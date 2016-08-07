@@ -1,0 +1,213 @@
+.mycluster {
+			width: 30px;
+			height: 30px;
+			background-clip: padding-box;
+			border-radius: 20px;
+			background-color: greenyellow;
+			text-align: center;
+			vertical-align: middle;
+			font-size: 20px;
+		}
+.tractscluster {
+			width: 30px;
+			height: 30px;
+			background-clip: padding-box;
+			border-radius: 5px;
+			background-color: rgba(0, 0, 255, 0.6);
+			text-align: center;
+			vertical-align: middle;
+			font-size: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+			color: white;
+		}
+.blockscluster {
+			width: 30px;
+			height: 30px;
+			background-clip: padding-box;
+			border-radius: 3px;
+			background-color: rgba(255, 255, 0, 0.8);
+			text-align: center;
+			vertical-align: middle;
+			font-size: 9px "Helvetica Neue", Arial, Helvetica, sans-serif;
+		}
+
+.blocksicon {		
+	background-clip: padding-box;		
+	border-radius: 2px;		
+	vertical-align: middle;		
+}		
+.bi800026{		
+	background-color: rgba(128, 0, 38, 0.8);		
+}		
+.biBD0026{		
+	background-color: rgba(189, 0, 38, 0.8);		
+}		
+.biE31A1C{		
+	background-color: rgba(227, 26, 28, 0.8);		
+}		
+.biFC4E2A{		
+	background-color: rgba(252, 78, 42, 0.8);		
+}		
+.biFD8D3C{		
+	background-color: rgba(253, 141, 60, 0.8);		
+}		
+.biFED976{		
+	background-color: rgba(254, 178, 76, 0.8);		
+}		
+.biFEB24C{		
+	background-color: rgba(254, 217, 118, 0.8);		
+}		
+.biFFEDA0{		
+	background-color: rgba(255, 237, 160, 0.8);		
+}
+
+.picluster {
+    background-color: rgba(255, 51, 255, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .brcluster {
+    background-color: rgba(204, 102, 0, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .pucluster {
+    background-color: rgba(122, 0, 245, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+.gcluster {
+    background-color: rgba(110, 204, 57, 0.7);
+    width: 5px;
+	height: 5px;
+	margin-left: 2px;
+	margin-top: 2px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .ccluster {
+    background-color: rgba(0, 109, 255, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+   .rcluster {
+    background-color: rgba(254, 10, 10, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+ .caycluster {
+    background-color: rgba(255, 255, 0, 0.6);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .capicluster {
+    background-color: rgba(255, 51, 255, 0.8);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .cabrcluster {
+    background-color: rgba(204, 102, 0, 0.8);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .capucluster {
+    background-color: rgba(122, 0, 245, 0.6);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+.cagcluster {
+    background-color: rgba(110, 204, 57, 0.8);
+    width: 5px;
+	height: 5px;
+	margin-left: 2px;
+	margin-top: 2px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .caccluster {
+    background-color: rgba(5, 250, 252, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+   .carcluster {
+    background-color: rgba(254, 10, 10, 0.6);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  
+  .cacluster{
+    background: #fff;
+	
+  	width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	border-radius: 15px;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .cagcluster, .capicluster, .caccluster, .carcluster, .capucluster, .cabrcluster {
+  	border-radius: 0px;
+  	width: 35px;
+	height: 35px;
+	/* -ms-transform: rotate(45deg); 
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+  	 */
+  }  

@@ -1,0 +1,341 @@
+body {
+	font-family: sans-serif;	
+	line-height: 16px;
+	font-size: 15px;
+	/* color: #06185c; */
+	margin: 0px;
+	/* do not add scroll bars unless overridden on sub-elements */
+	overflow: hidden;
+}
+
+div#map {
+	position: absolute;
+	align: left;
+	height: 100%;
+	width: 100%; 
+	background: #eee;
+	margin: 0px;
+	padding: 0px;
+}
+
+div#box {
+	padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;     
+    border-radius: 5px;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+.legend, #blocksLengend {		
+	padding: 6px 8px;		
+    font: 14px/16px Arial, Helvetica, sans-serif;		
+    background: white;		
+    background: rgba(255,255,255,0.8);		
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);		
+    border-radius: 5px;		
+    line-height: 18px;		
+    color: #555;		
+}		
+.legend i, #blocksLengend i {		
+    width: 18px;		
+    height: 18px;		
+    float: left;		
+    margin-left: 10%;		
+    margin-right: 10%;		
+    opacity: 0.7;		
+}
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;     
+    border-radius: 5px;    
+}
+.hasSelections {
+	opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+div#toolbox {
+	position: absolute;
+	left: 70px;	
+	width: 340px;
+	height: 500px;
+	float: left;
+	background: #ccc;
+	margin: 0px 2px 2px 2px;	
+	/*padding: 0.5em;*/
+	padding: 0px 1px;
+	/* add vertical scroll bar if content does not fit */
+	overflow-x: hidden;	
+	display: block;	
+	z-index: 99999;	
+}
+div#list {
+	opacity: 0.8;
+	overflow-x: hidden;	
+	overflow-y: auto;
+	align: left;
+	}
+
+div#toolbox h1 {
+	font-size: 100%;
+	font-weight: bold;
+	background: #888;
+	padding: 0.2em 0.2em 0.1em 0.2em;
+	margin: 1px;
+	opacity: 1.0;
+	cursor: move;
+	}
+
+img#legend {
+	display: block;
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+h1 {
+	font-size: 100%;
+	font-weight: bold;
+	background: #888;
+	padding: 0.2em 0.2em 0.1em 0.2em;
+	margin: 1px;	
+}
+
+h2 {
+	font-size: 100%;
+}
+
+p {
+    font-size: 100%
+}
+
+p.footnote {
+    font-size: 75%;    
+}
+
+
+form {
+	margin: 0px;
+	padding: 0.4em 0.4em 0.6em 0.4em;
+}
+
+form span {
+	/* group labels and their buttons together on a single line */
+	width: 100%;
+/*	 display: block; */
+	overflow: hidden;
+	margin: 0px;
+	padding: 0px;
+	/* can we keep rows of buttons from wrapping when vertical scroll bar appears ? */
+ 	/* white-space: */  
+}
+
+input {
+	margin: 2px;
+}
+
+form span label {
+	float: left;
+	width: 150px;
+}
+
+form span input {
+	float: right;
+	width: 150px;
+}
+
+form span select {
+	float: right;
+	width: 150px;
+}
+
+form span.timeEntry select {
+	float: left;
+}
+
+.autoWidth {
+	width: auto;
+}
+
+.narrowInput {
+	width: 4em;
+}
+
+.button {
+	width: 65px;				
+	cursor: pointer;	
+	vertical-align: baseline;
+	margin-left: 5px;	
+}
+.halfWidth {
+	width: 47%;
+}
+.fullWidth {
+	width: 100%;
+}
+
+div.ui-dialog{font-size: 85%;}
+div.ui-dialog.ui-draggable{font-size: 100%}
+
+#stopRoute td, #blockTract td, #parknrideInfo td{
+	padding-bottom: 8px;
+	
+}
+
+.onMapData{
+	padding-left: 30%;
+	float: right;		
+}		
+.LEP td{		
+	border:1px solid;		
+	width:25%;		
+    text-align: center;		
+}		
+.LEP > tbody > tr:nth-child(1){		
+	font-weight:bold;		
+	font-style:italic;		
+}
+
+#transitTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+	text-align:center;
+	font-size:60%
+} 
+
+#transitTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+} 
+#transitTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%
+}
+#geoTable {
+	table-layout: fixed	
+} 
+#geoTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+	text-align:center;
+	font-size:60%	
+} 
+
+#geoTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+}
+ 
+#geoTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%;	
+} 
+
+#pnrTable {
+	table-layout: fixed	
+} 
+#pnrTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+	text-align:center;
+	font-size:60%	
+} 
+
+#pnrTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+}
+ 
+#pnrTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%;	
+} 
+
+#displayConAgenciesTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	text-align:center;
+	font-size:60%
+}
+
+#displayConAgenciesTable tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:60%;	
+}
+
+#overlay {
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1999;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+.ui-menu {
+	padding: 5px
+}
+.ui-menu-icon {
+	margin-top: 4px
+}
+.ui-tooltip
+{
+    font-size:90%;
+    font-family:Calibri;
+}
+#list > .jstree-no-dots{
+	overflow: auto;
+    overflow-x: hidden;
+    background-color: #EAEAEA;
+    border-radius: 5px;
+}
+
+#dateList {
+	margin-top: 5%;
+	height: 18%;
+	background-color: #EAEAEA;
+	border-radius: 5px;
+	overflow:auto;
+	padding-top:2%;
+}
+
+#datepickerSubmit {
+	width: 98%;
+	height: 30px;
+	border-radius: 8px;
+	background-color: #808080;
+	color: white;
+	transform: scale(1,1);
+}
+
+#datepickerSubmit:hover {
+    transform: scale(1.1,1.1);
+    background-color: #626262;
+}
+
+/* #transitTable > tbody > tr {
+	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
+	background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+	background-color:#ededed;
+	-webkit-border-top-left-radius:10px;
+	-moz-border-radius-topleft:10px;
+	border-top-left-radius:10px;
+	-webkit-border-top-right-radius:10px;
+	-moz-border-radius-topright:10px;
+	border-top-right-radius:10px;
+	-webkit-border-bottom-right-radius:10px;
+	-moz-border-radius-bottomright:10px;
+	border-bottom-right-radius:10px;
+	-webkit-border-bottom-left-radius:10px;
+	-moz-border-radius-bottomleft:10px;
+	border-bottom-left-radius:10px;
+	text-indent:0;
+	border:1px solid #dcdcdc;
+	
+}
+#transitTable > tbody > tr:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
+	background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
+	background-color:#dfdfdf;
+}
+#transitTable > tbody > tr:active {
+	position:relative;
+	top:1px;
+} */
+/* #F9F9F9
+#FFF */
