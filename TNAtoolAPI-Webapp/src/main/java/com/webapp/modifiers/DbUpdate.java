@@ -51,10 +51,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.library.samples.UpdateEventManager;
-import com.webapp.api.model.*;
-import com.webapp.api.utils.PolylineEncoder;
-import com.webapp.api.utils.SphericalDistance;
+import com.model.database.UpdateEventManager;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException; 
@@ -72,15 +69,21 @@ import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
-import org.onebusaway.gtfs.impl.Databases;
+
+import com.model.database.Databases;
+import com.model.database.FeedNames;
+import com.model.database.GtfsHibernateReaderExampleMain;
+import com.model.database.PDBerror;
+import com.model.database.TransitError;
+import com.model.database.UserInfo;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.examples.GtfsHibernateReaderExampleMain;
-import org.onebusaway.gtfs.GtfsDatabaseLoaderMain;
+import org.onebusaway.gtfs.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
