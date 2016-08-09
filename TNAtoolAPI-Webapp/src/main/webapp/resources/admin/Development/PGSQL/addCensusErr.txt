@@ -1,0 +1,36 @@
+pg_restore: connecting to database for restore
+pg_restore: creating TABLE census_blocks
+pg_restore: creating TABLE census_blocks_reference
+pg_restore: creating TABLE census_congdists
+pg_restore: creating TABLE census_congdists_reference
+pg_restore: creating TABLE census_counties
+pg_restore: creating TABLE census_counties_reference
+pg_restore: creating TABLE census_places
+pg_restore: creating TABLE census_places_reference
+pg_restore: creating TABLE census_tracts
+pg_restore: creating TABLE census_tracts_reference
+pg_restore: creating TABLE census_urbans
+pg_restore: creating TABLE census_urbans_reference
+pg_restore: creating SEQUENCE tl_2010_41_cd111_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_cd111_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_county10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_county10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_place10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_place10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_tabblock10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_tabblock10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_41_tract10_gid_seq
+pg_restore: creating SEQUENCE OWNED BY tl_2010_41_tract10_gid_seq
+pg_restore: creating SEQUENCE tl_2010_us_uac10_gid_seq1
+pg_restore: creating SEQUENCE OWNED BY tl_2010_us_uac10_gid_seq1
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: creating DEFAULT gid
+pg_restore: processing data for table "census_blocks"
+pg_restore: processing data for table "census_blocks_reference"
+pg_restore: [archiver (db)] error returned by PQputCopyData: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.

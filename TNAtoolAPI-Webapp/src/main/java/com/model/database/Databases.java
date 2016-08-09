@@ -17,7 +17,7 @@ public class Databases {
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(
-					"TNAtoolAPI-Webapp/WebContent/admin/dbInfo.csv"));
+					"TNAtoolAPI-Webapp/src/main/webapp/resources/admin/dbInfo.csv"));
 			String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
 			String line = reader.readLine();
@@ -59,21 +59,4 @@ public class Databases {
 	public static String[] usernames = infoMap.get("username");
 	public static String[] passwords = infoMap.get("password");
 
-	static {
-		// list of configuration file names used in library-hibernate-spatial
-		// used in Hutil.java
-		// spatialConfigPaths[0]= "hibernate.cfg.xml";
-		// spatialConfigPaths[1]= "hibernate1.cfg.xml";
-
-		// list of configuration file names used in onebusaway-gtfs-hibernate
-		// used in GTFSHibernateReaderExampleMain.java
-		// ConfigPaths[0]=
-		// "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples.xml";
-		// ConfigPaths[1]=
-		// "classpath:org/onebusaway/gtfs/examples/hibernate-configuration-examples1.xml";
-
-		// list of database names used in the GUI
-		// dbnames[0] = "Database 1";
-		// dbnames[1] = "Database 2";
-	}
 }

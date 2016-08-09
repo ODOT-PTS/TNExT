@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>TNA Software Tool ADMIN</title>
+	
+	<script src="../js/lib/jquery-1.9.1.min.js"></script>
+	<script src="../js/lib/jquery-ui.js"></script>
+	<script src="adminTool.js"></script>
+	
+	<link rel="stylesheet" href="../js/lib/jquery-ui.css" />
+	<link rel="stylesheet" href="adminTool.css" />
+	
+</head>
+
+<body>
+	<header>
+		<h1 style="width:80%; margin:auto">ADMINISTRATIVE INTERFACE</h1>
+	</header>
+	
+	<div id="main">
+		<input type="button" id="addDB" value="Add a new or existing Database" onclick="addModifyDB(defaultInfo, -1)">
+		
+		<input type="button" id="runPlayground" value="Run Playground Add/Remove Processes" onclick="runPlayground('true')">
+		<br><br><br><br><br><br>
+		<div id="dbList">
+			
+		</div>
+		
+		
+		<div id="dialog-form" title="Create a New Database Connection">
+		  <p>All form fields are required.</p>
+		 
+		  <form>
+		    <fieldset id="dialogFields">
+		      
+		    </fieldset>
+		  </form>
+		</div>
+	</div>
+</body>
+
+</html>

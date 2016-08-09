@@ -1,0 +1,14 @@
+DB Update Process:
+1. Add all new feeds
+2. Run Tripstableupdator_pgsql.sql
+3. Run Stops_AddGeolocation.sql
+4. Run Stops_GeoCoder_pgsql.sql
+5. Run Stops-For-Route-query_pgsql.sql
+6. Run servedStopsSelector-2.sql
+7. Run *_trip_pgsql.sql 
+	counties_trip
+	tracts_trip
+	urbans_trip
+	places_trip
+	congdists_trip
+

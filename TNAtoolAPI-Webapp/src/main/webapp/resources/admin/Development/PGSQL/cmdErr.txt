@@ -1,0 +1,20 @@
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tripstableupdator_pgsql.sql:107: NOTICE:  table "tempshapes" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tripstableupdator_pgsql.sql:125: NOTICE:  table "tempestshapes" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tripstableupdator_pgsql.sql:187: NOTICE:  table "tempstopcodes" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tripstableupdator_pgsql.sql:204: NOTICE:  table "tempetriptimes" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tripstableupdator_pgsql.sql:222: ERROR:  column "tlength" of relation "gtfs_trips" does not exist
+LINE 2: update gtfs_trips trips set tlength=result.tlength from temp...
+                                    ^
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tripstableupdator_pgsql.sql:223: ERROR:  column "tlength" does not exist
+LINE 1: update gtfs_trips set tlength=0 where tlength isnull;
+                                              ^
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/StopsGeoCoder_PGSQL.sql:8: ERROR:  column "placeid" of relation "gtfs_stops" already exists
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/StopsGeoCoder_PGSQL.sql:10: ERROR:  column "congdistid" of relation "gtfs_stops" already exists
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/StopsGeoCoder_PGSQL.sql:11: ERROR:  Operation on mixed SRID geometries
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/StopsGeoCoder_PGSQL.sql:12: ERROR:  column "regionid" of relation "gtfs_stops" already exists
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/StopsGeoCoder_PGSQL.sql:17: ERROR:  column "urbanid" of relation "gtfs_stops" already exists
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Counties_trip_pgsql.sql:1: NOTICE:  table "census_counties_trip_map" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Tracts_trip_pgsql.sql:1: NOTICE:  table "census_tracts_trip_map" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Urbans_trip_pgsql.sql:1: NOTICE:  table "census_urbans_trip_map" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Places_trip_pgsql.sql:1: NOTICE:  table "census_places_trip_map" does not exist, skipping
+psql:C:/Users/Administrator/git/TNAsoftware/TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/Congdists_trip_pgsql.sql:1: NOTICE:  table "census_congdists_trip_map" does not exist, skipping

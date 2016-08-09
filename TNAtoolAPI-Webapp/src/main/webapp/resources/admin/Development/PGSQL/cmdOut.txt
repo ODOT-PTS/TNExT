@@ -1,0 +1,530 @@
+/*************************************************************
+ * First of two methods. Pass in a geometry (LINESTRING only).
+ * Returns ASCII-encoded point array for use in Google Maps.
+ ************************************************************/
+CREATE OR REPLACE FUNCTION GoogleEncodeLine
+(
+  g GEOMETRY
+)
+RETURNS TEXT AS $$
+DECLARE
+  pt1 GEOMETRY;
+  pt2 GEOMETRY;
+  p INT; np INT;
+  deltaX INT;
+  deltaY INT;
+  enX VARCHAR(255);
+  enY VARCHAR(255);
+  gEncoded TEXT;
+BEGIN
+  gEncoded = '';
+  np = ST_NPoints(g);
+
+  IF np > 3 THEN
+    g = ST_SimplifyPreserveTopology(g, 0.00001);
+    np = ST_NPoints(g);
+  END IF;
+
+  pt1 = ST_SetSRID(ST_MakePoint(0, 0),4326);
+
+  FOR p IN 1..np BY 1 LOOP
+    pt2 = ST_PointN(g, p);
+    deltaX = (floor(ST_X(pt2)*1e5)-floor(ST_X(pt1)*1e5))::INT;
+    deltaY = (floor(ST_Y(pt2)*1e5)-floor(ST_Y(pt1)*1e5))::INT;
+    enX = GoogleEncodeSignedInteger(deltaX);
+    enY = GoogleEncodeSignedInteger(deltaY);
+    gEncoded = gEncoded || enY || enX;
+
+    pt1 = ST_SetSRID(ST_MakePoint(ST_X(pt2), ST_Y(pt2)),4326);
+  END LOOP;
+RETURN gEncoded;
+End
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+/**************************************************************
+ * Second of two methods. Accepts a signed integer (LON or LAT
+ * by 1e5) and returns an ASCII-encoded coordinate expression.
+ *************************************************************/
+CREATE OR REPLACE FUNCTION GoogleEncodeSignedInteger(c INT)
+RETURNS VARCHAR(255) AS $$
+DECLARE
+  e VARCHAR(255);
+  s BIT(32);
+  b BIT(6);
+  n INT;
+BEGIN
+ e = '';
+ s = (c::BIT(32))<<1;
+
+ IF s::INT < 0 THEN
+   s = ~s;
+   END IF;
+
+ WHILE s::INT >= B'100000'::INT LOOP
+   b = B'100000' | (('0'||substring(s, 28, 5))::BIT(6));
+   n = b::INT + 63;
+   e = e || chr(n);
+   s = s >> 5;
+ END LOOP;
+ e = e || chr(s::INT+63);
+
+RETURN e;
+End
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+/**************************************************************
+ * Second of two methods. Accepts a signed integer (LON or LAT
+ * by 1e5) and returns an ASCII-encoded coordinate expression.
+ *************************************************************/
+CREATE OR REPLACE FUNCTION GoogleEncodeSignedInteger(c INT)
+RETURNS VARCHAR(255) AS $$
+DECLARE
+  e VARCHAR(255);
+  s BIT(32);
+  b BIT(6);
+  n INT;
+BEGIN
+ e = '';
+ s = (c::BIT(32))<<1;
+
+ IF s::INT < 0 THEN
+   s = ~s;
+   END IF;
+
+ WHILE s::INT >= B'100000'::INT LOOP
+   b = B'100000' | (('0'||substring(s, 28, 5))::BIT(6));
+   n = b::INT + 63;
+   e = e || chr(n);
+   s = s >> 5;
+ END LOOP;
+ e = e || chr(s::INT+63);
+
+RETURN e;
+End
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+/*create table tempshapes and fill it with route shapes*/
+drop table if exists tempshapes;
+DROP TABLE
+create table tempshapes(
+shapeid varchar(50),
+agencyid varchar(50),
+shape geometry(linestring),
+length float,
+primary key (agencyid, shapeid));
+CREATE TABLE
+CREATE UNIQUE INDEX id ON tempshapes (agencyid,shapeid);
+CREATE INDEX
+insert into tempshapes (shape, length, agencyid, shapeid)
+select ST_MakeLine(ST_setsrid(ST_MakePoint(point.lon, point.lat),4326)) as shape, 
+	ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(point.lon, point.lat),4326)),2993)) as length,
+	point.shapeid_agencyid as agencyid,
+	point.shapeid_id as shapeid
+	from ( select * from gtfs_shape_points order by  shapeid_agencyid, shapeid_id, sequence) as point		
+	group by agencyid, shapeid;
+INSERT 0 3
+	
+/*create a table named tempestshapes for trips without a route shape and fill it with estimated route shapes */
+drop table if exists tempestshapes;
+DROP TABLE
+create table tempestshapes(
+tripid varchar(255),
+agencyid varchar(50),
+shape geometry(linestring),
+estlength float,
+primary key (agencyid, tripid));
+CREATE TABLE
+CREATE UNIQUE INDEX idd ON tempestshapes (agencyid,tripid);
+CREATE INDEX
+insert into tempestshapes (shape, estlength, agencyid, tripid) 
+		select est.shape, est.estlength, est.agencyid, est.tripid from
+		(select ST_MakeLine(ST_setsrid(ST_MakePoint(point.lon, point.lat),4326)) as shape,
+		ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(point.lon, point.lat),4326)),2993)) as estlength,
+		point.agencyid as agencyid,
+		point.tripid as tripid 
+		from (
+			select stop.lat as lat, stop.lon as lon, stime.gid as gid, stime.trip_id as tripid, stime.trip_agencyid as agencyid
+			from gtfs_stops stop inner join gtfs_stop_times stime 
+			on stop.agencyid = stime.stop_agencyid and stop.id = stime.stop_id		 
+			order by stime.trip_agencyid, stime.trip_id, stime.stopsequence) as point
+			group by point.agencyid, point.tripid) 
+		as est inner join gtfs_trips trip
+		on est.agencyid = trip.agencyid and est.tripid = trip.id 
+		where trip.shapeid_id isnull;
+INSERT 0 0
+/*Adding geometry column to trips table*/
+SELECT AddGeometryColumn( 'public', 'gtfs_trips', 'shape', 4326, 'linestring', 2 );
+                     addgeometrycolumn                     
+-----------------------------------------------------------
+ public.gtfs_trips.shape SRID:4326 TYPE:linestring DIMS:2 
+(1 row)
+
+/*updating the trips table with real shapes and lengths*/
+update gtfs_trips trip set shape = tss.shape, epshape=GoogleEncodeLine(tss.shape), length = (tss.length)/1609.34, estlength=0 FROM tempshapes tss 
+	where tss.agencyid = trip.shapeid_agencyid  and tss.shapeid = trip.shapeid_id;
+UPDATE 4
+/*updating the trips table with estimated shapes and lengths*/
+update gtfs_trips trip set shape = tes.shape, epshape=GoogleEncodeLine(tes.shape), estlength = (tes.estlength)/1609.34, length=0 FROM tempestshapes tes 
+	where tes.agencyid = trip.agencyid  and tes.tripid = trip.id;
+UPDATE 0
+/*Update the stopscount column in trips table*/
+update gtfs_trips set stopscount = stpt.cnt from (select count(gid) as cnt, trip_id, trip_agencyid from gtfs_stop_times group by trip_id, trip_agencyid)as stpt where stpt.trip_agencyid = agencyid and stpt.trip_id=id ;
+UPDATE 4
+CREATE OR REPLACE FUNCTION makeuid
+(
+  r int
+)
+RETURNS TEXT AS $$
+DECLARE
+  buff TEXT;
+  rem int;
+  div int;
+  BEGIN
+  buff = '';
+  div = r;
+  rem = 0;
+while div>0 Loop
+if div >92 then
+	rem = div%93;
+	buff = chr(rem+34)||buff;
+	div = div / 93;
+else 
+	buff = chr(div+34)||buff;
+	div = 0;
+end if;
+end loop;  
+RETURN buff;
+End
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+drop table if exists tempstopcodes;
+DROP TABLE
+create table tempstopcodes(
+stopid varchar(255),
+agencyid varchar(50),
+rank int,
+uid varchar(255));
+CREATE TABLE
+insert into tempstopcodes(stopid, agencyid,rank) select stop.id, stop.agencyid, rank() over (partition by stop.agencyid order by stop.id) from gtfs_stops stop;
+INSERT 0 21
+update tempstopcodes set uid= makeuid(rank);
+UPDATE 21
+/*alter table gtfs_trips add column uid varchar(512);*/
+update gtfs_trips set uid = stpt.uid from 
+(select string_agg(tmp.uid,'!' order by tmp.uid) as uid, stime.trip_id, stime.trip_agencyid from 
+gtfs_stop_times stime inner join tempstopcodes tmp on tmp.agencyid=stime.stop_agencyid and tmp.stopid=stime.stop_id
+group by stime.trip_agencyid, stime.trip_id)as stpt where stpt.trip_agencyid = agencyid and stpt.trip_id=id;
+UPDATE 4
+/*Creating tempetriptimes table to store trip start and finish times*/
+drop table if exists tempetriptimes;
+DROP TABLE
+create table tempetriptimes(
+tripid varchar(255),
+agencyid varchar(50),
+tripstart int,
+tripfinish int,
+tlength int,
+primary key (agencyid, tripid));
+CREATE TABLE
+CREATE UNIQUE INDEX temptriptimesid ON tempetriptimes (agencyid,tripid);
+CREATE INDEX
+/*adding the trip start and finish times to the table*/
+insert into tempetriptimes(tripid,agencyid, tripstart, tripfinish)
+	select trip_id, trip_agencyid, min(arrivaltime), max(departuretime) from gtfs_stop_times where arrivaltime>0 and departuretime>0 group by trip_id, trip_agencyid;
+INSERT 0 4
+/*calculating trip time lengths*/
+update tempetriptimes set tlength= tripfinish-tripstart;
+UPDATE 4
+/*transferring trip time lengths to the trips table*/
+update gtfs_trips trips set tlength=result.tlength from tempetriptimes result where result.tripid = trips.id and result.agencyid = trips.agencyid;
+update gtfs_trips set tlength=0 where tlength isnull;
+alter table gtfs_stops add column location geometry(Point,2993);
+ALTER TABLE
+update gtfs_stops set location = ST_transform(ST_setsrid(ST_MakePoint(lon, lat),4326), 2993);
+UPDATE 21
+CREATE INDEX ids_location ON gtfs_stops
+  USING GIST (location);
+CREATE INDEX
+CLUSTER ids_location ON gtfs_stops;
+CLUSTER
+VACUUM ANALYZE gtfs_stops;
+VACUUM
+/*uncomment if the shapes table has its default wierd name*/
+/*alter table tl_2010_41_tabblock10 rename to census_blocks_reference;*/
+/*uncomment if the table does not already have the blockId column*/
+/*alter table gtfs_stops add column blockid varchar(15);*/
+update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;
+UPDATE 21
+/*select stop.agencyId, stop.name, shape.geoid10 from gtfs_stops stop join census_blocks_reference shape on st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;*/
+/*select stop.agencyId, stop.name, right(shape.geoid10,5)  from gtfs_stops stop join census_places_reference shape on st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;*/
+alter table gtfs_stops add column placeid varchar(7);
+update gtfs_stops stop set placeid=shape.geoid10 from census_places_reference shape where st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;
+UPDATE 17
+alter table gtfs_stops add column congdistid varchar(4);
+update gtfs_stops stop set congdistid=shape.congdistid from census_congdists shape where st_within(ST_MakePoint(stop.lon, stop.lat),shape.shape)=true; 
+alter table gtfs_stops add column regionid varchar(2);
+update gtfs_stops stop set regionid = county.odotregionid from census_counties county where left(stop.blockid,5)= county.countyid::varchar(5);
+UPDATE 21
+/*uncomment to delete urban areas not in Oregon state*/
+/*delete from census_urban where name10 not like '%OR%';*/
+/*vacuum analyze urban;*/
+alter table gtfs_stops add column urbanid varchar(5);
+update gtfs_stops stop set urbanid=shape.urbanid from census_urbans shape where st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true;
+UPDATE 14
+drop table if exists gtfs_stop_route_map;
+DROP TABLE
+CREATE TABLE gtfs_stop_route_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  routeid character varying(255),
+  agencyid_def character varying(50),
+  stopid character varying(255),
+  CONSTRAINT gtfs_stop_route_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT fk57a2facec6b68b22 FOREIGN KEY (agencyid_def, stopid)
+      REFERENCES gtfs_stops (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE gtfs_stop_route_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into gtfs_stop_route_map(stopId, agencyId, agencyId_def, routeId) 
+select distinct stimes.stop_id, routes.agency, stimes.stop_agencyId, routes.id 
+from gtfs_routes routes
+inner join gtfs_trips trips on routes.id = trips.route_id and routes.agencyId = trips.agencyId
+inner join gtfs_stop_times stimes on trips.id = stimes.trip_id and trips.agencyId = stimes.trip_agencyId;
+INSERT 0 21
+/*inner join gtfs_stops stops on stimes.stop_id = stops.id ; */
+drop table if exists gtfs_stop_service_map;
+DROP TABLE
+CREATE TABLE gtfs_stop_service_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  agencyid_def character varying(50),
+  stopid character varying(255),
+  CONSTRAINT gtfs_stop_service_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT fkf1c57f3ac6b68b22 FOREIGN KEY (agencyid_def, stopid)
+      REFERENCES gtfs_stops (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE gtfs_stop_service_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into gtfs_stop_service_map(stopId, agencyId, agencyId_def) 
+select distinct stimes.stop_id , agencies.id, stimes.stop_agencyId  
+from gtfs_agencies agencies
+inner join gtfs_routes routes on agencies.id = routes.agency  
+inner join gtfs_trips trips on routes.id = trips.route_id and routes.agencyId = trips.agencyId
+inner join gtfs_stop_times stimes on trips.id = stimes.trip_id and trips.agencyId = stimes.trip_agencyId;
+INSERT 0 21
+/*inner join gtfs_stops stops on stimes.stop_id = stops.id ; */
+drop table if exists census_counties_trip_map;
+DROP TABLE
+CREATE TABLE census_counties_trip_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  agencyid_def character varying(255),
+  routeid character varying(255),
+  countyid character varying(5),
+  regionid character varying(2),
+  tripid character varying(255),
+  serviceid character varying(255),
+  stopscount integer,  
+  length float,
+  shape geometry(multilinestring),
+  uid varchar(512),
+  CONSTRAINT census_counties_trip_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT census_counties_trip_map_fkey FOREIGN KEY (agencyid, tripid)
+      REFERENCES gtfs_trips (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE census_counties_trip_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into census_counties_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  countyid, regionid, shape, length, uid) 
+select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, county.countyid, county.odotregionid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,county.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,county.shape),2993))/1609.34), trip.uid
+from gtfs_trips trip
+inner join census_counties county on  st_intersects(county.shape,trip.shape)=true group by trip.id, trip.agencyid, county.countyid;
+INSERT 0 24
+update census_counties_trip_map set stopscount = res.cnt+0 from 
+(select count(stop.id) as cnt, substring(stop.blockid,1,5) as cid, stime.trip_agencyid as aid, stime.trip_id as tid 
+from gtfs_stops stop inner join gtfs_stop_times stime 
+on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stime.trip_agencyid, stime.trip_id, substring(stop.blockid,1,5)) as res
+where countyid =  res.cid and agencyid = res.aid and tripid=res.tid;
+UPDATE 20
+update census_counties_trip_map set stopscount=0 where stopscount IS NULL;
+UPDATE 4
+drop table if exists census_tracts_trip_map;
+DROP TABLE
+CREATE TABLE census_tracts_trip_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  agencyid_def character varying(255),
+  routeid character varying(255),
+  tractid character varying(11),
+  tripid character varying(255),
+  serviceid character varying(255),
+  stopscount integer,  
+  length float,
+  shape geometry(multilinestring),
+  uid varchar(512),
+  CONSTRAINT census_tracts_trip_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT census_tracts_trip_map_fkey FOREIGN KEY (agencyid, tripid)
+      REFERENCES gtfs_trips (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE census_tracts_trip_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into census_tracts_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  tractid, shape, length, uid) 
+select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, tract.tractid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,tract.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,tract.shape),2993))/1609.34), trip.uid
+from gtfs_trips trip
+inner join census_tracts tract on  st_intersects(tract.shape,trip.shape)=true group by trip.id, trip.agencyid, tract.tractid;
+INSERT 0 268
+update census_tracts_trip_map set stopscount = res.cnt+0 from 
+(select count(stop.id) as cnt, substring(stop.blockid,1,11) as cid, stime.trip_agencyid as aid, stime.trip_id as tid 
+from gtfs_stops stop inner join gtfs_stop_times stime 
+on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stime.trip_agencyid, stime.trip_id, substring(stop.blockid,1,11)) as res
+where tractid =  res.cid and agencyid = res.aid and tripid=res.tid;
+UPDATE 74
+update census_tracts_trip_map set stopscount=0 where stopscount IS NULL;
+UPDATE 194
+drop table if exists census_urbans_trip_map;
+DROP TABLE
+CREATE TABLE census_urbans_trip_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  agencyid_def character varying(255),
+  routeid character varying(255),
+  urbanid character varying(5),
+  tripid character varying(255),
+  serviceid character varying(255),
+  stopscount integer,  
+  length float,
+  shape geometry(multilinestring),
+  uid varchar(512),
+  CONSTRAINT census_urbans_trip_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT census_urbans_trip_map_fkey FOREIGN KEY (agencyid, tripid)
+      REFERENCES gtfs_trips (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE census_urbans_trip_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into census_urbans_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  urbanid, shape, length, uid) 
+select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, urban.urbanid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,urban.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,urban.shape),2993))/1609.34), trip.uid
+from gtfs_trips trip
+inner join census_urbans urban on  st_intersects(urban.shape,trip.shape)=true group by trip.id, trip.agencyid, urban.urbanid;
+INSERT 0 28
+update census_urbans_trip_map set stopscount = res.cnt+0 from 
+(select count(stop.id) as cnt, stop.urbanid as cid, stime.trip_agencyid as aid, stime.trip_id as tid 
+from gtfs_stops stop inner join gtfs_stop_times stime 
+on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stime.trip_agencyid, stime.trip_id, stop.urbanid) as res
+where urbanid =  res.cid and agencyid = res.aid and tripid=res.tid;
+UPDATE 24
+update census_urbans_trip_map set stopscount=0 where stopscount IS NULL;
+UPDATE 4
+drop table if exists census_places_trip_map;
+DROP TABLE
+CREATE TABLE census_places_trip_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  agencyid_def character varying(255),
+  routeid character varying(255),
+  placeid character varying(7),
+  tripid character varying(255),
+  serviceid character varying(255),
+  stopscount integer,  
+  length float,
+  shape geometry(multilinestring),
+  uid varchar(512),
+  CONSTRAINT census_places_trip_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT census_places_trip_map_fkey FOREIGN KEY (agencyid, tripid)
+      REFERENCES gtfs_trips (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE census_places_trip_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into census_places_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  placeid, shape, length, uid) 
+select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, place.placeid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,place.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,place.shape),2993))/1609.34), trip.uid
+from gtfs_trips trip
+inner join census_places place on  st_intersects(place.shape,trip.shape)=true group by trip.id, trip.agencyid, place.placeid;
+INSERT 0 78
+update census_places_trip_map set stopscount = res.cnt+0 from 
+(select count(stop.id) as cnt, stop.placeid as cid, stime.trip_agencyid as aid, stime.trip_id as tid 
+from gtfs_stops stop inner join gtfs_stop_times stime 
+on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stime.trip_agencyid, stime.trip_id, stop.placeid) as res
+where placeid =  res.cid and agencyid = res.aid and tripid=res.tid;
+UPDATE 48
+update census_places_trip_map set stopscount=0 where stopscount IS NULL;
+UPDATE 30
+drop table if exists census_congdists_trip_map;
+DROP TABLE
+CREATE TABLE census_congdists_trip_map
+(
+  gid serial NOT NULL,
+  agencyid character varying(255),
+  agencyid_def character varying(255),
+  routeid character varying(255),
+  congdistid character varying(4),
+  tripid character varying(255),
+  serviceid character varying(255),
+  stopscount integer,  
+  length float,
+  shape geometry(multilinestring),
+  uid varchar(512),
+  CONSTRAINT census_congdists_trip_map_pkey PRIMARY KEY (gid),
+  CONSTRAINT census_congdists_trip_map_fkey FOREIGN KEY (agencyid, tripid)
+      REFERENCES gtfs_trips (agencyid, id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+CREATE TABLE
+ALTER TABLE census_congdists_trip_map
+  OWNER TO postgres;
+ALTER TABLE
+insert into census_congdists_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  congdistid, shape, length, uid) 
+select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, congdist.congdistid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,congdist.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,congdist.shape),2993))/1609.34), trip.uid
+from gtfs_trips trip
+inner join census_congdists congdist on  st_intersects(congdist.shape,trip.shape)=true group by trip.id, trip.agencyid, congdist.congdistid;
+INSERT 0 12
+update census_congdists_trip_map set stopscount = res.cnt+0 from 
+(select count(stop.id) as cnt, stop.congdistid as cid, stime.trip_agencyid as aid, stime.trip_id as tid 
+from gtfs_stops stop inner join gtfs_stop_times stime 
+on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id group by stime.trip_agencyid, stime.trip_id, stop.congdistid) as res
+where congdistid =  res.cid and agencyid = res.aid and tripid=res.tid;
+UPDATE 0
+update census_congdists_trip_map set stopscount=0 where stopscount IS NULL;
+UPDATE 12

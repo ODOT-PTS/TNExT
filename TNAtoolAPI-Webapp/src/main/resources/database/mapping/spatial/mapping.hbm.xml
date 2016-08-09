@@ -1,0 +1,609 @@
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.library.model">
+
+    <class name="Census" table="census_blocks">
+        <id name="blockId" column="blockid" type="string" length="15" />
+        <property name="placeId" column="placeid" type="string" length="7" />
+        <many-to-one name="urban" not-null="true" update="false">
+            <column name="urbanId" />                                    
+        </many-to-one>        
+        <property name="regionId" column="regionid" type="string" length="2" />
+        <property name="congdistId" column="congdistid" type="string" length="4" />        
+        <property name="population" type="integer" column="population"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>
+        <property name="location" type="org.hibernatespatial.GeometryUserType"  column="location"/>
+        <property name="poptype" type="string" />
+        <property name="landarea" type="integer" />
+        <property name="waterarea" type="integer" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
+    </class>
+    
+    <class name="Tract" table="census_tracts">
+        <id name="tractId" column="tractid" type="string" length="11" />
+        <property name="name" column="tname" type="string" length="10"/>
+        <property name="longname" column="tlongname" type="string" length="50"/>
+        <property name="population" type="long" column="population"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="housing" type="long" />
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
+    </class>
+    
+    <class name="County" table="census_counties">
+        <id name="countyId" column="countyid" type="string" length="5"/>
+        <property name="name" column="cname" type="string" length="50"/>
+        <property name="population" type="long" column="population"/>
+        <property name="housing" type="long" column="housing"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+        <property name="regionId" column="odotregionid" type="string" length="2" />
+        <property name="regionName" column="odotregionname" type="string" length="9" />     
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>   
+    </class>
+    
+    <class name="ParknRide" table="parknride">
+        <id name="pnrid" column="pnrid" type="integer"/>
+        <property name="lat" column="lat" type="double"/>
+        <property name="lon" column="lon" type="double"/>
+        <property name="lotname" column="lotname" type="string"/>
+        <property name="location" column="location" type="string"/>
+        <property name="city" column="city" type="string" />
+        <property name="zipcode" column="zipcode" type="integer"/>
+        <property name="countyid" column="countyid" type="string"/>
+        <property name="county" column="county" type="string" />
+        <property name="spaces" column="spaces" type="integer"/>
+        <property name="accessiblespaces" column="accessiblespaces" type="integer"/>
+        <property name="bikerackspaces" column="bikerackspaces" type="integer"/>
+        <property name="bikelockerspaces" column="bikelockerspaces" type="integer"/>
+        <property name="electricvehiclespaces" column="electricvehiclespaces" type="integer"/>
+        <property name="carsharing" column="carsharing" type="string"/>
+        <property name="transitservice" column="transitservice" type="string"/>
+        <property name="availability" column="availability" type="string"/>
+        <property name="timelimit" column="timelimit" type="string"/>
+        <property name="restroom" column="restroom" type="string"/>
+        <property name="benches" column="benches" type="string"/>
+        <property name="shelter" column="shelter" type="string"/>
+        <property name="indoorwaitingarea" column="indoorwaitingarea" type="string"/>
+        <property name="trashcan" column="trashcan" type="string"/>
+        <property name="lighting" column="lighting" type="string"/>
+        <property name="securitycameras" column="securitycameras" type="string"/>
+        <property name="sidewalks" column="sidewalks" type="string"/>
+        <property name="pnrsignage" column="pnrsignage" type="string"/>
+        <property name="lotsurface" column="lotsurface" type="string"/>
+        <property name="propertyowner" column="propertyowner" type="string"/>
+        <property name="localexpert" column="localexpert" type="string"/>         
+        <property name="geom" column="geom" type="org.hibernatespatial.GeometryUserType" />
+    </class>
+    
+    <class name="Place" table="census_places">
+        <id name="placeId" column="placeid" type="string" length="7" />
+        <property name="name" column="pname" type="string"/> 
+        <property name="population" type="long" column="population"/>       
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="housing" type="long" />
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
+    </class>
+    
+    <class name="Urban" table="census_urbans">
+        <id name="urbanId" column="urbanid" type="string" length="5" />
+        <property name="name" column="uname" type="string"/>        
+        <property name="population" type="long" column="population"/> 
+        <property name="housing" type="long" />     
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
+    </class>
+    
+    <class name="CongDist" table="census_congdists">
+        <id name="congdistId" column="congdistid" type="string" length="4" />
+        <property name="name" column="cname" type="string"/>        
+        <property name="population" type="long" column="population"/> 
+        <property name="housing" type="long" />     
+        <property name="latitude" type="double" column="lat" />
+        <property name="longitude" type="double" column="lon"/>        
+        <property name="landarea" type="long" />
+        <property name="waterarea" type="long" />
+        <property name="population2010" type="integer" column="population2010"/>
+        <property name="population2015" type="integer" column="population2015"/>
+        <property name="population2020" type="integer" column="population2020"/>
+        <property name="population2025" type="integer" column="population2025"/>
+        <property name="population2030" type="integer" column="population2030"/>
+        <property name="population2035" type="integer" column="population2035"/>
+        <property name="population2040" type="integer" column="population2040"/>
+        <property name="population2045" type="integer" column="population2045"/>
+        <property name="population2050" type="integer" column="population2050"/>
+    </class>
+    
+    <class name="GeoStop" table="gtfs_stops">
+        <composite-id>
+            <key-property name="agencyId" column="agencyid" length="50" />
+            <key-property name="stopId" column="id"/>
+        </composite-id>
+        <property name="code" />
+        <property name="name" />
+        <property name="desc" column="description" />
+        <property name="direction" />
+        <property name="lat" />
+        <property name="lon" />
+        <property name="zoneId" />
+        <property name="url" />
+        <property name="locationType" />
+        <property name="parentStation" />
+        <property name="timezone" />
+        <property name="vehicleType" />
+        <property name="wheelchairBoarding" />
+        <property name="platformCode" />
+        <property name="blockId" column="blockid"/> 
+        <property name="placeId" column="placeid" /> 
+        <property name="regionId" column="regionid"/> 
+        <many-to-one name="urban" not-null="true" update="false">
+            <column name="urbanId" />                                    
+        </many-to-one>
+        <property name="congdistId" column="congdistid"/>
+        <property name="location" type="org.hibernatespatial.GeometryUserType"  column="location"/>       
+    </class>
+        
+   <class name="GeoStopRouteMap" table="gtfs_stop_route_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null" >
+            <generator class="native"  />
+        </id>        
+        <property name="agencyId" />        
+        <property name="routeId" />       
+        <many-to-one name="stop" not-null="true" update="false">
+            <column name="agencyId_def" />
+            <column name="stopId" />                        
+        </many-to-one>                
+    </class> 
+    
+    <class name="CountyTripMap" table="census_counties_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" />
+        <property name="uid" update="false"/>
+        <property name="regionId" update="false"/>
+        <many-to-one name="County" not-null="true" update="false">
+            <column name="countyId" />            
+        </many-to-one>       
+    </class>    
+    <class name="TractTripMap" table="census_tracts_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Tract" not-null="true" update="false">
+            <column name="tractId" />            
+        </many-to-one>       
+    </class>
+    <class name="PlaceTripMap" table="census_places_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null" >
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Place" not-null="true" update="false">
+            <column name="placeId" />            
+        </many-to-one>       
+    </class>
+    <class name="UrbanTripMap" table="census_urbans_trip_map" >
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="urban" not-null="true" update="false">
+            <column name="urbanId" />            
+        </many-to-one>       
+    </class>
+    <class name="CongdistTripMap" table="census_congdists_trip_map">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>                
+        <property name="agencyId" update="false"/> 
+        <property name="agencyId_def" update="false"/>
+        <property name="tripId" update="false"/>  
+        <property name="routeId" update="false"/>                       
+        <property name="length" update="false"/>
+        <property name="tlength" update="false"/>
+        <property name="stopscount" update="false"/>
+        <property name="serviceId" update="false"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType" update="false"/>
+        <property name="uid" update="false"/>
+        <many-to-one name="Congdist" not-null="true" update="false">
+            <column name="congdistId" />            
+        </many-to-one>       
+    </class>
+    <!-- <class name="Geotrip" table="gtfs_trips">
+
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+
+        <component name="routeId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="route_agencyId" length="50" />
+            <property name="route_id" />
+        </component>
+
+        <component name="serviceId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="serviceId_agencyId" index="serviceId" length="50" />
+            <property name="id" column="serviceId_id" index="serviceId" />
+        </component>
+
+        <component name="shapeId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="shapeId_agencyId" length="50" />
+            <property name="id" column="shapeId_id" />
+        </component>
+
+        <property name="tripShortName" />
+        <property name="tripHeadsign" />
+        <property name="routeShortName" />
+        <property name="directionId" />
+        <property name="blockId" index="blockId" />
+        <property name="wheelchairAccessible"/>
+        <property name="epshape" type="org.hibernate.type.TextType" column="epshape"/>
+        <property name="length"/>
+        <property name="estlength"/>
+        <property name="stopscount"/>
+        <property name="shape" type="org.hibernatespatial.GeometryUserType"/>
+    </class> -->
+    
+    <query name = "All_STOP_ROUTE_MAPS">
+    <![CDATA[from GeoStopRouteMap]]>
+	</query>
+    <query name = "ROUTE_BY_STOP">
+    <![CDATA[from GeoStopRouteMap gsr where gsr.stop.id.stopId=:id AND gsr.stop.id.agencyId=:agency]]>
+	</query>
+	<query name = "STOP_WITHIN_RECTANGLE">
+    <![CDATA[from GeoStop where within(location, :polygon) = true]]>
+	</query>
+    <query name = "STOP_BY_COORDINATES">
+    <![CDATA[from GeoStop where dwithin(location, :point, :radius) = true]]>
+	</query>
+	<query name = "STOP_BY_COORDINATES_SEL_AGENCIES">
+    <![CDATA[from GeoStop where id.agencyId in (:sa) AND dwithin(location, :point, :radius) = true ]]>
+	</query>	
+	<query name = "CENSUS_WITHIN_RECTANGLE">
+    <![CDATA[from Census where within(location, :polygon) = true]]>
+	</query>
+    <query name = "POP_BY_COORDINATES">
+    <![CDATA[select sum(population) from Census where distance(:point,location)<:radius]]>
+	</query>
+	<query name = "CENSUS_BY_COORDINATES">
+    <!-- <![CDATA[from Census where distance(:point,location)<:radius]]> -->
+    <![CDATA[from Census where dwithin(location, :point, :radius) = true]]>
+	</query>
+	<!-- <query name = "SHAPE_BY_TRIP">
+    <![CDATA[from Geotrip where id=:id]]>
+	</query> -->
+	<query name = "All_COUNTIES">
+    <![CDATA[from County order by regionId]]>
+	</query>
+	<query name = "All_TRACTS">
+    <![CDATA[from Tract]]>
+	</query>
+	<query name = "All_PLACES">
+    <![CDATA[from Place]]>
+	</query>
+	<query name = "All_URBANS">
+    <![CDATA[from Urban]]>
+	</query>
+	<query name = "URBANS_BYPOP">
+    <![CDATA[from Urban where population >= :pop]]>
+	</query>
+	<query name = "All_CONGDISTS">
+    <![CDATA[from CongDist]]>
+	</query>
+	<!-- <query name = "TRIPS_BY_COUNTY">
+    <![CDATA[from Geotrip join County on ST_Intersects(County.shape, Geotrip.shape)=true where County.id=:id]]>
+	</query> -->
+	<query name = "TRACTS_BY_PLACE">
+    <![CDATA[from Tract where SUBSTRING(tractId,1,7)=:id]]>
+	</query>
+	<query name = "PLACES_BY_COUNTY">
+    <![CDATA[from Place where SUBSTRING(placeId,1,5)=:id]]>
+	</query>
+	<query name = "TRACTS_BY_COUNTY">
+    <![CDATA[from Tract where SUBSTRING(tractId,1,5)=:id]]>
+	</query>
+	<query name = "TRACTSNO_BY_COUNTY">
+    <![CDATA[select count(tractId) from Tract where SUBSTRING(tractId,1,5)=:id]]>
+	</query>		
+	<query name = "BLOCKSNO_BY_TRACT">
+    <![CDATA[select count(blockId) from Census where substring(blockId,1,11)=:id]]>
+	</query>
+	<query name = "STOPS_BY_REGION">
+    <![CDATA[select count(stopId) from GeoStop where regionId=:id]]>
+	</query>
+	<query name = "STOPS_BY_REGION_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where regionId=:id AND id.agencyId in (:sa)]]>
+	</query>
+	<query name = "STOPS_BY_COUNTY">
+    <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,5)=:id]]>
+	</query>
+	<query name = "STOPS_BY_COUNTY_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,5)=:id AND id.agencyId in (:sa)]]>
+	</query>
+	<query name = "STOPSL_BY_COUNTY">
+    <![CDATA[from GeoStop where substring(blockId,1,5)=:id]]>
+	</query>
+	<query name = "STOPSL_BY_TRACT">
+    <![CDATA[from GeoStop where substring(blockId,1,11)=:id]]>
+	</query>
+	<query name = "STOPSL_BY_PLACE">
+    <![CDATA[from GeoStop where placeId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_URBAN">
+    <![CDATA[from GeoStop gsp where gsp.urban.urbanId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_URBANPOP">
+    <![CDATA[from GeoStop stops where stops.urban.population>=:pop]]>
+	</query>
+	<query name = "STOPSL_BY_CONGDIST">
+    <![CDATA[from GeoStop where congdistId=:id]]>
+	</query>
+	<query name = "STOPSL_BY_REGION">
+    <![CDATA[from GeoStop where regionId=:id]]>
+	</query>
+	<query name = "STOPS_BY_TRACT">
+    <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,11)=:id]]>
+    </query>
+    <query name = "STOPS_BY_TRACT_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where substring(blockId,1,11)=:id  AND id.agencyId in (:sa)]]>
+	</query>
+	<query name = "STOPS_BY_PLACE">
+    <![CDATA[select count(stopId) from GeoStop where placeId=:id]]>
+	</query>
+	<query name = "STOPS_BY_PLACE_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where placeId=:id  AND id.agencyId in (:sa)]]>
+	</query>
+	<query name = "STOPS_BY_URBAN">
+    <![CDATA[select count(stopId) from GeoStop where urbanId=:id]]>
+	</query>
+	<query name = "STOPS_BY_URBAN_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where urbanId=:id AND id.agencyId in (:sa)]]>
+	</query>
+	<query name = "STOPS_BY_CONGDIST">
+    <![CDATA[select count(stopId) from GeoStop where congdistId=:id]]>
+	</query>
+	<query name = "STOPS_BY_CONGDIST_SEL_AGENCIES">
+    <![CDATA[select count(stopId) from GeoStop where congdistId=:id AND id.agencyId in (:sa)]]>
+	</query>
+	<query name = "ROUTES_BY_REGION">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.regionId=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_REGION_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.regionId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_REGION_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.regionId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>		
+	<query name = "ROUTES_BY_COUNTY">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_COUNTY_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId,gsr.routeId]]>
+	</query>
+	<query name = "AGENCIES_BY_COUNTY_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,5)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
+	<query name = "TRIPS_BY_COUNTY">
+    <![CDATA[from CountyTripMap where countyId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_REGION">
+    <![CDATA[from CountyTripMap where regionId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_TRACT">
+    <![CDATA[from TractTripMap where tractId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_PLACE">
+    <![CDATA[from PlaceTripMap where placeId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_CONGDIST">
+    <![CDATA[from CongdistTripMap where congdistId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_URBAN">
+    <![CDATA[from UrbanTripMap where urbanId=:id order by agencyId_def, routeId, uid]]>
+	</query>
+	<query name = "TRIPS_BY_URBANPOP">
+    <![CDATA[from UrbanTripMap map where map.urban.urbanId in (select urbans.urbanId from Urban urbans where urbans.population >= :pop) order by map.agencyId_def, map.routeId, map.uid]]>
+	</query>
+	<query name = "ROUTES_BY_PLACE">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_PLACE_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_PLACE_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.placeId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_TRACT">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_TRACT_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_TRACT_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where substring(gsr.stop.blockId,1,11)=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_URBAN">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_URBAN_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_URBAN_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_AURBAN">
+	<![CDATA[from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id]]>
+	</query>
+	<query name = "ROUTES_BY_AURBAN_SEL_AGENCIES">
+	<![CDATA[from GeoStopRouteMap gsr where gsr.stop.urban.urbanId=:id AND gsr.stop.id.agencyId in (:sa)]]>
+	</query>
+	<query name = "ROUTES_BY_CONGDIST">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "ROUTES_BY_CONGDIST_SEL_AGENCIES">
+    <![CDATA[select gsr.routeId, gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.routeId, gsr.agencyId]]>
+	</query>
+	<query name = "AGENCIES_BY_CONGDIST_SEL_AGENCIES">
+    <![CDATA[select gsr.agencyId from GeoStopRouteMap gsr where gsr.stop.congdistId=:id AND gsr.stop.id.agencyId in (:sa) group by gsr.agencyId]]>
+	</query>
+	<query name = "POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true ) ]]>
+	</query>
+	<query name = "COUNTY_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and substring(blockId,1,5)=:id )]]>
+	</query>
+	<query name = "TRACT_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and substring(blockId,1,11)=:id )]]>
+	</query>
+	<query name = "PLACE_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and placeId=:id )]]>
+	</query>
+	<query name = "URBAN_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and urbanId=:id )]]>
+	</query>
+	<query name = "URBAN_POP_UNDUP_BATCH_BYPOP">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census cns where dwithin(location, :allpoints ,:radius)=true and cns.urban.population>:pop )]]>
+	</query>
+	<query name = "CONGDIST_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and congdistId=:id )]]>
+	</query>
+	<query name = "REGION_POP_UNDUP_BATCH">
+    <![CDATA[select sum(population) from Census where blockId in (select distinct blockId from Census where dwithin(location, :allpoints ,:radius)=true and regionId=:id )]]>
+	</query>
+	<query name = "COUNTY_BY_ID">
+    <![CDATA[from County where countyId =:id]]>
+	</query>
+	<query name = "TRACT_BY_ID">
+    <![CDATA[from Tract where tractId =:id]]>
+	</query>
+	<query name = "PLACE_BY_ID">
+    <![CDATA[from Place where placeId =:id]]>
+	</query>
+	<query name = "URBAN_BY_ID">
+    <![CDATA[from Urban where urbanId =:id]]>
+	</query>
+	<query name = "CONGDIST_BY_ID">
+    <![CDATA[from CongDist where congdistId =:id]]>
+	</query>
+	<query name = "REGION_BY_ID">
+    <![CDATA[from County where regionId =:id]]>
+	</query>
+	<query name = "CONNECTED_COUNTIES">
+    <![CDATA[select map.County.name from CountyTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CountyTripMap where countyId =:id ) group by map.County.countyId, map.County.name order by map.County.name ]]>
+	</query>
+	<query name = "CONNECTED_TRACTS">
+    <![CDATA[select map.Tract.name from TractTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from TractTripMap where tractId =:id ) group by map.Tract.tractId, map.Tract.name order by map.Tract.name ]]>
+	</query>
+	<query name = "CONNECTED_PLACES">
+    <![CDATA[select map.Place.name from PlaceTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from PlaceTripMap where placeId =:id ) group by map.Place.placeId, map.Place.name order by map.Place.name ]]>
+	</query>
+	<query name = "CONNECTED_URBANS">
+    <![CDATA[select map.urban.name from UrbanTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from UrbanTripMap where urbanId =:id ) group by map.urban.urbanId, map.urban.name order by map.urban.name ]]>
+	</query>
+	<query name = "CONNECTED_URBANS_BYPOP">
+    <![CDATA[select map.urban.name from UrbanTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from UrbanTripMap where urbanId in (select urbanId from Urban where population>=:pop)) group by map.urban.urbanId, map.urban.name order by map.urban.name ]]>
+	</query>
+	<query name = "CONNECTED_CONGDISTS">
+    <![CDATA[select map.Congdist.name from CongdistTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CongdistTripMap where congdistId =:id ) group by map.Congdist.congdistId, map.Congdist.name order by map.Congdist.name ]]>
+	</query>
+	<query name = "CONNECTED_REGIONS">
+    <![CDATA[select map.regionId from CountyTripMap map where concat(map.agencyId,map.tripId) in (select concat(agencyId,tripId) from CountyTripMap where regionId =:id ) group by map.regionId order by map.regionId ]]>
+	</query>
+	<query name = "PARKNRIDE_WITHIN_CIRCLE">
+    <![CDATA[from ParknRide where dwithin(geom, :point, :radius) = true]]>
+	</query>
+	 <query name = "PARKNRIDE_WITHIN_RECTANGLE">
+    <![CDATA[from ParknRide where within(geom, :polygon) = true]]>
+	</query>
+	<query name = "GEO_COUNTS">
+    <![CDATA[select (select count(countyId) from County) as county, (select count(tractId) from Tract) as tract, (select count(placeId) from Place) as place, (select count(urbanId) from Urban) as urban, (select count(congdistId) from CongDist) as congdist, (select count(distinct regionId) from County) as region, sum(population), sum(landarea), (select sum(population) from Census where poptype='U'), (select sum(population) from Census where poptype='R') from County]]>	</query>		
+</hibernate-mapping>

@@ -50,9 +50,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-
-import com.model.database.UpdateEventManager;
-
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException; 
 import net.lingala.zip4j.io.ZipOutputStream;
@@ -70,12 +67,8 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 
-import com.model.database.Databases;
-import com.model.database.FeedNames;
-import com.model.database.GtfsHibernateReaderExampleMain;
-import com.model.database.PDBerror;
-import com.model.database.TransitError;
-import com.model.database.UserInfo;
+import com.model.database.*;
+import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FeedInfo;
@@ -95,9 +88,9 @@ public class DbUpdate {
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
-	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
-	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
-	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
+	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];
+	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];
+	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];
 	private static final int DBINDEX = Databases.dbsize-1;
 	public final static String VERSION = "V4.16.07";
 	

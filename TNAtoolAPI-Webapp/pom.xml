@@ -7,63 +7,192 @@
   <name>TNAtoolAPI-Webapp</name>
   <description>An application for transit network analysis</description>
   
+  <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <geotools.version>12-SNAPSHOT</geotools.version>
+  </properties>
+  
+  <repositories>
+        <repository>
+                <id>OSGEO GeoTools repo</id>
+                <url>http://download.osgeo.org/webdav/geotools</url>
+        </repository>
+        <repository>
+                <id>Hibernate Spatial repo</id>
+                <url>http://www.hibernatespatial.org/repository</url>
+        </repository>
+		<repository>
+	         	<id>osgeo</id>
+	          	<name>Open Source Geospatial Foundation Repository</name>
+	          	<url>http://download.osgeo.org/webdav/geotools/</url>
+	    </repository>
+	    <repository>
+			    <id>opengeo</id>
+			    <name>OpenGeo Maven Repository</name>
+			    <url>http://repo.opengeo.org/</url>
+			    <snapshots>
+			        <enabled>true</enabled>
+			    </snapshots>
+		</repository>
+		
+		<repository>
+			    <id>geotoolkit</id>
+			    <name>Geotoolkit.org project</name>
+			    <url>http://maven.geotoolkit.org</url>
+		</repository>
+  </repositories>
+  
   <dependencies>
-	  <dependency>
-	  	<groupId>javax</groupId>
-	  	<artifactId>javaee-web-api</artifactId>
-	  	<version>6.0</version>
-	  	<scope>provided</scope>
-	  </dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>6.0</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/au.com.bytecode/opencsv -->
+		<dependency>
+			<groupId>au.com.bytecode</groupId>
+		 	<artifactId>opencsv</artifactId>
+		 	<version>2.4</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j -->
+		<dependency>
+			<groupId>net.lingala.zip4j</groupId>
+		 	<artifactId>zip4j</artifactId>
+		 	<version>1.3.2</version>
+		</dependency>
 	  
-	  <!-- https://mvnrepository.com/artifact/au.com.bytecode/opencsv -->
-	  <dependency>
-	  	<groupId>au.com.bytecode</groupId>
-	    <artifactId>opencsv</artifactId>
-	    <version>2.4</version>
-	  </dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-coyote -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-coyote</artifactId>
+			<version>7.0.14</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/xalan/serializer -->
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.8.0</version>
+		</dependency>
 	  
-	  <!-- https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j -->
-	  <dependency>
-	  	<groupId>net.lingala.zip4j</groupId>
-	    <artifactId>zip4j</artifactId>
-	    <version>1.3.2</version>
-	  </dependency>
-	  
-	  <!-- https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-coyote -->
-	  <dependency>
-	  	<groupId>org.apache.tomcat</groupId>
-	    <artifactId>tomcat-coyote</artifactId>
-	    <version>7.0.14</version>
-	  </dependency>
-	  
-	  <!-- https://mvnrepository.com/artifact/xalan/serializer -->
-	  <dependency>
-	  	<groupId>xerces</groupId>
-	    <artifactId>xercesImpl</artifactId>
-	    <version>2.8.0</version>
-	  </dependency>
-	  
-	  <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-	  <dependency>
-	  	<groupId>com.fasterxml.jackson.core</groupId>
-	    <artifactId>jackson-databind</artifactId>
-	    <version>2.8.1</version>
-	  </dependency>	
-	  
-	  <!-- https://mvnrepository.com/artifact/org.onebusaway/onebusaway-gtfs -->
-	  <dependency>
-	  	<groupId>org.onebusaway</groupId>
-	    <artifactId>onebusaway-gtfs</artifactId>
-	    <version>1.3.4</version>
-	  </dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.8.1</version>
+		</dependency>	
+		
+		<!-- https://mvnrepository.com/artifact/org.onebusaway/onebusaway-gtfs -->
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-gtfs</artifactId>
+			<version>1.3.4</version>
+		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.onebusaway/onebusaway-gtfs-modules -->
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-gtfs-hibernate</artifactId>
+			<version>1.3.4</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.hibernatespatial</groupId>
+		    <artifactId>hibernate-spatial-postgis</artifactId>
+		    <version>1.1</version>
+		</dependency>
+				
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-core</artifactId>
+		    <version>3.6.0.Final</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.postgis</groupId>
+			<artifactId>postgis-jdbc</artifactId>
+			<version>1.3.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/postgresql/postgresql -->
+		<dependency>
+		    <groupId>postgresql</groupId>
+		    <artifactId>postgresql</artifactId>
+		    <version>8.4-701.jdbc3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+	    </dependency>
+		
+		<dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-swing</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        
+		<dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        
+        <dependency>
+		  	<groupId>org.geotools</groupId>
+		  	<artifactId>gt-referencing</artifactId>
+		 	<version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-render</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-opengis</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-api</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-main</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-coverage</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-data</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		
+		
 
-	  <dependency>
-	  	<groupId>org.onebusaway</groupId>
-	  	<artifactId>onebusaway-gtfs-hibernate</artifactId>
-	  	<version>1.3.4</version>
-	  </dependency>
-	  <!-- https://mvnrepository.com/artifact/org.onebusaway/onebusaway-gtfs-modules -->
 	  
   </dependencies>
   <build>
@@ -77,9 +206,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
-					<verbose>true</verbose>
-					<source>1.8</source>
-		          	<target>1.8</target>
+					<verbose>true</verbose>	
+					<source>1.6</source>
+		          	<target>1.6</target>
 		        	<showWarnings>true</showWarnings>
 				</configuration>
 			</plugin>			
