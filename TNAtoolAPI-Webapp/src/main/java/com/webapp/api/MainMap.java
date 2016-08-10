@@ -13,7 +13,7 @@ public class MainMap extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("/WEB-INF/views/index.jsp").forward(request, response);
+		request.getRequestDispatcher(/*"/WEB-INF/views/index.jsp"*/"/WEB-INF/views/GeoCountiesReport.html?&dbindex=3&popYear=2010").forward(request, response);
 		
 	}
 	

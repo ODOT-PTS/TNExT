@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.gtfs.model.Agency;
+
 import com.model.database.queries.objects.*;
 import com.model.database.queries.congraph.*;
 /*import com.library.model.TransitConnection;
@@ -84,8 +86,8 @@ public class SpatialEventManager {
 		return output;
 	}
 
-	public static HashMap<String, Agency> getAllAgencies ( String username, int dbindex ) throws SQLException {
-		HashMap<String,Agency> response = new HashMap<String, Agency>();
+	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
+		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
 		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
 				+ "FROM gtfs_selected_feeds WHERE username='" + username + "')  ORDER BY name";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
@@ -93,13 +95,12 @@ public class SpatialEventManager {
 		ResultSet rs = stmt.executeQuery(query);
 		
 		while ( rs.next() ){
-			Agency i = new Agency();
+			ConGraphAgency i = new ConGraphAgency();
 			i.name = rs.getString("name");
 			i.centralized = rs.getBoolean("centralized");
 			i.id = rs.getString("id");
 			response.put(rs.getString("id"), i);
 		}
-		
 		connection.close();
 		return response;
 	}
