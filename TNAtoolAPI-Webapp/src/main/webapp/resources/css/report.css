@@ -1,0 +1,382 @@
+div{
+	margin:0px;
+	padding:0px
+}
+
+body {
+	font-family: sans-serif;	
+	line-height: 16px;
+	font-size: 15px;
+	color: #06185c;
+	margin: 4px;
+	/* do not add scroll bars unless overridden on sub-elements */
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+em{
+	display: inline-block;
+	font-size: 10px;
+	color:  #99FF33;
+	cursor: pointer;
+	font-style:italic;
+	font-weight:bold;
+	align: right;
+	vertical-align:middle;
+}
+.button {
+	align: left;
+	float: none;	
+	padding	: 3px;
+	margin-left: 2px;
+}
+
+.tbox {
+	height: 25px;	
+	width: 45px;		
+	padding-top:1px;
+	padding-bottom:1px;
+	padding-right:0px;
+	padding-left:4px;
+	margin-left: 3px;
+	margin-top: 2px;	
+}
+
+.utbox {
+	height: 25px;	
+	width: 75px;		
+	padding-top:0px;
+	padding-bottom:0px;
+	padding-right:0px;
+	padding-left:4px;
+	margin-left: 3px;		
+}
+
+.ui-tooltip {
+	font-size:80%;
+	padding: 5px 5px;
+}
+
+#datepicker {
+	margin-left:20px;
+}
+
+/* .dataTables_scrollHeadInner thead{
+	font-size:80%
+}
+.dataTables_scrollFootInner tfoot{
+	font-size:80%
+}
+.dataTables_scrollBody td{
+	text-align:center;
+	font-size:90%
+} */
+tr.odd td,tr.even td{
+	width:initial
+}
+#RT,#RT0,#RT1{
+	width:auto
+}
+#RT0,#RT1 {
+/* margin: 0 auto;
+clear: both;
+border-collapse: collapse; */
+table-layout: fixed; 
+word-wrap:break-word; 
+}
+.dataTables_scrollHeadInner,.dataTables_scrollFootInner{
+	margin:auto
+}
+.dataTables_scrollHead, .dataTables_scrollBody, .dataTables_scrollFoot{
+	width:auto
+}
+/* #displayReport0,#displayReport1{
+	width:90%;
+	margin:auto
+} */
+#RT thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+	font-size:80%
+} 
+.dataTables_scrollHead thead tr,
+.dataTables_scrollBody thead tr{
+	background-color:grey;
+}
+
+#RT thead th,#RT tfoot th,
+.dataTables_scrollHead thead th,.dataTables_scrollFoot tfoot th, .dataTables_scrollBody thead th, .dataTables_scrollBody tfoot th{
+	border: 1px solid black;
+	background-color:grey;
+	color: white;
+} 
+#RT tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+	font-size:80%
+} 
+#RT tbody tr,.dataTables_scrollBody tbody tr{
+	text-align:center;
+	font-size:90%
+} 
+#RT tbody tr tbody td{
+	text-align:left;
+}
+td.details-control {
+    background: url('js/lib/DataTables/images/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('js/lib/DataTables/images/details_close.png') no-repeat center center;    
+}
+td.details-control-cc {
+    background: url('js/lib/DataTables/images/details_open.png') no-repeat center center;
+    background-color:#C0C0C0;
+    cursor: pointer;
+}
+tr.shown td.details-control-cc {
+    background: url('js/lib/DataTables/images/details_close.png') no-repeat center center;
+    background-color:#C0C0C0;
+}
+ul.ColVis_collection {
+	width: auto;
+}
+div.DTTT_collection{
+	width: 200px;
+}
+#noTrip{
+	width:30%;
+	margin-left:30%;
+	border:2px Solid black;
+	padding:5%;
+	
+	/* float:center; */
+}
+.displayReport{
+	overflow:auto;
+}
+
+div#map {
+	height: 100%; 
+	background: #eee;
+	margin: 0px;
+	padding: 0px;
+}
+
+div#toolbox {
+	height: 100%; width: 320px;
+	float: left;
+	background: #ccc;
+	margin: 0px;
+	padding: 0px;
+	/* add vertical scroll bar if content does not fit */
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+img#legend {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+h2 {
+	font-size: 100%;
+	float: left;
+}
+
+h1 {
+	font-size: 125%;
+	font-weight: bold;
+	float: left;
+	padding: 0.4em;
+	margin: 0px;
+}
+p {
+    font-size: 100%
+}
+
+p.footnote {
+    font-size: 75%;    
+}
+div.container {
+	border: 1px solid #000000;
+	height: 35px;
+	width: 100%;
+	background: #888;
+}
+#controls {
+	height: 30px;
+	width: 100%;
+	font-size:100%;
+	padding: 0px;
+	margin: 0px;
+	
+}
+#td1{
+	width:20%;
+	padding-top: 8px;
+	margin: 3px;
+	vertical-align:top;
+	text-align:left;
+}
+#td2{
+	width:40%;
+	padding-top: 8px;
+	margin: 1px;
+	vertical-align:top;
+	text-align:center;
+}
+#td3{
+	width:25%;
+	padding-top: 8px;
+	margin: 1px;
+	vertical-align:top;
+	text-align:right;
+}
+#accordionItems{
+	text-align:left;
+	width:50%;
+	padding-left:10px
+}
+
+.ui-accordion .ui-accordion-header {
+	display: block;
+	cursor: pointer;
+	position: relative;
+	margin-top: 2px;
+	padding: .1em .1em .1em .2em;
+	min-height: 0; /* support: IE7 */
+}
+#accordionItems {  }
+#accordionItems ul { list-style:none; }
+
+.ui-progressbar {
+    width:50%;
+    margin:auto
+}
+
+.progress-label {
+    /* position: absolute; */
+    left: 50%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+ 
+div.headerL {
+	float: left;
+	width: 30%;
+	margin: 0px;
+	height: 35px;
+}
+
+div.headerBR {
+	float: right;
+	text-align: left;	
+}
+
+div.LHScontrols {
+	float: right;
+	text-align: left;
+	margin-right: 2px;
+	line-height: 30px;
+}
+
+div.RHScontrols {
+	float: right;
+	text-align: left;
+}
+
+div.headerR {
+	float: right;
+	width: 45%;
+	margin: 1px;
+	height: 35px;
+	text-align:right;
+	
+}
+
+div#toolbox {
+	margin: 0px;
+	padding: 0em;
+}
+
+form {
+	margin: 0px;
+	padding: 0.4em 0.4em 0.6em 0.4em;
+}
+
+form span {
+	width: 100%;
+	display: block;
+	overflow: hidden;
+	margin: 0px;
+	padding: 0px; 
+}
+
+
+form span label {
+	float: left;
+	width: 150px;
+}
+
+form span input {
+	float: right;
+	width: 150px;
+}
+
+form span select {
+	float: right;
+	width: 150px;
+}
+
+form span.timeEntry select {
+	float: left;
+}
+
+.autoWidth {
+	width: auto;
+}
+
+.narrowInput {
+	width: 4em;
+}
+
+.halfWidth {
+	width: 48%;
+}
+.fullWidth {
+	width: 100%;
+}
+.ui-progressbar {
+  	position: relative;
+}
+.progress-label {
+	position: absolute;
+	left: 37%;
+	top: 4px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
+}
+
+.navicon-line{
+	width:25px;
+	height:4px;
+	border:1px solid #565656; 
+	background-color:white; 
+	margin:4px;
+}
+
+.dropDown{
+	margin-right: 2em;
+    height: 81%;
+    margin-top: 2px;
+}
+
+.closeButton{
+	margin-right:5px; 
+	height:81%
+}
+
+.IOSym{
+	font-size:12px;
+	cursor:help;
+	vertical-align: super;
+}
