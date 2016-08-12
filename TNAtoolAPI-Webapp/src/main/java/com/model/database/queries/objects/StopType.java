@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopExt;
 
 
 @XmlRootElement(name = "Stop")
@@ -35,7 +36,7 @@ public class StopType {
     public StopType() {
     }
 
-    public StopType(org.onebusaway.gtfs.model.Stop stop) {
+    public StopType(StopExt stop) {
         this.id = stop.getId();
         this.stopLat = stop.getLat();
         this.stopLon = stop.getLon();
@@ -51,7 +52,7 @@ public class StopType {
         this.direction = stop.getDirection();
     }
 
-    public StopType(org.onebusaway.gtfs.model.Stop stop, Boolean extended) {
+    public StopType(StopExt stop, Boolean extended) {
         this.id = stop.getId();
         this.stopLat = stop.getLat();
         this.stopLon = stop.getLon();

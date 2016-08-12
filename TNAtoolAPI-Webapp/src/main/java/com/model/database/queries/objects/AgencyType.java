@@ -16,9 +16,9 @@ package com.model.database.queries.objects;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.onebusaway.gtfs.model.Agency;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
 
 @XmlRootElement(name = "Agency")
 public class AgencyType {
@@ -34,7 +34,7 @@ public class AgencyType {
         this.fareUrl = fareUrl;
     }
 
-    public AgencyType(Agency arg) {
+    public AgencyType(AgencyExt arg) {
         this.id = arg.getId();
         this.name = arg.getName();
         this.url = arg.getUrl();

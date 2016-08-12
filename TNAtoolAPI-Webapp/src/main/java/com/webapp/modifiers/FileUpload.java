@@ -64,9 +64,9 @@ public class FileUpload extends HttpServlet {
 	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
-	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];//"jdbc:postgresql://localhost:5432/playground";
-	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];//"postgres";
-	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];//"123123";
+	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];
+	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];
+	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];
 	private static final int DBINDEX = Databases.dbsize-1;
     /**
      * @see HttpServlet#HttpServlet()

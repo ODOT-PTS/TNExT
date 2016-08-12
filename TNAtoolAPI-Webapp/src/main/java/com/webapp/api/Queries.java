@@ -46,10 +46,11 @@ import com.model.database.queries.*;
 import com.model.database.queries.util.*;
 import com.model.database.Databases;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.*;
 import com.model.database.queries.congraph.*;
 import com.model.database.queries.objects.*;
 
-import org.onebusaway.gtfs.model.Agency;
+/*import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareRule;
 import org.onebusaway.gtfs.model.FeedInfo;
@@ -59,7 +60,8 @@ import org.onebusaway.gtfs.model.ServiceCalendarDate;
 import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
-import org.onebusaway.gtfs.model.Trip;
+import org.onebusaway.gtfs.model.Trip;*/
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -381,12 +383,12 @@ public class Queries {
 			}
 			for(GeoStopRouteMap r: sRoutes){
 				mapPnrRoute = new MapRoute();
-				Route _r = GtfsHibernateReaderExampleMain.QueryRoutebyid(new AgencyAndId(r.getagencyId(), r.getrouteId()), dbindex);
+				RouteExt _r = GtfsHibernateReaderExampleMain.QueryRoutebyid(new AgencyAndId(r.getagencyId(), r.getrouteId()), dbindex);
 				mapPnrRoute.AgencyId = _r.getId().getAgencyId();
 				mapPnrRoute.Id=_r.getId().getId();
 				mapPnrRoute.Name=_r.getLongName();
-				List<Trip> ts = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(_r, dbindex);
-				mapPnrRoute.Shape=ts.get(0).getEpshape();
+				List<TripExt> ts = null;/*GtfsHibernateReaderExampleMain.QueryTripsbyRoute(_r, dbindex);*///to be fixed
+//				mapPnrRoute.Shape=ts.get(0).getEpshape();//to be fixed
 				response.MapPnrRL.add(mapPnrRoute);
 			}
 		} catch (FactoryException e) {
@@ -426,7 +428,7 @@ public class Queries {
     			return response;
     		}
     		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
-	    	Collection <Agency> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(selectedAgencies, dbindex);
+	    	Collection <AgencyExt> allagencies = GtfsHibernateReaderExampleMain.QueryAllAgencies(selectedAgencies, dbindex);
 	    	if (menuResponse[dbindex]==null || menuResponse[dbindex].data.size()!=allagencies.size() ){
 	    		menuResponse[dbindex] = new AgencyRouteList();   	
 	    		menuResponse[dbindex] = PgisEventManager.agencyMenu(null, null, username, dbindex);
@@ -478,42 +480,23 @@ public class Queries {
     	AgencyAndId agencyandtrip = new AgencyAndId();
     	agencyandtrip.setAgencyId(agency);
     	agencyandtrip.setId(trip);
-    	Trip tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip, dbindex);    	
+    	TripExt tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip, dbindex);    	
     	Rshape shape = new Rshape();
-    	shape.points = tp.getEpshape();
-    	shape.length = tp.getLength();  
+//    	shape.points = tp.getEpshape();//to be fixed
+//    	shape.length = tp.getLength(); //to be fixed 
     	shape.agency = agency;
     	if(tp.getTripHeadsign()==null){
     		shape.headSign = "N/A";
     	}else{
     		shape.headSign = tp.getTripHeadsign();
     	}
-    	shape.estlength = tp.getEstlength();
-    	Agency agencyObject = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex);
+//    	shape.estlength = tp.getEstlength();//to be fixed
+    	AgencyExt agencyObject = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex);
     	shape.agencyName = agencyObject.getName();
 		return shape;
     }
   
-	/**
-     * Return length for a given trip and agency
-     */	
-    @GET
-    @Path("/tlength")
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object triplength(@QueryParam("agency") String agency,@QueryParam("trip") String trip, @QueryParam("dbindex") Integer dbindex){
-    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-    	AgencyAndId agencyandtrip = new AgencyAndId();
-    	agencyandtrip.setAgencyId(agency);
-    	agencyandtrip.setId(trip);
-    	List<ShapePoint> shapes = GtfsHibernateReaderExampleMain.Queryshapebytrip(agencyandtrip, dbindex);
-    	String pe = PolylineEncoder.createEncodings(shapes, 1);
-    	Rshape shape = new Rshape();
-    	shape.points = pe;
-		return shape;
-    }
-    
+ 
     /**
      * Return a list of all stops for a given route id in the database
      * @throws SQLException 
@@ -811,44 +794,7 @@ public class Queries {
         return response;
     }
 
-   /* @GET
-    @Path("/StopsRX")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getTASX(@QueryParam("agency") String agency, @QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("stopids") String stops, @QueryParam("dbindex") Integer dbindex) throws JSONException {
-    	
-    	if (Double.isNaN(x) || x <= 0) {
-            x = STOP_SEARCH_RADIUS;
-        }
-    	x = x * 1609.34;
-    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-    	String[] stopIds = stops.split(",");
-    	StopListR response = new StopListR();    	
-    	List<Stop> tmpStops = GtfsHibernateReaderExampleMain.QueryStopsbyAgency(agency, dbindex);
-    	String defAgency = tmpStops.get(0).getId().getAgencyId();
-    	for (String instance: stopIds){
-    		
-    		AgencyAndId stopId = new AgencyAndId(defAgency,instance);
-    		Stop stop = GtfsHibernateReaderExampleMain.QueryStopbyid(stopId, dbindex);    		
-	    	StopR each = new StopR();
-			each.StopId = "";
-			each.StopName = "";
-			each.URL = "";
-			each.PopWithinX = "";
-			
-			try{
-			each.PopWithinX = String.valueOf(EventManager.getpop(x, stop.getLat(), stop.getLon(), dbindex));
-			} catch (FactoryException e) {    				
-				e.printStackTrace();
-			} catch (TransformException e) {    				
-				e.printStackTrace();
-			}
-			each.Routes = GtfsHibernateReaderExampleMain.QueryRouteIdsforStop(stop, dbindex).toString();
-			response.StopR.add(each);
-    	}
-    	return response;
-    }*/    
+   
 	/**
 	 * Generates The Agency Summary report and geographic allocation of service for transit agencies
 	 */
@@ -1020,7 +966,7 @@ public class Queries {
 	/**
      * Generates The Route Schedule/Fare report
      */
-    @GET
+    /*@GET
     @Path("/ScheduleR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getSchedule(@QueryParam("agency") String agency, @QueryParam("route") String routeid, @QueryParam("day") String date, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
@@ -1035,15 +981,15 @@ public class Queries {
 		//System.out.println(days[0][0]);
     	AgencyAndId routeId = new AgencyAndId(agency,routeid);
     	response.Agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName()+"";
-    	Route route = GtfsHibernateReaderExampleMain.QueryRoutebyid(routeId, dbindex);
+    	RouteExt route = GtfsHibernateReaderExampleMain.QueryRoutebyid(routeId, dbindex);
     	response.Route = route.getId().getId()+"";
-    	List <FareRule> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route, dbindex);
+    	List <FareRuleExt> fareRules = GtfsHibernateReaderExampleMain.QueryFareRuleByRoute(route, dbindex);
     	if(fareRules.size()==0){
     		response.Fare = "N/A";
     	}else{
     		response.Fare = fareRules.get(0).getFare().getPrice()+"";
     	}
-    	List <Trip> routeTrips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route, dbindex);
+    	List <TripExt> routeTrips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route, dbindex);
     	int totalLoad = routeTrips.size();    	
     	response.directions[0]= new Schedule();
     	response.directions[1]= new Schedule();
@@ -1053,28 +999,28 @@ public class Queries {
     	String serviceAgency = routeTrips.get(0).getServiceId().getAgencyId();
 	    int startDate;
 	    int endDate;
-		List <ServiceCalendar> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency, dbindex);
-	    List <ServiceCalendarDate> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency, dbindex);
-Loop:  	for (Trip trip: routeTrips){
+		List <ServiceCalendarExt> agencyServiceCalendar = GtfsHibernateReaderExampleMain.QueryCalendarforAgency(serviceAgency, dbindex);
+	    List <ServiceCalendarDateExt> agencyServiceCalendarDates = GtfsHibernateReaderExampleMain.QueryCalendarDatesforAgency(serviceAgency, dbindex);
+Loop:  	for (TripExt trip: routeTrips){
     		index++;
     		boolean isIn = false;
-    		ServiceCalendar sc = null;
+    		ServiceCalendarExt sc = null;
 			if(agencyServiceCalendar!=null){
-				for(ServiceCalendar scs: agencyServiceCalendar){
+				for(ServiceCalendarExt scs: agencyServiceCalendar){
 					if(scs.getServiceId().getId().equals(trip.getServiceId().getId())){
 						sc = scs;
 						break;
 					}
 				}  
 			}
-			List <ServiceCalendarDate> scds = new ArrayList<ServiceCalendarDate>();
-			for(ServiceCalendarDate scdss: agencyServiceCalendarDates){
+			List <ServiceCalendarDateExt> scds = new ArrayList<ServiceCalendarDateExt>();
+			for(ServiceCalendarDateExt scdss: agencyServiceCalendarDates){
 				if(scdss.getServiceId().getId().equals(trip.getServiceId().getId())){
 					scds.add(scdss);
 				}
 			}
 			
-			for(ServiceCalendarDate scd: scds){
+			for(ServiceCalendarDateExt scd: scds){
 				if(days[0][0]==Integer.parseInt(scd.getDate().getAsString())){
 					if(scd.getExceptionType()==1){
 						isIn = true;
@@ -1168,7 +1114,7 @@ Loop:  	for (Trip trip: routeTrips){
 	    
     	progVal.remove(key);
         return response;
-    }
+    }*/
     
     public String strArrivalTime(int arrivalTime){
     	int hour = arrivalTime/3600;
@@ -2951,13 +2897,13 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] agencies = agency.split(",");
     	StartEndDates seDates;
     	String defaultAgency;
-    	FeedInfo feed;
-    	Agency ag;
+    	FeedInfoExt feed;
+    	AgencyExt ag;
     	try{
 	    	for(String a:agencies){
 	    		seDates = new StartEndDates();
 	    		ag = GtfsHibernateReaderExampleMain.QueryAgencybyid(a, dbindex);
-	    		defaultAgency = ag.getDefaultId();
+	    		defaultAgency = ag.getDefaultId();//to be fixed
 	        	feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
 	        	seDates.Startdate = feed.getStartDate().getAsString();
 	        	seDates.Enddate = feed.getEndDate().getAsString();
@@ -2969,26 +2915,6 @@ Loop:  	for (Trip trip: routeTrips){
     	}
 		return sedlist;
     }
-	
-	/**
-     * Get calendar range for agency
-     */
-    /*@GET
-    @Path("/agencyCalendarRange")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object agencyCalendarRange(@QueryParam("agency") String agency, @QueryParam("dbindex") Integer dbindex){
-    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-    	StartEndDates seDates = new StartEndDates();
-    	String defaultAgency = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getDefaultId();
-    	FeedInfo feed = GtfsHibernateReaderExampleMain.QueryFeedInfoByDefAgencyId(defaultAgency, dbindex).get(0);
-    	
-    	seDates.Startdate = feed.getStartDate().getAsString();
-    	seDates.Enddate = feed.getEndDate().getAsString();
-    	
-		return seDates;
-    }*/
     
     /**
      * Get overall calendar range

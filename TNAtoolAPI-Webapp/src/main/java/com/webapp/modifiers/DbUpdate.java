@@ -68,15 +68,7 @@ import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 
 import com.model.database.*;
-import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.FeedInfo;
-import org.onebusaway.gtfs.model.ShapePoint;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.StopTime;
-import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -1349,25 +1341,5 @@ public class DbUpdate {
 	    
 	    return fn;
 	}            
-	
-	@GET
-    @Path("/test")
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object test(@QueryParam("agency") String agency, @QueryParam("dbindex") int dbindex) throws IOException{
-		/*List<Trip> triplist = GtfsHibernateReaderExampleMain.QueryTripsforAgency(agency, dbindex);
-		for (Trip trip: triplist){
-			AgencyAndId agencyandtrip = trip.getId();
-			List<StopTime> st = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip, dbindex);	
-			for (StopTime stt: st){
-				System.out.println(stt.isArrivalTimeSet());
-			}
-		}*/
-		
-		Collection<FeedInfo> feedList = GtfsHibernateReaderExampleMain.QueryAllFeedInfos(dbindex);
-		for(FeedInfo fi: feedList){
-			System.out.print(fi.getPublisherName());
-		}
-		return new TransitError("Has been added to the database");
-	}
 	
 }

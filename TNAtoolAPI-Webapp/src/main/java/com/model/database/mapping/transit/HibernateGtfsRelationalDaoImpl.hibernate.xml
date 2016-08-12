@@ -20,19 +20,19 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
     <query name="agencyIdsReferencingServiceId" read-only="true">
-        SELECT trip.id.agencyId FROM Trip trip WHERE trip.serviceId = :serviceId GROUP BY trip.id.agencyId
+        SELECT trip.id.agencyId FROM TripExt trip WHERE trip.serviceId = :serviceId GROUP BY trip.id.agencyId
     </query>
      <query name="allAgencies" read-only="true">
-        FROM Agency agency WHERE agency.defaultId in (:sa)
+        FROM AgencyExt agency WHERE agency.defaultId in (:sa)
     </query>
      <query name="updatedTripShpaeLength" read-only="false">
-        update Trip set length = :length, estlength = :estlength, shape = :shape WHERE id = :tripid    
+        update TripExt set length = :length, estlength = :estlength, shape = :shape WHERE id = :tripid    
     </query>
     <query name="calendarForAgency" read-only="true">
-       FROM ServiceCalendar d WHERE d.serviceId.agencyId = :agency
+       FROM ServiceCalendarExt d WHERE d.serviceId.agencyId = :agency
     </query>
     <query name="calendarDatesForAgency" read-only="true">
-        FROM ServiceCalendarDate d WHERE d.serviceId.agencyId = :agency
+        FROM ServiceCalendarDateExt d WHERE d.serviceId.agencyId = :agency
     </query>    
     <query name="stopsForAgency" read-only="true">
        SELECT ssm.stop FROM StopServiceMap ssm WHERE ssm.agencyId = :agency
@@ -41,123 +41,123 @@
        SELECT srm.stop FROM StopRouteMap srm WHERE srm.routeId = :route AND srm.agencyId = :agency
     </query>
     <query name="stopsForTrip" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency
     </query>
     <query name="stopsForTripCounty" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,5)=:county
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,5)=:county
     </query>
     <query name="stopsForTripRegion" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND regionId=:region
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND regionId=:region
     </query>
     <query name="stopsForTripTract" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,11)=:tract
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND substring(stm.stop.blockId,1,11)=:tract
     </query>
     <query name="stopsForTripPlace" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.placeId=:place
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.placeId=:place
     </query>
     <query name="stopsForTripUrban" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.urbanId=:urban
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.urbanId=:urban
     </query>
     <query name="stopsForTripUrbans" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.urbanId in (:urbans)
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.urbanId in (:urbans)
     </query>
     <query name="stopsForTripCongdist" read-only="true">
-       SELECT stm.stop FROM StopTime stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.congdistId=:congdist
+       SELECT stm.stop FROM StopTimeExt stm WHERE stm.trip.id.id = :trip AND stm.trip.id.agencyId = :agency AND stm.stop.congdistId=:congdist
     </query>
     <query name="routeIdsForStop" read-only="true">
        SELECT srm.routeId FROM StopRouteMap srm WHERE srm.stop = :stop
     </query>    
     <query name="routesForAgency" read-only="true">
-        FROM Route route WHERE route.agency = :agency
+        FROM RouteExt route WHERE route.agency = :agency
     </query>    
     <query name="serviceCalendarsForRoute" read-only="true">
         SELECT rsim.calendar FROM RouteServiceIdMap rsim WHERE rsim.route = :route 
     </query>    
     <query name="stopsForStation" read-only="true">
-        FROM Stop stop WHERE stop.parentStation = :stationId AND stop.id.agencyId = :agencyId
+        FROM StopExt stop WHERE stop.parentStation = :stationId AND stop.id.agencyId = :agencyId
     </query>
     <query name="allStopsCount" read-only="true">
-        select count(*) FROM Stop WHERE agencyid in (:sa)
+        select count(*) FROM StopExt WHERE agencyid in (:sa)
     </query>
     <query name="tripsByRoute" read-only="true">
-        FROM Trip trip WHERE trip.route = :route order by trip.length+trip.estlength desc
+        FROM TripExt trip WHERE trip.route = :route order by trip.length+trip.estlength desc
     </query>
     <query name="RouteMilesForState" read-only="true">
-	select sum(length+estlength) from Trip where length+estlength in (select max(length+estlength) from Trip trip WHERE trip.id.agencyId in (:sa) group by trip.route.id.agencyId, trip.route.id.id)
+	select sum(length+estlength) from TripExt where length+estlength in (select max(length+estlength) from TripExt trip WHERE trip.id.agencyId in (:sa) group by trip.route.id.agencyId, trip.route.id.id)
     </query>
     <query name="tripsByShapeId" read-only="true">
-        FROM Trip trip WHERE trip.shapeId = :shapeId
+        FROM TripExt trip WHERE trip.shapeId = :shapeId
     </query>
     <query name="fareRuleForRoute" read-only="true">
-        FROM FareRule fr WHERE fr.route = :route
+        FROM FareRuleExt fr WHERE fr.route = :route
     </query>
     <query name="fareDataForAgency" read-only="true">
-        select avg(fr.fare.price), min(fr.fare.price), max(fr.fare.price), count(fr.fare.price) FROM FareRule fr WHERE fr.route.id.agencyId = :agency
+        select avg(fr.fare.price), min(fr.fare.price), max(fr.fare.price), count(fr.fare.price) FROM FareRuleExt fr WHERE fr.route.id.agencyId = :agency
     </query>
     <query name="fareDataForState" read-only="true">
-        select avg(fa.price), min(fa.price), max(fa.price), count(fa.price) FROM FareAttribute fa WHERE fa.id.agencyId in (:sa)
+        select avg(fa.price), min(fa.price), max(fa.price), count(fa.price) FROM FareAttributeExt fa WHERE fa.id.agencyId in (:sa)
     </query>    
     <query name="fareMedianForAgency" read-only="true">
-        select fr.fare.price FROM FareRule fr where fr.route.id.agencyId = :agency order by fr.fare.price desc
+        select fr.fare.price FROM FareRuleExt fr where fr.route.id.agencyId = :agency order by fr.fare.price desc
     </query>
     <query name="fareMedianForState" read-only="true">
-        select fa.price FROM FareAttribute fa WHERE fa.id.agencyId in (:sa) order by fa.price desc 
+        select fa.price FROM FareAttributeExt fa WHERE fa.id.agencyId in (:sa) order by fa.price desc 
     </query>
     <query name="farePriceForRoutes" read-only="true">
-        select fr.fare.price FROM FareRule fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
+        select fr.fare.price FROM FareRuleExt fr WHERE concat(fr.route.id.agencyId,',',fr.route.id.id) in (:routes) order by fr.fare.price
     </query>
     <query name="selectedAgenies" read-only="true">
-        FROM Agency a WHERE a.defaultId in (:sa)
+        FROM AgencyExt a WHERE a.defaultId in (:sa)
     </query>
     <query name="feedInfoByDefAgency" read-only="true">
-        FROM FeedInfo fi WHERE fi.defaultId = :defaultAgencyId
+        FROM FeedInfoExt fi WHERE fi.defaultId = :defaultAgencyId
     </query>
     <query name="tripsByServiceId" read-only="true">
-        FROM Trip trip WHERE trip.serviceId = :serviceId
+        FROM TripExt trip WHERE trip.serviceId = :serviceId
     </query>
     <query name="tripsByAgency_uidsorted" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
+        FROM TripExt trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
     </query>
     <query name="tripsByAgency_routesorted" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
+        FROM TripExt trip WHERE trip.id.agencyId = :agencyId ORDER BY trip.route.id, trip.uid
     </query>    
     <query name="tripsByBlockId" read-only="true">
-        FROM Trip trip WHERE trip.id.agencyId = :agencyId AND trip.blockId = :blockId
+        FROM TripExt trip WHERE trip.id.agencyId = :agencyId AND trip.blockId = :blockId
     </query>
     <query name="stopTimesByTrip" read-only="true">
-        SELECT st FROM StopTime st WHERE st.trip = :trip ORDER BY st.stopSequence
+        SELECT st FROM StopTimeExt st WHERE st.trip = :trip ORDER BY st.stopSequence
     </query>
     <query name="stopTimesByStop" read-only="true">
-        SELECT st FROM StopTime st WHERE st.stop = :stop
+        SELECT st FROM StopTimeExt st WHERE st.stop = :stop
     </query>
     <query name="allShapeIds" read-only="true">
-        SELECT point.shapeId FROM ShapePoint point GROUP BY point.shapeId.agencyId, point.shapeId.id
+        SELECT point.shapeId FROM ShapePointExt point GROUP BY point.shapeId.agencyId, point.shapeId.id
     </query>
     <query name="shapePointsForShapeId" read-only="true">
-        FROM ShapePoint point WHERE point.id.shapeId = :shapeId ORDER BY point.sequence
+        FROM ShapePointExt point WHERE point.id.shapeId = :shapeId ORDER BY point.sequence
     </query>
     <query name="frequenciesForTrip" read-only="true">
-        FROM Frequency f WHERE f.trip = :trip
+        FROM FrequencyExt f WHERE f.trip = :trip
     </query>
     <query name="calendarServiceIds" read-only="true">
-        SELECT serviceId FROM ServiceCalendar
+        SELECT serviceId FROM ServiceCalendarExt
     </query>
     <query name="calendarDateServiceIds" read-only="true">
-        SELECT serviceId FROM ServiceCalendarDate
+        SELECT serviceId FROM ServiceCalendarDateExt
     </query>    
     <query name="calendarDatesForServiceId" read-only="true">
-        FROM ServiceCalendarDate d WHERE d.serviceId = :serviceId
+        FROM ServiceCalendarDateExt d WHERE d.serviceId = :serviceId
     </query>
     <query name="calendarsForServiceId" read-only="true">
-        FROM ServiceCalendar d WHERE d.serviceId = :serviceId
+        FROM ServiceCalendarExt d WHERE d.serviceId = :serviceId
     </query>
     <query name="fareRulesForFareAttribute" read-only="true">
-        FROM FareRule fr WHERE fr.fare = :fareAttribute
+        FROM FareRuleExt fr WHERE fr.fare = :fareAttribute
     </query>
     <query name="serviceHoursbyTrip" read-only="true">
-        select concat(min(st.arrivalTime),'-',max(st.departureTime)) FROM StopTime st WHERE concat(st.trip.id.agencyId, st.trip.id.id) in (:trips) and st.arrivalTime>0 and st.departureTime>0
+        select concat(min(st.arrivalTime),'-',max(st.departureTime)) FROM StopTimeExt st WHERE concat(st.trip.id.agencyId, st.trip.id.id) in (:trips) and st.arrivalTime>0 and st.departureTime>0
     </query>
     <query name="counts" read-only="true">
-        select (select count(id) from Agency WHERE defaultId in (:sa))as agency, (select count(id.id) from Stop WHERE agencyid in (:sa))as stop, (select count(id.id) from Route WHERE defaultid in (:sa))as route from Agency
+        select (select count(id) from AgencyExt WHERE defaultId in (:sa))as agency, (select count(id.id) from StopExt WHERE agencyid in (:sa))as stop, (select count(id.id) from RouteExt WHERE defaultid in (:sa))as route from AgencyExt
     </query>
 </hibernate-mapping>

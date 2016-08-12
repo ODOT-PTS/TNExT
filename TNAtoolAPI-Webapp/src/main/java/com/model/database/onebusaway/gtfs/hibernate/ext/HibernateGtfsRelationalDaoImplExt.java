@@ -4,32 +4,39 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.impl.HibernateGtfsRelationalDaoImpl;
-import org.onebusaway.gtfs.model.Agency;
+//import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.FareRule;
-import org.onebusaway.gtfs.model.FeedInfo;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.ServiceCalendar;
-import org.onebusaway.gtfs.model.ServiceCalendarDate;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.Trip;
+//import org.onebusaway.gtfs.model.FareRule;
+//import org.onebusaway.gtfs.model.FeedInfo;
+//import org.onebusaway.gtfs.model.Route;
+//import org.onebusaway.gtfs.model.ServiceCalendar;
+//import org.onebusaway.gtfs.model.ServiceCalendarDate;
+//import org.onebusaway.gtfs.model.Stop;
+//import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
+
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.*;
 
 public class HibernateGtfsRelationalDaoImplExt extends
 		HibernateGtfsRelationalDaoImpl /*implements GtfsMutableRelationalDao*/ {
 
-	public Collection<Agency> getSelectedAgencies(List<String> selectedAgencies) {
+	public HibernateGtfsRelationalDaoImplExt(SessionFactory sessionFactory) {
+		super(sessionFactory);
+	}
+
+	public Collection<AgencyExt> getSelectedAgencies(List<String> selectedAgencies) {
 		return _ops.findByNamedQueryAndNamedParam("selectedAgenies", "sa",
 				selectedAgencies);
 	}
 
-	public List<Agency> getAllAgencies(List<String> selectedAgencies) {
+	public List<AgencyExt> getAllAgencies(List<String> selectedAgencies) {
 		return _ops.findByNamedQueryAndNamedParam("allAgencies", "sa",
 				selectedAgencies);
 	}
 
-	public List<Trip> getTripsForAgency(String agencyId) {
+	public List<TripExt> getTripsForAgency(String agencyId) {
 		return _ops.findByNamedQueryAndNamedParam("tripsByAgency_uidsorted",
 				"agencyId", agencyId);
 	}
@@ -39,23 +46,23 @@ public class HibernateGtfsRelationalDaoImplExt extends
 				"agencyId", agencyId);
 	}
 
-	public List<Trip> getTripsForAgency_RouteSorted(String agencyId) {
+	public List<TripExt> getTripsForAgency_RouteSorted(String agencyId) {
 		return _ops.findByNamedQueryAndNamedParam("tripsByAgency_routesorted",
 				"agencyId", agencyId);
 	}
 
-	public List<String> getRouteIdsForStop(Stop stop) {
+	public List<String> getRouteIdsForStop(StopExt stop) {
 		return _ops.findByNamedQueryAndNamedParam("routeIdsForStop", "stop",
 				stop);
 	}
 
-	public List<ServiceCalendar> getServiceCalendarsForRoute(Route route) {
+	public List<ServiceCalendarExt> getServiceCalendarsForRoute(RouteExt route) {
 		return _ops.findByNamedQueryAndNamedParam("serviceCalendarsForRoute",
 				"route", route);
 	}
 
-	public List<ServiceCalendar> getCalendarForAgency(String agency) {
-		List<ServiceCalendar> calendars = _ops.findByNamedQueryAndNamedParam(
+	public List<ServiceCalendarExt> getCalendarForAgency(String agency) {
+		List<ServiceCalendarExt> calendars = _ops.findByNamedQueryAndNamedParam(
 				"calendarForAgency", "agency", agency);
 		switch (calendars.size()) {
 		case 0:
@@ -65,12 +72,12 @@ public class HibernateGtfsRelationalDaoImplExt extends
 		}
 	}
 
-	public List<ServiceCalendarDate> getCalendarDatesForAgency(String agency) {
+	public List<ServiceCalendarDateExt> getCalendarDatesForAgency(String agency) {
 		return _ops.findByNamedQueryAndNamedParam("calendarDatesForAgency",
 				"agency", agency);
 	}
 
-	public List<FareRule> getFareRuleForRoute(Route route) {
+	public List<FareRuleExt> getFareRuleForRoute(RouteExt route) {
 		return _ops.findByNamedQueryAndNamedParam("fareRuleForRoute", "route",
 				route);
 	}
@@ -158,48 +165,48 @@ public class HibernateGtfsRelationalDaoImplExt extends
 				"routes", routes);
 	}
 
-	public void updateTrip(Trip trip) {
-		String[] names = { "length", "estlength", "shape", "tripid" };
+	public void updateTrip(TripExt trip) { 
+		/*String[] names = { "length", "estlength", "shape", "tripid" };
 		Object[] values = { trip.getLength(), trip.getEstlength(),
 				trip.getEpshape(), trip.getId() };
 		_ops.updateByNamedQueryAndNamedParams("updatedTripShpaeLength", names,
-				values);
-	}
+				values);*/
+	}//to be fixed
 
-	public List<Stop> getStopsForRoute(AgencyAndId route) {
+	public List<StopExt> getStopsForRoute(AgencyAndId route) {
 		String[] names = { "agency", "route" };
 		Object[] values = { route.getAgencyId(), route.getId() };
 		return _ops.findByNamedQueryAndNamedParams("stopsForRoute", names,
 				values);
 	}
 
-	public List<Stop> getStopsForAgency(String agency) {
+	public List<StopExt> getStopsForAgency(String agency) {
 		return _ops.findByNamedQueryAndNamedParam("stopsForAgency", "agency",
 				agency);
 	}
 
-	public List<Stop> getStopsForTrip(AgencyAndId trip) {
+	public List<StopExt> getStopsForTrip(AgencyAndId trip) {
 		String[] names = { "agency", "trip" };
 		Object[] values = { trip.getAgencyId(), trip.getId() };
 		return _ops.findByNamedQueryAndNamedParams("stopsForTrip", names,
 				values);
 	}
 
-	public List<Stop> getStopsForTripRegion(AgencyAndId trip, String region) {
+	public List<StopExt> getStopsForTripRegion(AgencyAndId trip, String region) {
 		String[] names = { "agency", "trip", "region" };
 		Object[] values = { trip.getAgencyId(), trip.getId(), region };
 		return _ops.findByNamedQueryAndNamedParams("stopsForTripRegion", names,
 				values);
 	}
 
-	public List<Stop> getStopsForTripUrban(AgencyAndId trip, String urban) {
+	public List<StopExt> getStopsForTripUrban(AgencyAndId trip, String urban) {
 		String[] names = { "agency", "trip", "urban" };
 		Object[] values = { trip.getAgencyId(), trip.getId(), urban };
 		return _ops.findByNamedQueryAndNamedParams("stopsForTripUrban", names,
 				values);
 	}
 
-	public List<Stop> getStopsForTripCongdist(AgencyAndId trip, String congdist) {
+	public List<StopExt> getStopsForTripCongdist(AgencyAndId trip, String congdist) {
 		String[] names = { "agency", "trip", "congdist" };
 		Object[] values = { trip.getAgencyId(), trip.getId(), congdist };
 		return _ops.findByNamedQueryAndNamedParams("stopsForTripCongdist",
@@ -217,7 +224,7 @@ public class HibernateGtfsRelationalDaoImplExt extends
 		return results.get(0);
 	}
 
-	public List<FeedInfo> getFeedInfoByDefAgencyId(String defaultAgency) {
+	public List<FeedInfoExt> getFeedInfoByDefAgencyId(String defaultAgency) {
 		return _ops.findByNamedQueryAndNamedParam("feedInfoByDefAgency",
 				"defaultAgencyId", defaultAgency);
 	}
@@ -237,32 +244,62 @@ public class HibernateGtfsRelationalDaoImplExt extends
 	    return response;
 	  }
 	
-	public List<Stop> getStopsForTripTract(AgencyAndId trip, String tract) {	  
+	public List<StopExt> getStopsForTripTract(AgencyAndId trip, String tract) {	  
 		  String[] names = {"agency", "trip", "tract"};
 		  Object[] values = {trip.getAgencyId(), trip.getId(), tract};
 		  return _ops.findByNamedQueryAndNamedParams("stopsForTripTract", names,
 			        values);
 	  }
 	  
-	  public List<Stop> getStopsForTripPlace(AgencyAndId trip, String place) {	  
+	  public List<StopExt> getStopsForTripPlace(AgencyAndId trip, String place) {	  
 		  String[] names = {"agency", "trip", "place"};
 		  Object[] values = {trip.getAgencyId(), trip.getId(), place};
 		  return _ops.findByNamedQueryAndNamedParams("stopsForTripPlace", names,
 			        values);
 	  }
 	  
-	  public List<Stop> getStopsForTripUrbans(AgencyAndId trip, List<String> urbans) {	  
+	  public List<StopExt> getStopsForTripUrbans(AgencyAndId trip, List<String> urbans) {	  
 		  String[] names = {"agency", "trip", "urbans"};
 		  Object[] values = {trip.getAgencyId(), trip.getId(), urbans};
 		  return _ops.findByNamedQueryAndNamedParams("stopsForTripUrbans", names,
 			        values);
 	  }
 	  
-	  public List<Stop> getStopsForTripCounty(AgencyAndId trip, String county) {	  
+	  public List<StopExt> getStopsForTripCounty(AgencyAndId trip, String county) {	  
 		  String[] names = {"agency", "trip", "county"};
 		  Object[] values = {trip.getAgencyId(), trip.getId(), county};
 		  return _ops.findByNamedQueryAndNamedParams("stopsForTripCounty", names,
 			        values);
+	  }
+	  
+	  
+	  
+	  public AgencyExt getAgencyForIdExt(String id) {
+		  return (AgencyExt) _ops.get(AgencyExt.class, id);
+	  }
+		
+	  public TripExt getTripForIdExt(AgencyAndId id) {
+		  return (TripExt) _ops.get(TripExt.class, id);
+	  }
+		
+	  public RouteExt getRouteForIdExt(AgencyAndId id) {
+		  return (RouteExt) _ops.get(RouteExt.class, id);
+	  }
+		
+	  public StopExt getStopForIdExt(AgencyAndId id) {
+		  return (StopExt) _ops.get(StopExt.class, id);
+	  }
+	
+	  public Collection<FeedInfoExt> getAllFeedInfosExt() {
+		  return _ops.find("FROM FeedInfo");
+	  }
+	
+	  public Collection<RouteExt> getAllRoutesExt() {
+		  return _ops.find("FROM Route route");
+	  }
+	
+	  public Collection<TripExt> getAllTripsExt() {
+		  return _ops.find("FROM Trip ORDER BY id.agencyId");
 	  }
 	  
 }

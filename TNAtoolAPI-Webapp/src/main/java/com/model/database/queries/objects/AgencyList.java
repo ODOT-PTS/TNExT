@@ -19,12 +19,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.onebusaway.gtfs.model.Agency;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
 
 @XmlRootElement(name = "AgencyList")
 public class AgencyList {
 
     @XmlJavaTypeAdapter(value = AgencyAdapter.class)
     @XmlElement(name = "Agency")
-    public Collection<Agency> agencies;
+    public Collection<AgencyExt> agencies;
 }
