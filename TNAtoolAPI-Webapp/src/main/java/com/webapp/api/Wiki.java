@@ -13,9 +13,10 @@ public class Wiki extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("/resources/wiki/index.html").forward(request, response);
-		
+		request.getRequestDispatcher("/resources/wiki/index.html").forward(
+				request, response);
+
 	}
-	
+
 	// POST
 }
