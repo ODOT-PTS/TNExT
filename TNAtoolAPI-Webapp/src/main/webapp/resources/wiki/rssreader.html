@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RSS Reader</title>    
+    <script src="scripts/jquery.js" type="text/javascript"></script> 	
+	<link href="scripts/jquery.zrssfeed.css" rel="stylesheet" type="text/css" />
+	<script src="scripts/jquery.zrssfeed.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+	$(document).ready(function () {
+	$('#test').rssfeed('https://github.com/tnatool/TNAST/commits/master.atom');
+	});
+</script>
+</head>
+<body>    
+    <div id="test"></div>    
+</body>
+</html>
