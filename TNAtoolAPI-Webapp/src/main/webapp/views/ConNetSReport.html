@@ -1,0 +1,155 @@
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Connected Networks Summary Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+<script type="text/javascript">
+var netNames = new Array();
+var minDistances = new Array();
+maxRadius = 1; // maximum search radius in miles.
+
+html = '<table id="RT" class="display" align="center">';
+tmp = '<tr><th class="metric" title="Transit network cluster ID." id="aid">Cluster ID</th>'+
+'<th class="metric" title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster.">Network Cluster Size<span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list.">Connected Agency IDs<span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list.">Connected Agency Names<span class="IOSym">(1)</span></th></tr>';
+
+html += '<thead>'+tmp+'</thead><tbody>';
+
+$(document).ready(function(){
+	loadDBList();
+	updateToolTips();
+	progressBar();
+	$('#Sradius').val(gap);
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		async: true,
+		success: function(d){			
+			$('h2').append('Connected Transit Networks Summary Report <br><hr>');
+			$.each(d.ClusterR, function(i,item){
+				html += '<tr><td>' + item.id+'</td><td>' +item.size+'</td><td>';
+				var names = '<td>';
+				var aidlist = item.ids.split(';');
+				var anamelist = item.names.split(';');
+				for (i=0; i<aidlist.length; i++){
+					html+= '<a href="#" type="XR" id="'+aidlist[i]+'">'+ aidlist[i]+'</a>';
+					names +='<a href="#" type="XR" id="'+aidlist[i]+'">'+ anamelist[i]+'</a>';
+					if (i<aidlist.length-1){
+						html+="; ";
+						names+="; ";
+					}
+				}
+				html+= '</td>'+names+'</td><td>'+d.metadata+'</td></tr>';			
+			});		
+			$('#displayReport').append($(html));
+			progressbar.remove();			
+			$('a').click(function(e){
+				if($(this).attr('type')=="XR"){
+		    		qstring = $(this).attr('id');			    		
+		    		window.open('/views/ConAgenXReport.html?&x='+gap+'&agency='+qstring+'&dbindex='+dbindex);
+				}				
+			});
+			
+			tableProperties.hiddenCols = [4];
+			tableProperties.unsortableCols = [2, 3];
+			tableProperties.colsToExport = [0, 1, 2, 3, 4];
+			table = buildDatatables();
+			
+		    $('#RT tbody').on('click', 'td.details-control', function () {
+		        var tr = $(this).parents('tr');
+		        var row = table.row( tr );
+		        var pos = row.index();
+		        if ( row.child.isShown() ) {
+		            row.child.hide("slow");
+		            tr.removeClass('shown');
+		        }
+		        else {
+		            row.child(format(pos)).show();
+		            tr.addClass('shown');
+		        }
+		    } );
+		    
+		    function format ( p ) {
+		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+		            '<tr>'+
+		                '<td>Connected Agency Names: </td>'+
+		                '<td>'+netNames[p]+'</td>'+
+		            '</tr>'+
+		            '<tr>'+
+		                '<td>Connected Agency Min Spatial Gaps (ft.): </td>'+
+		                '<td>'+minDistances[p]+'</td>'+
+		            '</tr>'+		            
+		        '</table>';
+		    }
+		    $('#RT_wrapper').css("width", $('#RT').css("width"));
+		    $('#RT_wrapper').css("margin", "auto");
+			$("#RT_length").remove();
+		    $("#RT_filter").insertBefore("#RT_info");
+		    $( ".dataTables_filter" ).css( "float", "left");
+		    $( ".dataTables_filter" ).before( "<br>" );
+    }});	
+});
+
+</script>
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	Maximum Spatial Gap (miles) <span class="IOSym">(1) </span><input type="text" name="gap" data-iomap="1" data-label="Maximum Spatial Gap (miles)" id="Sradius" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+</html>

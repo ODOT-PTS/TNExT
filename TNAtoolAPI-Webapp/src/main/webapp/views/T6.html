@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Title VI Report</title>
+	
+		<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://static.jstree.com/3.3.0/assets/dist/jstree.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	<script src="../resources/js/T6Methods.js"></script>
+	<script src="../resources/data/EmpJstree.js"></script>
+	<script src="../resources/js/slidebars.min.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/slidebars.min.css" />
+	
+	<script>
+
+	var dateIOnumber = 3;
+	var t6 = {};
+	var w_qstringx = $('#Sradius').val();
+	if (w_qstringx == null) {w_qstringx = 0.25};
+	var mySlidebar;
+	w_qstringd = getDates(keyName);
+	
+	(function($) {
+	    $(document).ready(function() {
+	    	$('.sb-slidebar').css('width', '28%');
+	    	loadDBList();
+	    	updateToolTips();
+	    	go(key);
+	    	
+	    	$('.ui-accordion-content').css('padding', '0px 0px');
+	    	$('#ui-accordion-accordion-header-0').css({'width':'80%','font-size':'80%','margin':'auto','text-align':'center'});
+	    	$('.ui-widget').css('font-size', '100%');
+	    	$('.ui-datepicker-inline').css('margin','auto');
+	    	
+	    	$('#dialogPreLoader').hide();
+	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Title VI Report');
+	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
+	    	mySlidebar.slidebars.open('left'); // Open the Slidebar
+	    });
+	  }) (jQuery);
+	
+	$(function () {
+		$('#jstree').jstree({	
+			"core":{
+				"check_callback" : true,
+				"themes" : { "stripes" : true },
+				"data" : [
+					{"text" : "Poverty", "type" : "poverty_default", "id" : "poverty", "state" : {"opened" : true},
+						"children" : [
+									{"text" : "Below Poverty Line", "type" : "poverty", "id" : "below_poverty"},
+									{"text" : "Above Poverty Line", "type" : "poverty", "id" : "above_poverty"}
+						              ]
+					},
+					{"text" : "Disability", "type" : "disability_default", "id" : "disability", "state" : {"opened" : true},
+						"children" : [
+									{"text" : "With Disability", "type" : "disability", "id" : "with_disability"},
+									{"text" : "Without Disability", "type" : "disability", "id" : "without_disability"}
+						              ]
+					},
+					{"text" : "Age", "type" : "age_default", "id" : "age", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "5 to 17 years", "type" : "age", "id" : "from5to17"},
+										{"text" : "18 to 64 years", "type" : "age", "id" : "from18to64"},
+										{"text" : "65 and older", "type" : "age", "id" : "above65"}
+							              ]            	  
+					},
+					{"text" : "Language", "type" : "language_default", "id" : "Language", "state" : {"opened" : true},
+						"children" : [
+										{"text" : "English", "type" : "language", "id" : "english"},
+										{"text" : "Spanish", "type" : "language", "id" : "spanish"},
+										{"text" : "Indo European", "type" : "language", "id" : "indo_european"},
+										{"text" : "Asian & Pacific Islander", "type" : "language", "id" : "asian_and_pacific_island"},
+										{"text" : "Other Languages", "type" : "language", "id" : "other_languages"}
+							              ]            	  
+					},
+					{"text" : "Ethnicity", "type" : "ehtnicity_default", "id" : "ethnicity",  "state" : {"opened" : true},
+						"children" : [
+										{"text" : "Black or African American", "type" : "ethnicity", "id" : "black_or_african_american"},
+										{"text" : "American Indian or Alaska Native", "type" : "ethnicity", "id" : "american_indian_and_alaska_native"},
+										{"text" : "Asian", "type" : "ethnicity", "id" : "asian"},
+										{"text" : "Native Hawaiian and Other Pacific Islander", "type" : "ethnicity", "id" : "native_hawaiian_and_other_pacific_islander"},
+										{"text" : "Other Races", "type" : "ethnicity", "id" : "other_races"},
+										{"text" : "Two or More Races", "type" : "ethnicity", "id" : "two_or_more"},
+										{"text" : "White", "type" : "ethnicity", "id" : "white"},
+										{"text" : "Hispanic or Latino", "type" : "ethnicity", "id" : "hispanic_or_latino"}
+					]}
+			]},
+			"types" : {
+				"poverty_default" : {
+					"icon" : "../resources/images/folder_closed-go.ico",
+					"valid_children" : ["poverty", "poverty_default"]					
+				},
+				"poverty" : {
+					"icon" : "../resources/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"disability_default" : {
+					"icon" : "../resources/images/folder_closed-go.ico",
+					"valid_children" : ["disability", "disability_default"]					
+				},
+				"disability" : {
+					"icon" : "../resources/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"age_default" : {
+					"icon" : "../resources/images/folder_closed-go.ico",
+					"valid_children" : ["age", "age_default"]					
+				},
+				"age" : {
+					"icon" : "../resources/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"language_default" : {
+					"icon" : "../resources/images/folder_closed-go.ico",
+					"valid_children" : ["language", "language_default"]					
+				},
+				"language" : {
+					"icon" : "../resources/images/arrow-right.ico",
+					"valid_children" : []
+				},
+				"ehtnicity_default" : {
+					"icon" : "../resources/images/folder_closed-go.ico",
+					"valid_children" : ["ethnicity", "ehtnicity_default"]					
+				},
+				"ethnicity" : {
+					"icon" : "../resources/images/arrow-right.ico",
+					"valid_children" : []
+				}	
+			},
+			"contextmenu":{         
+				"items": function($node) {
+					var tree = $("#jstree").jstree(true);
+					if (tree.get_type($node).indexOf('default') > -1 && tree.get_parent($node) == '#'){
+						return {
+							"Add group":{
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Add group",
+								"icon" : "../resources/images/folder_closed-add.ico",
+								"action": function (obj){
+									var nodesList = [];
+									$('.jstree-node').each(function(){
+									  if (tree.get_type($(this)) == tree.get_type($node)){
+										  var id   = $(this).attr('id');
+										  var text = $(this).children('a').text();
+										  nodesList.push(text);
+										 }
+									});
+
+									var counter = 1;
+									var newName = "Aggregated " + tree.get_text($node) + " " + counter;
+									
+									if ($.inArray(newName, nodesList) < 0){
+										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate", "state" : {"opened" : true} },'first',null,null);
+									}else{			
+										while ($.inArray(newName, nodesList) >= 0) {
+											newName = "Aggregated " + tree.get_text($node) + " " + counter++;
+										}
+										tree.create_node($($node).attr('id'),{ "text" : tree.get_string(newName), "type" : tree.get_type($node), "id":  tree.get_string(newName) + "_aggregate",  "state" : {"opened" : true} },'first',null,null);
+									}
+									tree.deselect_node($node);
+								}
+							},
+							"Rename": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Rename",
+								"icon" : "../resources/images/Rename.ico",
+								"action": function (obj) { 
+									tree.edit($node);
+								}
+							}
+						};	
+					}else if (tree.get_type($node).indexOf('default') > -1 && tree.get_parent($node) != '#'){
+						return {
+							"Rename": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Rename",
+								"icon" : "../resources/images/Rename.ico",
+								"action": function (obj) { 
+									tree.edit($node);
+								}
+							},                         
+							"Remove": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Remove",
+								"icon" : "../resources/images/folder_open-delete.ico",
+								"action": function (obj) { 
+									var children = tree.get_children_dom($node);
+									$.each(children, function(ind,obj){
+										tree.move_node($(this).attr('id'), tree.get_type($(this)));
+									});
+									tree.delete_node($node);
+								}
+							}
+						};	
+					}else{
+						return {
+							"Rename": {
+								"separator_before": false,
+								"separator_after": false,
+								"label": "Rename",
+								"icon" : "../resources/images/Rename.ico",
+								"action": function (obj) { 
+									tree.edit($node);
+								}
+							}
+						};	
+					}					
+				}
+			},
+			"plugins" : [
+						"dnd",
+						"contextmenu",
+						"sort",
+						"types",
+						"unique",
+						"checkbox"
+						]
+		});
+		
+		$(document).on("dnd_stop.vakata", function (e, data) {
+			$('#jstree').jstree(true).deselect_all();
+		});
+	});
+</script>
+</head>
+
+<body>
+<div id="sb-site">	
+	 <div class="container">
+		<div class="headerL" style="width:50%">
+			<div class="sb-toggle-left navbar-left" style="float:left">
+				<div class="navicon-line" style="background-color: #FF7373"></div>
+				<div class="navicon-line" style="background-color: #87F786"></div>
+				<div class="navicon-line" style="background-color: #FFFF00"></div>
+			</div>
+			<h1 >Transit Network Analysis Tool Reports</h1>
+		</div>	
+			
+		<div class="headerR">
+			<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+			<input type="button" style="margin-right:10px; height:81%" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
+		</div>
+	</div>
+	<div class="headerBL" style=" height:25px" >
+		<h2 id='h2' style="margin-top:10px; margin-bottom:0px; text-indent: 45px"></h2>
+		
+	</div>
+	<br>	
+	 <div style="width:100%; height: 93.7vh; overflow:auto; float:left; border-style:groove; border-width:5px; backgroun-color: #E8E8E8">
+		<p id="initialText" style="text-align: center; margin-top:150px; line-height: 70vh;" > <b>Choose categories and click "Generate Report".</b></p>
+		
+		<p id="displayReport" style="margin:5px; "><br></p>
+		<br>
+		<br>
+		<img id="dialogPreLoader" src="../resources/images/287.GIF" alt="Page Loading" style="width:100px; height:100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
+		<p id="bePatient" style="text-align: center; margin-top:150px; line-height: 70vh;"><b>This might take a few minutes.</b></p>
+	</div>
+</div> 
+	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
+		<button type="button" class="Button" onclick="openReport();" style="width:53%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
+		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
+		<br>
+		<br>
+		<div>
+			<div class="headerBC" id="accordion" >
+				<h3></h3>
+				<div>
+					<table style="width:100%;">
+						<tr>
+							<td style="vertical-align:top;padding-top:15px">
+								<div id="datepicker" ></div>
+							</td>
+						</tr>
+						<tr>
+							<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+								<ul data-role="listview">
+						
+								</ul>
+							</td>
+						</tr>
+					</table>
+					
+				</div>
+			</div>
+			<table style="width:100%">		
+			<tr><td><label for="reportType">Select report type:</label></td><td><select name="reportType" id="reportType" class="input" data-label="Report Type" style="height:25px;width:98%;" onchange="selectFunction()">
+						  <option value="Counties" selected>Counties</option>
+						  <option value="Census Places">Census Places</option>
+						  <option value="Congressional Districts">Congressional Districts</option>
+						  <option value="Urban Areas">Urban Areas</option>
+						  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
+						  <option value="Agencies">Agencies</option>
+					 </select><br></td></tr>
+			<tr><td>Population Search Radius (miles)<span class="IOSym">(1) </span></td><td><input type="text" name="Sradius" id="Sradius" class="input radius" data-iomap="1" data-label="Population Search Radius (miles)" style="text-indent: 2px; height:21px;width:95%;" value="0.25" onkeypress="return isNumber(event)"/></td></tr>
+			
+			<tr><td>Minimum Level of Service<span class="IOSym">(2) </span></td><td><input type="text" name="LOS" id="LOS" class="input" data-iomap="2" data-label="Minimum Level of Service" style="text-indent: 2px; height:22px; width:95%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			</table>
+			<input type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
+		</div>
+		<div id="jstree" class="demo" style="width:98%"></div>
+		<br>
+	</div>
+</body>

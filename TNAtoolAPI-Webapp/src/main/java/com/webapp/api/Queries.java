@@ -346,13 +346,14 @@ public class Queries {
     * a given radius of a park&ride lot.
     * 
     * @return MapPnrRecord
+    * @throws SQLException 
     */
    @GET
    @Path("/pnrstopsroutes")
    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
    public Object getPnrStopsRoutes(@QueryParam("pnrId") String pnrId, @QueryParam("pnrCountyId") String pnrCountyId,
 		   @QueryParam("lat") Double lat, @QueryParam("lng") Double lng, @QueryParam ("radius") Double radius,
-		   @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
+		   @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
 	   
 	   MapPnrRecord response = new MapPnrRecord();
 	   response.id = pnrId;
@@ -387,8 +388,8 @@ public class Queries {
 				mapPnrRoute.AgencyId = _r.getId().getAgencyId();
 				mapPnrRoute.Id=_r.getId().getId();
 				mapPnrRoute.Name=_r.getLongName();
-				List<TripExt> ts = null;/*GtfsHibernateReaderExampleMain.QueryTripsbyRoute(_r, dbindex);*///to be fixed
-//				mapPnrRoute.Shape=ts.get(0).getEpshape();//to be fixed
+				List<TripExt> ts = SpatialEventManager.QueryTripsbyRoute(_r.getId().getAgencyId(), _r.getId().getId(), dbindex);
+				mapPnrRoute.Shape = ts.get(0).getEpshape();
 				response.MapPnrRL.add(mapPnrRoute);
 			}
 		} catch (FactoryException e) {
@@ -414,7 +415,6 @@ public class Queries {
         }
     	String[] fulldates = null;
        	String[] days = null; 
-//       	username = "admin";
     	if (date!=null && !date.equals("") && !date.equals("null")){
     		String[] dates = date.split(",");
            	String[][] datedays = daysOfWeekString(dates);
@@ -482,15 +482,15 @@ public class Queries {
     	agencyandtrip.setId(trip);
     	TripExt tp = GtfsHibernateReaderExampleMain.getTrip(agencyandtrip, dbindex);    	
     	Rshape shape = new Rshape();
-//    	shape.points = tp.getEpshape();//to be fixed
-//    	shape.length = tp.getLength(); //to be fixed 
+    	shape.points = tp.getEpshape();//to be fixed
+    	shape.length = tp.getLength(); //to be fixed 
     	shape.agency = agency;
     	if(tp.getTripHeadsign()==null){
     		shape.headSign = "N/A";
     	}else{
     		shape.headSign = tp.getTripHeadsign();
     	}
-//    	shape.estlength = tp.getEstlength();//to be fixed
+    	shape.estlength = tp.getEstlength();//to be fixed
     	AgencyExt agencyObject = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex);
     	shape.agencyName = agencyObject.getName();
 		return shape;
@@ -545,6 +545,7 @@ public class Queries {
     public void setprogVal(double key, int val){
     	progVal.put(key, val);
     }
+    
     public int getprogVal(double key){
     	if(progVal.get(key)==null){
     		return 0;
@@ -965,11 +966,12 @@ public class Queries {
 	
 	/**
      * Generates The Route Schedule/Fare report
+	 * @throws SQLException 
      */
-    /*@GET
+    @GET
     @Path("/ScheduleR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getSchedule(@QueryParam("agency") String agency, @QueryParam("route") String routeid, @QueryParam("day") String date, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
+    public Object getSchedule(@QueryParam("agency") String agency, @QueryParam("route") String routeid, @QueryParam("day") String date, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException, SQLException {
     	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
         	dbindex = default_dbindex;
         }
@@ -989,7 +991,7 @@ public class Queries {
     	}else{
     		response.Fare = fareRules.get(0).getFare().getPrice()+"";
     	}
-    	List <TripExt> routeTrips = GtfsHibernateReaderExampleMain.QueryTripsbyRoute(route, dbindex);
+    	List <TripExt> routeTrips = SpatialEventManager.QueryTripsbyRoute(route.getId().getAgencyId(), route.getId().getId(), dbindex);
     	int totalLoad = routeTrips.size();    	
     	response.directions[0]= new Schedule();
     	response.directions[1]= new Schedule();
@@ -1074,10 +1076,10 @@ Loop:  	for (TripExt trip: routeTrips){
 				}
 			}
 			if(isIn){				
-	    		AgencyAndId agencyandtrip = trip.getId();
-	    		List <StopTime> stopTimes = GtfsHibernateReaderExampleMain.Querystoptimebytrip(agencyandtrip, dbindex);
+	    		AgencyAndId agencyAndTrip = trip.getId();
+	    		List <StopTimeExt> stopTimes = SpatialEventManager.Querystoptimebytrip(agencyAndTrip.getAgencyId(), agencyAndTrip.getId(), dbindex); // to be fixed
 	    		TripSchedule ts = new TripSchedule();
-	    		for (StopTime st: stopTimes){
+	    		for (StopTimeExt st: stopTimes){
 	    			if(st.isArrivalTimeSet()){
 	    				stoptime = new Stoptime();
 	    				stoptime.StopTime = strArrivalTime(st.getArrivalTime());
@@ -1114,7 +1116,7 @@ Loop:  	for (TripExt trip: routeTrips){
 	    
     	progVal.remove(key);
         return response;
-    }*/
+    }
     
     public String strArrivalTime(int arrivalTime){
     	int hour = arrivalTime/3600;
@@ -1686,7 +1688,6 @@ Loop:  	for (TripExt trip: routeTrips){
 		response = PgisEventManager.getAgenStops(agencyId, dbindex);
 		return response;		
     }
-    
     
 	/**
 	 * Generates The urban areas Summary report

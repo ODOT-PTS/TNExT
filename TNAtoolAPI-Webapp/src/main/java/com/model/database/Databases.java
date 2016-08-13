@@ -17,7 +17,7 @@ public class Databases {
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(
-					"C:/Users/Administrator/git/TNAST_MAVEN/TNAtoolAPI-Webapp/src/main/webapp/resources/admin/dbInfo.csv"));
+					"C:/Users/PB/git/TNAST_MAVEN/TNAtoolAPI-Webapp/src/main/webapp/resources/admin/dbInfo.csv"));
 			String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
 			String line = reader.readLine();

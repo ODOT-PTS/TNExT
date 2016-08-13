@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Employment Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://static.jstree.com/3.3.0/assets/dist/jstree.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	<script src="../resources/js/EmpMethods.js"></script>
+	<script src="../resources/data/EmpJstree.js"></script>
+	<script src="../resources/js/slidebars.min.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/slidebars.min.css" />
+	
+	<script>
+	
+	var dateIOnumber = 3; // the number is used to map selected date(s) to the metrics affected by the date(s).
+	var w_qstringd = getDates(keyName);
+	w_qstringx = $('#Sradius').val();
+	if (w_qstringx == null) {w_qstringx = 0.25};
+	var mySlidebar;
+	var wacBool = true;
+	var racBool = false;	
+	var wacData = {};
+	var racData = {};
+	var html = "";
+	var tmp = "";
+	var showPrompt = true; // determines whether to show the meta data prompt box.
+	
+	$(function() {
+	    $( "#dialog-confirm" ).dialog({
+	      resizable: false,
+	      height: 240,
+	      width: 600,
+	      modal: true,
+	      autoOpen: false,
+	      buttons: {
+	        "Proceed": function() {
+	          $( this ).dialog( "close" );
+	          if($('#showMSG').prop('checked')){
+	        	  showPrompt = false;
+	          }
+	        },
+	        /* "No": function() {
+	          $( this ).dialog( "close" );
+	          showPrompt = false;
+	        } */
+	      }
+	    });
+	    $( "#dialog-confirm" ).dialog("close");
+	  });
+	
+	(function($) {
+	    $(document).ready(function() {	    	
+	    	$('.sb-slidebar').css('width', '35%');
+	    	loadDBList();
+	    	updateToolTips();
+	    	go(key);
+	    	$('.selectedDate').css("text-align", "center");
+	    	$('.ui-accordion-content').css('padding', '0px 0px');
+	    	$('.ui-accordion-header').css({'width':'90%','font-size':'80%','margin':'auto','text-align':'center'});
+	    	$('.ui-widget').css('font-size', '100%');
+	    	$('.ui-datepicker-inline').css('margin','auto');
+	    	$('#bePatient').hide();
+	    	$('#dialogPreLoader').hide();
+	    	$('h2').append('<span id="reportTitle">'+$('#reportType').val()+'</span>' + ' Employment Report <span style="font-size:small;margin-left:1em">(For description of employment categories click <a href="http://lehd.ces.census.gov/data/lodes/LODES7/LODESTechDoc7.0.pdf">here</a></span>.)');
+	    	mySlidebar = new $.slidebars(); // Define your own instance of Slidebars
+	    	mySlidebar.slidebars.open('left'); // Open the Slidebar	    	    	
+	    });
+	  }) (jQuery);
+	
+	$(function () {
+		$('#jstree').jstree(default_jstree);
+		bindEvents();		
+	});	
+	</script>
+</head>
+
+<body>
+<div id="sb-site">	
+	 <div class="container">
+		<div class="headerL" style="width:50%">
+			<div class="sb-toggle-left navbar-left" style="float:left">
+				<div class="navicon-line" style="background-color: #FF7373"></div>
+				<div class="navicon-line" style="background-color: #87F786"></div>
+				<div class="navicon-line" style="background-color: #FFFF00"></div>
+			</div>
+			<h1 >Transit Network Analysis Tool Reports</h1>
+		</div>	
+			
+		<div class="headerR">
+			<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+			<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
+			
+		</div>
+	</div>
+	<div class="headerBL" style=" height:25px" >
+		<h2 id='h2' style="margin-top:10px; margin-bottom:0px; text-indent: 45px"></h2>
+		
+	</div>
+	<br>	
+	 <div style="width:99%; height: 91.5vh; overflow:auto; float:left; border-style:groove; border-width:5px; backgroun-color: #E8E8E8">
+		<p id="initialText" style="text-align: center; margin-top:150px; line-height: 70vh;" > <b>Choose categories and click "Generate Report".</b></p>
+		
+		<p id="displayReport" style="margin:5px; "><br></p>
+		<br>
+		<br>
+		<div id="dialogPreLoader"><img src="../resources/images/287.GIF" alt="Page Loading" style="width:90px; height:90px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;" >
+			<br><p style="text-align: center; margin-top:80px; line-height: 70vh;"><b>This might take a few minutes.</b></p>
+		</div>
+	</div>
+</div>
+	<div id="slidebar" class="sb-slidebar sb-left" data-sb-width="25%" style="height:100vh; overflow:auto; border-style:groove; background-color:white; border-width:5px;">
+		<button type="button" class="Button" onclick="openReport();" style="width:53%; height:30px;  background-color: #87F786; border-color:#4F964F; border-radius: 6px;"><i class="glyphicon glyphicon-asterisk"></i>Generate Report</button>
+		<button type="button" class="Button" onclick="clearReport();" style="; width:45%; height:30px; border-radius: 6px; background-color: #FF7373; border-color:#FB0303;"><i class="glyphicon glyphicon-asterisk"></i>Clear Report</button>
+		<br>
+		<br>
+		<div>
+			<div class="headerBC" id="accordion" style="margin-bottom:1em">
+				<h3></h3>
+				<div>
+					<table style="width:100%;">
+						<tr>
+							<td style="vertical-align:top;padding-top:15px">
+								<div id="datepicker" ></div>
+							</td>
+						</tr>
+						<tr>
+							<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+								<ul data-role="listview">
+						
+								</ul>
+							</td>
+						</tr>
+					</table>
+					
+				</div>
+			</div>
+			<table style="width:100%">
+			<tr><td><label for="dataSet">Data Set</label></td><td><select name="dataSet" id="dataSet" data-label="Dataset" class="input" onchange=datasetChange(this) style="height:25px;width:95%;">
+					  <option value="lodes_blocks_wac" selected>WAC - Workplace Area Characteristic</option>
+					  <option value="lodes_blocks_rac">RAC - Residence Area Characteristic</option>
+					  <option value="3">WAC &amp; RAC</option>
+				 </select><br></td></tr>
+			 <tr><td><label for="reportType">Report type </label></td><td><select name="reportType" id="reportType" class="input" data-label="Report Type" style="height:25px;width:65%;" onchange="selectFunction()">
+				  <option value="Counties" selected>Counties</option>
+				  <option value="Census Places">Census Places</option>
+				  <option value="Congressional Districts">Congressional Districts</option>
+				  <option value="Urban Areas">Urban Areas</option>
+				  <option value="ODOT Transit Regions">ODOT Transit Regions</option>
+				  <option value="Agencies">Agencies</option>
+			 </select><br></td></tr>
+			 <tr><td><label for="projectionYear">Year </label></td><td><select name="projectionYear" id="projectionYear" class="input" data-label="Selected Year" style="height:25px;width:65%;" onchange="updateProjection()">
+				  <option value="current" selected>2013</option>
+				  <option value="2015">2015 (Projection)</option>
+				  <option value="2020">2020 (Projection)</option>
+				  <option value="2025">2025 (Projection)</option>
+				  <option value="2030">2030 (Projection)</option>
+				  <option value="2035">2035 (Projection)</option>
+				  <option value="2040">2040 (Projection)</option>
+				  <option value="2045">2045 (Projection)</option>
+				  <option value="2050">2050 (Projection)</option>
+			 </select><br></td></tr>
+			<tr><td>Employment Search Radius <span class="IOSym">(1) </span></td><td><input type="text" name="Sradius" class="input radius" id="Sradius" data-iomap="1" data-label="Employment Search Radius" style="text-indent: 2px; height:21px;width:49%;" value="0.25" onkeypress="return isNumber(event)"/><span style="margin-left:4px">miles</span></td></tr>
+			<tr><td>Minimum Level of Service  <span class="IOSym">(2) </span></td><td><input type="text" name="LOS" id="LOS" class="input" data-iomap="2" data-label="Minimum Level of Service" style="text-indent: 2px; height:21px; width:49%;" value="2" onkeypress="return isWholeNumber(event)"/></td></tr>
+			</table>
+			<input id="checkbox" type="checkbox" name="selecteAll" onchange="toggleCheckbox(this)" ><b>Select All</b><br>
+		</div>
+		<div id="jstree" class="demo" style="width:98%"></div>
+		<br>
+	</div>
+	
+	<div id="dialog-confirm" style="text-align: justify;" title="Disclaimer">
+	  <div id="promptText"><!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 45px 0;"></span> -->
+		  The future employment figures provided by the selected report were estimated using a linear projection
+		  that used county-level employment of 2010 and county-level employment estimates for the years 2015 and 2025 as a basis.
+		  <br><br><input type="checkbox" id="showMSG">Do not show this message again
+	  </div>
+	</div>
+		
+</body>
+</html>

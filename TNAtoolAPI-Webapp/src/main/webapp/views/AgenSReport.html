@@ -1,0 +1,258 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Agency Summary Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+<script type="text/javascript">
+
+var counties = new Array();
+var cplaces = new Array();
+var uareas = new Array();
+var cdistricts = new Array();
+var ODOTregions = new Array();
+var fURL = new Array();
+var fAverage = new Array();
+var fMedian = new Array();
+var fMin = new Array();
+var fMax = new Array();
+var feedName = new Array();
+var feedVersion = new Array();
+var feedPubName = new Array();
+var feedPubUrl = new Array();
+var agencyIds = new Array();
+
+html = '<table id="RT" class="display" align="center">';
+tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+'<th class="metric" title="Phone number to contact the transit agency.">Phone #</th>'+
+'<th class="metric" title="Total number of routes operated by the transit agency.">Total Routes</th>'+
+'<th class="metric" title="Total number of stops operated by the transit agency.">Total Stops</th>'+
+'<th class="metric" title="Count of geographic areas that the transit agency operates within.">Geographic Areas</th>'+
+'<th class="metric" title="Count of counties that the transit agency operates within.">Total Counties</th>'+
+'<th class="metric" title="Count of census places that the transit agency operates within.">Total Census Places</th>'+
+'<th class="metric" title="Count of urban areas that the transit agency operates within.">Total Urban Areas</th>'+
+'<th class="metric" title="Count of congressional districts that the transit agency operates within.">Total Congressional Districts</th>'+
+'<th class="metric" title="Count of ODOT transit regions that the transit agency operates within.">Total ODOT Transit Regions</th>'+
+'<th class="metric" title="If available, this field points to the fare information published by the transit agency on its web site.">Fare</th>'+
+'<th class="metric" title="If available, this field points to the minimum fare price published by the transit agency on its web site.">Minimum Fare</th>'+
+'<th class="metric" title="If available, this field points to the average fare price published by the transit agency on its web site.">Average Fare</th>'+
+'<th class="metric" title="If available, this field points to the median fare price published by the transit agency on its web site.">Median Fare</th>'+
+'<th class="metric" title="If available, this field points to the maximum fare price published by the transit agency on its web site.">Maximum Fare</th>'+
+'<th class="metric" title="If available, this field points to the URL where fare information is published by the transit agency.">Fare URL</th>'+
+'<th class="metric" title="The earliest service date specified in the transit agency feed in YYYYMMDD format.">Service Start Date</th>'+
+'<th class="metric" title="The latest service date specified in the transit agency feed in YYYYMMDD format.">Service End Date</th>'+
+'<th class="metric" title="If available, this field points to the feed information such as name, version, publisher name and publisher URL.">Feed Information</th>'+
+'<th class="metric" title="Name of the GTFS feed file.">Feed Name</th>'+
+'<th class="metric" title="Version of the GTFS feed file.">Feed Version</th>'+
+'<th class="metric" title="Name of the GTFS feed file publisher.">Feed Publisher Name</th>'+
+'<th class="metric" title="URL of the GTFS feed file publisher.">Feed Publisher URL</th>';	
+html += '<thead>'+tmp+'</thead><tbody>';
+
+$(document).ready(function(){
+	loadDBList();
+	updateToolTips();
+	progressBar();
+
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
+		async: true,
+		success: function(d){			
+			$('h2').append('Transit Agency Summary Report <br><hr>');			
+			$.each(d.agencySR, function(i,item){
+				docMetadata = d.metadata;
+				agencytxt = "null";
+				if (item.AgencyId != ''){
+					agencytxt = item.AgencyId;
+				}		
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
+				+ item.URL + '" target="_blank">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
+				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
+				+'</a></td><td class="details-control" type="GA"></td><td>'+item.CountiesCount+'</td><td>'+item.PlacesCount+'</td><td>'+item.UrbansCount+'</td><td>'+item.CongDistsCount
+				+'</td><td>'+item.OdotRegionsCount+'</a></td><td class="details-control" type="FA"></td><td>'+showDollarSign(item.MinFare)+'</td><td>'+showDollarSign(item.AverageFare)+'</td><td>'+showDollarSign(item.MedianFare)
+				+'</td><td>'+showDollarSign(item.MaxFare)+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'
+				+item.FeedName+'</td><td>'+item.FeedVersion+'</td><td>'+item.FeedPublisherName+'</td><td>'+item.FeedPublisherUrl+'</td></tr>';
+				counties.push(item.CountiesCount);
+				cplaces.push(item.PlacesCount);
+				uareas.push(item.UrbansCount);
+				cdistricts.push(item.CongDistsCount);				
+				ODOTregions.push(item.OdotRegionsCount);
+				fAverage.push(item.AverageFare);
+				fMedian.push(item.MedianFare);
+				fMin.push(item.MinFare);
+				fMax.push(item.MaxFare);
+				agencyIds.push(item.AgencyId);
+				if (item.FareURL != null){
+					fURL.push(item.FareURL);
+				}else {					
+					fURL.push("-");
+				}
+				feedName.push(item.FeedName);
+				feedVersion.push(item.FeedVersion);
+				feedPubName.push(item.FeedPublisherName);
+				feedPubUrl.push(item.FeedPublisherUrl);
+			});		
+			html = html + '</tbody></table>'
+			$('#displayReport').append($(html));
+			progressbar.remove();			
+			function SetEvents(){
+				$('a').click(function(e){
+					var d = new Date();
+				    if ($(this).attr('type')=="RC"){
+				    	qstring = $(this).attr('id');
+				    	qstringx = '0.25';
+				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+						var keyName = setDates(qstringd);
+				    	window.open('/views/routereport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
+				    }else if($(this).attr('type')=="SC"){
+			    		qstring = $(this).attr('id');
+			    		qstringx = '0.25';
+			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');	
+						var keyName = setDates(qstringd);
+			    		window.open('/views/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+				    }else if($(this).attr('type')=="XR"){
+			    		qstring = $(this).attr('id');
+			    		qstringx = '0.25';
+			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+						var keyName = setDates(qstringd);
+			    		window.open('/views/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+				    }else if($(this).attr('type')=="CSA"){
+				    	qstring = $(this).attr('id');
+				    	window.open('/views/GeoCountiesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
+				    }else if($(this).attr('type')=="CPSA"){
+				    	qstring = $(this).attr('id');
+				    	window.open('/views/GeoPlacesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
+				    }else if($(this).attr('type')=="UASA"){
+				    	qstring = $(this).attr('id');
+				    	window.open('/views/GeoUAreasReport.html?&pop=-1&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
+				    }else if($(this).attr('type')=="CDSA"){
+				    	qstring = $(this).attr('id');
+				    	window.open('/views/GeoCongDistsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
+				    }else if($(this).attr('type')=="OTSA"){
+				    	qstring = $(this).attr('id');
+				    	window.open('/views/GeoRegionsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
+				    };
+				});
+			}
+			SetEvents();
+			
+			tableProperties.hiddenCols = [6,7,8,9,10,12,13,14,15,16,20,21,22,23];
+			tableProperties.unsortableCols = [5,11,19];
+			tableProperties.colsToExport = [0,1,2,3,4,6,7,8,9,10,12,13,14,15,16,17,18,20,21,22,23];
+			tableProperties.bSort = false;
+			table = buildDatatables();
+			
+			$('#RT tbody').on('click', 'td.details-control', function () {
+		    	var tr = $(this).parents('tr');	
+		        var row = table.row( tr );		        
+		        var ctype = '';
+		        var type = $(this).attr('type');
+		        if (row.child.isShown()) {
+		        	row.child.hide("slow");
+		            tr.removeClass('shown');
+		            ctype = row.child().attr('type');		            
+			        if (type!=ctype){
+			        	showdetails(tr,type);
+			        }
+		        } else {
+		        	showdetails(tr,type);
+		        }		        
+		    });
+		    function showdetails(tr,type){
+		    	var row = table.row( tr ); 
+		    	var p = row.index();
+		    	var html;
+		    	switch(type){		    	
+			    	case "GA":
+			    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Total Counties: </td><td><a href="#" type="CSA" id="'+agencyIds[p]
+			    		+'">'+counties[p]+'</a></td></tr>'+'<tr><td>Total Census Places: </td><td><a href="#" type="CPSA" id="'+agencyIds[p]+'">'+cplaces[p]+'</a></td></tr>'
+			    		+'<tr><td>Total Urban Areas: </td><td><a href="#" type="UASA" id="'+agencyIds[p]+'">'+uareas[p]+'</a></td></tr>'
+			    		+'<tr><td>Total Congressional Districts: </td><td><a href="#" type="CDSA" id="'+agencyIds[p]+'">'+cdistricts[p]+'</a></td></tr>'
+			    		+'<tr><td>Total ODOT Transit Regions: </td><td><a href="#" type="OTSA" id="'+agencyIds[p]+'">'+ODOTregions[p]+'</a></td></table>';
+			    	break;
+			    	case "FA":
+			    		if (fURL[p]=="-"){
+				        	html = '<td>'+fURL[p]+'</td>';
+				        }else{
+				        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
+				        }
+				    	html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Minimum Fare: </td><td>'+showDollarSign(fMin[p])+'</td></tr>'
+				    	+'<tr><td>Average Fare: </td><td>'+showDollarSign(fAverage[p])+'</td></tr>'+'<tr><td>Median Fare: </td><td>'+showDollarSign(fMedian[p])+'</td></tr>'
+				    	+'<tr><td>Maximum Fare: </td><td>'+showDollarSign(fMax[p])+'</td></tr>'+'<tr><td>Fare URL: </td>'+html+'</tr>'+'</table>';
+			    	break;
+			    	case "FE":
+			    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Feed Name: </td><td>'+feedName[p]+'</td></tr>'
+				    	+'<tr><td>Feed Version: </td><td>'+feedVersion[p]+'</td></tr>'+'<tr><td>Feed Publisher Name: </td><td>'+feedPubName[p]+'</td></tr>'
+				    	+'<tr><td>Feed Publisher URL: </td><td><a href="'+feedPubUrl[p]+'">'+feedPubUrl[p]+'</a></td>'+'</table>';
+			  		break;
+		    	}		    	
+		    row.child(html).show();
+		    row.child().attr('type',type);		    
+	        tr.addClass('shown');
+	        SetEvents();
+		    }	   
+    	}
+	});
+});
+</script>
+
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+</html>

@@ -1048,10 +1048,6 @@ map.on('click', function(){
 	}
 });
 
-/*function myFunction(){
-	alert('myFunction ran');
-}*/
-
 osmLayer.on('load', function(e) {
 	ggb = false;    
 });
@@ -1132,9 +1128,8 @@ $mylist
 	"json_data" : {
 		"ajax" : {
             "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex+'&username='+getSession(),
-            "type" : "get",	                
-            "success" : function(ops) {  
-            	
+            "type" : "get",
+            "success" : function(ops) { 
             	try {
             		$.each(ops.data, function(i,item){
                 		dialogAgencies.push(item.data);
@@ -1146,7 +1141,7 @@ $mylist
             		}
             	}
             	catch(err) {
-            		console.log("error");
+            		console.log("error in /menu ajax");
             	}
             	$("#overlay").hide();
             	return ops.data;            	
@@ -1158,7 +1153,7 @@ $mylist
 		"types" : {
 			"default": {	
 				"icon" : {
-	            	"image" : "js/lib/images/spacer.png"
+	            	"image" : "resources/images/spacer.png"
 	            	},
             	"select_node" : false,
             	"check_node" : true, 
@@ -1168,7 +1163,7 @@ $mylist
 			},
 			"disabled" : {
 				"icon" : {
-	            	"image" : "js/lib/images/loader.png"
+	            	"image" : "resources/images/loader.png"
 	            	},
 	            "check_node" : false, 
 	            "uncheck_node" : false,
@@ -1180,7 +1175,7 @@ $mylist
 	},
 	"themes": {
         "theme": "default-rtl",
-        "url": "js/lib/jstree-v.pre1.0/themes/default-rtl/style.css",
+        "url": "vendors/jstree-v.pre1.0/themes/default-rtl/style.css",
         "dots": false,
         "icons":true
     },
@@ -1191,7 +1186,6 @@ $mylist
         		"show" : {
                     "label" : "Show Route Shapes",
                     "action" : function (node) { 
-                    	//alert(node.attr("type"));
                     	zoomToRouteShapeFlag = false;
                     	if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
@@ -1452,7 +1446,7 @@ $mylist
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/views/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="KTHR"){
 				    var d = new Date();
 					var qstringx = '0.08';	// clustering radius
@@ -1460,32 +1454,32 @@ $mylist
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/views/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/views/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.25';
-			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/views/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/views/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/views/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/views/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/views/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/views/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);    		
+			    	window.open('/views/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);    		
 			    }else if(casestring=="AUASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/views/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/views/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="PNRR"){
-			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
+			    	window.open('/views/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1500,14 +1494,14 @@ $mylist
 			    	//var keyName = Math.random();
 		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/views/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	//var keyName = Math.random();
 		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/views/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
 			});
     	
@@ -1673,8 +1667,7 @@ function updateListDialog(agenciesIds){
 				if(today>item.Enddate){
 					$(aList[i]).children('a').css('color','red');
 				}
-		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
-		    	
+		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));		    	
 			});	
 		}
 	});
@@ -1703,7 +1696,6 @@ function updateListDialog(agenciesIds){
 	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
 	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
 	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
-	//$("#datesdiv").css({"width":"100%"});
 	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
 	
 	if (w_qstringd){				
@@ -1712,10 +1704,8 @@ function updateListDialog(agenciesIds){
 			onSelect: function(date, inst) {					  
 				  dateID = date.replace("/","").replace("/","");					  
 					if($("#"+dateID).length==0){
-						//alert("add triggered");
 						addDate(date);							
 					}else{
-						//alert("del triggered");
 						$("#"+dateID).remove();							
 					}
 					if ($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1725,7 +1715,6 @@ function updateListDialog(agenciesIds){
 						}
 		      }
 		});	
-		//alert(w_qstringd);
 		var cdate;
 		for(var i=0; i<w_qstringd.split(",").length; i++){
 			cdate = w_qstringd.split(",")[i];
@@ -1734,6 +1723,7 @@ function updateListDialog(agenciesIds){
 		}									
 	}
 }
+
 /*
  * Connectivity Graph
  */

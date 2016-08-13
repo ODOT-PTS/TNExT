@@ -75,7 +75,7 @@
 				    	<input id="submit" type="button" onclick="reloadDialog2(document.getElementById('Sradius').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
 		<p><br><span>Agencies connected to: <b><br>- <span style="font-size:80%; align:center;" id="dialogSelectedAgency"></span></b></span><br>
 		<p id="displayConAgenciesTable"></p>
-		<img id="dialogPreLoader2" src="resources/images/287.GIF" alt="Page Loading" width="85" height="85" style="margin:100px" >
+		<img id="dialogPreLoader2" src="../resources/images/287.GIF" alt="Page Loading" width="85" height="85" style="margin:100px" >
 	</div>
 	
 	<div id="dialog-form" title="On-Map Report">
@@ -127,9 +127,6 @@
 		  			<td class="onMapdata" id="mff"></td>
 		  		</tr>
 		  	</table>
-		  	<!-- <br>
-		  	<br>
-		  	<br> -->
 		  	<p id="displayTransitReport"></p>
 		  </div>
 		  <div id="geography">
@@ -161,9 +158,7 @@
 		  			<td><b>Number of Census Tracts:</b></td>
 		  			<td class="onMapdata" id="tt"></td>
 		  		</tr>
-		  	</table>
-		  	<!-- <br>
-		  	<br> -->		  	
+		  	</table>	  	
 		  	<p id="displayGeoReport"></p>
 		  </div>
 		  <div id="title6">
@@ -262,7 +257,7 @@
 		  		
 		  	<table style="font-size:95%;width:100%">
 		  		<tr>
-		  			<td>Asian & Pacific Islander:</td>
+		  			<td>Asian &amp; Pacific Islander:</td>
 		  			<td class="onMapdata" id="plsa"></td>
 		  		</tr>
 		  	</table>
@@ -327,7 +322,7 @@
 		  <div id="parknride">
 		  	<table id="parknrideInfo" style="border:none; font-size:100%;width:90% ">
 		  		<tr>
-		  			<td><b>Number of P&R Lots:</b></td>
+		  			<td><b>Number of P&amp;R Lots:</b></td>
 		  			<td class="onMapdata" id="npnr"></td>
 		  		</tr>
 		  		<tr>
@@ -340,7 +335,7 @@
 		  </div>
 		  
 	  </div>
-      <img id="dialogPreLoader" src="resources/images/287.GIF" alt="Page Loading" style="margin:9em;margin-top:22em" >     
+      <img id="dialogPreLoader" src="../resources/images/287.GIF" alt="Page Loading" style="margin:9em;margin-top:22em" >     
     </div>
     <div id="dialogResults" title="Report Results">
 	</div>

@@ -1,0 +1,267 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Park and Ride Extended Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+<script type="text/javascript">
+var countyId = getURIParameter("countyid");
+maxRadius = 1;
+html = '<table id="RT" class="display" align="center">';
+tmp = 	'<tr><th>P&R ID</th>'+
+			'<th>Lot Name</th>'+
+			'<th>City</th>'+
+			'<th>Location</th>'+
+			'<th>Zipcode</th>'+
+			'<th class="metric" title="Number of parking spaces in the lot.">Spaces</th>'+
+			'<th class="metric" title="Number of handicap parking spaces.">Accessible Spaces</th>'+
+			'<th class="metric" title="Transit routes accessible from the lot.">Transit Services <span class="IOSym">(1)</span></th>'+
+			'<th class="metric" title="Amenities available in the park and ride lot.">Amenities</th>'+
+			'<th class="metric" title="Transit agencies that have a stop within the X miles of the park and ride lot.">Connected Agencies</th>'+
+			'<th>Connected Stops IDs</th>'+
+			'<th>Connected Stops</th>'+
+			'<th>Connected Routes IDs</th>'+
+			'<th>Connected Routes</th>'+
+			'<th>Latitude</th>'+
+			'<th>Longitude</th>'+
+			'<th>Bike Rack Spaces</th>'+
+			'<th>Bike Locker Spaces </th>'+
+			'<th>Electric Vehicle Spaces</th>'+
+			'<th>Car Sharing</th>'+
+			'<th>Time Limit</th>'+
+			'<th>Restroom</th>'+
+			'<th>Benches</th>'+
+			'<th>Shelter</th>'+
+			'<th>Indoor Waiting Area</th>'+
+			'<th>Trash Can</th>'+
+			'<th>Lighting</th>'+
+			'<th>Security Cameras</th>'+
+			'<th>Sidewalks</th>'+
+			'<th>Park&Ride Signage</th>'+
+			'<th>Lot Surface</th>'+
+			'<th>Property Owner</th>'+
+			'<th>Local Expert</th></tr>';
+html += '<thead>'+tmp+'</thead><tbody>';
+
+$(document).ready(function(){
+	$("#Sradius").val(w_qstringx);
+	loadDBList();
+	updateToolTips();
+	progressBar()
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + w_qstringx + '&dbindex=' + dbindex + '&username=' + getSession(),
+		async: true,
+		success: function(d){	
+			docMetadata = d.metadata;
+			$('h2').append('Park & Ride Extended Report <br><hr>');
+			if (d.PnrCountiesList[0].county != null)
+				$('#PnrXReportCounty').append( d.PnrCountiesList[0].county + "  County - ");
+			$.each(d.PnrCountiesList, function(i,item){
+				html += '<tr><td>'+ item.pnrid + '</td>'+
+							'<td>' + item.lotname + '</td>'+
+							'<td>' + item.city + '</td>'+
+							'<td>' + item.location + '</td>'+
+							'<td>' + item.zipcode + '</td>'+
+							'<td>' + item.spaces + '</td>'+
+							'<td>' + item.accessiblespaces + '</td>'+
+							'<td class = "details-control"></td>'+
+							'<td class = "details-control"></td>'+
+							'<td>' + item.agencies + '</td>'+
+							'<td>' + item.stopids + '</td>'+
+							'<td>' + item.stopnames + '</td>'+
+							'<td>' + item.routeids + '</td>'+
+							'<td>' + item.routenames + '</td>'+
+							'<td>' + item.lat + '</td>'+
+							'<td>' + item.lon + '</td>'+
+							'<td>' + item.bikerackspaces + '</td>'+
+							'<td>' + item.bikelockerspaces + '</td>'+
+							'<td>' + item.electricvehiclespaces + '</td>'+
+							'<td>' + item.carsharing + '</td>'+
+							'<td>' + item.timelimit + '</td>'+
+							'<td>' + item.restroom + '</td>'+
+							'<td>' + item.benches + '</td>'+
+							'<td>' + item.shelter + '</td>'+
+							'<td>' + item.indoorwaitingarea + '</td>'+
+							'<td>' + item.trashcan + '</td>'+
+							'<td>' + item.lighting + '</td>'+
+							'<td>' + item.securitycameras + '</td>'+
+							'<td>' + item.sidewalks + '</td>'+
+							'<td>' + item.pnrsignage + '</td>'+
+							'<td>' + item.lotsurface + '</td>'+
+							'<td>' + item.propertyowner + '</td>'+
+							'<td>' + item.localexpert + '</td></tr>';							   			
+			});
+			$('#displayReport').append($(html));
+			progressbar.remove();
+			
+			tableProperties.hiddenCols = [9,10,11,12,13,21,22,23,24,25,26,27,28,29];
+			table = buildDatatables();
+			
+		    $('#RT tbody').on('click', 'td.details-control', function () {
+		    		var tr = $(this).parents('tr');
+			        var row = table.row( tr );
+			        var col = table.column( tr );
+			        var pos =  $(this).index();
+			        if ( row.child.isShown() ) {
+			            row.child.hide("slow");
+			            tr.removeClass('shown');
+			        }
+			        else {
+			        	if (pos ==7 )
+			        		row.child(format7(row.data())).show();
+			        	else if (pos == 8)
+			        		row.child(format8(row.data())).show();
+			            tr.addClass('shown');
+			        }
+		    });
+		    
+	    	function format8 ( arg ){
+				var rowData = Array.prototype.slice.call(arg);
+	    		 var html = '<table cellpadding="0" cellspacing="0" border="0" class="display" align="center">'+
+	    		'<th>Restroom</th>'+
+				'<th>Benches</th>'+
+				'<th>Shelter</th>'+
+				'<th>Indoor Waiting Area</th>'+
+				'<th>Trash Can</th>'+
+				'<th>Lighting</th>'+
+				'<th>Security Cameras</th>'+
+				'<th>Sidewalks</th>'+
+				'<th>Park&Ride Signage</th></tr>'+
+				'<tr><td>'+fun(rowData[21])+'</td>'+
+				'<td>'+fun(rowData[22])+'</td>'+
+				'<td>'+fun(rowData[23])+'</td>'+
+				'<td>'+fun(rowData[24])+'</td>'+
+				'<td>'+fun(rowData[25])+'</td>'+
+				'<td>'+fun(rowData[26])+'</td>'+
+	    		'<td>'+fun(rowData[27])+'</td>'+
+	    		'<td>'+fun(rowData[28])+'</td>'+
+	    		'<td>'+fun(rowData[29])+'</td></br></table>'; 
+	    		
+	    		function fun(s){
+	    			if ( s.indexOf("Yes")>-1 || s.indexOf("yes")>-1 || s.indexOf("YES")>-1)	// if s contains "yes"
+	    				return '<img src="../resources/images/tick.ico" height="40" width="40" alt="Yes">';
+	    			else if ( s.indexOf("No") > -1 || s.indexOf("no") > -1 || s.indexOf("NO") > -1)  // if s contains "no"
+	    				return '<img src="../resources/images/error.png" height="40" width="40" alt="No">';
+	    			else return s;
+	    		}
+	    		return html;
+	    	}
+
+		    function format7 ( arg ) {
+		    	var rowData = Array.prototype.slice.call(arg);
+		    	var agencies = rowData[9];
+		    	var stopids = rowData[10];
+		    	var stopnames = rowData[11];
+		    	var routeids = rowData[12];		    	
+		    	var routenames = rowData[13];
+		    	
+		    	agencies = agencies.replace("{","");
+		    	agencies = agencies.replace("}","");
+		    	agencies = agencies.replace(/"/g,"");
+		    	var agenciesArr = agencies.split(",");
+		    	
+		    	stopids = stopids.replace("{","");
+		    	stopids = stopids.replace("}","");
+		    	stopids = stopids.replace(/"/g,"");
+		    	var stopidsArr = stopids.split(",");
+		    	
+		    	stopnames = stopnames.replace("{","");
+		    	stopnames = stopnames.replace("}","");
+		    	stopnames = stopnames.replace(/"/g,"");
+		    	var stopnamesArr = stopnames.split(",");
+		    	
+		    	routeids = routeids.replace("{","");
+		    	routeids = routeids.replace("}","");
+		    	routeids = routeids.replace(/"/g,"");
+		    	var routeidsArr = routeids.split(",");
+
+		    	routenames = routenames.replace("{","");
+		    	routenames = routenames.replace("}","");
+		    	routenames = routenames.replace(/"/g,"");
+		    	var routenamesArr = routenames.split(",");
+		    	
+		    	var html = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:320px;">'+
+		    		'<tr><th>Agency</th>'+
+		    		'<th>Stop ID</th>'+
+		    		'<th>Stop Name</th>'+
+		    		'<th>Route ID</th>'+
+		    		'<th>Route Name</th></tr>';
+		    	for (var i = 0 ; i<routenamesArr.length ; i++){
+		    		html += '<tr><td>'+agenciesArr[i]+'</td>'+
+		    		'<td>'+stopidsArr[i]+'</td>'+
+		    		'<td>'+stopnamesArr[i]+'</td>'+
+		    		'<td>'+routeidsArr[i]+'</td>'+
+		    		'<td>'+routenamesArr[i]+'</td></tr>'
+		    	}	
+		            html+='</table>';
+		        return html;
+		    }
+    	}
+	});
+});
+</script>
+
+
+
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"><span id="PnrXReportCounty"></span></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" >
+			  		Transit Service Search Radius (miles)<span class="IOSym">(1) </span><input id="Sradius" name="x" data-iomap="1" data-label="Transit Service Search Radius (miles)" type="text" style="width:5em" class="input radius tbox" onkeypress="return isNumber(event)"/>
+			    	<input type="button" onclick="reloadPage()" title="Refresh Report"  value="Submit" class="button" /> 		    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<div><p id="displayReport" ><br></p></div>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+</html>

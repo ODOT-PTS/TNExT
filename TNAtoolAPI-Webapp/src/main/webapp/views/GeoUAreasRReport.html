@@ -1,0 +1,166 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Aggregated Urban Areas Summary Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+<script type="text/javascript">
+
+var fAverage = new Array();
+var fMedian = new Array();
+var upop = parseInt(getURIParameter("pop"));
+
+html = '<table id="RT" class="display" align="center">';
+tmp = '<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
+'<th class="metric" title="Name of the geographic area." id="an">Name</th>'+
+'<th class="metric" title="Total population of the geographic area.">Population<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total land area of the geographic area in square miles.">Land Area<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total water area of the geographic area in square miles.">Water Area<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total number of urbanized areas aggregated to generate this report.">Urban Areas<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total number of routes serving stops in the given geographic area.">Total Routes<span class="IOSym">(1) </span></th>'+
+'<th class="metric" title="Total number of stops within the given geographic area.">Total Stops<span class="IOSym">(1) </span></th></tr>';	
+html += '<thead>'+tmp+'</thead><tbody>';
+
+$(document).ready(function(){
+	$('#Upop').val(upop);
+	setPopOptions();
+	loadDBList();
+	updateToolTips();
+	progressBar();
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
+		async: true,
+		success: function(d){	
+			docMetadata = d.metadata;
+			$('h2').append('Aggregated Urban Areas Summary Report <br><hr>');
+			$.each(d.GeoR, function(i,item){
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +'<a href="#" type="SR">'+item.Name+
+				'</a></td><td>' +numberconv(item.population) +
+				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td><td>'+ item.UrbansCount+'</td>'+
+		   '<td>' + item.RoutesCount + '</td>'+
+				'<td>' + item.StopsCount + '</td></tr>';								   			
+			});		
+			html = html + '</tbody></table>'
+			$('#displayReport').append($(html));
+			progressbar.remove();
+			$('a').click(function(e){
+				var d = new Date();
+			    if($(this).attr('type')=="XR"){
+			    		qstring = $(this).attr('id');
+			    		qstringx = '0.25';
+			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+			    		//var keyName = Math.random();
+			    		///localStorage.setItem(keyName, qstringd);
+						var keyName = setDates(qstringd);			    		
+			    		window.open('/views/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
+			    } else if ($(this).attr('type')=="SR"){
+			    		window.open('/views/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex+'&popYear='+popYear);
+			    };
+			});
+			
+			table = buildDatatables();
+			
+		    $('#RT tbody').on('click', 'td.details-control', function () {
+		        var tr = $(this).parents('tr');
+		        var row = table.row( tr );
+		        var pos = row.index();
+		        if ( row.child.isShown() ) {
+		            row.child.hide("slow");
+		            tr.removeClass('shown');
+		        }
+		        else {
+		            row.child(format(pos)).show();
+		            tr.addClass('shown');
+		        }
+		    } );
+		    
+		    function format ( p ) {
+		        var html;
+		        if (fURL[p]=="-"){
+		        	html = '<td>'+fURL[p]+'</td>';
+		        }else{
+		        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
+		        }
+		    	return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+		            '<tr>'+
+		                '<td>Average Fare: </td>'+
+		                '<td>$'+fAverage[p]+'</td>'+
+		            '</tr>'+
+		            '<tr>'+
+		                '<td>Median Fare: </td>'+
+		                '<td>$'+fMedian[p]+'</td>'+
+		            '</tr>'+
+		            '<tr>'+
+		                '<td>Fare URL: </td>'+
+		                html+
+		            '</tr>'+
+		        '</table>';
+		    }
+    	}
+	});
+});
+</script>
+
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	Urban Population Filter <span class="IOSym">(1) </span><input type="text" name="pop" id="Upop" data-iomap="1" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/>
+			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+</html>

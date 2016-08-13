@@ -19,7 +19,7 @@ function openConGraph2(){
 		
 	var dbindex = getURIParameter("dbindex");
 	var agencyCentroids= {};
-	var loaderHtml = '<img id="conGraphPreLoader" src="images/287.GIF" alt="Page Loading" style="height:80; width:80; margin:120px" >';
+	var loaderHtml = '<img id="conGraphPreLoader" src="../resources/images/287.GIF" alt="Page Loading" style="height:80; width:80; margin:120px" >';
 	$( "#con-graph-dialog" ).append(loaderHtml);
 	
 	// Getting agency centroids

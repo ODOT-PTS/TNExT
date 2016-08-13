@@ -1,0 +1,377 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Hubs Summary Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+<script type="text/javascript">
+
+ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[4],"");
+w_qstringd = getDates(keyName);
+var w_qstringx = parseFloat(getURIParameter("x1"));
+var w_qstringx2 = parseFloat(getURIParameter("x2"));
+var w_qstringx3 = parseFloat(getURIParameter("x3"));
+var stops = [];
+var dateIOnumber = 4; // the number is used to map the date(s) to metric affected by it.
+var algDesc = "\r\n\r\n\r\nClustering Algorithm\r\n" +
+"--------------------\r\n" +
+"1. For each stop, a list of all the stops located within its \"Stop Cluster Radius\" is identified. Let's call each of these entries a cluster.\r\n" +
+"   For example,suppose that stop A is connected to stops A, B, C and D. This entry is an initial cluster \"A\" with stops {A,B,C,D}.\r\n" + 
+"2. The stops for initial clusters \"B\", \"C\" and \"D\" are added to the stops for cluster \"A\" and initial clusters \"B\", \"C\" and \"D\" are removed from the list prepared in (1).\r\n" + 
+"3. Step (2) is recursively repeated until there is not common stops in the between the remaining entries of the list. This final list contains the transit hubs clusters.\r\n" +
+"4. The cluster centroids are computed as the average latitude and longitude of its stops.\r\n" + 
+"5. Service related metrics such as number of stops, routes, visits, population served and etc. are computed as summation of the said metric over all the stops within the cluster.";
+
+
+
+html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
+tmp = '<tr><th id="an" title="ID number randomly assigned to the cluster.">ID</th>'+
+'<th class="metric" title="Latitude of the transit hub centroid.">Cluster Centroid Latitude <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Longitude of the transit hub centroid.">Cluster Centroid Longitude <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of stops in the cluster.">Stops Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of routes that serve stops in the cluster.">Routes Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of transit agencies that serve stops in the cluster.">Agencies Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of times all stops in the cluster are served.">Visits Count <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric" title="Total number of park and ride lots within X distance of the cluster centroid.">Park and Ride Lots Count <span class="IOSym">(1)(3)</span></th>'+
+'<th class="metric" title="Total number of counties that the cluster is located in.">Counties Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Total number of census places that the cluster is located in.">Census Places Count <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent.">Population Served <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric" title="Sum of the population of urban areas that stops in the cluster are located in.">Urban Population <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric" title="Unduplicated list of transit agencies that serve stops in the cluster.">Transit Agencies <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Detailed list of stops in the cluster.">Stops <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Unduplicated detailed list of routes in the cluster.">Routes <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Detailed list of park and ride lots within the X radius of the cluster centroid.">Park and Ride Lots <span class="IOSym">(1)(3)</span></th>'+
+'<th class="metric" title="Census places that stops in the cluster are locate in.">Census Places <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Counties that stops in the cluster are located in.">Counties <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="Areas that stops in the cluster are located in.">Urban Areas <span class="IOSym">(1)</span></th>'+
+'<th class="metric" title="ODOT transit regions that stops in the cluster are located in.">ODOT Transit Regions <span class="IOSym">(1)</span></th>'+
+'<th>Stops IDs</th>'+
+'<th>Stops Agencies</th>'+
+'<th>Stops Agencies Names</th>'+
+'<th>Stops Names</th>'+
+'<th>Stops Lats</th>'+
+'<th>Stops Lons</th>'+
+'<th>Stops Visits</th>'+
+'<th>Routes IDs</th>'+
+'<th>Routes Agencies</th>'+
+'<th>Routes Agencies Names</th>'+
+'<th>Routes Names</th>'+
+'<th>P&R ID</th>'+
+'<th>P&R Lot Names</th>'+
+'<th>P&R Cities</th>'+
+'<th>P&R Spaces</th>'+
+'<th>P&R Latitudes</th>'+
+'<th>P&R Longitudes</th>'+
+'<th>Census Places IDs</th>'+
+'<th>Census Places Names</th></tr>';
+html += '<thead>'+tmp+'</thead><tbody>';
+
+$(document).ready(function(){
+	$('#Sradius').val(w_qstringx);
+	$('#PopSradius').val(w_qstringx2);
+	$('#PnrSradius').val(w_qstringx3);
+	setPopOptions();
+	loadDBList();
+	updateToolTips();
+	progressBar();
+	go(key);
+	
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/hubs?'+ajaxURL+'&day='+w_qstringd+'&popYear='+popYear+'&key='+ key+'&username='+getSession(),
+		async: true,
+		success: function(d){
+			docMetadata = d.metadata;
+			var ID = 0;
+			var stopsSet = [];
+			$('h2').append('Transit Hubs Summary Report <br><hr>');			
+			$.each(d.Clusters, function(i,item){
+				html+= 
+				'<tr><td>' + ID++
+				+'</td><td>' + trimLat(item.lat) 
+				+'</td><td>' + trimLon(item.lon) 
+				+'</td><td>' + item.stopscount 
+				+'</td><td>' + item.routescount 
+				+'</td><td>' + item.agenciescount 
+				+'</td><td>' + item.visits
+				+'</td><td>' + item.pnrcount 
+				+'</td><td>' + item.countiescount
+				+'</td><td>' + item.placescount
+				+'</td><td>' + numberconv(item.pop) 
+				+'</td><td>' + numberconv(item.urbanareaspop) 
+				+'</td><td>' + item.agenciesNames 
+				+'</td><td class="details-control">'
+				+'</td><td class="details-control">'
+				+'</td><td class="details-control">'
+				+'</td><td class="details-control">'
+				+'</td><td>'+ item.countiesNames 
+				+'</td><td>'+ item.urbanNames;
+				if (item.regionsIDs == ""){
+					html += '</td><td>N/A'; 
+				}else{
+					html += '</td><td>'+ item.regionsIDs	
+				}				 
+				html += '</td><td>'+ item.stopsIDs 
+				+'</td><td>'+ item.stopsAgencies 
+				+'</td><td>'+ item.stopsAgenciesNames
+				+'</td><td>'+ item.stopsNames 
+				+'</td><td>'+ item.stopsLats 
+				+'</td><td>'+ item.stopsLons
+				+'</td><td>'+ item.stopsVisits
+				+'</td><td>'+ item.routesIDs 
+				+'</td><td>'+ item.routesAgencies
+				+'</td><td>'+ item.routesAgenciesNames
+				+'</td><td>'+ item.routesLongnames
+				+'</td><td>'+ item.pnrIDs
+				+'</td><td>'+ item.pnrNames
+				+'</td><td>'+ item.pnrCities
+				+'</td><td>'+ item.pnrSpaces
+				+'</td><td>'+ item.pnrLats
+				+'</td><td>'+ item.pnrLons
+				+'</td><td>'+ item.placesIDs
+				+'</td><td>'+ item.placesNames + '</tr>';
+			});			
+			html = html + '</tbody></table>';
+			$('#displayReport').append($(html));
+			progressbar.remove();
+			
+			tableProperties.hiddenCols =  [20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38];
+			tableProperties.unsortableCols = [1,2,13,14,15,16,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38];
+			tableProperties.colsToExport = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,23,24,25,26,27,30,31,32,33,34,35,36,37,38];
+			tableProperties.iDisplayLength = 6;
+			table = buildDatatables();
+			orderTable(table, 0, 'asc');
+			
+			$('#RT tbody').on('click', 'td.details-control', function () {
+		        var tr = $(this).parents('tr');
+		        var row = table.row( tr );
+		        var pos =  $(this).index();
+		        if ( row.child.isShown() ) {
+		            row.child.hide("slow");
+		            tr.removeClass('shown');
+		        }
+		        else {
+		        	if (pos == 13 ){ // stops details control
+		        		row.child(format1(row.data())).show();
+			            tr.addClass('shown');
+		        	}else if (pos == 14){ // routes details control
+		        		row.child(format2(row.data())).show();
+			            tr.addClass('shown');	
+			        }else if (pos == 15){ // census places details control
+		        		row.child(format3(row.data())).show();
+			            tr.addClass('shown');
+					}else if (pos == 16){ // census places details control
+		        		row.child(format4(row.data())).show();
+			            tr.addClass('shown');
+        			}
+		        }
+		    });	
+			
+			function format1 ( arg ) {
+		        var rowData = Array.prototype.slice.call(arg); 
+		        var stopsID = rowData[20].split(','); 
+		        var agencies = rowData[21].split(','); 
+		        var agenciesnames = rowData[22].split(','); 
+		        var stopsNames = rowData[23].split(',');
+		        var lats = rowData[24].split(','); 
+		        var lons = rowData[25].split(',');  
+		        var visits = rowData[26].split(',');
+		        
+		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:100px;">'
+		        +'<tr><th>Stop ID</th>'
+		        +'<th>Agency ID</th>'
+		        +'<th>Agency Name</th>'
+		        +'<th>Stop Name</th>'
+		        +'<th>Visits</th>'
+		        +'<th>Latitude</th>'
+		        +'<th>Longitude</th></tr>';
+		        
+		        for (i = 0; i < stopsID.length; i++) { 
+		        	subTable += 
+		        		'<tr><td>' + stopsID[i] 	+ '</td>'
+		        		+ '<td>' + agencies[i] 		+ '</td>'
+		        		+ '<td>' + agenciesnames[i] + '</td>'
+		        		+ '<td>' + stopsNames[i] 	+ '</td>'
+		        		+ '<td>' + visits[i] 		+ '</td>'
+		        		+ '<td>' + lats[i] 			+ '</td>'
+		        		+ '<td>' + lons[i] 			+ '</td></tr>';
+		        }
+		        subTable+='</table>';
+		        return subTable;
+		    }
+			
+			function format2 ( arg ) {
+		        var rowData = Array.prototype.slice.call(arg); 
+		        var routesIDs = rowData[27].split(','); 
+		        var agencyIDs = rowData[28].split(','); 
+		        var agencyNames = rowData[29].split(',');
+		        var routeNames = rowData[30].split(',');
+		        
+		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:100px;">'
+		        +'<tr><th>Route ID</th>'
+		        +'<th>Agency ID</th>'
+		        +'<th>Agency Name</th>'
+		        +'<th>Route Long Name</th></tr>';
+		        for (i = 0; i < routesIDs.length; i++) { 
+		        	subTable += 
+		        		'<tr><td>' 	+ routesIDs[i] 		+ '</td>'
+		        		+ '<td>' 	+ agencyIDs[i] 		+ '</td>'
+		        		+ '<td>' 	+ agencyNames[i] 	+ '</td>'
+		        		+ '<td>' 	+ routeNames[i] 	+ '</td></tr>';
+		        }
+		        subTable+='</table>';
+		        return subTable;
+		    }
+			
+			function format3 ( arg ) {
+		        var rowData = Array.prototype.slice.call(arg); 
+		        var pnrIDs = rowData[31].split(','); 
+		        var pnrNames = rowData[32].split(','); 
+		        var pnrCities = rowData[33].split(','); 
+		        var pnrSpaces = rowData[34].split(','); 
+		        var pnrLats = rowData[35].split(',');
+		        var pnrLons = rowData[36].split(','); 
+		        		        
+		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:100px;">'
+		        +'<tr><th>Park & Ride ID</th>'
+		        +'<th>Lot Name</th>'
+		        +'<th>City</th>'
+		        +'<th>Available Spaces</th>'
+		        +'<th>Latitude</th>'
+		        +'<th>Longitude</th></tr>';
+		        
+		        for (i = 0; i < pnrIDs.length; i++) { 
+		        	if (pnrIDs[i] == ""){
+		        		pnrIDs[i] = "N/A";
+		        		pnrSpaces[i] = "N/A";
+		        		pnrLats[i] = "N/A";
+		        		pnrLons[i] = "N/A";
+		        	}
+		        	
+		        	subTable += 
+		        		'<tr><td>' + pnrIDs[i] 		+ '</td>'
+		        		+ '<td>' + pnrNames[i] 		+ '</td>'
+		        		+ '<td>' + pnrCities[i] 	+ '</td>'
+		        		+ '<td>' + pnrSpaces[i] 	+ '</td>'
+		        		+ '<td>' + pnrLats[i] 		+ '</td>'
+		        		+ '<td>' + pnrLons[i] 		+ '</td></tr>';
+		        }
+		        subTable+='</table>';
+		        return subTable;
+		    }
+			
+			function format4 ( arg ) {
+		        var rowData = Array.prototype.slice.call(arg); 
+		        var placesIDs = rowData[37].split(','); 
+		        var placesNames = rowData[38].split(','); 
+		        		        
+		        var subTable = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:100px;">'
+		        +'<tr><th>Census Place ID</th>'
+		        +'<th>Census Place Name</th></tr>';
+		        
+		        for (i = 0; i < placesIDs.length; i++) { 
+		        	subTable += 
+		        		'<tr><td>' + placesIDs[i] 	+ '</td>'
+		        		+ '<td>' + placesNames[i] 	+ '</td></tr>';
+		        }
+		        subTable+='</table>';
+		        return subTable;
+		    }
+			addIOeffects(); //This method has to be call after initializing the datatable.
+		}
+	});	
+});	
+</script>
+
+</head>
+<body >
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">				
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
+			</div>
+		</div>	
+		
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  <td id="td2"> 
+			  	<div class="headerBC" id="accordion" >
+					<h3></h3>
+					<div>
+						<table style="width:100%;">
+							<tr>
+								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+									<ul data-role="listview">
+							
+									</ul>
+								</td>
+								<td style="vertical-align:top;padding-top:15px">
+									<div id="datepicker" ></div>
+								</td>
+							</tr>
+						</table>
+						
+					</div>
+				</div>
+			  </td> 
+			  <td id="td3">
+			  	<div class="headerBR" > 
+			    	Stop Cluster Radius(miles) <span class="IOSym">(1) </span><input type="text" name="x1" id="Sradius" data-IOMap="1" data-label="Stop Cluster Radius(miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
+			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
+		    	</div>
+			  </td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td><div style="float:right;"> 
+			    	Population Search Radius(miles)<span class="IOSym">(2) </span><input type="text" name="x2" id="PopSradius" data-IOMap="2" data-label="Population Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	</div><br>
+			    	<div style="float:right;margin-top:2px;"> 
+			    	Park &amp; Ride Search Radius(miles)<span class="IOSym">(3)  </span><input type="text" name="x3" id="PnrSradius" data-IOMap="3" data-label="Park & Ride Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	</div>
+			    </td>			    
+			</tr>
+		</table>
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+
+</body>
+</html>

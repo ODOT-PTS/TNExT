@@ -119,19 +119,19 @@ word-wrap:break-word;
 	text-align:left;
 }
 td.details-control {
-    background: url('js/lib/DataTables/images/details_open.png') no-repeat center center;
+    background: url('../../vendors/DataTables/images/details_open.png') no-repeat center center;
     cursor: pointer;
 }
 tr.shown td.details-control {
-    background: url('js/lib/DataTables/images/details_close.png') no-repeat center center;    
+    background: url('../../vendors/DataTables/images/details_close.png') no-repeat center center;    
 }
 td.details-control-cc {
-    background: url('js/lib/DataTables/images/details_open.png') no-repeat center center;
+    background: url('../../vendors/DataTables/images/details_open.png') no-repeat center center;
     background-color:#C0C0C0;
     cursor: pointer;
 }
 tr.shown td.details-control-cc {
-    background: url('js/lib/DataTables/images/details_close.png') no-repeat center center;
+    background: url('../../vendors/DataTables/images/details_close.png') no-repeat center center;
     background-color:#C0C0C0;
 }
 ul.ColVis_collection {

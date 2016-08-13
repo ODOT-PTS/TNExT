@@ -129,12 +129,6 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getShapePointsForShapeId(shapeid);
   }*/
   
-  public static List<StopTime> Querystoptimebytrip(AgencyAndId trip, int dbindex){
-	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
-	  Trip trp = dao.getTripForId(trip);	  
-	  return dao.getStopTimesForTrip(trp);
-  }
-  
   public static List<FareRuleExt> QueryFareRuleByRoute(RouteExt route, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  	  
 	  return dao.getFareRuleForRoute(route);

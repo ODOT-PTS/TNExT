@@ -81,7 +81,7 @@ function progressBar() {
 									.html('<table><tr><td>Report in progress... </td><td>'
 											+ $(this).progressbar("value")
 											+ "% "
-											+ '</td><td></span><img src="images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
+											+ '</td><td></span><img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px"></td></tr></table>');
 						}
 					});
 	var prog = false;
@@ -687,6 +687,19 @@ function setPopOptions() {
 	}
 	;
 	$('#popselect').val(popYear);
+}
+
+function dateToString(date){
+	var dArr = date.split("/");
+	return dArr[2]+dArr[0]+dArr[1];
+}
+
+function stringToDate(str){
+	var sArr = new Array();
+	sArr.push(str.substring(4, 6));
+	sArr.push(str.substring(6, 8));
+	sArr.push(str.substring(0, 4));
+	return sArr.join("/");
 }
 
 function showDollarSign(v) {

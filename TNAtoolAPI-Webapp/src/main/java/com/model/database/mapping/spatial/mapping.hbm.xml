@@ -1,7 +1,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="com.library.model">
+<hibernate-mapping package="com.model.database.queries.objects">
 
     <class name="Census" table="census_blocks">
         <id name="blockId" column="blockid" type="string" length="15" />

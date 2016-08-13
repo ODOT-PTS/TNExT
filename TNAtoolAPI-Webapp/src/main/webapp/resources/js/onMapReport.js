@@ -496,7 +496,7 @@ function showOnMapReport(lat, lon, date, x){
 				var tmpPnrCluster = new L.FeatureGroup();
 	
 				onMapIcon = L.icon({
-				    iconUrl: 'js/lib/leaflet-0.7/images/pnr.ico',
+				    iconUrl: 'vendors/leaflet-0.7/images/pnr.ico',
 				    iconSize:     [40, 40], // size of the icon
 				    iconAnchor:   [20, 39], // point of the icon which will correspond to marker's location
 				    popupAnchor:  [0, -36] // point from which the popup should open relative to the iconAnchor
@@ -584,7 +584,8 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 				'&pnrCountyId=' + countyId + '&lat=' + lat +
 				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
-		success: function(data){			
+		success: function(data){
+			console.log(data);
 			var tmpPnrRouteCluster = new L.FeatureGroup();
 			var c = i % 6;
 			var tmpPnrStopCluster = new L.MarkerClusterGroup({

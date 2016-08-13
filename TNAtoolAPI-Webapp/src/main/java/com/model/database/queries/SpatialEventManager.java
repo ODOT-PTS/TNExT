@@ -10,8 +10,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.model.database.queries.objects.*;
-import com.model.database.queries.congraph.*;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.StopTime;
+
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
+import com.model.database.queries.congraph.AgencyCentroid;
+import com.model.database.queries.congraph.ConGraphAgency;
 /*import com.library.model.TransitConnection;
 import com.library.model.ParknRide;
 import com.library.model.agencyCluster;
@@ -21,6 +27,12 @@ import com.library.model.congrapph.ConGraphAgencyGraph;
 import com.library.model.congrapph.ConGraphCluster;
 import com.library.model.congrapph.ConGraphObj;
 import com.library.model.congrapph.Coordinate;*/
+import com.model.database.queries.congraph.ConGraphAgencyGraph;
+import com.model.database.queries.congraph.ConGraphCluster;
+import com.model.database.queries.congraph.ConGraphObj;
+import com.model.database.queries.congraph.Coordinate;
+import com.model.database.queries.objects.ParknRide;
+import com.model.database.queries.objects.TransitConnection;
 
 public class SpatialEventManager {
 
@@ -44,7 +56,7 @@ public class SpatialEventManager {
 			query = query += lon[0] + " " + lat[0]; // Closing the polygon loop
 			query += "))', 4326),2993), parknride.geom)";
 		}
-		System.out.println(query);
+//		System.out.println(query);
 		stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
@@ -83,7 +95,54 @@ public class SpatialEventManager {
 		}
 		return output;
 	}
+	
+	public static List<TripExt> QueryTripsbyRoute(String agencyID, String routeID, int dbindex) throws SQLException{
+		List<TripExt> output = new ArrayList<TripExt>();
+		String query = "SELECT * FROM gtfs_trips WHERE route_agencyid = '" + agencyID + "' AND route_id = '" + routeID + "'";
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery(query);
+		TripExt trip;
+		while ( rs.next() ){
+			trip = new TripExt();
+			trip.setEpshape(rs.getString("epshape"));
+			trip.setLength( rs.getDouble("length") + rs.getDouble("tlength") );
+			trip.setTripHeadsign(rs.getString("tripheadsign"));
+			trip.setBlockId(rs.getString("blockid"));
+			output.add(trip);
+		}
+		connection.close();
+		return output;
+	}
 
+	public static List<StopTimeExt> Querystoptimebytrip(String agencyID, String tripID, int dbindex) throws SQLException{
+		List<StopTimeExt> output = new ArrayList<StopTimeExt>();
+		String query = "SELECT stoptimes.*, stops.name AS stopsname "
+				+ " FROM gtfs_stop_times AS stoptimes INNER JOIN gtfs_stops AS stops ON stops.id = stoptimes.stop_id AND stops.agencyid=stoptimes.stop_agencyid "
+				+ " WHERE trip_agencyid = '" + agencyID + "' AND trip_id = '" + tripID + "'";
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery(query);
+		StopTimeExt st;
+		while ( rs.next() ){
+			st = new StopTimeExt();
+			st.setId(rs.getInt("gid"));
+			st.setStopSequence(rs.getInt("stopsequence"));
+			st.setArrivalTime(rs.getInt("arrivaltime"));
+			st.setDepartureTime(rs.getInt("departuretime"));
+			st.setStopHeadsign(rs.getString("stopheadsign"));
+			st.setTimepoint(rs.getInt("timepoint"));			
+			StopExt stop = new StopExt();
+			AgencyAndId agencyAndId = new AgencyAndId(rs.getString("stops_agencyid"), rs.getString("stop_id"));
+			stop.setName(rs.getString("stopname"));
+			stop.setId(agencyAndId);
+			st.setStop(stop);			
+			output.add(st);
+		}
+		connection.close();
+		return output;
+	}
+	
 	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
 		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
 		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "

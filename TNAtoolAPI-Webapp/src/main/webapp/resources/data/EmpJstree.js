@@ -75,60 +75,60 @@ var default_jstree = {
 			
 			"types" : {
 				"CA_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CA", "CA_default"]					
 				},
 				"CA" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				},
 				"CE_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CE", "CE_default"]					
 				},
 				"CE" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				},
 				"CNS_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CNS", "CNS_default"]					
 				},
 				"CNS" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				},
 				"CR_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CR", "CR-default"]					
 				},
 				"CR" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				},
 				"CT_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CT", "CT_default"]					
 				},
 				"CT" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				},
 				
 				"CD_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CD", "CD_default"]					
 				},
 				"CD" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				},
 				"CS_default" : {
-					"icon" : "js/lib/images/folder_closed-go.ico",
+					"icon" : "../resources/images/folder_closed-go.ico",
 					"valid_children" : ["CS", "CS_default"]					
 				},
 				"CS" : {
-					"icon" : "js/lib/images/arrow-right.ico",
+					"icon" : "../resources/images/arrow-right.ico",
 					"valid_children" : []
 				}					
 			},
@@ -141,7 +141,7 @@ var default_jstree = {
 								"separator_before": false,
 								"separator_after": false,
 								"label": "Add group",
-								"icon" : "js/lib/images/folder_closed-add.ico",
+								"icon" : "../resources/images/folder_closed-add.ico",
 								"action": function (obj){
 									var nodesList = [];
 									$('.jstree-node').each(function(){
@@ -174,7 +174,7 @@ var default_jstree = {
 								"separator_before": false,
 								"separator_after": false,
 								"label": "Rename",
-								"icon" : "js/lib/images/Rename.ico",
+								"icon" : "../resources/images/Rename.ico",
 								"action": function (obj) { 
 									tree.edit($node);
 								}
@@ -186,7 +186,7 @@ var default_jstree = {
 								"separator_before": false,
 								"separator_after": false,
 								"label": "Rename",
-								"icon" : "js/lib/images/Rename.ico",
+								"icon" : "../resources/images/Rename.ico",
 								"action": function (obj) { 
 									tree.edit($node);
 								}
@@ -195,7 +195,7 @@ var default_jstree = {
 								"separator_before": false,
 								"separator_after": false,
 								"label": "Remove",
-								"icon" : "js/lib/images/folder_open-delete.ico",
+								"icon" : "../resources/images/folder_open-delete.ico",
 								"action": function (obj) { 
 									var children = tree.get_children_dom($node);
 									$.each(children, function(ind,obj){
@@ -211,7 +211,7 @@ var default_jstree = {
 								"separator_before": false,
 								"separator_after": false,
 								"label": "Rename",
-								"icon" : "js/lib/images/Rename.ico",
+								"icon" : "../resources/images/Rename.ico",
 								"action": function (obj) { 
 									tree.edit($node);
 								}
@@ -345,68 +345,68 @@ var new_jstree = {
 		
 		"types" : {
 			"#" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : []					
 			},
 			"CA_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CA", "CA_default"]					
 			},
 			"CA" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			},
 			"CE_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CE", "CE_default"]					
 			},
 			"CE" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			},
 			"CNS_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CNS", "CNS_default", "CNS_default_2"]					
 			},
 			"CNS_default_2" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : ["CNS"]					
 			},
 			"CNS" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			},
 			"CR_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CR", "CR-default"]					
 			},
 			"CR" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			},
 			"CT_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CT", "CT_default"]					
 			},
 			"CT" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			},
 			
 			"CD_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CD", "CD_default"]					
 			},
 			"CD" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			},
 			"CS_default" : {
-				"icon" : "js/lib/images/folder_closed-go.ico",
+				"icon" : "../resources/images/folder_closed-go.ico",
 				"valid_children" : ["CS", "CS_default"]					
 			},
 			"CS" : {
-				"icon" : "js/lib/images/arrow-right.ico",
+				"icon" : "../resources/images/arrow-right.ico",
 				"valid_children" : []
 			}					
 		},
@@ -419,7 +419,7 @@ var new_jstree = {
 							"separator_before": false,
 							"separator_after": false,
 							"label": "Add group",
-							"icon" : "js/lib/images/folder_closed-add.ico",
+							"icon" : "../resources/images/folder_closed-add.ico",
 							"action": function (obj){
 								var nodesList = [];
 								$('.jstree-node').each(function(){
@@ -452,7 +452,7 @@ var new_jstree = {
 							"separator_before": false,
 							"separator_after": false,
 							"label": "Rename",
-							"icon" : "js/lib/images/Rename.ico",
+							"icon" : "../resources/images/Rename.ico",
 							"action": function (obj) { 
 								tree.edit($node);
 							}
@@ -464,7 +464,7 @@ var new_jstree = {
 							"separator_before": false,
 							"separator_after": false,
 							"label": "Rename",
-							"icon" : "js/lib/images/Rename.ico",
+							"icon" : "../resources/images/Rename.ico",
 							"action": function (obj) { 
 								tree.edit($node);
 //								tree.set_text($node, "ssss");
