@@ -83,7 +83,6 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		
 		response.setContentType("application/json");
 	    PrintWriter out = response.getWriter();
 	    JSONObject obj = new JSONObject();
