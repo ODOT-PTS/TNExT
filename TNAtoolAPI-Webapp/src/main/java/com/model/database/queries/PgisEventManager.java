@@ -99,7 +99,7 @@ public class PgisEventManager {
 	    		+ "    		FROM stops WHERE ST_Dwithin(ST_transform(ST_setsrid(ST_MakePoint("+lon+", "+lat+"),4326), 2993), location, "+gap+")) "
 	    		+ "     SELECT main.id, main.name stopname, main.description, main.agencyid, gtfs_agencies.name agencyname, main.lat, main.lon "
 	    		+ "    		FROM main INNER JOIN gtfs_agencies ON main.agencyid=gtfs_agencies.id";
-	    System.out.println(query);
+	    //System.out.println(query);
 
 	    try {
 			stmt = connection.createStatement();
@@ -587,7 +587,7 @@ public class PgisEventManager {
 		+"LEFT JOIN popserved USING(aid) "
 		+ "WHERE agencies.defaultid IN (SELECT aid FROM aids) "
 		+"ORDER BY agencies.id ";
-	    System.out.println(query);
+	    //System.out.println(query);
 		    	
 	    	try {
 				stmt = connection.createStatement();
@@ -1066,7 +1066,7 @@ public class PgisEventManager {
 				+ "LEFT JOIN popatlos1 USING(" + criteria4 + ") "
 				+ "LEFT JOIN popwithinx USING(" + criteria4 + ") "
 				+ "LEFT JOIN totalpop1 USING(" + criteria4 + ") ";
-						    System.out.println(query);
+				//System.out.println(query);
 			    try {
 			    	stmt = connection.createStatement();
 					ResultSet rs = stmt.executeQuery(query); 
@@ -1824,7 +1824,7 @@ public class PgisEventManager {
       		+ "COALESCE(sum(population),0) as rspop from popserved where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) select"
       		+ " svcmiles,svchours,svcstops,upoplos,rpoplos,uspop,rspop,svdays,fromtime,totime,connections from service inner join upopatlos on true inner join rpopatlos on true "
       		+ "inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true";
-      System.out.println(query);    
+//      System.out.println(query);    
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -1920,7 +1920,7 @@ public class PgisEventManager {
     		+ "coalesce(count(distinct(concat(aid,stops.stopid))),0) as stops, coalesce(count(distinct aid),0) as agencies,"
     		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     		+stoproutes+"),"+routesquery+areaquery+ selectquery;
-    System.out.println(query);
+//    System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -2154,7 +2154,7 @@ public class PgisEventManager {
 				+ "	LEFT JOIN census_places USING(placeid) "
 				+ "	LEFT JOIN census_congdists USING(congdistid) "
 				+ "	LEFT JOIN census_counties ON census_counties.countyid = LEFT(result.blockid,5)";
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
@@ -2317,7 +2317,7 @@ public class PgisEventManager {
 				+ "left join rpop on routes.agencyid=rpop.aid and routes.id=rpop.routeid "
 				+ "left join stopscount on routes.id = stopscount.routeid "
 				+ "left join areas on routes.id = areas.routeid and routes.agencyid = areas.aid";					
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
@@ -3045,7 +3045,7 @@ public class PgisEventManager {
 					+ " disconnectedagencies AS (SELECT agencies.id, agencies.name, 0, NULL::char varying[], NULL::char varying[] FROM gtfs_agencies AS agencies "
 					+ "		WHERE agencies.id NOT IN (SELECT agencyid FROM connections) AND agencies.id IN (SELECT aid FROM aids)) "
 					+ " SELECT * FROM connectedagencies UNION ALL SELECT * FROM disconnectedagencies";
-			System.out.println(query);
+//			System.out.println(query);
 			
 			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
@@ -3103,7 +3103,7 @@ public class PgisEventManager {
 					+ " SELECT agencyid AS aid1, agencyname AS aname1, connectedagency AS aid2, gtfs_agencies.name AS aname2, COUNT(dist) AS size, ROUND(MIN(dist),2) AS min_gap, ROUND(MAX(dist),2) AS max_gap, ROUND(AVG(dist),2) AS avg_gap, "
 					+ "	ARRAY_AGG(name1) AS names1, ARRAY_AGG(name2) AS names2, ARRAY_AGG(ROUND(dist,2)::TEXT) AS dists, ARRAY_AGG(stop1loc) AS locs1, ARRAY_AGG(stop2loc) AS locs2 "
 					+ "	FROM distances INNER JOIN gtfs_agencies ON connectedagency = gtfs_agencies.id GROUP BY agencyid, connectedagency, agencyname, gtfs_agencies.name";
-			System.out.println(query);
+//			System.out.println(query);
 			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
@@ -3196,7 +3196,7 @@ public class PgisEventManager {
 				+ "		group by stop_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
-		System.out.println("visit frequency: " + mainquery);
+//		System.out.println("visit frequency: " + mainquery);
 			try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -3232,7 +3232,7 @@ public class PgisEventManager {
 				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid_def),"
 				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid_def)"
 				+ " SELECT stops4.clusterid, array_agg(stop) AS stops, array_agg(distinct agencyid2) AS agencies FROM stops4 GROUP BY clusterid"; 
-		System.out.println(query);
+//		System.out.println(query);
 		Statement stmt = null;
 		try {
 			Connection connection = makeConnection(dbindex);			
@@ -3463,7 +3463,7 @@ public class PgisEventManager {
 		mainquery+="stopsas as (select agency.name as agency, stops.* from stops inner join gtfs_agencies agency on agency.id = stops.aid order by aid, stopid), "
 				+ "stopsa as (select stopsas.*, array_agg(blockid) blks from stopsas , census_blocks where st_dwithin(census_blocks.location, loc,163) group by stopsas.agency, stopsas.aid, stopsas.routes, stopsas.stopid, stopsas.name, stopsas.location, stopsas.loc, stopsas.svc)"
 				+ "select * from stopsa";
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();	
@@ -3682,7 +3682,7 @@ public class PgisEventManager {
 				+ "blocktractrac as (select blocktract.*, c000 as brac, round((c000/((barea+warea)*3.86102e-7)),2) as racdensity from blocktract left join lodes_blocks_rac emprac on blocktract.blockid=emprac.blockid), "
 				+ "blocktractracwac as (select blocktractrac.*, c000 as bwac, round((c000/((barea+warea)*3.86102e-7)),2) as wacdensity from blocktractrac left join lodes_blocks_wac empwac on blocktractrac.blockid=empwac.blockid) "
 				+ "select * from blocktractracwac left join title_vi_blocks_float t6 on blocktractracwac.blockid=t6.blockid order by blocktractracwac.blockid";
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();	
@@ -3876,7 +3876,7 @@ public class PgisEventManager {
 					+ "trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip inner join gtfs_routes route on "
 					+ "trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by agency, routeid, length desc, tripid";							
 		}		
-		System.out.println(mainquery);
+//		System.out.println(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();	

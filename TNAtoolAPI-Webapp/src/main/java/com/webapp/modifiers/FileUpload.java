@@ -204,7 +204,7 @@ public class FileUpload extends HttpServlet {
 		}else if(getSessionUser!=null){//get session id
 			UserSession us = new UserSession();
 			HttpSession session = request.getSession(false);
-			if (session == null){
+			if (session == null || session.getAttribute("username")==null){
 				us.User = "admin";
 			}else{
 				us.User = (String) session.getAttribute("username");

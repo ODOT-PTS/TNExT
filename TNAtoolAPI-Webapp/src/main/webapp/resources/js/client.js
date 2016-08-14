@@ -1129,7 +1129,7 @@ $mylist
 		"ajax" : {
             "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex+'&username='+getSession(),
             "type" : "get",
-            "success" : function(ops) { 
+            "success" : function(ops) {
             	try {
             		$.each(ops.data, function(i,item){
                 		dialogAgencies.push(item.data);
