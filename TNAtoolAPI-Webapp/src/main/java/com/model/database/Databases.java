@@ -11,12 +11,12 @@ import java.util.HashMap;
 
 public class Databases {
 	public static HashMap<String, String[]> infoMap = getDbInfo();
-
+	public static String path;
 	public static HashMap<String, String[]> getDbInfo() {
 
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
-			String path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			BufferedReader reader = new BufferedReader(new FileReader(
 					path+"../../src/main/webapp/resources/admin/dbInfo.csv"));
 			String[] keys = reader.readLine().trim().split(",");
@@ -54,6 +54,12 @@ public class Databases {
 	public static String[] spatialConfigPaths = infoMap
 			.get("spatialConfigPaths");
 	public static String[] ConfigPaths = infoMap.get("ConfigPaths");
+	static{
+		String connectionPath = path + "../../src/main/java/";
+		for (int k=0; k<ConfigPaths.length; k++){
+			ConfigPaths[k] = connectionPath + ConfigPaths[k];
+		}	    
+	}		 
 	public static String[] dbnames = infoMap.get("dbnames");
 	public static String[] connectionURLs = infoMap.get("connectionURL");
 

@@ -1,2 +1,2 @@
 address,port,username,password
-localhost,5432,postgres,123123
+tnasoftwaretool.engr.oregonstate.edu,5432,postgres,OSUteam007@postgres
