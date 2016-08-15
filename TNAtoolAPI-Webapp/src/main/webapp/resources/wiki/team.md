@@ -21,7 +21,7 @@ The project team members are:
 </p>
 
 ---
-<img src="http://saeedt.us.to/images/Saeed_Personal.jpg" alt="Saeed Ghanbartehrani" width="110" height="110" style="float:left;" title="Saeed Ghanbartehrani">
+<img src="https://media.licdn.com/media/AAEAAQAAAAAAAAXnAAAAJDQxMDhkNGQ1LWE2ZmUtNGM2NS1hMDcyLTkwYmFhNzg0YWEyYQ.jpg" alt="Saeed Ghanbartehrani" width="110" height="110" style="float:left;" title="Saeed Ghanbartehrani">
 <span style="margin-left:100px; display:block;">Dr. Saeed Ghanbartehrani</span></b>
 <span style="margin-left:100px; display:block;">Instructor in Industrial and Manufacturing Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
