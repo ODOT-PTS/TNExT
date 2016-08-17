@@ -28,8 +28,8 @@ Video Tutorials
 	<tr><td>8
 		<td>This video tutorial explains the features of the stops cluster dialog box of the Transit Network Analysis software tool (Duration: 10:05 min).
 		<td><iframe src="https://www.youtube.com/embed/1VfrdVrib-U" frameborder="0" allowfullscreen></iframe>
-		<tr><td>8
-		<td>is video tutorial explains how to access and interact with the tabular reports available in the Transit Network Analysis Software Tool (Duration: 8:50 min).
+	<tr><td>9
+		<td>This video tutorial explains how to access and interact with the tabular reports available in the Transit Network Analysis Software Tool (Duration: 8:50 min).
 		<td><iframe src="https://www.youtube.com/embed/uh3Ba6msMB4" frameborder="0" allowfullscreen></iframe>
 </table>
 

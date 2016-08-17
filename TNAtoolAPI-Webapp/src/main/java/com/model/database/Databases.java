@@ -55,7 +55,7 @@ public class Databases {
 			.get("spatialConfigPaths");
 	public static String[] ConfigPaths = infoMap.get("ConfigPaths");
 	static{
-		String connectionPath = path + "../../src/main/java/";
+		String connectionPath = path + "../../src/main/resources/";
 		for (int k=0; k<ConfigPaths.length; k++){
 			ConfigPaths[k] = connectionPath + ConfigPaths[k];
 		}	    

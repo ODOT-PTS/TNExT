@@ -44,8 +44,8 @@ public class MainMap extends HttpServlet {
 		String[] params = reader.readLine().trim().split(",");
 		reader.close();
 		
-		String spatialConnectionPath = path+"/../../src/main/java/com/model/database/connections/spatial";
-		String transitConnectionPath = path+"/../../src/main/java/com/model/database/connections/transit";
+		String spatialConnectionPath = path+"/../../src/main/resources/com/model/database/connections/spatial";
+		String transitConnectionPath = path+"/../../src/main/resources/com/model/database/connections/transit";
 		File connectionFolder = new File(spatialConnectionPath);
 		File[] listOfFiles = connectionFolder.listFiles();
 		String[] dbNames = new String[listOfFiles.length];
