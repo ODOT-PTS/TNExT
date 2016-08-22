@@ -87,16 +87,16 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						var keyName = setDates(qstringd); 		
-			    		window.open('/views/GeoUrbansXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
-			    	window.open('/views/GASReport.html?&areaid='+qstring+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear);
+			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-		    		url = '/views/routereport.html?';
+		    		url = '/TNAtoolAPI-Webapp/routereport.html?';
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
@@ -107,7 +107,7 @@ $(document).ready(function(){
 		    		qstringx = '0.25';
 		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-		    		url = '/views/stopreport.html?';
+		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}

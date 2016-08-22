@@ -1446,7 +1446,7 @@ $mylist
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/views/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="KTHR"){
 				    var d = new Date();
 					var qstringx = '0.08';	// clustering radius
@@ -1454,32 +1454,32 @@ $mylist
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/views/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/views/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
 			    	var qstringx = '0.25';
-			    	window.open('/views/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/views/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '0.1';
-			    	window.open('/views/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if(casestring=="CSR"){
-			    	window.open('/views/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/views/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/views/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/views/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);    		
 			    }else if(casestring=="AUASR"){
-			    	window.open('/views/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/views/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="PNRR"){
-			    	window.open('/views/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
+			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1494,14 +1494,14 @@ $mylist
 			    	//var keyName = Math.random();
 		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
-			    	window.open('/views/Emp.html?&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    	//var keyName = Math.random();
 		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
-			    	window.open('/views/T6.html?&n='+keyName+'&dbindex='+dbindex);
+			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
 			});
     	

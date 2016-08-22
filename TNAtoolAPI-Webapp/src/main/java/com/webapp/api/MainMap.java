@@ -31,7 +31,7 @@ public class MainMap extends HttpServlet {
 		
 		setDatabaseParams();
 		
-		request.getRequestDispatcher("/views/index.jsp").forward(request, response);
+		request.getRequestDispatcher("/TNAtoolAPI-Webapp/index.jsp").forward(request, response);
 		
 	}
 	

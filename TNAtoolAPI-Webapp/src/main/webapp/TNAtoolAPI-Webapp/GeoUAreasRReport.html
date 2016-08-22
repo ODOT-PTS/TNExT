@@ -78,9 +78,9 @@ $(document).ready(function(){
 			    		//var keyName = Math.random();
 			    		///localStorage.setItem(keyName, qstringd);
 						var keyName = setDates(qstringd);			    		
-			    		window.open('/views/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
 			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/views/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex+'&popYear='+popYear);
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex+'&popYear='+popYear);
 			    };
 			});
 			

@@ -78,20 +78,20 @@ $(document).ready(function(){
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/views/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);			    	   
+			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);			    	   
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.25';
-		    		window.open('/views/AgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+		    		window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if($(this).attr('type')=="USR"){
-		    		window.open('/views/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if($(this).attr('type')=="CDSR"){
-		    		window.open('/views/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if($(this).attr('type')=="OSR"){
-		    		window.open('/views/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if($(this).attr('type')=="CPSR"){
-		    		window.open('/views/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if($(this).attr('type')=="CSR"){
-		    		window.open('/views/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
+		    		window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    };
 			});
 			
