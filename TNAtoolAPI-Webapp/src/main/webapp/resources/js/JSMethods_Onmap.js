@@ -18,3 +18,8 @@ function myMethod(latLng){
 	that._fireCreatedEvent();
 	that.disable();	
 }
+
+/////////////   ShapeFile Export Wizard Methods //////////////////
+function ShapeFileExpStart(){
+	window.open('/views/ShapeFileExport.html');
+}
