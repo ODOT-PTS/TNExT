@@ -1726,5 +1726,5 @@ function updateListDialog(agenciesIds){
 
 /*
  * Connectivity Graph
- */
+ */ 
 //$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');
