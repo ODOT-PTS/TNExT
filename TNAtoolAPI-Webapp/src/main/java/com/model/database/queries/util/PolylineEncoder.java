@@ -5,7 +5,10 @@
  * @author Mark Rambow
  * @e-mail markrambow[at]gmail[dot]com
  * @version 0.1
- * Revised by Saeed to accept List<ShapePoint> as input data type and output a string of encoded polyline (2D)
+ 
+ * 2015
+ * Modified by Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+
  */
 
 package com.model.database.queries.util;
