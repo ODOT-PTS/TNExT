@@ -13,7 +13,8 @@ Following are the software and settings required to host an instance of the TNA 
      
     3-Install PostGIS extension on PostgreSQL. 
     
-    4-Database dumps may be found here. Note that database dumps have to be restored with the same name. 
+    4-Database dumps may be found at the following link. Note that database dumps have to be restored with the same name. 
+     [https://drive.google.com/folderview?id=0Bx4Zxars8NaNOWNxTlctME92OGc&usp=sharing]
     
     5-For development purposes any Java IDE can be used to clone the code from the GitHub repository, 
      otherwise the code can be directly download from GitHub. 
