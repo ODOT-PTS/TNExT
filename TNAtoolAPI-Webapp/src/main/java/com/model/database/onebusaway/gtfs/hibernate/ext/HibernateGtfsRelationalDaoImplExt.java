@@ -130,7 +130,7 @@ public class HibernateGtfsRelationalDaoImplExt extends
 	}
 
 	public Float getFareMedianForAgency(String agency, int farecount) {
-		if (farecount % 2 == 0) {
+		/*if (farecount % 2 == 0) {
 			List<Float> results = ((HibernateOperationsImplExt) _ops).findByNamedQueryAndNamedParamLimited(
 					"fareMedianForAgency", "agency", agency, 2,
 					(farecount / 2) - 1);
@@ -141,12 +141,13 @@ public class HibernateGtfsRelationalDaoImplExt extends
 							"fareMedianForAgency", "agency", agency, 1,
 							(farecount / 2));
 			return results.get(0);
-		}
+		}*/
+		return (float) 0;
 	}
 
 	public Float getFareMedianForState(List<String> selectedAgencies,
 			int farecount) {
-		if (farecount % 2 == 0) {
+		/*if (farecount % 2 == 0) {
 			List<Float> results = ((HibernateOperationsImplExt) _ops).findByNamedQueryAndNamedParamLimited(
 					"fareMedianForState", "sa", selectedAgencies, 2,
 					(farecount / 2) - 1);
@@ -157,7 +158,8 @@ public class HibernateGtfsRelationalDaoImplExt extends
 					"fareMedianForState", "sa", selectedAgencies, 1,
 					(farecount / 2));
 			return results.get(0);
-		}
+		}*/
+		return (float) 0;
 	}
 
 	public List<Float> getFarePriceForRoutes(List<String> routes) {

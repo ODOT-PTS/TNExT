@@ -724,3 +724,94 @@ function trimLon(x) {
 		x = x.substring(0, 13);
 	return x;
 }
+
+/**
+ * Add the navigation tree to the tablular reports
+ */
+function appendNavigation(){
+	if($( "#td2" ).length==0){
+		$( "#td1" ).after( '<td id="td2"><div></div></td>');
+	}
+	
+	var title = $(document).find("title").text();
+	var html = '<div id="navigationAccordion" style="font-size:90%;width:90%">';
+	html += '<h3>'+title+'</h3><div><div id="navigationTree" style="font-size: 80%;font-weight: normal;"></div></div></div>';
+	$('h2').css('width','100%');
+	$('h2').append(html);
+	$("#navigationAccordion > h3").css('text-align','center');
+	
+	//$("#navigationAccordion > h3 > div").html('<div id="navigationTree"></div>');
+	
+	$("#navigationAccordion").accordion({
+		collapsible : true,
+		active : false,
+		heightStyle : "content"
+	});
+	
+	$('#navigationTree').jstree(navigationMap);
+	$('#navigationTree').on('loaded.jstree', function (e, data) {
+		//$('.jstree-icon.jstree-themeicon').css('display','none');
+		hideTreeNodes($(this),title);
+	});
+	$('#navigationTree').on('open_node.jstree', function (e, data) {
+		$('.jstree-icon.jstree-themeicon').css('display','none');
+	});
+	$('#navigationAccordion > h3').click(function(){
+		$('.jstree-icon.jstree-themeicon').css('display','none');
+		//console.log($('#navigationTree' + ' li[id="'+title+'"] a'));
+		$($('#navigationTree' + ' li[id="'+title+'"] a')[0]).css('font-weight', 'bold');
+	});
+}
+
+function hideTreeNodes(tree,title){
+	//alert($('#navigationTree').jstree().get_node(title).text);
+	//console.log($('#navigationTree').jstree().get_json()[0]);
+	var root = tree.jstree().get_json()[0];
+	//console.log(root.children);
+	tree.jstree().open_node(root);
+	$.each(root.children, function(i,item){
+    	//$(this).hide();
+		//var node = $("#navigationTree").jstree().get_node(this.id);
+		//console.log(this.text);
+		
+    	if(this.text!=title){
+    		tree.jstree().hide_node(this);
+    	}else{
+    		tree.jstree().open_node(this);
+//    		alert($('#'+this.id+'_anchor').length);
+//    		alert($('#agencySummary_anchor').css('font-weight'));
+    		//$('#agencySummary_anchor').css('font-weight', 'bold');
+    		$.each(this.children, function(i,item){
+    			tree.jstree().disable_node(this);
+    		});
+    	}
+	});
+}
+
+var navigationMap = { 
+	'core' : {
+		/*'themes': {
+            'name': 'proton',
+            'responsive': true
+        },*/
+		'data' : [
+ 	       { "id" : "Statewide Summary Report", "parent" : "#", "text" : "Statewide Summary Report" },
+	       { "id" : "Statewide Extended Report", "parent" : "Statewide Summary Report", "text" : "Statewide Extended Report" },
+	       { "id" : "Transit Agencies Summary Report", "parent" : "Statewide Summary Report", "text" : "Transit Agencies Summary Report" },
+	       { "id" : "Urban Areas Summary Report", "parent" : "Statewide Summary Report", "text" : "Urban Areas Summary Report" },
+	       { "id" : "Counties Summary Report", "parent" : "Statewide Summary Report", "text" : "Counties Summary Report" },
+	       { "id" : "Congressional Districts Summary Report", "parent" : "Statewide Summary Report", "text" : "Congressional Districts Summary Report" },
+	       { "id" : "ODOT Transit Regions Summary Report", "parent" : "Statewide Summary Report", "text" : "ODOT Transit Regions Summary Report" },
+	       { "id" : "Census Places Summary Report", "parent" : "Statewide Summary Report", "text" : "Census Places Summary Report" },
+	       
+	       { "id" : "Transit Agency Extended Report", "parent" : "Transit Agencies Summary Report", "text" : "Transit Agency Extended Report" },
+	       { "id" : "Routes Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "Routes Summary Report" },
+	       { "id" : "Stops Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "Stops Summary Report" },
+	       { "id" : "Urban Areas Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "Urban Areas Summary Report" },
+	       { "id" : "Counties Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "Counties Summary Report" },
+	       { "id" : "Congretional Districts Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "Congretional Districts Summary Report" },
+	       { "id" : "ODOT Transit Regions Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "ODOT Transit Regions Summary Report" },
+	       { "id" : "Census Places Summary Report", "parent" : "Transit Agencies Summary Report", "text" : "Census Places Summary Report" },
+	    ]
+	}
+};
