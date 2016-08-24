@@ -1,3 +1,18 @@
+// Copyright (C) 2015 Oregon State University - School of Machanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Lesser General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Lesser General Public License for more details.
+//
+//    You should have received a copy of the GNU  General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 package com.webapp.api;
 
 import java.io.IOException;
@@ -2147,7 +2162,7 @@ Loop:  	for (TripExt trip: routeTrips){
 	@GET
 	@Path("/stateSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateSR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("username") String username) throws JSONException {
+	public Object getStateSR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("username") String username) throws JSONException, FactoryException, TransformException {
 		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
 			dbindex = default_dbindex;
         }
@@ -2163,15 +2178,7 @@ Loop:  	for (TripExt trip: routeTrips){
     	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "StatewideReport";
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
-		try {
-			geocounts = EventManager.getGeoCounts(dbindex, popYear);//needs to be changed
-		} catch (FactoryException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (TransformException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}		
+		geocounts = PgisEventManager.getGeoCounts(dbindex,username,popYear);//needs to be changed		
 		GeoR each = new GeoR();
 		each.Name = "Oregon";
 		each.CountiesCount = String.valueOf(geocounts.get("county"));
@@ -2187,7 +2194,7 @@ Loop:  	for (TripExt trip: routeTrips){
 		index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		HashMap<String, Integer> transcounts = new HashMap<String, Integer>();
-		transcounts = GtfsHibernateReaderExampleMain.QueryCounts(dbindex,selectedAgencies);
+		transcounts = PgisEventManager.QueryCounts(dbindex,username);
 		each.StopsCount = String.valueOf(transcounts.get("stop"));
 		each.RoutesCount = String.valueOf(transcounts.get("route"));
 		each.AgenciesCount = String.valueOf(transcounts.get("agency"));
