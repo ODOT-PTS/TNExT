@@ -224,7 +224,7 @@ div.ui-dialog.ui-draggable{font-size: 100%}
 .dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
 	text-align:center; 
 	font-size:60%	
-}
+} 
 #geoTable tfoot tr{
 	text-align:center;
 	font-size:80%;
