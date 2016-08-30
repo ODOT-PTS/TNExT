@@ -261,6 +261,7 @@ function addIOeffects(){
 }
 
 function reloadPage() {
+
 	var exit = false;
 	$(".radius").each(function(index, object) {
 		var tmpX = parseFloat($(object).val()).toString();
