@@ -2529,6 +2529,7 @@ Loop:  	for (TripExt trip: routeTrips){
 				
 			}
 		}
+		System.out.println(h.size());
 		response = getClusterData(h, fulldates, days, dbindex, x2, x3, username, key, popYear);
 		return response;
     }
@@ -2547,11 +2548,17 @@ Loop:  	for (TripExt trip: routeTrips){
 				ResultSet rs = stmt.executeQuery(query);
 				while (rs.next()) {
 					String[] con_a;
+					
+					boolean centralize = rs.getBoolean("centralized");
+		
 					con_a = (String[]) rs.getArray("contained_agencies")
 							.getArray();
+		if (centralize){
 					c_a.addAll(Arrays.asList(con_a));
 					c_a.remove(agencies.get(i));
+		}
 				}
+				
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -2568,7 +2575,6 @@ Loop:  	for (TripExt trip: routeTrips){
 		PgisEventManager.dropConnection(connection);
 		return na;
 	}
-	
 	public HubsClusterList getClusterData(HashMap<String, KeyClusterHashMap> x, String[] dates, String[] days, final int dbindex, final double popRadius, final double pnrRadius, String username, final double key, final String popYear) throws SQLException{
 		HubsClusterList output = new HubsClusterList();
     	int progress = 0;
