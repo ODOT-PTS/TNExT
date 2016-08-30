@@ -193,63 +193,107 @@ div.ui-dialog.ui-draggable{font-size: 100%}
 	font-style:italic;		
 }
 
-#transitTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
 	text-align:center;
 	font-size:60%
+} 
+#transitTable tfoot tr{
+	text-align:center;
+	font-size:80%;
 } 
 
-#transitTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
 	text-align:center;
 	font-size:60%
 } 
-#transitTable tbody tr,.dataTables_scrollBody tbody tr{
+#transitTable thead tr{
+	text-align:center;
+	font-size:80%;
+} 
+.dataTables_scrollBody tbody tr{
 	text-align:center;
 	font-size:60%
+}
+#transitTable tbody tr{
+	text-align:center;
+	font-size:80%;
 }
 #geoTable {
 	table-layout: fixed	
 } 
-#geoTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
 	text-align:center;
 	font-size:60%	
 } 
+#geoTable tfoot tr{
+	text-align:center;
+	font-size:80%;
+} 
 
-#geoTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
 	text-align:center;
 	font-size:60%
 }
+#geoTable thead tr{
+	text-align:center;
+	font-size:80%;
+}
  
-#geoTable tbody tr,.dataTables_scrollBody tbody tr{
+.dataTables_scrollBody tbody tr{
 	text-align:center;
 	font-size:60%;	
+} 
+#geoTable tbody tr{
+	text-align:center;
+	font-size:80%;
 } 
 
 #pnrTable {
 	table-layout: fixed	
 } 
-#pnrTable tfoot tr,.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
+.dataTables_scrollFoot tfoot tr, .dataTables_scrollBody tfoot tr{
 	text-align:center;
 	font-size:60%	
 } 
+#pnrTable tfoot tr{
+	text-align:center;
+	font-size:80%;
+} 
 
-#pnrTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
 	text-align:center;
 	font-size:60%
 }
+#pnrTable thead tr{
+	text-align:center;
+	font-size:80%;
+}
  
-#pnrTable tbody tr,.dataTables_scrollBody tbody tr{
+.dataTables_scrollBody tbody tr{
 	text-align:center;
 	font-size:60%;	
 } 
+#pnrTable tbody tr{
+	text-align:center;
+	font-size:80%;
+} 
 
-#displayConAgenciesTable thead tr,.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
+.dataTables_scrollHead thead tr, .dataTables_scrollBody thead tr{
 	text-align:center;
 	font-size:60%
 }
+#displayConAgenciesTable thead tr{
+	text-align:center;
+	font-size:80%;
+}
 
-#displayConAgenciesTable tbody tr,.dataTables_scrollBody tbody tr{
+.dataTables_scrollBody tbody tr{
 	text-align:center;
 	font-size:60%;	
+}
+#displayConAgenciesTable tbody tr{
+	text-align:center;
+	font-size:80%;	
 }
 
 #overlay {
