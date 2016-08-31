@@ -127,7 +127,7 @@ $(document).ready(function(){
 					var d = new Date();
 					qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-					url = '/views/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName+'&popYear='+popYear;
+					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName+'&popYear='+popYear;
 					if (areaId!=null){
 						url+='&areaid='+areaId+'&type='+type;
 					}
@@ -139,7 +139,7 @@ $(document).ready(function(){
 				    var d = new Date();
 				    qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);		    		
-				    window.open('/views/schedulereport.html?&agency='+$(this).attr('aid') + '&route=' + $(this).attr('id')+'&n='+keyName+'&dbindex='+dbindex);
+				    window.open('/TNAtoolAPI-Webapp/schedulereport.html?&agency='+$(this).attr('aid') + '&route=' + $(this).attr('id')+'&n='+keyName+'&dbindex='+dbindex);
 			}});
 			
 			tableProperties.hiddenCols = [21];

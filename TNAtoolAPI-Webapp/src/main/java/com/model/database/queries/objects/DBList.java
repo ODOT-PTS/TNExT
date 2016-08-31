@@ -11,7 +11,10 @@ public class DBList {
 
 	@XmlElement(name = "DBelement")
     public Collection<String> DBelement = new ArrayList<String>();
-
+	
+	@XmlElement(name = "DBid")
+    public Collection<String> DBid = new ArrayList<String>();
+	
 }	
 
 

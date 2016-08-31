@@ -2,9 +2,9 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>ODOT Transit Regions Summary Report</title>
+	<title>Congressional Districts Summary Report</title>
 	
-	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+		<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
@@ -29,20 +29,20 @@
 	
 <script type="text/javascript">
 
+var agencyId = getURIParameter("agency");
 var nameString = '';
 var fAverage = new Array();
 var fMedian = new Array();
 
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
-'<th class="metric" title="Name of the geographic area." id="an">Name</th>'+
+'<th id="an" class="metric" title="Name of the geographic area.">Name</th>'+
 '<th class="metric" title="Total population of the geographic area.">Population</th>'+
 '<th class="metric" title="Total land area of the geographic area in square miles.">Land Area</th>'+
 '<th class="metric" title="Total water area of the geographic area in square miles.">Water Area</th>'+
 '<th class="metric" title="Total number of transit agencies operating in the given geographic area.">Total Agencies</th>'+
 '<th class="metric" title="Total number of routes serving stops in the given geographic area.">Total Routes</th>'+
-'<th class="metric" title="Total number of stops within the given geographic area.">Total Stops</th>'+
-'<th class="metric" title="List of Counties within the geographic area.">Counties</th></tr>';
+'<th class="metric" title="Total number of stops within the given geographic area.">Total Stops</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -51,11 +51,10 @@ $(document).ready(function(){
 	updateToolTips();
 	progressBar();
 	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=5'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?key='+ key+'&agency='+agencyId+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=5'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	}
-
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -66,10 +65,10 @@ $(document).ready(function(){
 			if (agencyId!=null){
 				nameString ='For '+d.agencyName;
 			}
-			$('h2').append('ODOT Transit Regions Summary Report '+nameString+'<br><hr>');
+			$('h2').append('Congressional Districts Summary Report '+nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
-				html +='<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
-				item.Name + '</td><td>' + numberconv(item.population) +
+				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
+				item.Name + '</td><td>' +numberconv(item.population) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
 				if (agencyId!=null){
 					html+='<td>1</td>';
@@ -77,8 +76,9 @@ $(document).ready(function(){
 					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
 				}
 				html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td><td>'+item.CountiesCount+'</td></tr>' ;								   			
+				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></tr>';							   			
 			});		
+			html = html + '</tbody></table>'
 			$('#displayReport').append($(html));
 			progressbar.remove();
 			$('a').click(function(e){
@@ -88,36 +88,37 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						var keyName = setDates(qstringd);
-			    		window.open('/views/GeoRegionsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoCongdistsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);    		
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
-			    	window.open('/views/GASReport.html?&areaid='+qstring+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear);
+			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=5'+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-		    		url = '/views/routereport.html?';
+		    		url = '/TNAtoolAPI-Webapp/routereport.html?';
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
+		    		url +='&areaid='+qstring+'&type=5'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
 			    	window.open(url);			    	
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
 		    		qstringx = '0.25';
 		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-		    		url = '/views/stopreport.html?';
+		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
-		    		window.open(url);
+		    		url +='&areaid='+qstring+'&type=5'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
+		    		window.open(url);		
 			    };
 			});
 			
-			table = buildDatatables();
+			tableProperties.colsToExport = [0,1,2,3,4,6,7];
+			table = buildDatatables();		
 			
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
@@ -156,11 +157,9 @@ $(document).ready(function(){
 		        '</table>';
 		    }
 		}
-    });
+	});
 });
 </script>
-
-
 
 </head>
 <body>
@@ -170,8 +169,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -185,7 +184,6 @@ $(document).ready(function(){
 			  
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			  			    	    	
 		    	</div>
 			  </td>
 			</tr>

@@ -62,7 +62,6 @@ public class Databases {
 	}		 
 	public static String[] dbnames = infoMap.get("dbnames");
 	public static String[] connectionURLs = infoMap.get("connectionURL");
-
 	public static String[] usernames = infoMap.get("username");
 	public static String[] passwords = infoMap.get("password");
 

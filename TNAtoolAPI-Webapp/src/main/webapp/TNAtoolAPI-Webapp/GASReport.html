@@ -123,19 +123,19 @@ $(document).ready(function(){
 				    	qstringx = '0.25';				    	
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    	keyName = setDates(qstringd);
-				    	window.open('/views/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
+				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 				    }else if($(this).attr('type')=="SC"){
 				    	qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		keyName = setDates(qstringd);
-			    		window.open('/views/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		keyName = setDates(qstringd);
-			    		window.open('/views/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+			    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 				    };
 				});
 			}		
