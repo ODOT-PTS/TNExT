@@ -281,6 +281,11 @@ public class Queries {
 		
 		// Creating shapefiles on the server
 		path = path + "../../src/main/webapp/downloadables/shapefiles";
+		
+		// Making downloadables/shapefiles directory
+		File shapefiles = new File(path);
+		shapefiles.mkdirs();
+		
 			// Making unique file names
 			Date dNow = new Date( );
 			SimpleDateFormat ft = new SimpleDateFormat ("hhmmss");
