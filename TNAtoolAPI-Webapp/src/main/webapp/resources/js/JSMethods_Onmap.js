@@ -159,7 +159,7 @@ function createShapeFiles() {
 		},
 		error : function(e) {
 			window.open("/" + e.responseText);
-			$('#overlay').hide();
+			$('#overlay').fadeOut(1500,null);
 		}
 	});
 }

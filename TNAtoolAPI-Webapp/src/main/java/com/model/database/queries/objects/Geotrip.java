@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ 
+ * 2015
+ * Modified by Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+
  */
 package com.model.database.queries.objects;
 

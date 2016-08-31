@@ -1,3 +1,19 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU  General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+
 package com.model.database.queries;
 
 import java.sql.Connection;
@@ -3103,7 +3119,7 @@ public class PgisEventManager {
 					+ " SELECT agencyid AS aid1, agencyname AS aname1, connectedagency AS aid2, gtfs_agencies.name AS aname2, COUNT(dist) AS size, ROUND(MIN(dist),2) AS min_gap, ROUND(MAX(dist),2) AS max_gap, ROUND(AVG(dist),2) AS avg_gap, "
 					+ "	ARRAY_AGG(name1) AS names1, ARRAY_AGG(name2) AS names2, ARRAY_AGG(ROUND(dist,2)::TEXT) AS dists, ARRAY_AGG(stop1loc) AS locs1, ARRAY_AGG(stop2loc) AS locs2 "
 					+ "	FROM distances INNER JOIN gtfs_agencies ON connectedagency = gtfs_agencies.id GROUP BY agencyid, connectedagency, agencyname, gtfs_agencies.name";
-//			System.out.println(query);
+		System.out.println(query);
 			ResultSet rs = stmt.executeQuery(query);
 			while ( rs.next() ) {
 				agencyCluster instance = new agencyCluster();
@@ -4094,5 +4110,87 @@ public class PgisEventManager {
 		all.white += single.white;
 		all.hispanic_or_latino += single.hispanic_or_latino;
 	}
+
+
+public static HashMap<String, Long> getGeoCounts(int dbindex, String username, String popYear){			
+	Connection connection = makeConnection(dbindex);
+	String query="";
+	Statement stmt = null;
+	HashMap<String, Long> response = new HashMap<String, Long>();
+	query = "select (select count(countyId) from census_counties) as county, "
+			+"(select count(tractId) from census_tracts) as tract, "
+			+"(select count(placeId) from census_places) as place, (select count(urbanId) from census_urbans) as urban, "
+			+"(select count(congdistId) from census_congdists) as congdist, (select count(distinct regionId) from census_counties) as region, "
+			+"sum(population"+popYear+")as pop, sum(landarea) as landarea, (select sum(population"+popYear+") from census_blocks where poptype='U') as urbanpop, "
+			+"(select sum(population"+popYear+") from census_blocks where poptype='R')as ruralpop, (select sum(C000_"+popYear+") from lodes_rac_projection_block )as rac,"
+			+"(select sum(C000) from lodes_blocks_wac )as wac from census_counties";
+	
+	System.out.println(query);
+	try {
+        stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(query); 
+        while ( rs.next() ) {
+
+    response = new HashMap<String, Long>();
+	response.put("county",  rs.getLong("county"));
+	response.put("tract",  rs.getLong("tract"));
+	response.put("place",  rs.getLong("place"));
+	response.put("urban", rs.getLong("urban"));
+	response.put("congdist", rs.getLong("congdist"));
+	response.put("region", rs.getLong("region"));
+	response.put("pop", rs.getLong("pop"));
+	response.put("landarea", rs.getLong("landarea"));
+	response.put("urbanpop", rs.getLong("urbanpop"));
+	response.put("ruralpop", rs.getLong("ruralpop"));
+	response.put("rac", rs.getLong("rac"));
+	response.put("wac", rs.getLong("wac"));
+        }	  
+    rs.close();
+    stmt.close();  
+	}
+	 catch ( Exception e ) {
+	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+	dropConnection(connection);
+	
+    
+}
+	return response;	}
+
+
+public static HashMap<String, Integer> QueryCounts (int dbindex,String username)
+{
+	Connection connection = makeConnection(dbindex);
+	String query="";
+	Statement stmt = null;
+	HashMap<String, Integer> response = new HashMap<String, Integer>();
+
+query="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),"
++"stops0 as (select id as agenid,defaultid as defid from aids left join gtfs_agencies on aid=defaultid),"
++"stops as (select count(distinct(defid || id)) as stops from stops0 left join gtfs_stops on gtfs_stops.agencyid=defid),"
++"agencies as (select count(distinct agenid) as agencies from stops0),"
++"routes as (select count(distinct(defid || id)) as routes from stops0 left join gtfs_routes on gtfs_routes.defaultid=defid)" 
++"select * from stops cross join routes cross join agencies"; 
+System.out.println(query);
+try {
+    stmt = connection.createStatement();
+    ResultSet rs = stmt.executeQuery(query); 
+    while ( rs.next() ) {
+
+response = new HashMap<String, Integer>();
+response.put("agency",  rs.getInt("agencies"));
+response.put("stop", rs.getInt("stops"));
+response.put("route", rs.getInt("routes"));
+    }	  
+rs.close();
+stmt.close();  
+}
+ catch ( Exception e ) {
+        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+dropConnection(connection);
+
+
+}
+return response;	}
+
 }
 
