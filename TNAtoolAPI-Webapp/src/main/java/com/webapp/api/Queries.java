@@ -228,7 +228,7 @@ public class Queries {
 	 * @throws ZipException
 	 * @throws InterruptedException
 	 */
-	@GET
+    @GET
 	@Path("/getshapefile")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
@@ -279,6 +279,9 @@ public class Queries {
 		String[] params = reader.readLine().trim().split(",");
 		reader.close();
 		
+		//shapefile generator path
+		String generatorPath = path+"../../src/main/resources/com/model/shapefile/shapefilegenerator.bat";
+		generatorPath = generatorPath.substring(1, generatorPath.length());
 		// Creating shapefiles on the server
 		path = path + "../../src/main/webapp/downloadables/shapefiles";
 		
@@ -294,10 +297,17 @@ public class Queries {
 		String folderName = flag + "_shape_" + uniqueString;
 		File folder = new File (path + "/" + folderName);
 		folder.mkdir();
-		String command = "pgsql2shp -f " + folder.getAbsolutePath() + "\\" + flag + "_shape -h " + params[0] + " -u "
-				+ params[2] + " -P " + params[3] + " " + dbName + " \"" + query + "\"";
-		ProcessBuilder pb = new ProcessBuilder("CMD", "/C", command);
-		pb.start().waitFor(5, TimeUnit.MINUTES);
+		String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
+		ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
+				, folder.getAbsolutePath() + "\\" + flag + "_shape"
+				, params[0]
+				, params[2]
+				, params[3]
+				, dbName
+				,"\"" + query + "\""
+				, psqlPath);	
+		Process pr = pb.start();
+		pr.waitFor(5,TimeUnit.MINUTES);
 		
 		// start compression once the files are generated
 		File zipF = new File(path + "/" + flag + "_shape_" + uniqueString + ".zip");
