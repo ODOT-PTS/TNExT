@@ -56,6 +56,15 @@ function checkSVChange()
 }
 
 function onMapSubmit(){
+	
+	$('#blockSvc').prop('checked', false);
+	$("input[name=blocksDensity][value='pop']").prop("checked",true);
+	$( "input[name='blocksDensity']" ).each(function() {
+  	  $( this ).prop( "disabled", false );
+	});
+	$('#legendSelect').hide();
+	$('#blocksLengend').hide();
+	
 	map.removeLayer(onMapCluster);
 	$( '.POPcal').datepicker( "hide" );
 	currentLayer.closePopup();
@@ -75,7 +84,13 @@ function onMapSubmit(){
 	$("#tabs").hide();
 	$('#dialogPreLoader').show();	
 	$('.ui-tabs .ui-tabs-nav li a').css("padding",".5em 0.5em");
-	showOnMapReport(currentLats, currentLngs, currentDate, currentX);
+	
+	showOnMapReport(currentLats, currentLngs, currentDate, currentX, losRadius);
+}
+
+function legendSelectChange(e){
+	losRadius = e.value;
+	onMapSubmit();
 }
 
 function setDialog(){
@@ -106,6 +121,7 @@ var tractCluster;
 var pnrCluster;
 var pnrStopCluster;
 var pnrRadius=0.1;
+var losRadius = 0.1;
 
 function transitRadio(r){
 	//alert(r.value);
@@ -138,15 +154,44 @@ function doNotDelete(){
     //DONT DELETE
 };
 
+function changeSvc(b, densityValue){
+	if(b){
+		$( "input[name='blocksDensity']" ).each(function() {
+	    	  $( this ).prop( "disabled", true );
+	    });
+		$('#blockLegendDiv').hide();
+		
+		for(var i=0; i<blockCluster.length; i++){
+    		blockCluster[i].eachLayer(function (layer) {
+    			layer.setStyle({
+					radius: layer.svc,
+					weight: 2,
+					fillOpacity: 0.5,
+					fillColor: "#4b85f2",
+	            });
+	    	});
+    	}
+		
+	}else{
+		$( "input[name='blocksDensity']" ).each(function() {
+	    	  $( this ).prop( "disabled", false );
+	    });
+		$('#blockLegendDiv').show();
+		changeDensityStyle(densityValue);
+	}
+}
+
 function changeDensityStyle(densityType){
 	if(blockDensityValue!=densityType){
 		blockDensityValue = densityType;
 		switch (densityType) {
 	    case "pop":
-	    	//alert(onMapBlockCluster.getLayers().length);
 	    	for(var i=0; i<blockCluster.length; i++){
 	    		blockCluster[i].eachLayer(function (layer) {
 		    	    layer.setStyle({
+		    	    	radius: 6,
+						weight: 0,
+						fillOpacity: 0.8,
 		            	fillColor: getColorBlocks(layer.popDensity)
 		            });
 		    	});
@@ -156,6 +201,9 @@ function changeDensityStyle(densityType){
 	    	for(var i=0; i<blockCluster.length; i++){
 	    		blockCluster[i].eachLayer(function (layer) {
 		    	    layer.setStyle({
+		    	    	radius: 6,
+						weight: 0,
+						fillOpacity: 0.8,
 		            	fillColor: getColorBlocks(layer.racDensity)
 		            });
 		    	});
@@ -165,6 +213,9 @@ function changeDensityStyle(densityType){
 	    	for(var i=0; i<blockCluster.length; i++){
 	    		blockCluster[i].eachLayer(function (layer) {
 		    	    layer.setStyle({
+		    	    	radius: 6,
+						weight: 0,
+						fillOpacity: 0.8,
 		            	fillColor: getColorBlocks(layer.wacDensity)
 		            });
 		    	});
@@ -173,7 +224,7 @@ function changeDensityStyle(densityType){
 	}
 }
 
-function showOnMapReport(lat, lon, date, x){
+function showOnMapReport(lat, lon, date, x, losRadius){
 	if (!typeof lat === 'number'){
 		lat = lat.join(",");
 		lon = lon.join(",");
@@ -205,7 +256,10 @@ function showOnMapReport(lat, lon, date, x){
 	tractCluster = new Array();
 	pnrCluster = new Array();	
 	
+	var MapBlk;
+	var MapBlkSvc;
 	var blocksLegendFlag = 0;
+	var indx;
 	
 	var GcolorArray=['blockscluster', 'tractscluster'];
 	$('#displayTransitReport').empty();
@@ -216,13 +270,14 @@ function showOnMapReport(lat, lon, date, x){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&losRadius='+losRadius+'&username='+getSession(),
 		//url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
 		async: true,
 		success: function(data){
 			//localStorage.setItem('myStorage', JSON.stringify(data));	//delete
 			//data = JSON.parse(localStorage.getItem('myStorage'));		//delete
-			//console.log(data);
+			MapBlk = data.MapTR.MapBL;
+			MapBlkSvc = data.MapTR.MapBLS;
 			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
 			$('#tr').html(numberWithCommas(data.MapTR.TotalRoutes));
 			$('#af').html('$'+Math.round(data.MapTR.AverageFare*100)/100);
@@ -370,16 +425,27 @@ function showOnMapReport(lat, lon, date, x){
 						var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
 							radius: 6,		
 							fillColor: getColorBlocks(jtem.Density),		
-					        color: "#333333",		
+					        color: "#0f3885",		
 					        weight: 0,		
 					        opacity: 1,		
 					        fillOpacity: 0.8,		
 					    });
+						var blkSvcFreq;
+						
+						indx = MapBlk.indexOf(jtem.ID);
+						if(indx!=-1){
+							marker.svc = scaledSvc(MapBlkSvc[indx]);
+							blkSvcFreq = MapBlkSvc[indx];
+						}else{
+							marker.svc = 0;
+							blkSvcFreq = 0;
+						}
+						
 						marker.popDensity = jtem.Density;
 						marker.racDensity = jtem.RacDensity;
 						marker.wacDensity = jtem.WacDensity;
 						marker.bindPopup('<b>Block ID:</b> '+jtem.ID+'<br><b>Type:</b> '+jtem.Type+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)
-								+'<br><b>Employees:</b> '+numberWithCommas(jtem.Wac)+'<br><b>Employment:</b> '+numberWithCommas(jtem.Rac)
+								+'<br><b>Employees:</b> '+numberWithCommas(jtem.Wac)+'<br><b>Employment:</b> '+numberWithCommas(jtem.Rac)+'<br><b>Level of Service:</b> '+numberWithCommas(blkSvcFreq)
 								+'<br><b>County:</b> '+jtem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>',popupOptions);
 						tmpBlockCluster.addLayer(marker);				
 				});
@@ -496,7 +562,7 @@ function showOnMapReport(lat, lon, date, x){
 				var tmpPnrCluster = new L.FeatureGroup();
 	
 				onMapIcon = L.icon({
-				    iconUrl: 'vendors/leaflet-0.7/images/pnr.ico',
+				    iconUrl: 'js/lib/leaflet-0.7/images/pnr.ico',
 				    iconSize:     [40, 40], // size of the icon
 				    iconAnchor:   [20, 39], // point of the icon which will correspond to marker's location
 				    popupAnchor:  [0, -36] // point from which the popup should open relative to the iconAnchor
@@ -569,6 +635,16 @@ function showOnMapReport(lat, lon, date, x){
 	
 }
 
+function scaledSvc(svc){
+	svc = Math.ceil(Math.log2(svc));		
+	/*if(weight==1){		
+		return 2;		
+	}else{		
+		return weight;		
+	}*/		
+	return svc;
+}
+
 function nearbyStops(markerId, countyId, lat ,lon, radius){
 	PnrRadius = document.getElementById(radius).value;
 	if (exceedsMaxRadius(PnrRadius)){	// Checks if the entered search radius exceeds the maximum.
@@ -584,8 +660,7 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 				'&pnrCountyId=' + countyId + '&lat=' + lat +
 				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex + '&username=' + getSession(),
 		async: true,
-		success: function(data){
-			console.log(data);
+		success: function(data){			
 			var tmpPnrRouteCluster = new L.FeatureGroup();
 			var c = i % 6;
 			var tmpPnrStopCluster = new L.MarkerClusterGroup({

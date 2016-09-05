@@ -2,7 +2,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Transit Agency Summary Report</title>
+	<title>Transit Agencies Summary Report</title>
 	
 	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -25,6 +26,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
 	
 <script type="text/javascript">
@@ -79,9 +81,12 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
 		success: function(d){
+			console.log(d);
 			docMetadata = d.metadata;
-			$('h2').append('Transit Agency Summary Report for '+d.areaName+'<br><hr>');			
+			appendNavigation(d.areaName);
+			//$('h2').append('Transit Agency Summary Report for '+d.areaName+'<br><hr>');			
 			$.each(d.agencySR, function(i,item){
+				docMetadata = d.metadata;
 				agencytxt = "null";
 				if (item.AgencyId != ''){
 					agencytxt = item.AgencyId;
@@ -123,19 +128,19 @@ $(document).ready(function(){
 				    	qstringx = '0.25';				    	
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    	keyName = setDates(qstringd);
-				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
+				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
 				    }else if($(this).attr('type')=="SC"){
 				    	qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/Xreport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);	    		
+			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
 				    };
 				});
 			}		

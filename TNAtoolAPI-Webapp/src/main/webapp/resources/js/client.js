@@ -1,16 +1,17 @@
-var key="--"; //= Math.random();
-var default_dbindex = getDefaultDbIndex();
+var default_dbindex = getDefaultDbIndex(); //selects the most recent database 
 var dbindex = default_dbindex;
 var newdates = null;
-var URL = document.URL;
 var maxRadius = 5;
+
+//setting the URL based on selected dates
+var key="--"; //used for saving or loading selected dates
+var URL = document.URL;
 if (URL.split("?").length >0){
 	URL = URL.split("?")[0];
 	if (document.URL.indexOf("n=")<1){
 		URL +="?&n="+key;
 	} else {
 		var index = (document.URL.split("n=")[1].indexOf("&")>0) ? document.URL.split("n=")[1].indexOf("&"):document.URL.split("n=")[1].length;
-		//key = parseFloat(document.URL.split("n=")[1].substr(0,index));
 		key = document.URL.split("n=")[1].substr(0,index);
 		URL +="?&n="+key;
 	}
@@ -25,17 +26,10 @@ if (URL.split("?").length >0){
 	URL +="?&n="+key+"&dbindex="+dbindex;
 }
 history.pushState('data', '', URL);
-var w_qstringd = getDates(key);//localStorage.getItem(key);
-//alert(w_qstringd);
-var INIT_LOCATION = new L.LatLng(44.141894, -121.783660); 
-var dialogheight = Math.round((window.innerHeight)*.9); 
-if (dialogheight > 1000){
-	dialogheight = 1000;
-}
-if (dialogheight < 400){
-	dialogheight = 400;
-}
-//alert ("windows height is: "+$(window).height()+" And doc height is: "+$(document).height()+ " Inner height is: "+window.innerHeight);
+var w_qstringd = getDates(key);
+//end
+
+//starts initializing the map
 var map = new L.Map('map', {	
 	minZoom : 6,
 	maxZoom : 19	
@@ -48,16 +42,15 @@ var terrainMap = new L.StamenTileLayer("terrain");
 
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
 var osmLayer = new L.TileLayer(OSMURL, 
-		{subdomains: ["otile1","otile2","otile3","otile4"], maxZoom: 19, attribution: osmAttrib});
-/*var osmLayer = new L.TileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', 
-		{maxZoom: 19, attribution: osmAttrib});*/
+		{subdomains: ["otile1-s","otile2-s","otile3-s","otile4-s"], maxZoom: 19, attribution: osmAttrib});
 
-var aerialLayer = new L.TileLayer(aerialURL, 
-		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});
+/*var aerialLayer = new L.TileLayer(aerialURL, 
+		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});*/
 
 map.addLayer(terrainMap);
 $("body").css("display","");
 $("#overlay").show();
+//end
 
 ///******Variables declared for the on-Map connected agencies report ********///
 var connectionMarkers = new L.FeatureGroup();
@@ -150,9 +143,9 @@ function loadDialog2(node){
             			'<th>Agency Name</th>'+
             			'<th>Number of Connections</th></tr>';	
 			html += '<thead>'+tmp+'</thead><tbody>';
-			var html2 = '<tfoot>'+tmp+'</tfoot>';
+			//var html2 = '<tfoot>'+tmp+'</tfoot>';
 			
-			for (i = 0; i < data.ClusterR.length; i++) {
+			for (var i = 0; i < data.ClusterR.length; i++) {
 				html += '<td>'+ data.ClusterR[i].id +'</td>'+
 				'<td>'+ data.ClusterR[i].name +'</td>'+
 				'<td>'+ data.ClusterR[i].size +'</td></tr>';
@@ -266,7 +259,7 @@ function onMarkerClick(){
 	 */ 	
 	var agencies;									 	
 	if (this.agencyId == selectedAgency.attr("id")){
-		var agencies = [];
+		agencies = [];
 		agencies = selectedAgencies.slice(0);		
 		agencies.splice(agencies.indexOf(this.agencyId),1);
 	}else{
@@ -337,6 +330,13 @@ function isNormalInteger(str) {
 }
 
 ///*****************Leaflet Draw******************///
+var dialogheight = Math.round((window.innerHeight)*.9); 
+if (dialogheight > 1000){
+	dialogheight = 1000;
+}
+if (dialogheight < 400){
+	dialogheight = 400;
+}
 var dialogAgencies = new Array();
 var dialogAgenciesId = new Array();
 var dialog = $( "#dialog-form" ).dialog({
@@ -370,16 +370,24 @@ var dialog = $( "#dialog-form" ).dialog({
       }
   });
 
-//making the blocks legend
+// the blocks legend
 var blockDensityValue;
+var newDensityValue;
 (function () {
 	var html = $('#blocksLengend');		
     var grades = [-1, 0, 20, 100, 500, 1000, 5000, 10000];	
     // loop through our density intervals and generate a label with a colored square for each interval		
-    html =  '<p><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
+    html =  '<p id="legendFirstP"><input type="checkbox" id="blockSvc" >Level of Service</p>'+
+    		'<p id="legendSelect" style="display: none;">Search Radius <select onchange="legendSelectChange(this)">'+
+    		'<option value="0.1" selected>0.1</option>'+
+    		'<option value="0.25">0.25</option>'+
+    		'<option value="0.5">0.5</option>'+
+    		'<option value="1">1</option>'+
+    		'</select> mi</p>'+
+    		'<p style="margin-top: 0.5em;"><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
     		'<p><input type="radio" name="blocksDensity" value="rac">Employment Density</p>'+
     		'<p><input type="radio" name="blocksDensity" value="wac">Employee Density</p></br>';	
-    
+    html+='<div id="blockLegendDiv">';
     for (var i = 0; i < grades.length; i++) {		
         html += '<i style="background:' + getColorBlocks(grades[i] + 1) + '"></i> ';
         if(i==0){
@@ -390,18 +398,35 @@ var blockDensityValue;
         	html += grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
     	}
     }		
+    html+='</div>';
     $('#blocksLengend').html(html);
     
     $('#blocksLengend > p').css("margin-bottom","0px");
+    $('#legendFirstP').css("margin-bottom","10px");
     $('#blocksLengend > p > input').css({"vertical-align":"text-bottom","margin-right":"3px"});
     
     $('#blocksLengend').hide();
     
     blockDensityValue = "pop";
     
+    
+    $( "#blockSvc" ).change(function() {
+    	var b = this.checked;
+    	if(b){
+    		$('#legendSelect').show();
+    		newDensityValue = blockDensityValue;
+    	}else{
+    		$('#legendSelect').hide();
+    	}
+    	
+    	blockDensityValue = "svc";
+		changeSvc(b,newDensityValue);
+	});
+    
     $( "input[name='blocksDensity']" ).each(function() {
     	  $( this ).click(function() {
     		  //alert( $( this ).val() );
+    		  //blockDensityValue = $( this ).val();
     		  changeDensityStyle($( this ).val());
     	  });
     });
@@ -538,6 +563,7 @@ map.on('draw:created', function (e) {
 });
 map.on('popupopen',function (e) {
 	try{
+		
 		// Checks to see if the popup is for a circle drawn around a stop or a coordinate.
 		if (e.popup._content.indexOf('POPradius')>-1){
 			
@@ -551,7 +577,8 @@ map.on('popupopen',function (e) {
 				currentX = this.value*1609.344;
 				area = (Math.pow(layer.getRadius()*0.000621371,2)*Math.PI).toFixed(2);
 				$('#POParea').html(area);
-				layer.pop
+				//alert();
+				//layer.pop
 			});
 		}
 	}catch (e) {
@@ -672,8 +699,7 @@ info.update = function (props) {
 var legend = L.control({position: 'bottomright'});		
 legend.onAdd = function (map) {		
     var div = L.DomUtil.create('div', 'legend'),		
-        grades = [0, 10, 20, 50, 100, 200, 500, 1000],		
-        labels = [];		
+        grades = [0, 10, 20, 50, 100, 200, 500, 1000];		
     // loop through our density intervals and generate a label with a colored square for each interval		
     div.innerHTML = '<p>Population Density</p>';		
     for (var i = 0; i < grades.length; i++) {		
@@ -872,7 +898,7 @@ function disponmap(layerid,k,points,popup,node){
 			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 		});
 		break;
-	case 5:
+	default:
 		markers = new L.MarkerClusterGroup({
 			maxClusterRadius: 120,
 			iconCreateFunction: function (cluster) {
@@ -880,7 +906,7 @@ function disponmap(layerid,k,points,popup,node){
 			},
 			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 		});
-		break;
+		//break;
 	}	
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
@@ -969,13 +995,14 @@ function scaledFreq(freq){
 
 function dispronmap(k,d,name,node){	
 	var popHtml = '<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Route Head Sign:</b> '+d.headSign;
+	var polyline;
 	if(frequencyFlag){
 		var freq = node.attr("freq");
 		popHtml+='<br><b>Frequency:</b> '+freq;
 		if(freq==1){
 			freq++;
 		}
-		var polyline = L.Polyline.fromEncoded(d.points, {	
+		polyline = L.Polyline.fromEncoded(d.points, {	
 			weight: scaledFreq(freq),
 			color: colorset[k],
 			//color: "#006DFF",
@@ -997,7 +1024,7 @@ function dispronmap(k,d,name,node){
 			polyline.closePopup();
 		});
 	}else{
-		var polyline = L.Polyline.fromEncoded(d.points, {	
+		polyline = L.Polyline.fromEncoded(d.points, {	
 			weight: 5,
 			color: colorset[(k+Math.floor(Math.random() * 6))%6],
 			opacity: .5,
@@ -1029,6 +1056,8 @@ function dateRemove(e, d){
 			$("#datepick").css({"border":""});						
 		}
 }
+
+var INIT_LOCATION = new L.LatLng(44.141894, -121.783660); 
 var initLocation = INIT_LOCATION;
 
 map.setView(initLocation,8);
@@ -1048,6 +1077,10 @@ map.on('click', function(){
 	}
 });
 
+/*function myFunction(){
+	alert('myFunction ran');
+}*/
+
 osmLayer.on('load', function(e) {
 	ggb = false;    
 });
@@ -1059,6 +1092,7 @@ terrainMap.on('load', function(e) {
 });
 var mmRecLat = 0;
 var mmRecLng = 0;
+
 //var miniMap = new L.Control.MiniMap(new L.TileLayer(OSMURL, {subdomains: ["otile1","otile2","otile3","otile4"], minZoom: 5, maxZoom: 5, attribution: osmAttrib}),{position:'bottomright',toggleDisplay:true}).addTo(map);
 $('.leaflet-control-scale-line').css({'border':'2px solid grey','line-height':'1.2','margin-left':'0px'});
 var menucontent = '<ul id="rmenu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">';
@@ -1128,8 +1162,9 @@ $mylist
 	"json_data" : {
 		"ajax" : {
             "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex+'&username='+getSession(),
-            "type" : "get",
-            "success" : function(ops) {
+            "type" : "get",	                
+            "success" : function(ops) {  
+            	
             	try {
             		$.each(ops.data, function(i,item){
                 		dialogAgencies.push(item.data);
@@ -1141,7 +1176,7 @@ $mylist
             		}
             	}
             	catch(err) {
-            		console.log("error in /menu ajax");
+            		console.log("error");
             	}
             	$("#overlay").hide();
             	return ops.data;            	
@@ -1153,7 +1188,7 @@ $mylist
 		"types" : {
 			"default": {	
 				"icon" : {
-	            	"image" : "resources/images/spacer.png"
+	            	"image" : "js/lib/images/spacer.png"
 	            	},
             	"select_node" : false,
             	"check_node" : true, 
@@ -1163,7 +1198,7 @@ $mylist
 			},
 			"disabled" : {
 				"icon" : {
-	            	"image" : "resources/images/loader.png"
+	            	"image" : "js/lib/images/loader.png"
 	            	},
 	            "check_node" : false, 
 	            "uncheck_node" : false,
@@ -1175,7 +1210,7 @@ $mylist
 	},
 	"themes": {
         "theme": "default-rtl",
-        "url": "vendors/jstree-v.pre1.0/themes/default-rtl/style.css",
+        "url": "js/lib/jstree-v.pre1.0/themes/default-rtl/style.css",
         "dots": false,
         "icons":true
     },
@@ -1186,6 +1221,7 @@ $mylist
         		"show" : {
                     "label" : "Show Route Shapes",
                     "action" : function (node) { 
+                    	//alert(node.attr("type"));
                     	zoomToRouteShapeFlag = false;
                     	if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
@@ -1443,7 +1479,7 @@ $mylist
 					var d = new Date();
 					var qstringx = '0.08';	// clustering radius
 					var qstringx2 = '0.25'; // population search radius					
-					var qstringx3 = '2.0'  // park and ride search radius
+					var qstringx3 = '2.0'; // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
@@ -1458,7 +1494,7 @@ $mylist
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="ASR"){
-			    	var qstringx = '0.25';
+			    	//var qstringx = '0.25';
 			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
@@ -1667,7 +1703,8 @@ function updateListDialog(agenciesIds){
 				if(today>item.Enddate){
 					$(aList[i]).children('a').css('color','red');
 				}
-		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));		    	
+		    	$(aList[i]).children('a').attr( "title", "Active Service Dates: "+stringToDate(item.Startdate)+" to "+stringToDate(item.Enddate));
+		    	
 			});	
 		}
 	});
@@ -1696,6 +1733,7 @@ function updateListDialog(agenciesIds){
 	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
 	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
 	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
+	//$("#datesdiv").css({"width":"100%"});
 	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
 	
 	if (w_qstringd){				
@@ -1704,8 +1742,10 @@ function updateListDialog(agenciesIds){
 			onSelect: function(date, inst) {					  
 				  dateID = date.replace("/","").replace("/","");					  
 					if($("#"+dateID).length==0){
+						//alert("add triggered");
 						addDate(date);							
 					}else{
+						//alert("del triggered");
 						$("#"+dateID).remove();							
 					}
 					if ($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1715,6 +1755,7 @@ function updateListDialog(agenciesIds){
 						}
 		      }
 		});	
+		//alert(w_qstringd);
 		var cdate;
 		for(var i=0; i<w_qstringd.split(",").length; i++){
 			cdate = w_qstringd.split(",")[i];
@@ -1723,8 +1764,7 @@ function updateListDialog(agenciesIds){
 		}									
 	}
 }
-
 /*
  * Connectivity Graph
- */ 
+ */
 //$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');

@@ -157,12 +157,7 @@ public class GtfsHibernateReaderExampleMain {
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	  return dao.getRouteMiles(selectedAgencies);
   }
-  
- public static Float QueryFareMedian(String agencyId,int farecount, int dbindex){
-	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
-	  return dao.getFareMedianForAgency(agencyId, farecount);
-  }
-  
+    
   public static Float QueryFareMedian(List<String> selectedAgencies,int farecount, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	  return dao.getFareMedianForState(selectedAgencies, farecount);
