@@ -132,6 +132,7 @@ function toggleFlagCheckboxes() {
 				checked : false
 			});
 		})
+		$('#submitButton').attr("disabled", true);
 	}
 }
 
