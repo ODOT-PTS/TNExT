@@ -483,7 +483,7 @@ public class Queries {
    @GET
    @Path("/onmapreport")
    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException { 
+   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("losRadius") String losRadius, @QueryParam("username") String username) throws JSONException, SQLException { 
    	if (Double.isNaN(x) || x <= 0) {
            x = 0;
        }
@@ -491,8 +491,7 @@ public class Queries {
    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
        	dbindex = default_dbindex;
        } 
-   	//final int sdbindex = dbindex;
-//   	x = x * 1609.34;
+   	double losR = Double.parseDouble(losRadius) * 1609.34;
    	String[] latss = lats.split(",");
    	double[] lat = new double[latss.length];
    	int ind = 0;
@@ -513,7 +512,7 @@ public class Queries {
    	String[] fulldates = datedays[0];
    	String[] days = datedays[1];	   	
    	MapDisplay response = new MapDisplay();
-   	MapTransit stops = PgisEventManager.onMapStops(fulldates,days,username, x, lat, lon, dbindex);
+   	MapTransit stops = PgisEventManager.onMapStops(fulldates,days,username, x, lat, lon, losR, dbindex);
    	MapGeo blocks = PgisEventManager.onMapBlocks(x, lat, lon, dbindex);
    	response.MapTR = stops;
    	response.MapG = blocks;

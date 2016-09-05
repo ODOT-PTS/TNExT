@@ -91,8 +91,8 @@
 				</p>
 				<input  type="text" autofocus style="visibility:hidden">
 			</div>
-			<div style="width:40%; margin-left:10%; margin-bottom:6%">
-				<div id="blocksLengend">
+			<div style="width:40%; margin-left:5%; margin-bottom:6%">
+				<div id="blocksLengend" style="width:100%">
 				
 				</div>
 			</div>

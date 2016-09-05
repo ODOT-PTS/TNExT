@@ -31,7 +31,7 @@ Video Tutorials
 		<tr><td>9
 		<td>This video tutorial explains how to access and interact with the tabular reports available in the Transit Network Analysis Software Tool (Duration: 8:50 min).
 		<td><iframe src="https://www.youtube.com/embed/uh3Ba6msMB4" frameborder="0" allowfullscreen></iframe>
-		<tr><td>10
+	<tr><td>10
 		<td>This video tutorial introduces the Statewide, Transit Agencies, and Geographical tabular reports available in the Transit Network Analysis software tool. Also, the different alternatives available to the user to navigate to different tabular reports using hyperlinks are illustrated (Duration: 4:10 min).
 		<td><iframe src="https://www.youtube.com/embed/maAL6MMuqZs" frameborder="0" allowfullscreen></iframe>
 		<tr><td>11

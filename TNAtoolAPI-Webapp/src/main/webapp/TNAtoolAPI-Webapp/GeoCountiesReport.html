@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -25,6 +26,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
 	
 <script type="text/javascript">
@@ -70,7 +72,8 @@ $(document).ready(function(){
 			if (agencyId!=null){
 				nameString ='For '+d.agencyName;
 			}
-			$('h2').append('Counties Summary Report ' + nameString+'<br><hr>');
+			appendNavigation(nameString);
+			//$('h2').append('Counties Summary Report ' + nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' + item.ODOTRegion + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
@@ -93,17 +96,17 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);    		
 			    }else if($(this).attr('type')=="TC"){
 			    	qstring = $(this).attr('id');
 			    	if (agencyId!=null){			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring+'&agency='+agencyId+'&dbindex='+dbindex+'&popYear='+popYear);
+			    		window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring+'&agency='+agencyId+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
 					} else {
-						window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring+'&dbindex='+dbindex+'&popYear='+popYear);
+						window.open('/TNAtoolAPI-Webapp/GeoTractsReport.html?&county='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
 					}			    	
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
-			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=0'+'&dbindex='+dbindex+'&popYear='+popYear);
+			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=0'+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
 			    }else if($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
 			    	qstringx = '0.25';
@@ -113,7 +116,7 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
+		    		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav;
 			    	window.open(url);			    	
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
@@ -124,7 +127,7 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
+		    		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav;
 		    		window.open(url);			    	
 			    };
 			});
