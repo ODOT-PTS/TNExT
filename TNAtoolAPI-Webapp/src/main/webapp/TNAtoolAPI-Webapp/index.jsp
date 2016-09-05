@@ -143,7 +143,7 @@
 		  			<td class="onMapdata" id="tpr"></td>
 		  		</tr>
 		  		<tr>
-		  			<td><b>Employmees (2013):</b></td>
+		  			<td><b>Employees (2013):</b></td>
 		  			<td class="onMapdata" id="tee"></td>
 		  		</tr>
 		  		<tr>
