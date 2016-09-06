@@ -340,7 +340,7 @@
     <div id="dialogResults" title="Report Results">
 	</div>
     <div id="map"> </div>
-    <div id="con-graph-dialog" title="Transit Connectivity Graph"></div>
+    <div id="con-graph-dialog" title="Transit Connectivity Graph" style="min-height:350px"></div>
    	<script type="text/javascript" src="resources/js/client.js"></script>
 </body>
 </html>
