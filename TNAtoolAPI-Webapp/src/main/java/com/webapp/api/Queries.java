@@ -2431,12 +2431,13 @@ Loop:  	for (TripExt trip: routeTrips){
 	
 	/**
 	 * Generates The Extended statewide report
+	 * @throws SQLException 
 	 */
 	    
 	@GET
 	@Path("/stateXR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("popYear") String popYear, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
+	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("popYear") String popYear, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
 		if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }       			
@@ -2473,7 +2474,7 @@ Loop:  	for (TripExt trip: routeTrips){
 		response.AverageFare = String.valueOf(FareData.get("avg"));
 		response.MaxFare = String.valueOf(FareData.get("max"));
 		int FareCount = FareData.get("count").intValue();
-		float FareMedian = GtfsHibernateReaderExampleMain.QueryFareMedian(selectedAgencies, FareCount, dbindex);
+		float FareMedian = SpatialEventManager.getFareMedianForState(selectedAgencies, FareCount, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.MedianFare = String.valueOf(FareMedian);
