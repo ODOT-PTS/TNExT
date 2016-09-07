@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -25,6 +26,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
 	 
 <script type="text/javascript">
@@ -57,7 +59,8 @@ $(document).ready(function(){
 		async: true,
 		success: function(item){
 			docMetadata = item.metadata;
-			$('h2').append(item.AreaName+' Extended Report <br><hr>');	
+			appendNavigation(item.AreaName);
+			//$('h2').append(item.AreaName+' Extended Report <br><hr>');	
 			html += '<tr><td class="metric" title="Identification number associated with the geographic area.">Geo ID<td>'+ item.AreaId 
 			+'</td></tr><tr><td class="metric" title="Name of the geographic area.">Name</td><td>' + item.AreaName 
 			+'</td></tr><tr><td class="metric" title="Summation of the lengths of the longest trips within the given geographic area.">Route Miles </td><td>'+ numberconv(item.RouteMiles) 
@@ -170,7 +173,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>

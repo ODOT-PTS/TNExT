@@ -59,7 +59,10 @@ $(document).ready(function(){
 		async: true,
 		success: function(item){
 			docMetadata = item.metadata;
-			$('h2').append(item.AgencyName+' Extended Report <br><hr>');	
+
+			appendNavigation(item.AgencyName);
+			//$('h2').append(item.AgencyName+' Extended Report <br><hr>');	
+
 			html += '<tr><td class="metric" title="Identification number reported in the transit agency GTFS feed.">Agency ID<td>'+ item.AgencyId 
 			+'</td></tr><tr><td class="metric" title="Agency name reported in the transit agency GTFS feed.">Agency Name</td><td>' + item.AgencyName 
 			+'</td></tr><tr><td class="metric" title="Summation of the lengths of the longest route variant for all routes that the transit agency serves.">Route Miles</td><td>'+ numberconv(item.RouteMiles) 
@@ -110,7 +113,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>

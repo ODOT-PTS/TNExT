@@ -4181,7 +4181,7 @@ public class PgisEventManager {
 	/**
 	 *Queries the transit part of the on map report	
 	 */
-	public static MapTransit onMapStops(String[] date, String[] day, String username, double d, double[] lat, double[] lon, int dbindex) {
+	public static MapTransit onMapStops(String[] date, String[] day, String username, double d, double[] lat, double[] lon, double losR, int dbindex) {
 		CoordinateReferenceSystem sourceCRS = null;
 		CoordinateReferenceSystem targetCRS = null;
 		MathTransform transform = null;
@@ -4271,7 +4271,7 @@ public class PgisEventManager {
 					+ "stopids inner join gtfs_stops stop on st_within(stop.location,ST_GeomFromText('"+targetGeometry+"',2993))=true where stop.id = stopids.stopid and stop.agencyid=stopids.aid_def),";			
 		}
 		mainquery+="stopsas as (select agency.name as agency, stops.* from stops inner join gtfs_agencies agency on agency.id = stops.aid order by aid, stopid), "
-				+ "stopsa as (select stopsas.*, array_agg(blockid) blks from stopsas , census_blocks where st_dwithin(census_blocks.location, loc,163) group by stopsas.agency, stopsas.aid, stopsas.routes, stopsas.stopid, stopsas.name, stopsas.location, stopsas.loc, stopsas.svc)"
+				+ "stopsa as (select stopsas.*, array_agg(blockid) blks from stopsas , census_blocks where st_dwithin(census_blocks.location, loc,"+losR+") group by stopsas.agency, stopsas.aid, stopsas.routes, stopsas.stopid, stopsas.name, stopsas.location, stopsas.loc, stopsas.svc)"
 				+ "select * from stopsa";
 //		System.out.println(mainquery);
 		try{

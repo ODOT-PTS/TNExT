@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -25,6 +26,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
 	
 <script type="text/javascript">
@@ -73,7 +75,8 @@ $(document).ready(function(){
 			if (agencyId!=null){
 				nameString ='For '+d.agencyName;
 			}
-			$('h2').append('ODOT Transit Regions Summary Report '+nameString+'<br><hr>');
+			appendNavigation(nameString);
+			//$('h2').append('ODOT Transit Regions Summary Report '+nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html +='<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' + numberconv(item.population) + '</td><td>' +numberconv(item.employment) +	'</td>';
@@ -103,10 +106,11 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/GeoRegionsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoRegionsXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);    		
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
-			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null);
+
+			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav);
 			    }
 			    else if($(this).attr('type')=="UC"){
 			    	qstring = $(this).attr('id');			    	
@@ -114,15 +118,15 @@ $(document).ready(function(){
 			    	var popMin='0'	;
 			    	if(agencyId!=null)
 			    		{
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=4'+'&agency='+agencyId);    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=4'+'&agency='+agencyId+'&nav='+nav);    		
 			    		}
 			    	else
 			    		{
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=4');    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=4'+'&nav='+nav);    		
 			    		}
 			    }
 			    else if($(this).attr('type')=="RC"){
-			    	qstring = $(this).attr('id');
+		    	qstring = $(this).attr('id');
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					keyName = setDates(qstringd);
@@ -130,7 +134,8 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null;
+
+		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav;
 			    	window.open(url);			    	
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
@@ -141,10 +146,11 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null;
+
+		    		url +='&areaid='+qstring+'&type=4'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav;
 		    		
 		    		window.open(url);			    	
-			    };
+		    };
 			});
 			
 			
@@ -205,7 +211,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>

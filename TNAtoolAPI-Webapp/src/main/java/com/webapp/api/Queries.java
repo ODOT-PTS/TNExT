@@ -15,56 +15,50 @@
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 package com.webapp.api;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
-import javax.swing.JOptionPane;
-import javax.swing.text.html.parser.Entity;
+import javax.swing.Timer;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.QueryParam;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.ZipOutputStream;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
+
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.codehaus.jettison.json.JSONException;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.webapp.modifiers.DbUpdate;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.model.database.queries.*;
-import com.model.database.queries.util.*;
-import com.model.database.Databases;
-import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.*;
-import com.model.database.queries.congraph.*;
-import com.model.database.queries.objects.*;
-
 /*import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FareRule;
@@ -80,6 +74,84 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import com.model.database.Databases;
+import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.FareRuleExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.FeedInfoExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.RouteExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarDateExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
+import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
+import com.model.database.queries.EventManager;
+import com.model.database.queries.PgisEventManager;
+import com.model.database.queries.SpatialEventManager;
+import com.model.database.queries.congraph.AgencyCentroid;
+import com.model.database.queries.congraph.AgencyCentroidList;
+import com.model.database.queries.congraph.ConGraphAgency;
+import com.model.database.queries.congraph.ConGraphAgencyGraph;
+import com.model.database.queries.congraph.ConGraphAgencyGraphList;
+import com.model.database.queries.congraph.ConGraphObj;
+import com.model.database.queries.congraph.ConGraphObjSet;
+import com.model.database.queries.objects.AgencyRouteList;
+import com.model.database.queries.objects.AgencySR;
+import com.model.database.queries.objects.AgencySRList;
+import com.model.database.queries.objects.AgencyXR;
+import com.model.database.queries.objects.CAStopsList;
+import com.model.database.queries.objects.Census;
+import com.model.database.queries.objects.CensusList;
+import com.model.database.queries.objects.Centroid;
+import com.model.database.queries.objects.ClusterR;
+import com.model.database.queries.objects.ClusterRList;
+import com.model.database.queries.objects.CongDist;
+import com.model.database.queries.objects.County;
+import com.model.database.queries.objects.DBList;
+import com.model.database.queries.objects.EmpDataList;
+import com.model.database.queries.objects.GeoArea;
+import com.model.database.queries.objects.GeoR;
+import com.model.database.queries.objects.GeoRList;
+import com.model.database.queries.objects.GeoStop;
+import com.model.database.queries.objects.GeoStopRouteMap;
+import com.model.database.queries.objects.GeoXR;
+import com.model.database.queries.objects.HubCluster;
+import com.model.database.queries.objects.HubsClusterList;
+import com.model.database.queries.objects.KeyClusterHashMap;
+import com.model.database.queries.objects.MapDisplay;
+import com.model.database.queries.objects.MapGeo;
+import com.model.database.queries.objects.MapPnR;
+import com.model.database.queries.objects.MapPnrCounty;
+import com.model.database.queries.objects.MapPnrRecord;
+import com.model.database.queries.objects.MapRoute;
+import com.model.database.queries.objects.MapStop;
+import com.model.database.queries.objects.MapTransit;
+import com.model.database.queries.objects.NetworkCluster;
+import com.model.database.queries.objects.ParknRide;
+import com.model.database.queries.objects.ParknRideCountiesList;
+import com.model.database.queries.objects.Place;
+import com.model.database.queries.objects.PnrInCountyList;
+import com.model.database.queries.objects.ProgVal;
+import com.model.database.queries.objects.RouteListR;
+import com.model.database.queries.objects.RouteR;
+import com.model.database.queries.objects.Rshape;
+import com.model.database.queries.objects.Schedule;
+import com.model.database.queries.objects.ScheduleList;
+import com.model.database.queries.objects.StartEndDates;
+import com.model.database.queries.objects.StartEndDatesList;
+import com.model.database.queries.objects.StopList;
+import com.model.database.queries.objects.StopListR;
+import com.model.database.queries.objects.StopR;
+import com.model.database.queries.objects.Stoptime;
+import com.model.database.queries.objects.TitleVIDataList;
+import com.model.database.queries.objects.Tract;
+import com.model.database.queries.objects.TransitError;
+import com.model.database.queries.objects.TripSchedule;
+import com.model.database.queries.objects.Urban;
+import com.model.database.queries.objects.agencyCluster;
+import com.model.database.queries.util.StringUtils;
+import com.model.database.queries.util.Types;
+import com.webapp.modifiers.DbUpdate;
+
 
 @Path("/transit")
 @XmlRootElement
@@ -91,21 +163,31 @@ public class Queries {
 	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
 	static int dbsize = Databases.dbsize;	
 	
+	/**
+	 * returns the name-list and id-list of databases.
+	 * @return DBList
+	 * @throws JSONException
+	 */
 	@GET
-    @Path("/DBList")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getDBList() throws JSONException {
-		
-				
-        String[] DBList = Databases.dbnames;
-        DBList response = new DBList();
-        
-        for (int s=0; s<dbsize; s++){        	
-        	response.DBelement.add(DBList[s]);
-        }
-        
-        return response;
-    }
+	@Path("/DBList")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getDBList() throws JSONException {
+
+		String[] DBNames = Databases.dbnames;
+		String[] DBIds = Databases.connectionURLs.clone();
+		for (int i = 0 ; i < DBIds.length ; i++){
+			String[] temp = DBIds[i].split("/");
+			DBIds[i] = temp[temp.length-1];;
+		}	
+		DBList response = new DBList();
+
+		for (int s = 0; s < dbsize; s++) {
+			response.DBelement.add(DBNames[s]);
+			response.DBid.add(DBIds[s]);
+		}
+		return response;
+	}
 	
 	  /**
      * Lists stops within a certain distance of a 
@@ -132,7 +214,144 @@ public class Queries {
  	   return results;	   
     }
     
-    
+    /**
+	 * Generates the shapefile of routes/stops, compresses the 
+	 * files into a zipfile on server and return the zipfile's path.
+	 *  
+	 * @param agencyIDs
+	 * @param flag
+	 * @param dbName
+	 * @param username
+	 * @return String - zipfile path
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ZipException
+	 * @throws InterruptedException
+	 */
+    @GET
+	@Path("/getshapefile")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getShapeFile(@QueryParam("agencyids") String agencyIDs,
+			@QueryParam("flag") String flag,
+			@QueryParam("dbName") String dbName,
+			@QueryParam("username") String username) throws SQLException,
+			IOException, ZipException, InterruptedException {
+		String query = "";
+		String[] agencies = agencyIDs.split(",");
+		String feeds = "";
+		if (agencies.length > 1){
+			feeds = "((SELECT " + agencies[0] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[0] + " || '%') ";
+			for (int i = 1; i < agencies.length ; i++)
+				feeds += " UNION ALL (SELECT " + agencies[1] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[1] + " || '%')";
+			feeds += " ) ";
+		}else{
+			feeds = "(SELECT " + agencies[0] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[0] + " || '%')";
+		}
+		if (flag.equals("routes")) {
+			query = "SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
+					+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
+					+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
+					+ " shape AS trip_shape "
+					+ "	FROM gtfs_routes AS routes "
+					+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
+					+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
+					+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
+					+ "	WHERE routes.agencyid IN (" + agencyIDs + ")";
+		} else if (flag.equals("stops")) {
+			query += "SELECT agencies.name AS PRVDR_NM, '1899-12-30' AS arrival_ti, '1899-12-30' AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
+					+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
+					+ " 	CURRENT_DATE AS GIS_PRC_DT, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, stops.location AS shape "
+					+ "		FROM gtfs_stops AS stops "
+					+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+					+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id "
+					+ "		INNER JOIN " + feeds + " AS feeds ON feeds.aid = map.agencyid "
+					+ "		WHERE map.agencyid IN (" + agencyIDs + ")";
+		}
+		
+		// get database parameters
+		String path = MainMap.class.getProtectionDomain().getCodeSource()
+				.getLocation().getPath();
+
+		BufferedReader reader = new BufferedReader(new FileReader(path
+				+ "../../src/main/webapp/resources/admin/databaseParams.csv"));
+		reader.readLine();
+		String[] params = reader.readLine().trim().split(",");
+		reader.close();
+		
+		//shapefile generator path
+		String generatorPath = path+"../../src/main/resources/com/model/shapefile/shapefilegenerator.bat";
+		generatorPath = generatorPath.substring(1, generatorPath.length());
+		// Creating shapefiles on the server
+		path = path + "../../src/main/webapp/downloadables/shapefiles";
+		
+		// Making downloadables/shapefiles directory
+		File shapefiles = new File(path);
+		shapefiles.mkdirs();
+		
+			// Making unique file names
+			Date dNow = new Date( );
+			SimpleDateFormat ft = new SimpleDateFormat ("hhmmss");
+			String uniqueString = ft.format(dNow);
+		
+		String folderName = flag + "_shape_" + uniqueString;
+		File folder = new File (path + "/" + folderName);
+		folder.mkdir();
+		String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
+		ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
+				, folder.getAbsolutePath() + "\\" + flag + "_shape"
+				, params[0]
+				, params[2]
+				, params[3]
+				, dbName
+				,"\"" + query + "\""
+				, psqlPath);	
+		Process pr = pb.start();
+		pr.waitFor(5,TimeUnit.MINUTES);
+		
+		// start compression once the files are generated
+		File zipF = new File(path + "/" + flag + "_shape_" + uniqueString + ".zip");
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipF));
+        InputStream in = null;
+        File[] sfiles = folder.listFiles();
+
+        ZipParameters parameters = new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        
+        for(File f: sfiles){
+        	out.putNextEntry(f, parameters);
+        	
+        	in = new FileInputStream(f);
+            byte[] readBuff = new byte[4096];
+            int readLen = -1;
+            while ((readLen = in.read(readBuff)) != -1) {
+            	out.write(readBuff, 0, readLen);
+            }
+        	
+            out.closeEntry();
+        	in.close();
+        }
+        out.finish();
+        out.close();
+        FileUtils.deleteDirectory(folder);
+        
+        // delete the file after 5 minutes.
+        Timer timer;
+        ActionListener a = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				zipF.delete();
+			}
+		};
+		timer = new Timer(1, a);
+		timer.setRepeats(false);
+		timer.setInitialDelay(5*60000);
+		timer.start();
+		
+        return "downloadables/shapefiles/" +  zipF.getName();
+	}
+	
 	/** Generates Counties P&R Report*/
 	@GET
 	@Path("/CountiesPnR")
@@ -264,7 +483,7 @@ public class Queries {
    @GET
    @Path("/onmapreport")
    @Produces({ MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException { 
+   public Object getOnMapReport(@QueryParam("lat") String lats,@QueryParam("lon") String lons, @QueryParam("day") String date, @QueryParam("x") double x, @QueryParam("dbindex") Integer dbindex, @QueryParam("losRadius") String losRadius, @QueryParam("username") String username) throws JSONException, SQLException { 
    	if (Double.isNaN(x) || x <= 0) {
            x = 0;
        }
@@ -272,8 +491,7 @@ public class Queries {
    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
        	dbindex = default_dbindex;
        } 
-   	//final int sdbindex = dbindex;
-//   	x = x * 1609.34;
+   	double losR = Double.parseDouble(losRadius) * 1609.34;
    	String[] latss = lats.split(",");
    	double[] lat = new double[latss.length];
    	int ind = 0;
@@ -294,7 +512,7 @@ public class Queries {
    	String[] fulldates = datedays[0];
    	String[] days = datedays[1];	   	
    	MapDisplay response = new MapDisplay();
-   	MapTransit stops = PgisEventManager.onMapStops(fulldates,days,username, x, lat, lon, dbindex);
+   	MapTransit stops = PgisEventManager.onMapStops(fulldates,days,username, x, lat, lon, losR, dbindex);
    	MapGeo blocks = PgisEventManager.onMapBlocks(x, lat, lon, dbindex);
    	response.MapTR = stops;
    	response.MapG = blocks;
@@ -2351,12 +2569,13 @@ Loop:  	for (TripExt trip: routeTrips){
 	
 	/**
 	 * Generates The Extended statewide report
+	 * @throws SQLException 
 	 */
 	    
 	@GET
 	@Path("/stateXR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("popYear") String popYear, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, FactoryException, TransformException {
+	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("popYear") String popYear, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
 		if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }       			
@@ -2393,7 +2612,7 @@ Loop:  	for (TripExt trip: routeTrips){
 		response.AverageFare = String.valueOf(FareData.get("avg"));
 		response.MaxFare = String.valueOf(FareData.get("max"));
 		int FareCount = FareData.get("count").intValue();
-		float FareMedian = GtfsHibernateReaderExampleMain.QueryFareMedian(selectedAgencies, FareCount, dbindex);
+		float FareMedian = SpatialEventManager.getFareMedianForState(selectedAgencies, FareCount, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.MedianFare = String.valueOf(FareMedian);

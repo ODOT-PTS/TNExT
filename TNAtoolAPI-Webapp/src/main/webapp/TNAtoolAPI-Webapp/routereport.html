@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -25,6 +26,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
 	
 <script type="text/javascript">
@@ -86,7 +88,8 @@ $(document).ready(function(){
 		success: function(d){
 			var namestring = (d.AgencyName!=null)? d.AgencyName:'';
 				namestring+= ' Routes Report'+((d.AreaName!=null)?' for '+d.AreaName:'');
-			$('h2').append(namestring+'<br><hr>');
+			appendNavigation(namestring);
+			//$('h2').append(namestring+'<br><hr>');
 			$.each(d.RouteR, function(i,item){
 				html += '<tr><td>'+ item.AgencyId+'</td><td>'+item.AgencyName+'</td><td><a href="#" class="schedulereport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.RouteId+'</a></td>'; 
 				if (item.RouteURL!=null){
@@ -127,7 +130,7 @@ $(document).ready(function(){
 					var d = new Date();
 					qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName+'&popYear='+popYear;
+					url = '/TNAtoolAPI-Webapp/stopreport.html?agency='+$(this).attr('aid')+'&x='+qstringx+ '&route=' + $(this).attr('id')+'&n='+keyName+'&popYear='+popYear+'&nav='+nav;
 					if (areaId!=null){
 						url+='&areaid='+areaId+'&type='+type;
 					}
@@ -184,7 +187,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>

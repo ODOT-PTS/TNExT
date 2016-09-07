@@ -121,10 +121,12 @@ public class SpatialEventManager {
 		TripExt trip;
 		while ( rs.next() ){
 			trip = new TripExt();
+			trip.setId(new AgencyAndId(rs.getString("agencyid"),rs.getString("id")));
 			trip.setEpshape(rs.getString("epshape"));
 			trip.setLength( rs.getDouble("length") + rs.getDouble("tlength") );
 			trip.setTripHeadsign(rs.getString("tripheadsign"));
 			trip.setBlockId(rs.getString("blockid"));
+			trip.setServiceId(new AgencyAndId(rs.getString("serviceid_agencyid"), rs.getString("serviceid_id")));			
 			output.add(trip);
 		}
 		connection.close();
@@ -149,8 +151,8 @@ public class SpatialEventManager {
 			st.setStopHeadsign(rs.getString("stopheadsign"));
 			st.setTimepoint(rs.getInt("timepoint"));			
 			StopExt stop = new StopExt();
-			AgencyAndId agencyAndId = new AgencyAndId(rs.getString("stops_agencyid"), rs.getString("stop_id"));
-			stop.setName(rs.getString("stopname"));
+			AgencyAndId agencyAndId = new AgencyAndId(rs.getString("stop_agencyid"), rs.getString("stop_id"));
+			stop.setName(rs.getString("stopsname"));
 			stop.setId(agencyAndId);
 			st.setStop(stop);			
 			output.add(st);
@@ -315,4 +317,26 @@ public class SpatialEventManager {
 		}		
 		return response;
 	}	
+
+	public static float getFareMedianForState(List<String> selectedAgencies, int FareCount, int dbindex) throws SQLException{
+		float output = 0;
+		String query = "SELECT price::float FROM gtfs_fare_attributes WHERE agencyid IN (";
+		for (String agencyId : selectedAgencies)
+			query = query.concat("'" + agencyId + "',");
+		query = query.concat("'') ORDER BY price");
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		int medianIndex = (int) Math.ceil(FareCount/2); // the number that points to the median row in "gtfs_fare_attributes" table.
+		int counter = 0;
+		while(rs.next()){
+			if (counter++ == medianIndex){
+				output = (float) rs.getDouble("price");
+				System.out.println(counter);
+			}
+		}
+		System.out.println(medianIndex);
+		return output;
+	}
 }

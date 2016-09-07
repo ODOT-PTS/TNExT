@@ -91,8 +91,8 @@
 				</p>
 				<input  type="text" autofocus style="visibility:hidden">
 			</div>
-			<div style="width:40%; margin-left:10%; margin-bottom:6%">
-				<div id="blocksLengend">
+			<div style="width:40%; margin-left:5%; margin-bottom:6%">
+				<div id="blocksLengend" style="width:100%">
 				
 				</div>
 			</div>
@@ -340,7 +340,7 @@
     <div id="dialogResults" title="Report Results">
 	</div>
     <div id="map"> </div>
-    <div id="con-graph-dialog" title="Transit Connectivity Graph"></div>
+    <div id="con-graph-dialog" title="Transit Connectivity Graph" style="min-height:350px"></div>
    	<script type="text/javascript" src="resources/js/client.js"></script>
 </body>
 </html>
