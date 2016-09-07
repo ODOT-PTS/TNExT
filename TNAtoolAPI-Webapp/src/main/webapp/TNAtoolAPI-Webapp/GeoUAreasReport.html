@@ -29,30 +29,57 @@
 	
 <script type="text/javascript">
 
+var areaid=getURIParameter("areaid");
 var upop = getURIParameter("pop");
+var popMax = getURIParameter("popMax");
+var popMin = getURIParameter("popMin");
+var geotype=getURIParameter("type");
 var fAverage = new Array();
 var fMedian = new Array();
+var ipop=popYear;
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
-'<th class="metric" title="Name of the geographic area." id="an">Name</th>'+
-'<th class="metric" title="Total population of the geographic area.">Population</th>'+
-'<th class="metric" title="Total land area of the geographic area in square miles.">Land Area</th>'+
-'<th class="metric" title="Total water area of the geographic area in square miles.">Water Area</th>'+
-'<th class="metric" title="Total number of transit agencies operating in the given geographic area.">Total Agencies</th>'+
-'<th class="metric" title="Total number of routes serving stops in the given geographic area.">Total Routes</th>'+
-'<th class="metric" title="Total number of stops within the given geographic area.">Total Stops</th></tr>';	
+if (areaid!="null"){
+	
+tmp ='<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
+'<th class="metric"   title="Name of the geographic area." id="an">Name</th>'+
+'<th class="metric" title=" Overlapping population of the geographic area with the urban area.">Overlapping Population</th>'+
+'<th class="metric" title=" Total population of the  urban area.">Total Population</th>'+
+'<th  class="metric" title=" Overlapping Employment (RAC) of the geographic area with the urban area.">Overlapping Employment(RAC)</th>'+
+'<th id="emp1" class="metric" title=" Overlapping Employees (WAC) of the geographic area with the urban area.">Overlapping Employees(WAC)</th>'+
+'<th class="metric" title=" Overlapping land area of the geographic area and urban area in square miles.">Overlapping Land Area</th>'+
+'<th class="metric" title="Overlapping water area of the geographic area and urban area in square miles.">Overlapping Water Area</th>'+
+'<th class="metric" title=" number of overlapping transit agencies operating in the given geographic area.">Overlapping  Agencies</th>'+
+'<th class="metric" title=" number of routes serving stops in the given geographic area.">Overlapping  Routes</th>'+
+'<th class="metric" title=" number of stops within the given geographic area.">Overlapping  Stops</th></tr>';	
+}
+else{
+	
+	tmp ='<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
+	'<th class="metric"   title="Name of the geographic area." id="an">Name</th>'+
+	'<th class="metric" title="  population of the geographic area.."> Population</th>'+
+	'<th  class="metric" title="  Employment (RAC) of the geographic area."> Employment(RAC)</th>'+
+	'<th id="emp1" class="metric" title="  Employees (WAC) of the geographic area."> Employees(WAC)</th>'+
+	'<th class="metric" title="  land area of the geographic area  in square miles."> Land Area</th>'+
+	'<th class="metric" title=" water area of the geographic area  in square miles."> Water Area</th>'+
+	'<th class="metric" title=" number of  transit agencies operating in the given geographic area.">  Agencies</th>'+
+	'<th class="metric" title=" number of routes serving stops in the given geographic area.">  Routes</th>'+
+	'<th class="metric" title=" number of stops within the given geographic area.">  Stops</th></tr>';	
+
+}
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
+	$('#popMax').val(popMax);
+	$('#popMin').val(popMin);
 	setPopOptions();
 	loadDBList();
 	updateToolTips();
 	progressBar();
 	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&agency='+agencyId+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&agency='+agencyId+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	}
 	$.ajax({
 		type: 'GET',
@@ -67,12 +94,26 @@ $(document).ready(function(){
 			$('h2').append('Urban Areas Summary Report '+nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
-				item.Name + '</td><td>' +numberconv(item.population) +
-				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
-				if (agencyId!=null){
-					html+='<td>1</td>';
+				item.Name + '</td><td>' +numberconv(item.population) +'</td>';
+				if (areaid!="null"){
+									html+='<td>'+numberconv(item.Totalupop) +'</td>';
+				}
+				
+				html+='<td>'+numberconv(item.employment)+'</td>';
+				
+				if (ipop>2010){
+					html+='<td>N/A</td>';
+				}
+				else{
+					
+				html+='<td>'+numberconv(item.employees)+'</td>';
+				}
+				html+='<td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td>';
+			
+				if (agencyId){html+='<td>1</td>';
 				} else {
 					html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
+					
 				}
 		   		html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
 				'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td></tr>';								   			
@@ -87,11 +128,13 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						var keyName = setDates(qstringd); 		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid='+qstring+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+areaid);
 			    }else if($(this).attr('type')=="AC"){
 			    	qstring = $(this).attr('id');			    	
-			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear);
-			    }else if($(this).attr('type')=="RC"){
+			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+areaid);
+			    }
+			    
+			    else if($(this).attr('type')=="RC"){
 			    	qstring = $(this).attr('id');
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
@@ -100,7 +143,7 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=3'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
+		    		url +='&areaid='+qstring+'&type=3'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+areaid;
 			    	window.open(url);			    	
 			    }else if($(this).attr('type')=="SC"){
 			    	qstring = $(this).attr('id');
@@ -111,12 +154,14 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=3'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear;
+		    		url +='&areaid='+qstring+'&type=3'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+areaid;
 		    		window.open(url);
 			    };
 			});
+		
 			
 			table = buildDatatables();
+			
 			
 			$('#RT tbody').on('click', 'td.details-control', function () {
 		        var tr = $(this).parents('tr');
@@ -180,18 +225,23 @@ $(document).ready(function(){
 				</div>
 			  </td>
 			  
-			  <td id="td3">
-			  	<div class="headerBR" > 
-			    		
-		    	</div>
-			  </td>
-			</tr>
-		</table>		
+			
 		
+			  <td id="td4" >
+			  	<div class="headerBR" > 
+			       Minimum Urban Population   <span class="IOSym">(1)</span><input type="text" id="popMin" name="popMin" data-iomap="2" data-label="Minimum Urban Population" class="input tbox" onkeypress="return isWholeNumber(event)" style="width: 65px;" />	
+			   <input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
+			    	    Maximum Urban Population<span class="IOSym">(2)</span><input type="text" id="popMax" name="popMax" data-iomap="1" data-label="Maximum Urban Population" class="input tbox" onkeypress="return isNumber(event)" style="width: 65px; "/>	<br>		    		
+			    		
+			    	</div>
+			  </td>	    
+			</tr>
+		</table>
 		
 		<p id="displayReport"><br></p>
 		<br>
 		<br>
 		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
 </body>
+
 </html>

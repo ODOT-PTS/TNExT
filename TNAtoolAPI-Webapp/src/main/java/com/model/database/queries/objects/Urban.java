@@ -18,6 +18,9 @@
 package com.model.database.queries.objects;
 
 
+
+
+
 public class Urban {
 	private String urbanId;
 	private String name;
@@ -26,7 +29,9 @@ public class Urban {
     private double latitude;
     private double longitude;
     private long landarea;
-    private long waterarea;
+    private long waterarea; 
+    private long employment;
+    private long employees;
     private int population2010;
     private int population2015;
     private int population2020;
@@ -194,6 +199,21 @@ public class Urban {
     
     public Integer getPopulation2050() {
         return population2050;
+    }
+    
+    public void setemployment(long employment) {
+        this.employment = employment;
+    }
+    
+    public long getemployment() {
+        return employment;
+    }
+    public void setemployees(long employees) {
+        this.employees = employees;
+    }
+    
+    public long employees() {
+        return employees;
     }
     
     public Integer getPopulation(int year) {

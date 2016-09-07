@@ -83,6 +83,15 @@ public class StopR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String racWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String wacWithinX;
+	
+	
+	@XmlAttribute
+    @JsonSerialize
     public String OverFiftyPop;
 	
 	@XmlAttribute

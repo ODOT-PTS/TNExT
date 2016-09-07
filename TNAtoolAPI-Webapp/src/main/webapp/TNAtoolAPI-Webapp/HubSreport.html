@@ -35,6 +35,7 @@ var w_qstringx = parseFloat(getURIParameter("x1"));
 var w_qstringx2 = parseFloat(getURIParameter("x2"));
 var w_qstringx3 = parseFloat(getURIParameter("x3"));
 var stops = [];
+var ipop= popYear;
 var dateIOnumber = 4; // the number is used to map the date(s) to metric affected by it.
 var algDesc = "\r\n\r\n\r\nClustering Algorithm\r\n" +
 "--------------------\r\n" +
@@ -59,6 +60,8 @@ tmp = '<tr><th id="an" title="ID number randomly assigned to the cluster.">ID</t
 '<th class="metric" title="Total number of counties that the cluster is located in.">Counties Count <span class="IOSym">(1)</span></th>'+
 '<th class="metric" title="Total number of census places that the cluster is located in.">Census Places Count <span class="IOSym">(1)</span></th>'+
 '<th class="metric" title="Unduplicated sum of the population within the X radius distance of all stops in the cluster. This metric is date-independent.">Population Served <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric" title="Unduplicated sum of the Employment (RAC) within the X radius distance of all stops in the cluster. This metric is date-independent.">Employment Served(RAC) <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric" title="Unduplicated sum of the Employees (WAC) within the X radius distance of all stops in the cluster. This metric is date-independent.">Employees Served (WAC)<span class="IOSym">(1)(2)</span></th>'+
 '<th class="metric" title="Sum of the population of urban areas that stops in the cluster are located in.">Urban Population <span class="IOSym">(1)(2)</span></th>'+
 '<th class="metric" title="Unduplicated list of transit agencies that serve stops in the cluster.">Transit Agencies <span class="IOSym">(1)</span></th>'+
 '<th class="metric" title="Detailed list of stops in the cluster.">Stops <span class="IOSym">(1)</span></th>'+
@@ -122,7 +125,16 @@ $(document).ready(function(){
 				+'</td><td>' + item.countiescount
 				+'</td><td>' + item.placescount
 				+'</td><td>' + numberconv(item.pop) 
-				+'</td><td>' + numberconv(item.urbanareaspop) 
+				+'</td><td>' + item.rac+'</td>';
+				if(ipop>2010)
+				{
+				html+='<td>N/A</td>';
+				}
+				else
+			{	
+				html+='<td>' + item.wac+'</td>';
+			}
+				html+='</td><td>' + numberconv(item.urbanareaspop) 
 				+'</td><td>' + item.agenciesNames 
 				+'</td><td class="details-control">'
 				+'</td><td class="details-control">'
@@ -362,7 +374,7 @@ $(document).ready(function(){
 			    	Population Search Radius(miles)<span class="IOSym">(2) </span><input type="text" name="x2" id="PopSradius" data-IOMap="2" data-label="Population Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div><br>
 			    	<div style="float:right;margin-top:2px;"> 
-			    	Park &amp; Ride Search Radius(miles)<span class="IOSym">(3)  </span><input type="text" name="x3" id="PnrSradius" data-IOMap="3" data-label="Park & Ride Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
+			    	Park & Ride Search Radius(miles)<span class="IOSym">(3)  </span><input type="text" name="x3" id="PnrSradius" data-IOMap="3" data-label="Park & Ride Search Radius(miles)" class="input radius tbox" style="margin-right:58px;" onkeypress="return isNumber(event)"/>
 			    	</div>
 			    </td>			    
 			</tr>

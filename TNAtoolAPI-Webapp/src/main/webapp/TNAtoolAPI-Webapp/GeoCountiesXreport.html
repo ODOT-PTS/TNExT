@@ -39,6 +39,9 @@ var areaName;
 var popServedLOS;
 var popWithinX;
 var popServed;
+var ipop = popYear;
+
+
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 tmp = '<tr><th>Metric</th><th>Value</th></tr>';
@@ -76,11 +79,38 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric" title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area.">Percent of Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.PopServedAtLoService))
 			+'</td></tr><tr><td class="metric" title="Summation of unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service.">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.UPopServedAtLoService)			
 			+'</td></tr><tr><td class="metric" title="Summation of unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service.">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.RPopServedAtLoService)
-			+'</td></tr><tr><td class="metric" title="100 minus percent of population served.">Percent of Population Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.PopUnServed))
+		    +'</td></tr><tr><td class="metric" title="100 minus percent of population served.">Percent of Population Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.PopUnServed))
 			+'</td></tr><tr><td class="metric" title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates.">Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.ServiceStops)
 			+'</td></tr><tr><td class="metric" title="Total unduplicated urban population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Urban population served by service is calculated as service stops multiplied by the unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates.">Urban Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.UPopServedByService)
 			+'</td></tr><tr><td class="metric" title="Total unduplicated rural population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Rural population served by service is calculated as service stops multiplied by the unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates.">Rural Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.RPopServedByService)
-			+'</td></tr><tr><td class="metric" title="Set of days (from the selected days) in which at least one trip within the given geographic area is served.">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
+		    //RAC
+		    +'</td></tr><tr><td class="metric" title="Summation of unduplicated  employment(RAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">Employment Served (RAC) (Unduplicated)<span class="IOSym">(1)</span></td><td>' +  numberconv(item.racWithinX)
+			+'</td></tr><tr><td class="metric" title="Summation of unduplicated employment (RAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total employment (RAC) of the given geographic area.">Percent of Employment (RAC)  Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.racServed))
+			+'</td></tr><tr><td class="metric" title="Summation of unduplicated employment (RAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total employment (RAC) of the given geographic area.">Percent of Employment (RAC)  Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.racServedAtLoService))
+			+'</td></tr><tr><td class="metric" title="Summation of unduplicated  employment (RAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service."> Employment (RAC)  Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalracServedAtLoService)		
+			+'</td></tr><tr><td class="metric" title="100 minus percent of Employment (RAC) served.">Percent of Employment (RAC) Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.racUnServed))
+			+'</td></tr><tr><td class="metric" title="Total unduplicated  Employment (RAC) impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.  Employment (RAC) served by service is calculated as service stops multiplied by the unduplicated  Employment (RAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."> Employment (RAC) Served By Service<span class="IOSym">(1)(3)</span></td><td>' +numberconv(item.racServedByService)+'</td></tr>';
+           //RAC		
+           //WAC
+           if(popYear==2010){ html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."> Employees (WAC) Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
+			+'</td></tr><tr id="wac3"><td  class="metric" title="Summation of unduplicated employees(WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total employee(WAC) of the given geographic area.">Percent of Employees (WAC)  Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.wacServed))
+			+'</td></tr><tr id="wac4"><td  class="metric" title="Summation of unduplicated employees(WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total employee(WAC) of the given geographic area.">Percent of Employees (WAC)  Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.wacServedAtLoService))
+			+'</td></tr><tr id="wac5"><td  class="metric" title="Summation of unduplicated  employees(WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service.">Employees (WAC)  Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalwacServedAtLoService)			
+			+'</td></tr><tr id="wac7"><td  class="metric" title="100 minus percent of employees (WAC) served.">Percent of Employee (WAC) Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.wacUnServed))
+		    +'</td></tr><tr id="wac8"><td  class="metric" title="Total unduplicated  employees (WAC) impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.  Employees (WAC) served by service is calculated as service stops multiplied by the unduplicated urban Employee (WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."> Employees (WAC) Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.wacServedByService)+'</td></tr>';
+       }
+           else{
+        	   
+	        html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."> Employees (WAC) Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' + 'N/A'
+			+'</td></tr><tr id="wac3"><td  class="metric" title="Summation of unduplicated employees(WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total employee(WAC) of the given geographic area.">Percent of Employees (WAC)  Served<span class="IOSym">(1)</span></td><td>' + 'N/A'
+			+'</td></tr><tr id="wac4"><td  class="metric" title="Summation of unduplicated employees(WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total employee(WAC) of the given geographic area.">Percent of Employees (WAC)  Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + 'N/A'
+            +'</td></tr><tr id="wac5"><td  class="metric" title="Summation of unduplicated  employees(WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service.">Employees (WAC)  Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + 'N/A'
+			+'</td></tr><tr id="wac7"><td  class="metric" title="100 minus percent of employees (WAC) served.">Percent of Employee (WAC) Unserved<span class="IOSym">(1)</span></td><td>'+ 'N/A'
+		    +'</td></tr><tr id="wac8"><td  class="metric" title="Total unduplicated  employees (WAC) impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.  Employees (WAC) served by service is calculated as service stops multiplied by the unduplicated urban Employee (WAC) within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates."> Employees (WAC) Served By Service<span class="IOSym">(1)(3)</span></td><td>' + 'N/A'+'</td></tr>';
+          }
+            //WAC		
+
+	html+='<tr><td class="metric" title="Set of days (from the selected days) in which at least one trip within the given geographic area is served.">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
 			+'</td></tr><tr><td class="metric" title="List of geographic areas of the same type that are connected to the area of interest through routes.">Connected Communities</td><td>'+(item.ConnectedCommunities).replace(/County/g,'')   
 			+'</td></tr><tr><td class="metric" title="Earliest and latest arrival and departure times of all transit stops within the given geographic area.">Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService
 			+'</td></tr><tr><td class="metric" title="If available, this field points to the fare minimum for the given geographic area.">Minimum Fare</td><td>'+showDollarSign(item.MinFare)
@@ -88,6 +118,8 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric" title="If available, this field points to the fare median for the given geographic area.">Median Fare</td><td>'+showDollarSign(item.MedianFare)
 			+'</td></tr><tr><td class="metric" title="If available, this field points to the fare maximum for the given geographic area.">Maximum Fare</td><td>'+showDollarSign(item.MaxFare)+'</td>';
 			html +='</tr></tbody></table>';
+			
+	
 			
 			$('#displayReport').append($(html));
 			areaName = item.AreaName;
@@ -99,6 +131,7 @@ $(document).ready(function(){
 			tableProperties.paging = false;
 			tableProperties.ordering = false;
 			tableProperties.unsortableCols = [0,1];
+		
 			table = buildDatatables();
 			
 			$('#RT tbody').on('click', 'td.details-control', function () {
@@ -139,7 +172,7 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population/Employment Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>

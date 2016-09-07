@@ -25,6 +25,8 @@ public class GeoArea {
 	private long population;    
     private long landarea;
     private long waterarea;
+    private long employment;
+    private long employee;
     
     
     
@@ -96,4 +98,21 @@ public class GeoArea {
 	public void setWaterarea(long waterarea) {
 		this.waterarea = waterarea;
 	}	  
+	public double getEmployment() {
+		return employment;
+	}
+
+	public void setEmployment(long employment) {
+		this.employment = employment;
+	}	  
+	public double getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(long employee) {
+		this.employee = employee;
+	}	  
+
 }
+
+
