@@ -52,6 +52,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.io.ZipOutputStream;
 import net.lingala.zip4j.model.ZipParameters;
@@ -148,6 +149,8 @@ import com.model.database.queries.objects.TransitError;
 import com.model.database.queries.objects.TripSchedule;
 import com.model.database.queries.objects.Urban;
 import com.model.database.queries.objects.agencyCluster;
+import com.model.database.queries.timingcon.ConTrip;
+import com.model.database.queries.timingcon.TripTime;
 import com.model.database.queries.util.StringUtils;
 import com.model.database.queries.util.Types;
 import com.webapp.modifiers.DbUpdate;
@@ -235,39 +238,12 @@ public class Queries {
 	public Object getShapeFile(@QueryParam("agencyids") String agencyIDs,
 			@QueryParam("flag") String flag,
 			@QueryParam("dbName") String dbName,
+			@QueryParam("dbIndex") Integer dbIndex,
 			@QueryParam("username") String username) throws SQLException,
 			IOException, ZipException, InterruptedException {
-		String query = "";
+		
 		String[] agencies = agencyIDs.split(",");
 		String feeds = "";
-		if (agencies.length > 1){
-			feeds = "((SELECT " + agencies[0] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[0] + " || '%') ";
-			for (int i = 1; i < agencies.length ; i++)
-				feeds += " UNION ALL (SELECT " + agencies[1] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[1] + " || '%')";
-			feeds += " ) ";
-		}else{
-			feeds = "(SELECT " + agencies[0] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[0] + " || '%')";
-		}
-		if (flag.equals("routes")) {
-			query = "SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
-					+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
-					+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
-					+ " shape AS trip_shape "
-					+ "	FROM gtfs_routes AS routes "
-					+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
-					+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
-					+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
-					+ "	WHERE routes.agencyid IN (" + agencyIDs + ")";
-		} else if (flag.equals("stops")) {
-			query += "SELECT agencies.name AS PRVDR_NM, '1899-12-30' AS arrival_ti, '1899-12-30' AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
-					+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
-					+ " 	CURRENT_DATE AS GIS_PRC_DT, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, stops.location AS shape "
-					+ "		FROM gtfs_stops AS stops "
-					+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-					+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id "
-					+ "		INNER JOIN " + feeds + " AS feeds ON feeds.aid = map.agencyid "
-					+ "		WHERE map.agencyid IN (" + agencyIDs + ")";
-		}
 		
 		// get database parameters
 		String path = MainMap.class.getProtectionDomain().getCodeSource()
@@ -293,63 +269,84 @@ public class Queries {
 			Date dNow = new Date( );
 			SimpleDateFormat ft = new SimpleDateFormat ("hhmmss");
 			String uniqueString = ft.format(dNow);
-		
+			
+		//The folder that contains agencies shapefile folders.
 		String folderName = flag + "_shape_" + uniqueString;
-		File folder = new File (path + "/" + folderName);
-		folder.mkdir();
-		String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
-		ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
-				, folder.getAbsolutePath() + "\\" + flag + "_shape"
-				, params[0]
-				, params[2]
-				, params[3]
-				, dbName
-				,"\"" + query + "\""
-				, psqlPath);	
-		Process pr = pb.start();
-		pr.waitFor(5,TimeUnit.MINUTES);
+		File mainFolder = new File (path + "/" + folderName);
+		mainFolder.mkdir();
 		
-		// start compression once the files are generated
-		File zipF = new File(path + "/" + flag + "_shape_" + uniqueString + ".zip");
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipF));
-        InputStream in = null;
-        File[] sfiles = folder.listFiles();
+		// Getting hashmap of agencies (AgencyId -> AgencyName)
+		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager.getAllAgencies(username, dbIndex);
+		
+		for ( int i = 0 ; i < agencies.length ; i++){
+			String agencyId = agencies[i];
+			String query = "";
+			feeds = "(SELECT '" + agencyId + "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '" + agencyId + "' || '%')";
+
+			if (flag.equals("routes")) {
+				query = "SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
+						+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
+						+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
+						+ " shape AS trip_shape "
+						+ "	FROM gtfs_routes AS routes "
+						+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
+						+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
+						+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
+						+ " WHERE routes.agencyid = '" + agencyId + "'";
+			} else if (flag.equals("stops")) {
+				query += "SELECT agencies.name AS PRVDR_NM, ('1899-12-30'||' '||current_time)::date AS arrival_ti, ('1899-12-30'||' '||current_time)::date AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
+						+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
+						+ " 	feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, stops.location AS shape "
+						+ "		FROM gtfs_stops AS stops "
+						+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+						+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id "
+						+ "		INNER JOIN " + feeds + " AS feeds ON feeds.aid = map.agencyid "
+						+ "		WHERE map.agencyid ='" + agencyId + "'";
+			}
+			
+			// Folder that contains agency's shapefiles
+			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
+			File agencyFolder = new File(path + "/" + flag + "_shape_" + uniqueString + "/" + tempAgencyname + "_" + flag);
+			agencyFolder.mkdirs();
+
+			// Run the command to generate shapefiles for the agency
+			String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
+			ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
+					, agencyFolder.getAbsolutePath() + "\\" + tempAgencyname + "_" + flag + "_shape"
+					, params[0]
+					, params[2]
+					, params[3]
+					, dbName
+					,"\"" + query + "\""
+					, psqlPath);	
+
+			Process pr = pb.start();
+			pr.waitFor(5,TimeUnit.MINUTES);
+		}
 
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        parameters.setIncludeRootFolder(false);
         
-        for(File f: sfiles){
-        	out.putNextEntry(f, parameters);
-        	
-        	in = new FileInputStream(f);
-            byte[] readBuff = new byte[4096];
-            int readLen = -1;
-            while ((readLen = in.read(readBuff)) != -1) {
-            	out.write(readBuff, 0, readLen);
-            }
-        	
-            out.closeEntry();
-        	in.close();
-        }
-        out.finish();
-        out.close();
-        FileUtils.deleteDirectory(folder);
+        ZipFile zipF = new ZipFile(path + "/" + flag + "_shape_" + uniqueString + ".zip");
+        zipF.createZipFileFromFolder(mainFolder, parameters, false, 0);
+        
+        FileUtils.deleteDirectory(mainFolder);
         
         // delete the file after 5 minutes.
         Timer timer;
         ActionListener a = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				zipF.delete();
+				zipF.getFile().delete();
 			}
 		};
 		timer = new Timer(1, a);
 		timer.setRepeats(false);
 		timer.setInitialDelay(5*60000);
-		timer.start();
-		
-        return "downloadables/shapefiles/" +  zipF.getName();
+		timer.start();		
+        return "downloadables/shapefiles/" +  zipF.getFile().getName();
 	}
 	
 	/** Generates Counties P&R Report*/
@@ -729,6 +726,124 @@ public class Queries {
 		return shape;
     }
   
+    /**
+     * Returns all the trips that have a stops within a given distance from 
+     * the stops of a selected trip and run within the given time window.
+     * The method is used to generate Missed Opportunity and Timing Connection Reports.
+     *  
+     * @param radius
+     * @param agencyId
+     * @param date
+     * @param dbindex
+     * @param timeWin
+     * @param tripId
+     * @return List of trips along with the time difference between the time one arrives at a stop and 
+     * 		the time connected trip passes through the other stop.
+     * @throws SQLException
+     */
+    @GET
+    @Path("/timingCon")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getTimingCon(@QueryParam("radius") String radius, 
+    		@QueryParam("agencyId") String agencyId, 
+    		@QueryParam("date") String date,
+    		@QueryParam("dbindex") Integer dbindex,
+    		@QueryParam("timeWin") Integer timeWin,
+    		@QueryParam("tripId") String tripId) throws SQLException{
+    	
+    	List<ConTrip> response = new ArrayList<ConTrip>();
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	
+    	// Setting date
+    			String fulldate = null;
+    	       	String day = null; 
+    			String[] dates = date.split(",");
+    	       	String[][] datedays = daysOfWeekString(dates);
+    	       	fulldate = datedays[0][0];
+    	       	day = datedays[1][0];
+    	       	
+    	Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query ="WITH tripstops AS (SELECT trips.epshape AS shape1, stop_id, stop_agencyid, stopsequence, arrivaltime, departuretime, stops.location FROM gtfs_stop_times AS times INNER JOIN gtfs_stops AS stops ON stop_id=id AND stop_agencyid=agencyid " +
+				"	INNER JOIN gtfs_trips AS trips ON trips.agencyid = '" + agencyId + "' and trips.id = '" + tripId + "' " +
+				"	WHERE times.trip_agencyid = '" + agencyId + "' AND times.trip_id = '" + tripId + "'), " +
+				" " +
+				"connectedstops AS (SELECT arrivaltime, departuretime, stopsequence, stop_id AS stopid1 ,id AS stopid2, name AS stopname2, lat AS stoplat2, lon AS stoplon2, agencyid AS agencyid2, lat, lon, stops.location, shape1 " +
+				"	FROM gtfs_stops AS stops  " +
+				"	INNER JOIN tripstops ON ST_DISTANCE(tripstops.location, stops.location) < " + radius + " " +
+				"	WHERE id <> stop_id " +
+				"	ORDER BY stopsequence), " +
+				"connectedroutes AS (SELECT stopid1, map.agencyid, map.agencyid_def, map.routeid, stopid2, stopname2, stoplat2, stoplon2, arrivaltime, departuretime, shape1 " +
+				"	FROM gtfs_stop_route_map AS map  " +
+				"	INNER JOIN connectedstops ON map.agencyid_def = connectedstops.agencyid2 and stopid = stopid2), " +
+				" " +
+				"connectedtrips AS (SELECT trips.id AS tripid, trips.agencyid AS tripagencyid, routes.shape1, trips.epshape AS shape2, trips.route_id AS routeid, trips.route_agencyid,  " +
+				"	routes.agencyid_def AS route_agencyid_def, serviceid_id AS serviceid, arrivaltime, departuretime, stopid1, stopid2, stopname2, stoplat2, stoplon2 " +
+				"	FROM gtfs_trips AS trips  " +
+				"	INNER JOIN connectedroutes AS routes " +
+				"	ON trips.route_id = routes.routeid AND trips.route_agencyid = routes.agencyid), " +
+				"exceptiondates AS (SELECT * FROM gtfs_calendar_dates WHERE serviceid_agencyid IN (SELECT DISTINCT route_agencyid_def FROM connectedtrips) AND date::int = '" + fulldate + "'), " +
+				" " +
+				"tripsoftheday1 AS (SELECT trips.*  " +
+				"	FROM connectedtrips AS trips  " +
+				"	INNER JOIN gtfs_calendars AS cal ON cal.serviceid_agencyid = trips.route_agencyid_def AND cal.serviceid_id = trips.serviceid " +
+				"	WHERE startdate::int <= " + fulldate + " AND enddate::int >= " + fulldate + " AND " + day + "= 1 " +
+				"	), " +
+				" " +
+				"tripsoftheday2 AS (SELECT trips.* FROM connectedtrips AS trips  " +
+				"	INNER JOIN exceptiondates AS dates ON dates.serviceid_agencyid = trips.route_agencyid_def AND dates.serviceid_id = trips.serviceid " +
+				"	WHERE exceptiontype = 1 " +
+				"	), " +
+				" " +
+				"alltripsoftheday AS (select * from tripsoftheday1 UNION ALL (select * from tripsoftheday2)), " +
+				"tripsoftheday AS (SELECT alltrips.* FROM alltripsoftheday AS alltrips  " +
+				"	LEFT JOIN (SELECT * FROM exceptiondates WHERE exceptiontype=2) AS offdates " +
+				"	ON alltrips.route_agencyid_def = offdates.serviceid_agencyid AND alltrips.serviceid = offdates.serviceid_id  " +
+				"	WHERE offdates.serviceid_id IS NULL  " +
+				"	AND arrivaltime <> -999 AND tripid <> '" + tripId + "'), " +
+				" " +
+				"tripswithintimewindow AS (SELECT trips.stopid1, trips.stopid2, trips.stopname2, stoplat2, stoplon2, trips.routeid, trips.route_agencyid, trips.tripid, tripagencyid,  " +
+				"	serviceid, trips.arrivaltime as arrival1, trips.departuretime AS departure1, " +
+				"	times.arrivaltime AS arrival2, times.departuretime AS departure2, (times.departuretime - trips.arrivaltime) AS diff, trips.shape1, trips.shape2 " +
+				"	FROM tripsoftheday AS trips  " +
+				"	INNER join gtfs_stop_times AS times " +
+				"	ON trips.tripagencyid = times.trip_agencyid AND trips.tripid=times.trip_id AND trips.stopid2 = times.stop_id " +
+				"	WHERE ABS(trips.arrivaltime - times.departuretime) <" + timeWin + "*60) " +
+				" " +
+				"SELECT agencies.name AS agency_name, routes.longname AS route_name, stops.name AS stopname1, stops.lat AS stoplat1, stops.lon AS stoplon1, tripswithintimewindow.* FROM tripswithintimewindow " +
+				"	INNER JOIN gtfs_agencies AS agencies ON tripswithintimewindow.tripagencyid = agencies.id " +
+				"	INNER JOIN gtfs_routes AS routes ON tripswithintimewindow.route_agencyid = routes.agencyid " +
+				"		AND tripswithintimewindow.routeid = routes.id " +
+				"	INNER JOIN gtfs_stops AS stops ON stopid1 = stops.id AND stops.agencyid IN (SELECT id FROM gtfs_agencies WHERE defaultid = '" + agencyId + "') ";
+//		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			ConTrip e = new ConTrip();
+			e.agencyId = rs.getString("route_agencyid");
+			e.agencyName = rs.getString("agency_name");
+			e.arrival1 = rs.getInt("arrival1");
+			e.arrival2 = rs.getInt("arrival2");
+			e.departure1 = rs.getInt("departure1");
+			e.departure2 = rs.getInt("departure2");
+			e.routeId = rs.getString("routeid");
+			e.routeName = rs.getString("route_name");
+			e.stopId1 = rs.getString("stopid1");
+			e.stopName1 = rs.getString("stopname1");
+			e.stopName2 = rs.getString("stopname2");
+			e.stopId2 = rs.getString("stopid2");
+			e.stopLat1 = rs.getDouble("stoplat1");
+			e.stopLon1 = rs.getDouble("stoplon1");
+			e.stopLat2 = rs.getDouble("stoplat2");
+			e.stopLon2 = rs.getDouble("stoplon2");
+			e.timeDiff = rs.getInt("diff");
+			e.tripShape1 = rs.getString("shape1");
+			e.tripShape2 = rs.getString("shape2");
+			response.add(e);
+		}
+    	return response;
+    }
  
     /**
      * Return a list of all stops for a given route id in the database
@@ -1078,6 +1193,7 @@ public class Queries {
 	
 	/**
 	 * Generates The stops report and geographic allocation of service for transit agencies
+	 * @throws SQLException 
 	 */
 	    
 	/*@GET
@@ -1119,6 +1235,101 @@ public class Queries {
 	    return response;
 	}*/
 
+	/**
+	 * Returns the list of routes operated by and agency regardless of being active or not.
+	 * @param agencyId
+	 * @param dbindex
+	 * @param username
+	 * @return RouteListR
+	 * @throws SQLException
+	 */
+	@GET
+	@Path("/agencyRoutes")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getAgencyRoutes(@QueryParam("agency") String agencyId, @QueryParam("dbindex") Integer dbindex,
+			@QueryParam("username") String username) throws SQLException{
+		RouteListR response = new RouteListR();
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query = "SELECT * FROM gtfs_routes WHERE agencyid = '" + agencyId + "'";
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			RouteR i = new RouteR();
+			i.AgencyId = agencyId;
+			i.RouteId = rs.getString("id");
+			i.RouteLName = rs.getString("longname");
+			i.RouteSName = rs.getString("shortname");
+			response.RouteR.add(i);
+		}
+		connection.close();
+		return response;
+	}
+	
+	/**
+	 * Returns the list of the trips running on the given date along with their start and end time in hh:mm:ss.
+	 * 
+	 * @param agencyId
+	 * @param date
+	 * @param radius
+	 * @param dbindex
+	 * @return
+	 * @throws SQLException
+	 */
+	@GET
+    @Path("/tripsOfTheDayByRoute")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object tripsOfTheDayByRoute(@QueryParam("agency") String agencyId, @QueryParam("date") String date,
+    		@QueryParam("radius") Double radius, @QueryParam("dbindex") Integer dbindex, @QueryParam("routeId") String routeId) throws SQLException{
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	List<TripTime> response = new ArrayList<TripTime>();
+    	
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query = "WITH aid AS (SELECT defaultid FROM gtfs_agencies WHERE id = '" + agencyId + "'), "
+				+ " services0 AS (SELECT * FROM gtfs_calendars WHERE startdate::int <= " + sdates[0] + " AND enddate::int >= " + sdates[0] + " AND serviceid_agencyid IN (SELECT * FROM aid) AND " + days[0] + " = 1), "
+				+ " exceptiondates AS (SELECT * FROM gtfs_calendar_dates WHERE serviceid_agencyid IN (SELECT * FROM aid) AND date::int = '" + sdates[0] + "'), "
+				+ " svcids0 AS (SELECT services0.serviceid_agencyid, services0.serviceid_id FROM services0 "
+				+ "	LEFT JOIN (SELECT * FROM exceptiondates WHERE exceptiontype=2) AS offdates "
+				+ "	ON services0.serviceid_id = offdates.serviceid_id WHERE offdates.serviceid_id IS NULL), "
+				+ " svcids AS (SELECT * FROM svcids0 UNION ALL (SELECT serviceid_agencyid, serviceid_id FROM exceptiondates WHERE exceptiontype=1)), "
+				
+				// SET OF ALL TRIPS OF THE AGENCY RUNNING ON THE GIVEN DATE "
+				+ " trips AS (SELECT trips.* FROM gtfs_trips AS trips INNER JOIN svcids USING(serviceid_agencyid,serviceid_id) "
+				+ " WHERE route_agencyid='" + agencyId + "' AND route_id = '" + routeId + "')"
+				
+				// SET OF FEASIBLE ROUTES ON THE SELECTED DATE ARE LISTED WITH THEIR RESPECTIVE TIME INTERVALS
+				+ " SELECT times.trip_agencyid, times.trip_id, FLOOR(MIN(arrivaltime)/3600) AS arrival_hour, FLOOR(MIN(arrivaltime)%3600/60) AS arrival_minute, FLOOR((MIN(arrivaltime)%3600%60)/60) AS arrival_second, "
+				+ "	FLOOR(MAX(departuretime)/3600) AS departure_hour, FLOOR(MAX(departuretime)%3600/60) AS departure_minute, FLOOR((MAX(departuretime)%3600%60)/60) AS departure_second "
+				+ "	FROM trips INNER JOIN gtfs_stop_times AS times "
+				+ "	ON trips.id = times.trip_id "
+				+ "	WHERE times.arrivaltime > 0 "
+				+ "	GROUP BY times.trip_agencyid, times.trip_id "
+				+ "	ORDER BY MIN(arrivaltime)";
+//		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			TripTime t = new TripTime();
+			t.tripId = rs.getString("trip_id");
+			t.start_hr = (int) rs.getDouble("arrival_hour");
+			t.start_min = (int) rs.getDouble("arrival_minute");
+			t.start_sec = (int) rs.getDouble("arrival_second");
+			t.end_hr = (int) rs.getDouble("departure_hour");
+			t.end_min = (int) rs.getDouble("departure_minute");
+			t.end_sec = (int) rs.getDouble("departure_second");
+			response.add(t);
+		}
+		return response;
+    }
+	
 	/**
 	 * Generates The Routes report:
 	 * routes report by agency
@@ -3168,4 +3379,8 @@ Loop:  	for (TripExt trip: routeTrips){
 		StartEndDates response = PgisEventManager.getsedates(username, agency, dbindex);    	
 		return response;
     }	
+    
+    
 }
+
+

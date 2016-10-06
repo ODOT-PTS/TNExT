@@ -80,6 +80,7 @@ $(document).ready(function(){
 		url+='areaid='+areaId+'&type='+type+'&';
 	}
 	url+='&x='+w_qstringx+'&day='+w_qstringd+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
+	console.log(url);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',

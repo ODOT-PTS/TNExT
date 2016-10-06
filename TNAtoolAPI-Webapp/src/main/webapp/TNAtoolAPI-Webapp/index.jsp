@@ -36,8 +36,9 @@
 	<script type="text/javascript" src="resources/js/onMapReport.js"></script>
 	<script type="text/javascript" src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
 	<script type="text/javascript" src="resources/js/JSMethods_Onmap.js"></script>
+	<script type="text/javascript" src="resources/js/TimingConnection.js"></script>
 	<script type="text/javascript" src="resources/js/JSMethods.js"></script>
-	
+	<script type="text/javascript" src="resources/js/ShapefileGenerator.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="resources/css/client.css" />	
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.css" />
