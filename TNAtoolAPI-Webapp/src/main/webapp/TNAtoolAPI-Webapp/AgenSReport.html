@@ -31,6 +31,8 @@
 	
 <script type="text/javascript">
 
+var type = parseInt(getURIParameter("type"));
+var areaId = getURIParameter("areaid");
 var counties = new Array();
 var cplaces = new Array();
 var uareas = new Array();
@@ -138,13 +140,14 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');	
 						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&areaid='+null+'&type='+null+'&route='+null+'&nav='+nav);	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+
+			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaid='+null+'&type='+0+'&username='+getSession()+'&geotype='+-1+'&geoid='+null+'&nav='+nav);	    		
 				    }else if($(this).attr('type')=="CSA"){
 				    	qstring = $(this).attr('id');
 				    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
@@ -153,8 +156,12 @@ $(document).ready(function(){
 				    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
 				    }else if($(this).attr('type')=="UASA"){
 				    	qstring = $(this).attr('id');
-				    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
-				    }else if($(this).attr('type')=="CDSA"){
+
+				    	var popMax='2000000';
+				    	var popMin='0'	;
+
+				    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+null+'&type=3'+'&nav='+nav);
+		    }else if($(this).attr('type')=="CDSA"){
 				    	qstring = $(this).attr('id');
 				    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
 				    }else if($(this).attr('type')=="OTSA"){
@@ -223,6 +230,7 @@ $(document).ready(function(){
     	}
 	});
 });
+
 </script>
 
 </head>
