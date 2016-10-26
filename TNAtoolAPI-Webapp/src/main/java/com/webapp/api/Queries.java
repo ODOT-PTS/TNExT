@@ -86,6 +86,7 @@ import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarE
 import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
 import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
 import com.model.database.queries.EventManager;
+import com.model.database.queries.FlexibleReportEventManager;
 import com.model.database.queries.PgisEventManager;
 import com.model.database.queries.SpatialEventManager;
 import com.model.database.queries.congraph.AgencyCentroid;
@@ -3588,6 +3589,14 @@ Loop:  	for (TripExt trip: routeTrips){
 		return response;
     }	
     
+    @GET
+    @Path("/getAreaList")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+    		MediaType.TEXT_XML })
+    public Object getAreaList(@QueryParam("areaType") String areaType,
+    		@QueryParam("dbindex") Integer dbindex) throws SQLException{
+    	return FlexibleReportEventManager.getAreaList(areaType, dbindex);
+    }
     
 }
 

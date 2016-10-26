@@ -1782,4 +1782,4 @@ $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append(
 /*
  * Timing connection wizard
  */
-//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="timing-connection-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="timing-conneciton-button" style="border-radius:5px; background-color:#FFF" onclick="TimingConStart()">T</button></div>');
+$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="flexRepButton"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="timing-conneciton-button" style="border-radius:5px; background-color:#FFF" onclick="flexRepDialog()">F</button></div>');

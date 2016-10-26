@@ -39,11 +39,13 @@
 	<script type="text/javascript" src="resources/js/TimingConnection.js"></script>
 	<script type="text/javascript" src="resources/js/JSMethods.js"></script>
 	<script type="text/javascript" src="resources/js/ShapefileGenerator.js"></script>
+	<script type="text/javascript" src="resources/js/FlexibleReporting.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="resources/css/client.css" />	
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.multidatespicker.css">
 	<link rel="stylesheet" type="text/css" href="resources/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="resources/css/FlexibleReporting.css" />
 	<link rel="stylesheet" type="text/css" href="vendors/MarkerCluster/MarkerCluster.css" />
 	<link rel="stylesheet" type="text/css" href="vendors/MarkerCluster/MarkerCluster.styles.css" />
 	<link rel="stylesheet" type="text/css" href="vendors/MarkerCluster/MarkerCluster.Default.css" />	
@@ -342,6 +344,22 @@
 	</div>
     <div id="map"> </div>
     <div id="con-graph-dialog" title="Transit Connectivity Graph" style="min-height:350px"></div>
+    <div id="flexRepDialog" title="Flexible Reporting Wizard" style="min-height:350px;">
+    	<div id="FlexRepContainer">
+	   		<div id="FlexRepTypes" class="flexRepDialogSection"></div>
+	    	<div id="FlexRepParamsMetrics" class="flexRepDialogSection">
+	    		<div id="FlexRepParamsHeader"></div>
+	   			<span class="header2" >Select report parameters:</span><hr><div id="FlexRepParams" class="FlexRepParamsMetricsContainer"></div>
+				<br><br>
+	   			<span class="header2" >Select desired metrics:</span><hr><div id="FlexRepMetrics" class="FlexRepParamsMetricsContainer"></div>
+	    	</div>   
+	    	<div id="FlexRepAgencies" class="flexRepDialogSection"></div>
+	    	<div id="FlexRepAreas" class="flexRepDialogSection"></div>
+	    	<div id="FlexRepUAreas" class="flexRepDialogSection"></div>
+    	</div>
+    	<br>
+    	<div style="clear:both;"><input type='submit' id='flexRepSubmit' value='Submit' onclick='openFlexRepTable()'></div>
+    </div>
    	<script type="text/javascript" src="resources/js/client.js"></script>
 </body>
 </html>
