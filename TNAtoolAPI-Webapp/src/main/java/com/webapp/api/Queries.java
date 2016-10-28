@@ -52,6 +52,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.io.ZipOutputStream;
 import net.lingala.zip4j.model.ZipParameters;
@@ -85,6 +86,7 @@ import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExamp
 //import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
 //import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
 import com.model.database.queries.EventManager;
+import com.model.database.queries.FlexibleReportEventManager;
 import com.model.database.queries.PgisEventManager;
 import com.model.database.queries.SpatialEventManager;
 import com.model.database.queries.congraph.AgencyCentroid;
@@ -148,6 +150,8 @@ import com.model.database.queries.objects.TransitError;
 import com.model.database.queries.objects.TripSchedule;
 import com.model.database.queries.objects.Urban;
 import com.model.database.queries.objects.agencyCluster;
+import com.model.database.queries.timingcon.ConTrip;
+import com.model.database.queries.timingcon.TripTime;
 import com.model.database.queries.util.StringUtils;
 import com.model.database.queries.util.Types;
 import com.webapp.modifiers.DbUpdate;
@@ -240,39 +244,12 @@ public class Queries {
 	public Object getShapeFile(@QueryParam("agencyids") String agencyIDs,
 			@QueryParam("flag") String flag,
 			@QueryParam("dbName") String dbName,
+			@QueryParam("dbIndex") Integer dbIndex,
 			@QueryParam("username") String username) throws SQLException,
 			IOException, ZipException, InterruptedException {
-		String query = "";
+		
 		String[] agencies = agencyIDs.split(",");
 		String feeds = "";
-		if (agencies.length > 1){
-			feeds = "((SELECT " + agencies[0] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[0] + " || '%') ";
-			for (int i = 1; i < agencies.length ; i++)
-				feeds += " UNION ALL (SELECT " + agencies[1] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[1] + " || '%')";
-			feeds += " ) ";
-		}else{
-			feeds = "(SELECT " + agencies[0] + "::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || " + agencies[0] + " || '%')";
-		}
-		if (flag.equals("routes")) {
-			query = "SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
-					+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
-					+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
-					+ " shape AS trip_shape "
-					+ "	FROM gtfs_routes AS routes "
-					+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
-					+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
-					+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
-					+ "	WHERE routes.agencyid IN (" + agencyIDs + ")";
-		} else if (flag.equals("stops")) {
-			query += "SELECT agencies.name AS PRVDR_NM, '1899-12-30' AS arrival_ti, '1899-12-30' AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
-					+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
-					+ " 	CURRENT_DATE AS GIS_PRC_DT, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, stops.location AS shape "
-					+ "		FROM gtfs_stops AS stops "
-					+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-					+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id "
-					+ "		INNER JOIN " + feeds + " AS feeds ON feeds.aid = map.agencyid "
-					+ "		WHERE map.agencyid IN (" + agencyIDs + ")";
-		}
 		
 		// get database parameters
 		String path = MainMap.class.getProtectionDomain().getCodeSource()
@@ -298,63 +275,84 @@ public class Queries {
 			Date dNow = new Date( );
 			SimpleDateFormat ft = new SimpleDateFormat ("hhmmss");
 			String uniqueString = ft.format(dNow);
-		
+			
+		//The folder that contains agencies shapefile folders.
 		String folderName = flag + "_shape_" + uniqueString;
-		File folder = new File (path + "/" + folderName);
-		folder.mkdir();
-		String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
-		ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
-				, folder.getAbsolutePath() + "\\" + flag + "_shape"
-				, params[0]
-				, params[2]
-				, params[3]
-				, dbName
-				,"\"" + query + "\""
-				, psqlPath);	
-		Process pr = pb.start();
-		pr.waitFor(5,TimeUnit.MINUTES);
+		File mainFolder = new File (path + "/" + folderName);
+		mainFolder.mkdir();
 		
-		// start compression once the files are generated
-		File zipF = new File(path + "/" + flag + "_shape_" + uniqueString + ".zip");
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipF));
-        InputStream in = null;
-        File[] sfiles = folder.listFiles();
+		// Getting hashmap of agencies (AgencyId -> AgencyName)
+		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager.getAllAgencies(username, dbIndex);
+		
+		for ( int i = 0 ; i < agencies.length ; i++){
+			String agencyId = agencies[i];
+			String query = "";
+			feeds = "(SELECT '" + agencyId + "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '" + agencyId + "' || '%')";
+
+			if (flag.equals("routes")) {
+				query = "SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
+						+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
+						+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
+						+ " shape AS trip_shape "
+						+ "	FROM gtfs_routes AS routes "
+						+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
+						+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
+						+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
+						+ " WHERE routes.agencyid = '" + agencyId + "'";
+			} else if (flag.equals("stops")) {
+				query += "SELECT agencies.name AS PRVDR_NM, ('1899-12-30'||' '||current_time)::date AS arrival_ti, ('1899-12-30'||' '||current_time)::date AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
+						+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
+						+ " 	feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, stops.location AS shape "
+						+ "		FROM gtfs_stops AS stops "
+						+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+						+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id "
+						+ "		INNER JOIN " + feeds + " AS feeds ON feeds.aid = map.agencyid "
+						+ "		WHERE map.agencyid ='" + agencyId + "'";
+			}
+			
+			// Folder that contains agency's shapefiles
+			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
+			File agencyFolder = new File(path + "/" + flag + "_shape_" + uniqueString + "/" + tempAgencyname + "_" + flag);
+			agencyFolder.mkdirs();
+
+			// Run the command to generate shapefiles for the agency
+			String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
+			ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
+					, agencyFolder.getAbsolutePath() + "\\" + tempAgencyname + "_" + flag + "_shape"
+					, params[0]
+					, params[2]
+					, params[3]
+					, dbName
+					,"\"" + query + "\""
+					, psqlPath);	
+
+			Process pr = pb.start();
+			pr.waitFor(5,TimeUnit.MINUTES);
+		}
 
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        parameters.setIncludeRootFolder(false);
         
-        for(File f: sfiles){
-        	out.putNextEntry(f, parameters);
-        	
-        	in = new FileInputStream(f);
-            byte[] readBuff = new byte[4096];
-            int readLen = -1;
-            while ((readLen = in.read(readBuff)) != -1) {
-            	out.write(readBuff, 0, readLen);
-            }
-        	
-            out.closeEntry();
-        	in.close();
-        }
-        out.finish();
-        out.close();
-        FileUtils.deleteDirectory(folder);
+        ZipFile zipF = new ZipFile(path + "/" + flag + "_shape_" + uniqueString + ".zip");
+        zipF.createZipFileFromFolder(mainFolder, parameters, false, 0);
+        
+        FileUtils.deleteDirectory(mainFolder);
         
         // delete the file after 5 minutes.
         Timer timer;
         ActionListener a = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				zipF.delete();
+				zipF.getFile().delete();
 			}
 		};
 		timer = new Timer(1, a);
 		timer.setRepeats(false);
 		timer.setInitialDelay(5*60000);
-		timer.start();
-		
-        return "downloadables/shapefiles/" +  zipF.getName();
+		timer.start();		
+        return "downloadables/shapefiles/" +  zipF.getFile().getName();
 	}
 	
 	/** Generates Counties P&R Report*/
@@ -734,6 +732,124 @@ public class Queries {
 		return shape;
     }
   
+    /**
+     * Returns all the trips that have a stops within a given distance from 
+     * the stops of a selected trip and run within the given time window.
+     * The method is used to generate Missed Opportunity and Timing Connection Reports.
+     *  
+     * @param radius
+     * @param agencyId
+     * @param date
+     * @param dbindex
+     * @param timeWin
+     * @param tripId
+     * @return List of trips along with the time difference between the time one arrives at a stop and 
+     * 		the time connected trip passes through the other stop.
+     * @throws SQLException
+     */
+    @GET
+    @Path("/timingCon")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object getTimingCon(@QueryParam("radius") String radius, 
+    		@QueryParam("agencyId") String agencyId, 
+    		@QueryParam("date") String date,
+    		@QueryParam("dbindex") Integer dbindex,
+    		@QueryParam("timeWin") Integer timeWin,
+    		@QueryParam("tripId") String tripId) throws SQLException{
+    	
+    	List<ConTrip> response = new ArrayList<ConTrip>();
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	
+    	// Setting date
+    			String fulldate = null;
+    	       	String day = null; 
+    			String[] dates = date.split(",");
+    	       	String[][] datedays = daysOfWeekString(dates);
+    	       	fulldate = datedays[0][0];
+    	       	day = datedays[1][0];
+    	       	
+    	Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query ="WITH tripstops AS (SELECT trips.epshape AS shape1, stop_id, stop_agencyid, stopsequence, arrivaltime, departuretime, stops.location FROM gtfs_stop_times AS times INNER JOIN gtfs_stops AS stops ON stop_id=id AND stop_agencyid=agencyid " +
+				"	INNER JOIN gtfs_trips AS trips ON trips.agencyid = '" + agencyId + "' and trips.id = '" + tripId + "' " +
+				"	WHERE times.trip_agencyid = '" + agencyId + "' AND times.trip_id = '" + tripId + "'), " +
+				" " +
+				"connectedstops AS (SELECT arrivaltime, departuretime, stopsequence, stop_id AS stopid1 ,id AS stopid2, name AS stopname2, lat AS stoplat2, lon AS stoplon2, agencyid AS agencyid2, lat, lon, stops.location, shape1 " +
+				"	FROM gtfs_stops AS stops  " +
+				"	INNER JOIN tripstops ON ST_DISTANCE(tripstops.location, stops.location) < " + radius + " " +
+				"	WHERE id <> stop_id " +
+				"	ORDER BY stopsequence), " +
+				"connectedroutes AS (SELECT stopid1, map.agencyid, map.agencyid_def, map.routeid, stopid2, stopname2, stoplat2, stoplon2, arrivaltime, departuretime, shape1 " +
+				"	FROM gtfs_stop_route_map AS map  " +
+				"	INNER JOIN connectedstops ON map.agencyid_def = connectedstops.agencyid2 and stopid = stopid2), " +
+				" " +
+				"connectedtrips AS (SELECT trips.id AS tripid, trips.agencyid AS tripagencyid, routes.shape1, trips.epshape AS shape2, trips.route_id AS routeid, trips.route_agencyid,  " +
+				"	routes.agencyid_def AS route_agencyid_def, serviceid_id AS serviceid, arrivaltime, departuretime, stopid1, stopid2, stopname2, stoplat2, stoplon2 " +
+				"	FROM gtfs_trips AS trips  " +
+				"	INNER JOIN connectedroutes AS routes " +
+				"	ON trips.route_id = routes.routeid AND trips.route_agencyid = routes.agencyid), " +
+				"exceptiondates AS (SELECT * FROM gtfs_calendar_dates WHERE serviceid_agencyid IN (SELECT DISTINCT route_agencyid_def FROM connectedtrips) AND date::int = '" + fulldate + "'), " +
+				" " +
+				"tripsoftheday1 AS (SELECT trips.*  " +
+				"	FROM connectedtrips AS trips  " +
+				"	INNER JOIN gtfs_calendars AS cal ON cal.serviceid_agencyid = trips.route_agencyid_def AND cal.serviceid_id = trips.serviceid " +
+				"	WHERE startdate::int <= " + fulldate + " AND enddate::int >= " + fulldate + " AND " + day + "= 1 " +
+				"	), " +
+				" " +
+				"tripsoftheday2 AS (SELECT trips.* FROM connectedtrips AS trips  " +
+				"	INNER JOIN exceptiondates AS dates ON dates.serviceid_agencyid = trips.route_agencyid_def AND dates.serviceid_id = trips.serviceid " +
+				"	WHERE exceptiontype = 1 " +
+				"	), " +
+				" " +
+				"alltripsoftheday AS (select * from tripsoftheday1 UNION ALL (select * from tripsoftheday2)), " +
+				"tripsoftheday AS (SELECT alltrips.* FROM alltripsoftheday AS alltrips  " +
+				"	LEFT JOIN (SELECT * FROM exceptiondates WHERE exceptiontype=2) AS offdates " +
+				"	ON alltrips.route_agencyid_def = offdates.serviceid_agencyid AND alltrips.serviceid = offdates.serviceid_id  " +
+				"	WHERE offdates.serviceid_id IS NULL  " +
+				"	AND arrivaltime <> -999 AND tripid <> '" + tripId + "'), " +
+				" " +
+				"tripswithintimewindow AS (SELECT trips.stopid1, trips.stopid2, trips.stopname2, stoplat2, stoplon2, trips.routeid, trips.route_agencyid, trips.tripid, tripagencyid,  " +
+				"	serviceid, trips.arrivaltime as arrival1, trips.departuretime AS departure1, " +
+				"	times.arrivaltime AS arrival2, times.departuretime AS departure2, (times.departuretime - trips.arrivaltime) AS diff, trips.shape1, trips.shape2 " +
+				"	FROM tripsoftheday AS trips  " +
+				"	INNER join gtfs_stop_times AS times " +
+				"	ON trips.tripagencyid = times.trip_agencyid AND trips.tripid=times.trip_id AND trips.stopid2 = times.stop_id " +
+				"	WHERE ABS(trips.arrivaltime - times.departuretime) <" + timeWin + "*60) " +
+				" " +
+				"SELECT agencies.name AS agency_name, routes.longname AS route_name, stops.name AS stopname1, stops.lat AS stoplat1, stops.lon AS stoplon1, tripswithintimewindow.* FROM tripswithintimewindow " +
+				"	INNER JOIN gtfs_agencies AS agencies ON tripswithintimewindow.tripagencyid = agencies.id " +
+				"	INNER JOIN gtfs_routes AS routes ON tripswithintimewindow.route_agencyid = routes.agencyid " +
+				"		AND tripswithintimewindow.routeid = routes.id " +
+				"	INNER JOIN gtfs_stops AS stops ON stopid1 = stops.id AND stops.agencyid IN (SELECT id FROM gtfs_agencies WHERE defaultid = '" + agencyId + "') ";
+//		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			ConTrip e = new ConTrip();
+			e.agencyId = rs.getString("route_agencyid");
+			e.agencyName = rs.getString("agency_name");
+			e.arrival1 = rs.getInt("arrival1");
+			e.arrival2 = rs.getInt("arrival2");
+			e.departure1 = rs.getInt("departure1");
+			e.departure2 = rs.getInt("departure2");
+			e.routeId = rs.getString("routeid");
+			e.routeName = rs.getString("route_name");
+			e.stopId1 = rs.getString("stopid1");
+			e.stopName1 = rs.getString("stopname1");
+			e.stopName2 = rs.getString("stopname2");
+			e.stopId2 = rs.getString("stopid2");
+			e.stopLat1 = rs.getDouble("stoplat1");
+			e.stopLon1 = rs.getDouble("stoplon1");
+			e.stopLat2 = rs.getDouble("stoplat2");
+			e.stopLon2 = rs.getDouble("stoplon2");
+			e.timeDiff = rs.getInt("diff");
+			e.tripShape1 = rs.getString("shape1");
+			e.tripShape2 = rs.getString("shape2");
+			response.add(e);
+		}
+    	return response;
+    }
  
     /**
      * Return a list of all stops for a given route id in the database
@@ -849,240 +965,356 @@ public class Queries {
     	return result;
     }
     /**
-     * Generates The Agency Extended report
-     */ 
-    @GET
-    @Path("/AgencyXR")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getAXR(@QueryParam("agency") String agency, @QueryParam("day") String date, @QueryParam("popYear") String popYear,@QueryParam("x") double x, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex) throws JSONException {
-    	
-       	if (Double.isNaN(x) || x <= 0) {
-            x = STOP_SEARCH_RADIUS;
-        }
-       	 
-       	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-       	if(popYear==null||popYear.equals("null")){
-			popYear="2010";
+	 * Generates The Agency Extended report
+	 * @param username 
+	 * @param username 
+	 * @throws SQLException 
+	 */
+	@GET
+	@Path("/AgencyXR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getAXR(@QueryParam("agency") String agency, @QueryParam("day") String date,
+			@QueryParam("popYear") String popYear, @QueryParam("x") double x, @QueryParam("key") double key,
+			@QueryParam("dbindex") Integer dbindex,@QueryParam("areaId") String areaid,@QueryParam("type") int type,@QueryParam("username") String username,@QueryParam("geoid") String geoid ,@QueryParam("geotype") int geotype)throws JSONException, SQLException {
+
+		if (Double.isNaN(x) || x <= 0) {
+			x = STOP_SEARCH_RADIUS;
 		}
-       	int totalLoad = 10;
-       	int index =0;
-       	String[] dates = date.split(",");
-       	String[][] datedays = daysOfWeekString(dates);
-       	String[] fulldates = fulldate(dates);
-       	String[] sdates = datedays[0];
-       	String[] days = datedays[1];
-    	    	
-    	AgencyXR response = new AgencyXR();
-    	response.metadata = "Report Type:Transit Agency Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+"Population Search Radius(miles):"+String.valueOf(x)+
-    	    	";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
-    	x = x * 1609.34;
-    	response.AgencyId = agency;    	
-    	response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
-    	index ++;
-    	setprogVal(key, (int) Math.round(index*100/totalLoad));
-    	double[] StopsPopMiles = PgisEventManager.stopsPopMiles(agency, x, dbindex, popYear);
-    	index+=2;
-    	setprogVal(key, (int) Math.round(index*100/totalLoad));
-    	long StopCount = Math.round(StopsPopMiles[0]);
-    	response.StopCount =  String.valueOf(StopCount);
-    	response.UPopWithinX = String.valueOf(Math.round(StopsPopMiles[1]));
-    	response.RPopWithinX = String.valueOf(Math.round(StopsPopMiles[2]));
-    	double RouteMiles = StopsPopMiles[3];
-    	response.RouteMiles = String.valueOf(RouteMiles);    	
-    	if (RouteMiles >0)
-        	response.StopPerRouteMile = String.valueOf(Math.round((StopCount*10000.0)/(RouteMiles))/10000.0);
-        else 
-        	response.StopPerRouteMile = "NA";
-    			
-    	HashMap<String, String> ServiceMetrics =  PgisEventManager.AgencyServiceMetrics(sdates,days,fulldates,agency,x,dbindex, popYear);
-    	index +=6;
-    	setprogVal(key, (int) Math.round(index*100/totalLoad));
-    	response.ServiceMiles = ServiceMetrics.get("svcmiles");
-    	response.ServiceHours = ServiceMetrics.get("svchours");
+
+		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
+			dbindex = default_dbindex;
+		}
+		if (popYear == null || popYear.equals("null")) {
+			popYear = "2010";
+		}
+		int totalLoad = 10;
+		int index = 0;
+		String[] dates = date.split(",");
+		String[][] datedays = daysOfWeekString(dates);
+		String[] fulldates = fulldate(dates);
+		String[] sdates = datedays[0];
+		String[] days = datedays[1];
+		HashMap<String, String> ServiceMetrics=new HashMap<String,String>();
+		double[] StopsPopMiles;
+		
+		
+		
+		AgencyXR response = new AgencyXR();
+		response.metadata = "Report Type:Transit Agency Extended Report;Report Date:"
+				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+				+ "Selected Database:" + Databases.dbnames[dbindex] + ";Selected Date(s):" + date
+				+ "Population Search Radius(miles):" + String.valueOf(x) + ";Selected Transit Agency:" + agency + ";"
+				+ DbUpdate.VERSION;
+		x = x * 1609.34;
+		response.AgencyId = agency;
+		//response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
+		HashMap<String,  ConGraphAgency> allAgencies = new HashMap<String,  ConGraphAgency>();
+		allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+		response.AgencyName=allAgencies.get(agency).name;
+		index++;
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+	if (areaid.equals("null"))
+	{System.out.println("kkkl");
+		 StopsPopMiles = PgisEventManager.stopsPopMiles(0,agency, x, dbindex, popYear,null,null,-1);
+		index += 2;
+	}
+	
+	else
+	{ if(geotype==-1)
+	{
+	 StopsPopMiles = PgisEventManager.stopsPopMiles(type,agency, x, dbindex, popYear,areaid,null,-1);
+	}
+	else
+	{
+		 StopsPopMiles = PgisEventManager.stopsPopMiles(type,agency, x, dbindex, popYear,areaid,geoid,geotype);
+
+	}
+	 index += 2;
+	}
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		long StopCount = Math.round(StopsPopMiles[0]);
+		response.StopCount = String.valueOf(StopCount);
+		response.UPopWithinX = String.valueOf(Math.round(StopsPopMiles[1]));
+		response.RPopWithinX = String.valueOf(Math.round(StopsPopMiles[2]));
+		response.racWithinX= String.valueOf(Math.round(StopsPopMiles[4]));
+		response.wacWithinX= String.valueOf(Math.round(StopsPopMiles[5]));
+		
+		double RouteMiles = StopsPopMiles[3];
+		response.RouteMiles = String.valueOf(RouteMiles);
+		if (RouteMiles > 0)
+			response.StopPerRouteMile = String.valueOf(Math.round((StopCount * 10000.0) / (RouteMiles)) / 10000.0);
+		else
+			response.StopPerRouteMile = "NA";
+if(geotype!=-1)
+{	
+	ServiceMetrics = PgisEventManager.AgencyServiceMetrics(sdates, days, fulldates, agency,
+				x, dbindex, popYear,areaid,type,geotype,geoid);
+}
+else
+{
+	ServiceMetrics = PgisEventManager.AgencyServiceMetrics(sdates, days, fulldates, agency,
+			x, dbindex, popYear,areaid,type,-1,null);
+}
+
+	index += 6;
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		response.ServiceMiles = ServiceMetrics.get("svcmiles");
+		response.ServiceHours = ServiceMetrics.get("svchours");
 		response.ServiceStops = ServiceMetrics.get("svcstops");
 		response.UPopServedByService = ServiceMetrics.get("uspop");
 		response.RPopServedByService = ServiceMetrics.get("rspop");
+		response.racServedByService = ServiceMetrics.get("srac");
+		response.wacServedByService = ServiceMetrics.get("swac");
 		String serviceDays = ServiceMetrics.get("svcdays");
-		if (serviceDays.length()>2){
+		if (serviceDays.length() > 2) {
 			serviceDays = serviceDays.replace("\"", "");
-			serviceDays= serviceDays.substring(1,serviceDays.length()-1);
+			serviceDays = serviceDays.substring(1, serviceDays.length() - 1);
 			String[] svcdays = serviceDays.split(",");
 			serviceDays = StringUtils.join(Arrays.asList(svcdays), ";");
-        }
-		response.ServiceDays = serviceDays;
-		int HOSstart =Integer.parseInt(ServiceMetrics.get("fromtime"));
-		int HOSend = Integer.parseInt(ServiceMetrics.get("totime"));			
-        response.HoursOfService = ((HOSstart==-1)?"NA":StringUtils.timefromint(HOSstart))+"-"+ ((HOSend==-1)?"NA":StringUtils.timefromint(HOSend)); 
-        index++;
-        setprogVal(key, (int) Math.round(index*100/totalLoad));
-        try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}        
-        progVal.remove(key);                
-    	return response;
-    }
-    
-    /**
-     * Generates The Stops report for
-     * agency
-     * agency and route
-     * geographic area 
-     * geographic area and agency
-     * geographic area and route and agency
-     * @throws SQLException 
-     */
-    @GET
-    @Path("/StopsR")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object getTAS(@QueryParam("agency") String agency,@QueryParam("x") double x,@QueryParam("route") String routeid,@QueryParam("areaid") String areaid, 
-    		@QueryParam("type") Integer type,@QueryParam("key") double key, @QueryParam("popYear") String popYear, @QueryParam("day") String date, @QueryParam("dbindex") Integer dbindex,@QueryParam("username") String username) throws JSONException, SQLException {
-    	
-    	if (Double.isNaN(x) || x <= 0) {
-            x = STOP_SEARCH_RADIUS;
-        }    	
-    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-    	if(popYear==null||popYear.equals("null")){
-			popYear="2010";
 		}
-    	String[] dates = date.split(",");
-    	String[][] datedays = daysOfWeekString(dates);
-    	String[] fulldates = datedays[0];
-    	String[] days = datedays[1];
-    	StopListR response = new StopListR();  
-    	response.AgencyName = "";
-    	//x = x * 1609.34;
-    	int index =0;
-    	int totalLoad = 4;
-    	if (agency!=null)
-    		agency = (agency.equals("null"))? null:agency;
-    	if (routeid !=null)
-    		routeid = (routeid.equals("null"))? null:routeid;
-    	if (areaid!=null)
-    		areaid = (areaid.equals("null"))? null:areaid;
-    	
-    	setprogVal(key, (int) Math.round(index*100/totalLoad));
-    	ArrayList<StopR> report = new ArrayList<StopR>();
-    	//System.out.println("RouteID is : "+routeid);
-    	if (areaid==null){
-    		response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
-    		index++;
-    		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    		if (routeid==null){ //agency    			
-    			response.metadata = "Report Type:Transit Stops Report for Agency;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
-    			report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34, dbindex, popYear);
-    			index++;
-        		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    		}else{//agency and route
-    			response.metadata = "Report Type:Transit Stops Report for Agency and Route;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
-    			report = PgisEventManager.stopGeosr(username, 0,  fulldates, days, null, agency, routeid, x * 1609.34, dbindex, popYear);
-    			index++;
-        		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    		}
-    	}else{
-    		response.AreaType = Types.getAreaName(type);
-    		response.AreaName = EventManager.QueryGeoAreabyId(areaid, type, dbindex, Integer.parseInt(popYear)).getName();
-    		index++;
-    		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    		if(routeid==null){
-    			if (agency==null){//area   				
-    				response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-        	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid + ";" + DbUpdate.VERSION;
-    				report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, null, null, x * 1609.34, dbindex, popYear);
-    				index++;
-    	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    			}else{//area and agency
-    				response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
-    				index++;
-    	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    				response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-        	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+";Selected Transit Agency:"+agency + ";" + DbUpdate.VERSION;
-    				report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, null, x * 1609.34, dbindex, popYear);
-    				index++;
-    	    		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    			}
-    		}else{//area, agency, and route
-    			response.AgencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
-    			index++;
-        		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    			response.metadata = "Report Type:Transit Stops Report for "+Types.getAreaName(type)+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	    	"Selected Database:" +Databases.dbnames[dbindex]+";Population Search Radius(miles):"+String.valueOf(x)+";Selected Geographic Area:"+areaid+
-    	    	    	";Selected Transit Agency:"+agency+";Selected Route:"+routeid + ";" + DbUpdate.VERSION;
-    			report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, routeid, x * 1609.34, dbindex, popYear);
-    			index++;
-        		setprogVal(key, (int) Math.round(index*100/totalLoad));
-    		}
-    		
-    	}    	
-    	response.StopR = report;
-    	setprogVal(key,100);		   	
-    	try {
+		response.ServiceDays = serviceDays;
+		int HOSstart = Integer.parseInt(ServiceMetrics.get("fromtime"));
+		int HOSend = Integer.parseInt(ServiceMetrics.get("totime"));
+		response.HoursOfService = ((HOSstart == -1) ? "NA" : StringUtils.timefromint(HOSstart)) + "-"
+				+ ((HOSend == -1) ? "NA" : StringUtils.timefromint(HOSend));
+		index++;
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}   	
-    	progVal.remove(key);
-        return response;
-    }
+		}
+		progVal.remove(key);
+		return response;
+	}
+
+    
+	/**
+	 * Generates The Stops report for agency agency and route geographic area
+	 * geographic area and agency geographic area and route and agency
+	 * 
+	 * @throws SQLException
+	 */
+	@GET
+	@Path("/StopsR")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getTAS(@QueryParam("agency") String agency, @QueryParam("x") double x,
+			@QueryParam("route") String routeid, @QueryParam("areaid") String areaid, @QueryParam("type") Integer type,
+			@QueryParam("key") double key, @QueryParam("popYear") String popYear, @QueryParam("day") String date,
+			@QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username, @QueryParam("geotype") Integer geotype,@QueryParam("geoid") String geoid)
+			throws JSONException, SQLException {
+
+		if (Double.isNaN(x) || x <= 0) {
+			x = STOP_SEARCH_RADIUS;
+		}
+		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
+			dbindex = default_dbindex;
+		}
+		if (popYear == null || popYear.equals("null")) {
+			popYear = "2010";
+		}
+		String[] dates = date.split(",");
+		String[][] datedays = daysOfWeekString(dates);
+		String[] fulldates = datedays[0];
+		String[] days = datedays[1];
+		StopListR response = new StopListR();
+		response.AgencyName = "";
+		// x = x * 1609.34;
+		int index = 0;
+		int totalLoad = 4;
+		if (agency != null)
+			agency = (agency.equals("null")) ? null : agency;
+		if (routeid != null)
+			routeid = (routeid.equals("null")) ? null : routeid;
+		if (areaid != null)
+			areaid = (areaid.equals("null")) ? null : areaid;
+
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		ArrayList<StopR> report = new ArrayList<StopR>();
+		// System.out.println("RouteID is : "+routeid);
+		if (areaid == null) {
+			HashMap<String,  ConGraphAgency> allAgencies = new HashMap<String,  ConGraphAgency>();
+			allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+			response.AgencyName = allAgencies.get(agency).name;
+			index++;
+			setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+			if (routeid == null) { // agency
+				response.metadata = "Report Type:Transit Stops Report for Agency;Report Date:"
+						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+						+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+						+ String.valueOf(x) + ";Selected Transit Agency:" + agency + ";" + DbUpdate.VERSION;
+			
+				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34,dbindex, popYear,-1,null);
+				index++;
+				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+			} else {// agency and route
+				response.metadata = "Report Type:Transit Stops Report for Agency and Route;Report Date:"
+						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+						+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+						+ String.valueOf(x) + ";Selected Transit Agency:" + agency + ";Selected Route:" + routeid + ";"
+						+ DbUpdate.VERSION;
+				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, routeid, x * 1609.34,
+						dbindex, popYear,-1,null);
+				index++;
+				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+			}
+		} else {
+			System.out.println(geotype);
+			response.AreaType = Types.getAreaName(type);
+		if(!geoid.equals("null"))
+		{ System.out.println("nu");
+			response.AreaName = PgisEventManager.QueryGeoAreabyId(type,areaid,dbindex,username, popYear,geotype,geoid)
+					.getName();
+		}
+		else
+		{ System.out.println("nu1");
+			response.AreaName = PgisEventManager.QueryGeoAreabyId(type,areaid,dbindex,username, popYear,-1,null)
+					.getName();
+		}
+			index++;
+			setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+			if (routeid == null) {
+				if (agency == null) {// area
+					response.metadata = "Report Type:Transit Stops Report for " + Types.getAreaName(type)
+							+ ";Report Date:"
+							+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+							+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+							+ String.valueOf(x) + ";Selected Geographic Area:" + areaid + ";" + DbUpdate.VERSION;
+					if(!geoid.equals("null")){
+					report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, null, null,x * 1609.34, dbindex, popYear,geotype,geoid);
+					}
+					else{
+						report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, null, null,x * 1609.34, dbindex, popYear,-1,null);
+						
+					}	
+					index++;
+					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+				} else {// area and agency
+					HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
+					allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+					response.AgencyName = allAgencies.get(agency).name;
+					index++;
+					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+					response.metadata = "Report Type:Transit Stops Report for " + Types.getAreaName(type)
+							+ ";Report Date:"
+							+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+							+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+							+ String.valueOf(x) + ";Selected Geographic Area:" + areaid + ";Selected Transit Agency:"
+							+ agency + ";" + DbUpdate.VERSION;
+					if(!geoid.equals("null")){	
+					report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, null,
+							x * 1609.34, dbindex, popYear,geotype,geoid);
+				}
+				else
+				{report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, null,
+						x * 1609.34, dbindex, popYear,-1,null);
+				}
+					index++;
+					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+				}
+			} else {// area, agency, and route
+				HashMap<String,ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
+				allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+				response.AgencyName = allAgencies.get(agency).name;
+				index++;
+				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+				response.metadata = "Report Type:Transit Stops Report for " + Types.getAreaName(type) + ";Report Date:"
+						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+						+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+						+ String.valueOf(x) + ";Selected Geographic Area:" + areaid + ";Selected Transit Agency:"
+						+ agency + ";Selected Route:" + routeid + ";" + DbUpdate.VERSION;
+				if(!geoid.equals("null")){
+				report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, routeid,
+						x * 1609.34, dbindex, popYear,geotype,geoid);
+				}
+				else
+				{
+					report = PgisEventManager.stopGeosr(username, type, fulldates, days, areaid, agency, routeid,
+							x * 1609.34, dbindex, popYear,-1,null);
+				}
+				
+				index++;
+				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+			}
+
+		}
+		response.StopR = report;
+		setprogVal(key, 100);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		progVal.remove(key);
+		return response;
+	}
 
    
-	/**
-	 * Generates The Agency Summary report and geographic allocation of service for transit agencies
+    /**
+	 * Generates The Agency Summary report and geographic allocation of service
+	 * for transit agencies
 	 */
-	    
+
 	@GET
 	@Path("/AgencySR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getASR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("username") String username, @QueryParam("areaid") String areaId, 
-			@QueryParam("type") Integer type) throws JSONException {
-		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-		if(popYear==null||popYear.equals("null")){
-			popYear="2010";
+	public Object getASR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex,
+			@QueryParam("popYear") String popYear, @QueryParam("username") String username,
+			@QueryParam("areaid") String areaId, @QueryParam("type") Integer type ,@QueryParam("geotype") Integer geotype,@QueryParam("geoid") String geoid) throws JSONException {
+		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
+			dbindex = default_dbindex;
 		}
-		int index =0;
+		if (popYear == null || popYear.equals("null")) {
+			popYear = "2010";
+		}
+		int index = 0;
 		int totalLoad = 2;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		ArrayList<AgencySR> agencies = new ArrayList<AgencySR>();
-		AgencySRList response = new AgencySRList();		
-		if (type!=null && areaId!=null){
-			GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex,Integer.parseInt(popYear));
-			agencies = PgisEventManager.agencyGeosr(username, type, areaId, dbindex);
-			response.metadata = "Report Type:Agency Allocation of Service (Transit Agency Summary Report) for "+instance.getName()+"("+Types.getAreaName(type)+")"
-			+";Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+		AgencySRList response = new AgencySRList();
+		if (type != null && areaId != null) {
+			GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex, Integer.parseInt(popYear));
+			if(geoid!=null){
+				agencies = PgisEventManager.agencyGeosr(username, type, areaId, dbindex,geotype,geoid);
+					
+			}
+				else{
+					agencies = PgisEventManager.agencyGeosr(username, type, areaId, dbindex,-1,null);
+					
+				
+			}
+				response.metadata = "Report Type:Agency Allocation of Service (Transit Agency Summary Report) for "
+					+ instance.getName() + "(" + Types.getAreaName(type) + ")" + ";Report Date:"
+					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())
+					+ ";Selected Database:" + Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 			response.areaName = instance.getName();
-			//might need to add area type for census tracts and some other geo areas
+			// might need to add area type for census tracts and some other geo
+			// areas
 			response.areaType = instance.getTypeName();
 		} else {
 			agencies = PgisEventManager.agencysr(username, dbindex);
-			response.metadata = "Report Type:Transit Agency Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
-		}		
+			response.metadata = "Report Type:Transit Agency Summary Report;Report Date:"
+					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+					+ "Selected Database:" + Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+		}
 		index++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));     
-	    response.agencySR = agencies;   
-	    index++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
-	    try {
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		response.agencySR = agencies;
+		index++;
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	    progVal.remove(key);
-	    return response;
+		progVal.remove(key);
+		return response;
 	}
+
 	
 	/**
 	 * Generates The stops report and geographic allocation of service for transit agencies
+	 * @throws SQLException 
 	 */
 	    
 	/*@GET
@@ -1124,6 +1356,101 @@ public class Queries {
 	    return response;
 	}*/
 
+	/**
+	 * Returns the list of routes operated by and agency regardless of being active or not.
+	 * @param agencyId
+	 * @param dbindex
+	 * @param username
+	 * @return RouteListR
+	 * @throws SQLException
+	 */
+	@GET
+	@Path("/agencyRoutes")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getAgencyRoutes(@QueryParam("agency") String agencyId, @QueryParam("dbindex") Integer dbindex,
+			@QueryParam("username") String username) throws SQLException{
+		RouteListR response = new RouteListR();
+		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query = "SELECT * FROM gtfs_routes WHERE agencyid = '" + agencyId + "'";
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			RouteR i = new RouteR();
+			i.AgencyId = agencyId;
+			i.RouteId = rs.getString("id");
+			i.RouteLName = rs.getString("longname");
+			i.RouteSName = rs.getString("shortname");
+			response.RouteR.add(i);
+		}
+		connection.close();
+		return response;
+	}
+	
+	/**
+	 * Returns the list of the trips running on the given date along with their start and end time in hh:mm:ss.
+	 * 
+	 * @param agencyId
+	 * @param date
+	 * @param radius
+	 * @param dbindex
+	 * @return
+	 * @throws SQLException
+	 */
+	@GET
+    @Path("/tripsOfTheDayByRoute")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object tripsOfTheDayByRoute(@QueryParam("agency") String agencyId, @QueryParam("date") String date,
+    		@QueryParam("radius") Double radius, @QueryParam("dbindex") Integer dbindex, @QueryParam("routeId") String routeId) throws SQLException{
+    	if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+        	dbindex = default_dbindex;
+        }
+    	List<TripTime> response = new ArrayList<TripTime>();
+    	
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query = "WITH aid AS (SELECT defaultid FROM gtfs_agencies WHERE id = '" + agencyId + "'), "
+				+ " services0 AS (SELECT * FROM gtfs_calendars WHERE startdate::int <= " + sdates[0] + " AND enddate::int >= " + sdates[0] + " AND serviceid_agencyid IN (SELECT * FROM aid) AND " + days[0] + " = 1), "
+				+ " exceptiondates AS (SELECT * FROM gtfs_calendar_dates WHERE serviceid_agencyid IN (SELECT * FROM aid) AND date::int = '" + sdates[0] + "'), "
+				+ " svcids0 AS (SELECT services0.serviceid_agencyid, services0.serviceid_id FROM services0 "
+				+ "	LEFT JOIN (SELECT * FROM exceptiondates WHERE exceptiontype=2) AS offdates "
+				+ "	ON services0.serviceid_id = offdates.serviceid_id WHERE offdates.serviceid_id IS NULL), "
+				+ " svcids AS (SELECT * FROM svcids0 UNION ALL (SELECT serviceid_agencyid, serviceid_id FROM exceptiondates WHERE exceptiontype=1)), "
+				
+				// SET OF ALL TRIPS OF THE AGENCY RUNNING ON THE GIVEN DATE "
+				+ " trips AS (SELECT trips.* FROM gtfs_trips AS trips INNER JOIN svcids USING(serviceid_agencyid,serviceid_id) "
+				+ " WHERE route_agencyid='" + agencyId + "' AND route_id = '" + routeId + "')"
+				
+				// SET OF FEASIBLE ROUTES ON THE SELECTED DATE ARE LISTED WITH THEIR RESPECTIVE TIME INTERVALS
+				+ " SELECT times.trip_agencyid, times.trip_id, FLOOR(MIN(arrivaltime)/3600) AS arrival_hour, FLOOR(MIN(arrivaltime)%3600/60) AS arrival_minute, FLOOR((MIN(arrivaltime)%3600%60)/60) AS arrival_second, "
+				+ "	FLOOR(MAX(departuretime)/3600) AS departure_hour, FLOOR(MAX(departuretime)%3600/60) AS departure_minute, FLOOR((MAX(departuretime)%3600%60)/60) AS departure_second "
+				+ "	FROM trips INNER JOIN gtfs_stop_times AS times "
+				+ "	ON trips.id = times.trip_id "
+				+ "	WHERE times.arrivaltime > 0 "
+				+ "	GROUP BY times.trip_agencyid, times.trip_id "
+				+ "	ORDER BY MIN(arrivaltime)";
+//		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()){
+			TripTime t = new TripTime();
+			t.tripId = rs.getString("trip_id");
+			t.start_hr = (int) rs.getDouble("arrival_hour");
+			t.start_min = (int) rs.getDouble("arrival_minute");
+			t.start_sec = (int) rs.getDouble("arrival_second");
+			t.end_hr = (int) rs.getDouble("departure_hour");
+			t.end_min = (int) rs.getDouble("departure_minute");
+			t.end_sec = (int) rs.getDouble("departure_second");
+			response.add(t);
+		}
+		return response;
+    }
+	
 	/**
 	 * Generates The Routes report:
 	 * routes report by agency
@@ -1372,51 +1699,69 @@ Loop:  	for (Trip trip: routeTrips){
     	}
     }
 
-    /**
-	 * Generates The geographic area summary by agency report (geographic allocation of service) 
+	/**
+	 * Generates The geographic area summary by agency report (geographic
+	 * allocation of service)
+	 * @throws SQLException 
 	 */
-	    
+
 	@GET
 	@Path("/GeoCSRA")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGCSRA(@QueryParam("upop") int urbanPop, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("type") Integer type, @QueryParam("agency") String agency, @QueryParam("username") String username ) throws JSONException {
-		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
-        	dbindex = default_dbindex;
-        }
-		if(popYear==null||popYear.equals("null")){
-			popYear="2010";
+	public Object getGCSRA(@QueryParam("upop") int urbanPop, @QueryParam("key") double key,
+			@QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear,
+			@QueryParam("type") Integer type, @QueryParam("agency") String agency,
+			@QueryParam("username") String username,@QueryParam("popMax") String popmax,@QueryParam("popMin") String popmin,@QueryParam("areaid") String areaid,@QueryParam("geotype") Integer geotype) throws JSONException, SQLException {
+		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
+			dbindex = default_dbindex;
+		}
+		if (popYear == null || popYear.equals("null")) {
+			popYear = "2010";
 		}
 		int index = 1;
 		int totalLoad = 3;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		GeoRList response = new GeoRList();
-		if (agency!=null)
-			agency = (agency.equals("null"))? null:agency;
-		if (agency!=null){
-			response.metadata = "Report Type:"+Types.getAreaName(type)+" Summary Report for "+agency+" ;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+		List<GeoR> results=new ArrayList();
+		if (agency != null)
+			agency = (agency.equals("null")) ? null : agency;
+		if (agency != null) {
+			response.metadata = "Report Type:" + Types.getAreaName(type) + " Summary Report for " + agency
+					+ " ;Report Date:"
+					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+					+ "Selected Database:" + Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 			response.agencyId = agency;
-			response.agencyName = GtfsHibernateReaderExampleMain.QueryAgencybyid(agency, dbindex).getName();
-		}else {
-			response.metadata = "Report Type:"+Types.getAreaName(type)+" Summary Report ;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
-		}		
-		List<GeoR> results = PgisEventManager.geoallocation(type, agency, dbindex, username, urbanPop, popYear);
+			HashMap<String,  ConGraphAgency> allAgencies = new HashMap<String,  ConGraphAgency>();
+			allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+			response.agencyName = allAgencies.get(agency).name;
+		} else {
+			response.metadata = "Report Type:" + Types.getAreaName(type) + " Summary Report ;Report Date:"
+					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+					+ "Selected Database:" + Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+		}
+	if (type==3)
+	{
+		 results = PgisEventManager.geoallocation(type, agency, dbindex, username, urbanPop, popYear,popmin,popmax,areaid,geotype);
+	}	
+	else{
+		 results = PgisEventManager.geoallocation(type, agency, dbindex, username, urbanPop, popYear,"null","null","null",0);
+
+	}
 		index++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));		
-		response.type = Types.getAreaName(type);		
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		response.type = Types.getAreaName(type);
 		response.GeoR = results;
 		index++;
-	    setprogVal(key, (int) Math.round(index*100/totalLoad));	    
-	    try {
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
+		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	    progVal.remove(key);
-	    return response;
+		progVal.remove(key);
+		return response;
 	}
-       
+
     /**
      * Employment Summary Reports
      */
@@ -2381,27 +2726,29 @@ Loop:  	for (Trip trip: routeTrips){
 	/**
 	 * Generates The Summary Statewide report
 	 */
-	    
+
 	@GET
 	@Path("/stateSR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateSR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("username") String username) throws JSONException, FactoryException, TransformException {
-		if (dbindex==null || dbindex<0 || dbindex>dbsize-1){
+	public Object getStateSR(@QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex,
+			@QueryParam("popYear") String popYear, @QueryParam("username") String username) throws JSONException, FactoryException, TransformException {
+		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
-        }
-		if(popYear==null||popYear.equals("null")){
-			popYear="2010";
+		}
+		if (popYear == null || popYear.equals("null")) {
+			popYear = "2010";
 		}
 		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		int totalLoad = 2;
 		int index = 0;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		GeoRList response = new GeoRList();
-		response.metadata = "Report Type:Statewide Summary Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-    	    	"Selected Database:" +Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+		response.metadata = "Report Type:Statewide Summary Report;Report Date:"
+				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
+				+ "Selected Database:" + Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
 		response.type = "StatewideReport";
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
-		geocounts = PgisEventManager.getGeoCounts(dbindex,username,popYear);//needs to be changed		
+		geocounts = PgisEventManager.getGeoCounts(dbindex,username,popYear);
 		GeoR each = new GeoR();
 		each.Name = "Oregon";
 		each.CountiesCount = String.valueOf(geocounts.get("county"));
@@ -2411,37 +2758,41 @@ Loop:  	for (Trip trip: routeTrips){
 		each.RegionsCount = String.valueOf(geocounts.get("region"));
 		each.CongDistsCount = String.valueOf(geocounts.get("congdist"));
 		each.population = String.valueOf(geocounts.get("pop"));
-		each.landArea = String.valueOf(Math.round(geocounts.get("landarea")/2.58999e4)/100.0);
+		each.landArea = String.valueOf(Math.round(geocounts.get("landarea") / 2.58999e4) / 100.0);
 		each.urbanpop = String.valueOf(geocounts.get("urbanpop"));
-		each.ruralpop = String.valueOf(geocounts.get("ruralpop"));		
+		each.ruralpop = String.valueOf(geocounts.get("ruralpop"));
+		each.employment = String.valueOf(geocounts.get("rac"));
+		each.employees= String.valueOf(geocounts.get("wac"));
 		index++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		HashMap<String, Integer> transcounts = new HashMap<String, Integer>();
-		transcounts = PgisEventManager.QueryCounts(dbindex,username);
+		transcounts = GtfsHibernateReaderExampleMain.QueryCounts(dbindex, selectedAgencies);
 		each.StopsCount = String.valueOf(transcounts.get("stop"));
 		each.RoutesCount = String.valueOf(transcounts.get("route"));
 		each.AgenciesCount = String.valueOf(transcounts.get("agency"));
 		response.GeoR.add(each);
 		index++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}        
-        progVal.remove(key);		
+		}
+		progVal.remove(key);
 		return response;
-		
-    }
+
+	}
+
 	
 	/**
 	 * Generates The Extended statewide report
+	 * @throws SQLException 
 	 */
 	    
 	@GET
 	@Path("/stateXR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("popYear") String popYear, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException {
+	public Object getStateXR(@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("popYear") String popYear, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String username) throws JSONException, SQLException {
 		if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }       			
@@ -2478,7 +2829,7 @@ Loop:  	for (Trip trip: routeTrips){
 		response.AverageFare = String.valueOf(FareData.get("avg"));
 		response.MaxFare = String.valueOf(FareData.get("max"));
 		int FareCount = FareData.get("count").intValue();
-		float FareMedian = GtfsHibernateReaderExampleMain.QueryFareMedian(selectedAgencies, FareCount, dbindex);
+		float FareMedian = SpatialEventManager.getFareMedianForState(selectedAgencies, FareCount, dbindex);
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.MedianFare = String.valueOf(FareMedian);
@@ -2491,15 +2842,7 @@ Loop:  	for (Trip trip: routeTrips){
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
-		try {
-			geocounts = EventManager.getGeoCounts(dbindex, popYear);
-		} catch (FactoryException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (TransformException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}		
+		geocounts = PgisEventManager.getGeoCounts(dbindex,username, popYear);		
 		response.StopsPersqMile = String.valueOf(Math.round(StopsCount*25899752356.00/geocounts.get("landarea"))/10000.00);
 		index+=5;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -2511,7 +2854,12 @@ Loop:  	for (Trip trip: routeTrips){
 		response.ServiceHours = serviceMetrics.get("svchours");
 		response.ServiceStops = serviceMetrics.get("svcstops");
 		response.PopServedAtLoService = String.valueOf(Math.round(10000.0*PopatLOS/geocounts.get("pop"))/100.0);				
+		response.RacAtLoService = String.valueOf(Math.round(10000.0*(Long.parseLong(serviceMetrics.get("racatlos")))/geocounts.get("rac"))/100.0);				
+		response.WacAtLoService = String.valueOf(Math.round(10000.0*(Long.parseLong(serviceMetrics.get("wacatlos")))/geocounts.get("wac"))/100.0);				
 		response.PopServedByService = String.valueOf(svcPop);
+		response.racServedByService=String.valueOf("srac");
+		response.wacServedByService=String.valueOf("swac");
+		
 		String serviceDays = serviceMetrics.get("svcdays");
 		if (serviceDays.length()>2){
 			serviceDays = serviceDays.replace("\"", "");
@@ -2527,12 +2875,22 @@ Loop:  	for (Trip trip: routeTrips){
 		int HOSend = Integer.parseInt(serviceMetrics.get("totime"));			
         response.HoursOfService = ((HOSstart==-1)?"NA":StringUtils.timefromint(HOSstart))+"-"+ ((HOSend==-1)?"NA":StringUtils.timefromint(HOSend));
         
-		long PopWithinX = PgisEventManager.PopWithinX(x, username, dbindex, popYear);
+		long [] PopWithinX = PgisEventManager.PopWithinX(x, username, dbindex, popYear);
 		index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
-		response.PopWithinX = String.valueOf(PopWithinX);
-		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX/geocounts.get("pop"))))/100.0);
-		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX/geocounts.get("pop")))/100.00);	
+		response.PopWithinX = String.valueOf(PopWithinX[0]);
+		response.racWithinX= String.valueOf(PopWithinX[1]);
+		response.wacWithinX= String.valueOf(PopWithinX[2]);
+		
+		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX[0]/geocounts.get("pop"))))/100.0);
+		response.racUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX[1]/geocounts.get("rac"))))/100.0);
+		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*PopWithinX[2]/geocounts.get("wac"))))/100.0);
+		
+		response.PopServed = String.valueOf(Math.round((10000.00*PopWithinX[0]/geocounts.get("pop")))/100.00);	
+		response.racServed = String.valueOf(Math.round((10000.00*PopWithinX[0]/geocounts.get("rac")))/100.00);	
+		response.wacServed = String.valueOf(Math.round((10000.00*PopWithinX[0]/geocounts.get("wac")))/100.00);	
+		
+		
 		long[] pop50kCutOff = PgisEventManager.cutOff50(x, username, dbindex, popYear);
 		response.PopServedOver50k = String.valueOf(pop50kCutOff[0]);
 		response.TotalPopOver50k = String.valueOf(pop50kCutOff[1]);
@@ -2558,7 +2916,8 @@ Loop:  	for (Trip trip: routeTrips){
 	@GET
 	@Path("/geoAreaXR")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getGeoXR(@QueryParam("areaid") String areaId, @QueryParam("type") int type,@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("username") String username) throws JSONException {
+	public Object getGeoXR(@QueryParam("areaid") String areaId, @QueryParam("type") int type,@QueryParam("day") String date,@QueryParam("x") double x, @QueryParam("l") Integer L, @QueryParam("key") double key, @QueryParam("dbindex") Integer dbindex, @QueryParam("popYear") String popYear, @QueryParam("username") String username, @QueryParam("geoid") String geoid, @QueryParam("geotype") Integer geotype) throws JSONException {
+		long stopspop []=new long[20];
 		if (Double.isNaN(x) || x <= 0) {
             x = STOP_SEARCH_RADIUS;
         }       			
@@ -2576,9 +2935,10 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] fulldates = fulldate(dates);
     	String[] sdates = datedays[0];
     	String[] days = datedays[1];
-    	
+    	HashMap<String, String > servicemetrics  = new HashMap<String, String>();
     	GeoXR response = new GeoXR();
-    	GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex, Integer.parseInt(popYear));
+    	GeoArea instance = PgisEventManager.QueryGeoAreabyId(type,areaId, dbindex,username, popYear,-1,null);
+    	//GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex, Integer.parseInt(popYear));
     	response.metadata = "Report Type:"+instance.getTypeName()+" Extended Report;Report Date:"+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
     	    	"Selected Database:" +Databases.dbnames[dbindex]+";Selected Date(s):"+date+";Population Search Radius(miles):"+String.valueOf(x)+
     	    	";Minimum Level of Service(times):"+String.valueOf(L) + ";" + DbUpdate.VERSION;
@@ -2601,32 +2961,78 @@ Loop:  	for (Trip trip: routeTrips){
 		float RouteMiles = PgisEventManager.RouteMiles(type, areaId, username, dbindex);
 		response.RouteMiles = String.valueOf(RouteMiles);
 		index ++;
-		setprogVal(key, (int) Math.round(index*100/totalLoad));
+
 		
-		long[] stopspop= PgisEventManager.stopsPop(type,areaId,username,x,dbindex, popYear);
+		setprogVal(key, (int) Math.round(index*100/totalLoad));
+		if (geoid != null)
+		{
+		 stopspop= PgisEventManager.stopsPop(type,areaId,username,x,dbindex, popYear,geoid,geotype);
+		}
+		else
+		{
+	     stopspop= PgisEventManager.stopsPop(type,areaId,username,x,dbindex, popYear,null,-1);
+			
+		}
+		
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.StopsPersqMile = String.valueOf(Math.round(stopspop[0]*25899752356.00/instance.getLandarea())/10000.00);
 		response.PopWithinX = String.valueOf(stopspop[1]+stopspop[2]);
+		response.racWithinX = String.valueOf(stopspop[3]+stopspop[4]);
+		response.wacWithinX = String.valueOf(stopspop[5]+stopspop[6]);
 		response.UPopWithinX = String.valueOf(stopspop[1]);
 		response.RPopWithinX = String.valueOf(stopspop[2]);
+		response.UracWithinX = String.valueOf(stopspop[3]);
+		response.RracWithinX = String.valueOf(stopspop[4]);
+		response.UwacWithinX = String.valueOf(stopspop[5]);
+		response.RwacWithinX = String.valueOf(stopspop[6]);
 		response.PopServed = String.valueOf(Math.round((10000.00*(stopspop[1]+stopspop[2])/instance.getPopulation()))/100.00);
+		response.racServed = String.valueOf(Math.round((10000.00*(stopspop[3]+stopspop[4])/instance.getEmployment()))/100.00);
+		response.wacServed = String.valueOf(Math.round((10000.00*(stopspop[5]+stopspop[6])/instance.getEmployee()))/100.00);
 		response.UPopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/instance.getPopulation()))/100.00);	
 		response.RPopServed = String.valueOf(Math.round((10000.00*(stopspop[2])/instance.getPopulation()))/100.00);	
+		response.UracServed = String.valueOf(Math.round((10000.00*(stopspop[3])/instance.getEmployment()))/100.00);	
+		response.RracServed = String.valueOf(Math.round((10000.00*(stopspop[4])/instance.getEmployment()))/100.00);
+		response.UwacServed = String.valueOf(Math.round((10000.00*(stopspop[5])/instance.getEmployee()))/100.00);	
+		response.RwacServed = String.valueOf(Math.round((10000.00*(stopspop[6])/instance.getEmployee()))/100.00);
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[1]+stopspop[2])/instance.getPopulation())))/100.0);
-		HashMap<String, String> servicemetrics = PgisEventManager.ServiceMetrics(type,sdates,days,fulldates,areaId,username,L,x,dbindex,popYear);
+		response.racUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[3]+stopspop[4])/instance.getEmployment())))/100.0);
+		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[5]+stopspop[6])/instance.getEmployee())))/100.0);
+		if (geoid != null)
+		{
+		 servicemetrics = PgisEventManager.ServiceMetrics(type,sdates,days,fulldates,areaId,username,L,x,dbindex,popYear,geotype,geoid);
+		}
+		else
+		{
+		 servicemetrics = PgisEventManager.ServiceMetrics(type,sdates,days,fulldates,areaId,username,L,x,dbindex,popYear,-1,null);
+			
+		}
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		double ServiceMiles = Float.parseFloat(servicemetrics.get("svcmiles"));
 		long PopatLOS = (Long.parseLong(servicemetrics.get("upopatlos"))+Long.parseLong(servicemetrics.get("rpopatlos")));
+		long racatLOS = (Long.parseLong(servicemetrics.get("uracatlos"))+Long.parseLong(servicemetrics.get("rracatlos")));
+		long wacatLOS = (Long.parseLong(servicemetrics.get("uwacatlos"))+Long.parseLong(servicemetrics.get("rwacatlos")));
 		float svcPop = (Float.parseFloat(servicemetrics.get("uspop"))+Float.parseFloat(servicemetrics.get("rspop")));
+		float svcrac = (Float.parseFloat(servicemetrics.get("usrac"))+Float.parseFloat(servicemetrics.get("rsrac")));
+		float svcwac = (Float.parseFloat(servicemetrics.get("uswac"))+Float.parseFloat(servicemetrics.get("rswac")));
+		response.totalracServedAtLoService=String.valueOf(racatLOS);
+		response.totalwacServedAtLoService=String.valueOf(wacatLOS);
+		
+		
 		response.ServiceMiles = (stopspop[0] != 0) ? servicemetrics.get("svcmiles") :"0";
 		response.ServiceHours = servicemetrics.get("svchours");
 		response.ServiceStops = servicemetrics.get("svcstops");
 		response.PopServedAtLoService = String.valueOf(Math.round(10000.0*PopatLOS/instance.getPopulation())/100.0);
 		response.UPopServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("upopatlos")));
 		response.RPopServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rpopatlos")));
-		
+		response.racServedAtLoService = String.valueOf(Math.round(10000.0*racatLOS/instance.getEmployment())/100.0);
+	   
+		response.UracServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("uracatlos")));
+		response.RracServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rracatlos")));
+		response.wacServedAtLoService = String.valueOf(Math.round(10000.0*wacatLOS/instance.getEmployee())/100.0);
+	    response.UwacServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("uwacatlos")));
+		response.RwacServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rwacatlos")));	
 		String serviceDays = servicemetrics.get("svcdays");
 		if (serviceDays.length()>2){
 			serviceDays = serviceDays.replace("\"", "");
@@ -2652,7 +3058,14 @@ Loop:  	for (Trip trip: routeTrips){
         response.ConnectedCommunities = servicemetrics.get("connections");
 		response.PopServedByService = String.valueOf(svcPop);
 		response.UPopServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("uspop")));	
-		response.RPopServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("rspop")));	
+		response.RPopServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("rspop")));
+		response.racServedByService = String.valueOf(svcrac);
+		response.UracServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("usrac")));	
+		response.RracServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("rsrac")));	
+		response.wacServedByService = String.valueOf(svcwac);
+		response.UwacServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("uswac")));	
+		response.RwacServedByService = String.valueOf(Float.parseFloat(servicemetrics.get("rswac")));	
+		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -2701,6 +3114,7 @@ Loop:  	for (Trip trip: routeTrips){
 		return response;
 	}
 	
+
 	@GET
 	@Path("/keyHubs")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -2798,6 +3212,7 @@ Loop:  	for (Trip trip: routeTrips){
 		PgisEventManager.dropConnection(connection);
 		return na;
 	}
+	
 	public HubsClusterList getClusterData(HashMap<String, KeyClusterHashMap> x, String[] dates, String[] days, final int dbindex, final double popRadius, final double pnrRadius, String username, final double key, final String popYear) throws SQLException{
 		HubsClusterList output = new HubsClusterList();
     	int progress = 0;
@@ -2841,7 +3256,7 @@ Loop:  	for (Trip trip: routeTrips){
     			tOutput = output;
     		}
     		
-			public void run() {
+    		public void run() {
 				String query;
 				Connection connection = PgisEventManager.makeConnection(dbindex);
 				try {
@@ -2879,44 +3294,49 @@ Loop:  	for (Trip trip: routeTrips){
 								+ "tmproutes AS (SELECT map.* FROM gtfs_stop_route_map AS map INNER JOIN stops ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id), "
 								+ "routes AS (SELECT gtfs_routes.* FROM gtfs_routes INNER JOIN tmproutes ON tmproutes.routeid = gtfs_routes.id AND tmproutes.agencyid = gtfs_routes.agencyid), "
 								+ "routesarray0 AS (SELECT routes.agencyid, routes.id, routes.shortname, routes.longname, gtfs_agencies.name AS agencyname "
-								+ "	FROM routes INNER JOIN gtfs_agencies "
-								+ "	ON routes.agencyid = gtfs_agencies.id "
+								+ "	FROM routes INNER JOIN gtfs_agencies " + "	ON routes.agencyid = gtfs_agencies.id "
 								+ "	GROUP BY routes.agencyid, routes.id, routes.shortname, routes.longname, agencyname), "
 								+ "routesarray  AS (SELECT COALESCE(array_agg(agencyid),'{N/A}') AS routesagencies, COALESCE(array_agg(agencyname),'{N/A}') AS routesagenciesnames, COALESCE(array_agg(id),'{N/A}') AS routesids, COALESCE(array_agg(shortname),'{N/A}') AS routesshortnames, COALESCE(array_agg(longname),'{N/A}') AS routeslongnames FROM routesarray0),  "
 								+ "routescount AS (SELECT count(distinct agencyid||id) AS routescount FROM routes), "
 								+ "counties AS (SELECT counties.countyid, counties.cname FROM census_counties AS counties INNER JOIN stops ON LEFT(stops.blockid,5) = counties.countyid), "
 								+ "countiesarray AS (SELECT COALESCE(array_agg(distinct countyid),'{N/A}') AS countiesids, COALESCE(array_agg(distinct cname),'{N/A}') AS countiesnames FROM counties), "
 								+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
-								+ "urbanarray AS (SELECT COALESCE(sum(distinct population"+popYear+")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
+								+ "urbanarray AS (SELECT COALESCE(sum(distinct population" + popYear
+								+ ")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
 								+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
-								+ "pop0 AS (SELECT distinct census_blocks.blockid, population"+popYear+" as population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, " + popRadius + ")), "
-								+ "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0),"
-								+ "pnr AS (SELECT pr.* FROM parknride AS pr INNER JOIN clustercoor ON ST_Dwithin(pr.geom,ST_transform(ST_setsrid(ST_MakePoint(clustercoor.lon, clustercoor.lat),4326), 2993)," + pnrRadius + ")), "
+								+ "pop0 AS (SELECT distinct census_blocks.blockid, population" + popYear
+								+ " as population FROM census_blocks INNER JOIN stops ON ST_Dwithin(census_blocks.location, stops.location, "
+								+ popRadius + ")), " + "pop AS (SELECT COALESCE(sum(population),0) AS pop FROM pop0),"
+								+"rac as (select COALESCE(sum(C000_"+popYear+"),0) as employment from  pop0 left join lodes_rac_projection_block using(blockid)),"
+								+"wac as (select COALESCE(sum(C000),0) as employees from  pop0 left join lodes_blocks_wac using(blockid)),"
+								+ "pnr AS (SELECT pr.* FROM parknride AS pr INNER JOIN clustercoor ON ST_Dwithin(pr.geom,ST_transform(ST_setsrid(ST_MakePoint(clustercoor.lon, clustercoor.lat),4326), 2993),"
+								+ pnrRadius + ")), "
 								+ "pnrarray AS (SELECT COALESCE(count(pnr.pnrid),0) AS pnrcount,COALESCE(array_agg(pnr.pnrid),'{}') AS pnrids, COALESCE(array_agg(pnr.lat),'{}') AS pnrlats, "
 								+ "COALESCE(array_agg(pnr.lon),'{}') AS pnrlons, COALESCE(array_agg(pnr.lotname),'{N/A}') AS pnrnames, COALESCE(array_agg(pnr.city),'{N/A}') AS pnrcities, "
-								+ "	COALESCE(array_agg(pnr.spaces),'{0}') AS pnrspaces "
-								+ "	FROM pnr), "
+								+ "	COALESCE(array_agg(pnr.spaces),'{0}') AS pnrspaces " + "	FROM pnr), "
 								+ "placesarray0 AS (SELECT distinct places.placeid FROM census_places AS places INNER JOIN stops ON stops.placeid = places.placeid), "
 								+ "placesarray AS (SELECT COALESCE(array_agg(places.placeid),'{N/A}') AS placesids, COALESCE(array_agg(pname),'{N/A}') AS placesnames, count(distinct places.placeid) AS placescount "
 								+ "FROM census_places AS places INNER JOIN placesarray0 ON placesarray0.placeid = places.placeid) "
 								+ ""
 								+ "SELECT clustercoor.*, stopscount.*, agenciescount.*, pop.* AS pop, regionsarray.*, "
 								+ "	urbanarray.*, countiesarray.*, agenciesarray.*, countiescount.*, routescount.*,"
-								+ " stopsarray.*, routesarray.*,pnrarray.*, placesarray.*"
+								+ " stopsarray.*, routesarray.*,pnrarray.*, placesarray.*,employment,employees"
 								+ "	FROM stopsarray CROSS JOIN stopscount CROSS JOIN agenciesarray CROSS JOIN routesarray"
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
-								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray";
-	//					System.out.println(query);	
-						
+								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray CROSS JOIN rac CROSS JOIN wac";
+					//	System.out.println("this one"+query+"-------------");
+
 						ResultSet rs = stmt.executeQuery(query);
-							
-						while(rs.next()){
+
+						while (rs.next()) {
 							response.lat = rs.getString("lat");
 							response.lon = rs.getString("lon");
 							response.agenciescount = rs.getString("agenciescount");
 							response.countiescount = rs.getString("countiescount");
 							response.pop = rs.getString("pop");
+							response.rac = (rs.getLong("employment"));
+							response.wac = (rs.getLong("employees"));
 							response.stopscount = rs.getString("stopscount");
 							response.routescount = rs.getString("routescount");
 							response.pnrcount = rs.getInt("pnrcount");
@@ -2924,9 +3344,9 @@ Loop:  	for (Trip trip: routeTrips){
 							response.urbanareaspop = rs.getString("urbanareaspop");
 							response.visits = visits + "";
 							String[] tempCountiesNames = (String[]) rs.getArray("countiesnames").getArray();
-							response.countiesNames =  Arrays.asList(tempCountiesNames);
+							response.countiesNames = Arrays.asList(tempCountiesNames);
 							String[] tempAgenciesNames = (String[]) rs.getArray("agenciesnames").getArray();
-							response.agenciesNames =  Arrays.asList(tempAgenciesNames);
+							response.agenciesNames = Arrays.asList(tempAgenciesNames);
 							String[] tempUrbanNames = (String[]) rs.getArray("urbannames").getArray();
 							response.urbanNames = Arrays.asList(tempUrbanNames);
 							String[] tempRoutesAgencies = (String[]) rs.getArray("routesagencies").getArray();
@@ -2940,7 +3360,7 @@ Loop:  	for (Trip trip: routeTrips){
 							String[] tempRoutesLongnames = (String[]) rs.getArray("routeslongnames").getArray();
 							response.routesLongnames = Arrays.asList(tempRoutesLongnames);
 							String[] tempStopsIDs = (String[]) rs.getArray("stopsids").getArray();
-							response.stopsIDs =  Arrays.asList(tempStopsIDs);
+							response.stopsIDs = Arrays.asList(tempStopsIDs);
 							String[] tempStopsAgencies = (String[]) rs.getArray("stopsagencyids").getArray();
 							response.stopsAgencies = Arrays.asList(tempStopsAgencies);
 							String[] tempStopsAgenciesNames = (String[]) rs.getArray("stopsagenciesnames").getArray();
@@ -2952,13 +3372,13 @@ Loop:  	for (Trip trip: routeTrips){
 							Double[] tempStopsLats = (Double[]) rs.getArray("stopslats").getArray();
 							response.stopsLats = Arrays.asList(tempStopsLats);
 							Double[] tempStopsLons = (Double[]) rs.getArray("stopslons").getArray();
-							response.stopsLons =  Arrays.asList(tempStopsLons);					
+							response.stopsLons = Arrays.asList(tempStopsLons);
 							Integer[] tempPnrIDs = (Integer[]) rs.getArray("pnrids").getArray();
-							response.pnrIDs =  Arrays.asList(tempPnrIDs);
+							response.pnrIDs = Arrays.asList(tempPnrIDs);
 							Double[] tempPnrLats = (Double[]) rs.getArray("pnrlats").getArray();
-							response.pnrLats =  Arrays.asList(tempPnrLats);
+							response.pnrLats = Arrays.asList(tempPnrLats);
 							Double[] tempPnrLons = (Double[]) rs.getArray("pnrlons").getArray();
-							response.pnrLons =  Arrays.asList(tempPnrLons);
+							response.pnrLons = Arrays.asList(tempPnrLons);
 							String[] tempPnrNames = (String[]) rs.getArray("pnrnames").getArray();
 							response.pnrNames = Arrays.asList(tempPnrNames);
 							String[] tempPnrCities = (String[]) rs.getArray("pnrnames").getArray();
@@ -2976,19 +3396,19 @@ Loop:  	for (Trip trip: routeTrips){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-						
+
 				PgisEventManager.dropConnection(connection);
-				bool=false;
+				bool = false;
 			}
-			
-			public void start (){
-				if (t == null){
-					t = new Thread (this, threadName);
-					t.start ();
+
+			public void start() {
+				if (t == null) {
+					t = new Thread(this, threadName);
+					t.start();
 				}
-		   }
-    		
-    	}
+			}
+
+		}
 		
     	fillClusters fc1 = new fillClusters( "Thread-1", first, output);
         fc1.start();
@@ -3030,6 +3450,7 @@ Loop:  	for (Trip trip: routeTrips){
 		}
 		return y;
 	}
+	
 	
 	@GET
     @Path("/connectivityGraph")
@@ -3172,4 +3593,16 @@ Loop:  	for (Trip trip: routeTrips){
 		StartEndDates response = PgisEventManager.getsedates(username, agency, dbindex);    	
 		return response;
     }	
+    
+    @GET
+    @Path("/getAreaList")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+    		MediaType.TEXT_XML })
+    public Object getAreaList(@QueryParam("areaType") String areaType,
+    		@QueryParam("dbindex") Integer dbindex) throws SQLException{
+    	return FlexibleReportEventManager.getAreaList(areaType, dbindex);
+    }
+    
 }
+
+

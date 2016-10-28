@@ -42,6 +42,17 @@ public class HubCluster {
 	@XmlAttribute
 	@JsonSerialize
 	public String pop;
+	
+
+	@XmlAttribute
+	@JsonSerialize
+	public long rac;
+
+
+	@XmlAttribute
+	@JsonSerialize
+	public long wac;
+
 
 	@XmlAttribute
 	@JsonSerialize

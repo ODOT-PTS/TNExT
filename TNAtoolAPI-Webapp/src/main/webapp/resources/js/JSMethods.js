@@ -306,7 +306,12 @@ function getMetadata() {
 	 */
 	var output = 		   'Metadata\r\n';
 	output = output.concat('--------------------\r\n');
-	output = output.concat('Title: ' + $('h2').text() + '\r\n');
+	if ($('#reportTitle').text() == ""){
+		output = output.concat('Title: ' + $('h2').text() + '\r\n');
+	}
+	else{
+		output = output.concat('Title: ' + $('#reportTitle').text() + '\r\n');
+	}
 	output = output.concat('Time & Date: ' + Date() + '\r\n');
 	output = output.concat('Tool Version: ' + getVersion());
 	
@@ -336,8 +341,6 @@ function getMetadata() {
 	 * Appending algortihm for ran to generate the report, if any.
 	 */
 	if (typeof algDesc !== 'undefined') {
-//		output = output.concat('\r\n\r\n\r\nAlgorithm\r\n');
-//		output = output.concat('--------------------\r\n');	
 		output = output.concat(algDesc);
 	}
 	
@@ -366,7 +369,7 @@ function getMetadata() {
 	
 	// Adding description of the footnotes that map inputs and metrics
 	$(".input").each(function(index, object) {
-		if (!$(object).is('select')){
+		if (!$(object).is('select') && object.dataset.iomap != undefined){
 			output = output.concat('(' + object.dataset.iomap + ') '  + object.dataset.label + '\r\n');
 		}	
 	});
@@ -743,7 +746,7 @@ function appendNavigation(name){
 	nav = findNavigationId(title);
 	
 	var html = '<div id="navigationAccordion" style="font-size:90%;width:90%">';
-	html += '<h3>'+title+name+'</h3><div><div id="navigationTree" style="font-size: 80%;font-weight: normal;"></div></div></div>';
+	html += '<h3 id="reportTitle">'+title+name+'</h3><div><div id="navigationTree" style="font-size: 80%;font-weight: normal;"></div></div></div>';
 	$('h2').css('width','100%');
 	$('h2').append(html);
 	$("#navigationAccordion > h3").css('text-align','center');
@@ -841,7 +844,7 @@ var navigationIdMap = {
 	"Urban Areas Summary Report" : "urbanS",
 	"Urban Area Extended Report" : "urbanX",
 	"Routes Summary Report" : "route",
-	"Stops Summary Report" : "stop",
+	"Stops Summary Report" : "stop"
 };
 var navigationMap = { 
 	'core' : {
@@ -1128,3 +1131,31 @@ var navigationMap = {
 	    ]
 	}
 };
+
+/**
+ * Adds a '0' character to a one digit number
+ * converts '1' to '01'. Used to display time 
+ * 03:33:05.
+ * 
+ * @param input
+ * @returns {String}
+ */
+function doubleDigit(input) {
+	if (0 <= input && input < 10)
+		return '0' + input;
+	else
+		return input + '';
+}
+
+/**
+ * Converts the seconds to time. For example
+ * 9000 is returned as 02:30:00.
+ * @param input
+ * @returns {String}
+ */
+function secToHour(input) {
+	var hr = Math.floor(input / 3600);
+	var min = Math.floor(input % 3600 / 60);
+	var sec = Math.floor(input % 3600 % 60);
+	return doubleDigit(hr) + ":" + doubleDigit(min) + ":" + doubleDigit(sec);
+}

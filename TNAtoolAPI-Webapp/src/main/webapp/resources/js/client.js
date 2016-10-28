@@ -1414,6 +1414,7 @@ $mylist
 		    		'<ul>'+
 		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="KTHR" href="#"><b>Key Transit Hubs Reports</b></a></li>'+
+		    		'<li role="presentation"><a id="TCR" href="#"><b>Timing Connections Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Transit Networks Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Transit Agencies Reports</b></a></li>'+
 		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
@@ -1493,6 +1494,8 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
 			    }else if (casestring=="SSR"){			    	
 			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    }else if (casestring=="TCR") {
+			    	window.open('/TNAtoolAPI-Webapp/TimingConnection.html?&dbindex=' + dbindex);
 			    }else if (casestring=="ASR"){
 			    	//var qstringx = '0.25';
 			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
@@ -1509,7 +1512,9 @@ $mylist
 			    }else if(casestring=="CDSR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="UASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear);    		
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+null+'&type=-1');    		
 			    }else if(casestring=="AUASR"){
 			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="ORSR"){
@@ -1767,9 +1772,14 @@ function updateListDialog(agenciesIds){
 /*
  * Connectivity Graph
  */ 
-//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');
+$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');
 
 /*
  * ShapeFile export wizard
  */
 $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="shapefile-export-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="shapefile-export-button" style="border-radius:5px; background-color:#FFF" onclick="ShapeFileExpStart()">S</button></div>');
+
+/*
+ * Timing connection wizard
+ */
+$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="flexRepButton"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="timing-conneciton-button" style="border-radius:5px; background-color:#FFF" onclick="flexRepDialog()">F</button></div>');

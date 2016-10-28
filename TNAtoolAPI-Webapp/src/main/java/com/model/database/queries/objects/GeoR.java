@@ -35,7 +35,19 @@ public class GeoR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String Totalupop;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String population;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String employment;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String employees;
 	
 	@XmlAttribute
     @JsonSerialize
@@ -96,6 +108,12 @@ public class GeoR {
 	@XmlAttribute
     @JsonSerialize
     public String CongDistsCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UrbanAreasCount;
+	
+	
 	
 	@XmlAttribute
     @JsonSerialize

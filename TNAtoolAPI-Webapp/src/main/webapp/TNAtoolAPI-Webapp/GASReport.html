@@ -34,6 +34,8 @@
 
 var type = parseInt(getURIParameter("type"));
 var areaId = getURIParameter("areaid");
+var geotype = parseInt(getURIParameter("geotype"));
+var geoid = getURIParameter("geoid");
 var counties = new Array();
 var cplaces = new Array();
 var uareas = new Array();
@@ -79,7 +81,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid,
 		async: true,
 		success: function(d){
 			console.log(d);
@@ -129,19 +131,24 @@ $(document).ready(function(){
 				    	qstringx = '0.25';				    	
 				    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 				    	keyName = setDates(qstringd);
-				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
+
+				    	window.open('/TNAtoolAPI-Webapp/routereport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&agency='+qstring+'&nav='+nav);
 				    }else if($(this).attr('type')=="SC"){
 				    	qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+'&areaid='+areaId+'&type='+type+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+geoid+'&nav='+nav);	    		
+
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+
+			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaId='+areaId+'&type='+type+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid+'&nav='+nav);	    		
+				    
 
 				    };
 				});
@@ -199,7 +206,6 @@ $(document).ready(function(){
 	});
 	
 });
-
 </script>
 
 

@@ -34,6 +34,15 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
+	public String AreaId;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String Type;
+	
+	
+	@XmlAttribute
+	@JsonSerialize
     public String AgencyId;
 	
 	@XmlAttribute
@@ -54,6 +63,14 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String racWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String wacWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String StopCount;
 	
 	@XmlAttribute
@@ -71,6 +88,14 @@ public class AgencyXR {
 	@XmlAttribute
     @JsonSerialize
     public String RPopServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String racServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String wacServedByService;
 	
 	@XmlAttribute
     @JsonSerialize
