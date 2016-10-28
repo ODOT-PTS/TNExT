@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.collections.iterators.EntrySetMapIterator;
 
 public class Databases {
 	public static HashMap<String, String[]> infoMap = getDbInfo();
@@ -34,7 +37,7 @@ public class Databases {
 		try {
 			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			BufferedReader reader = new BufferedReader(new FileReader(
-					path+"../../src/main/webapp/resources/admin/dbInfo.csv"));
+					path+"../../src/main/resources/admin/resources/dbInfo.csv"));
 			String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
 			String line = reader.readLine();
@@ -64,7 +67,47 @@ public class Databases {
 				+ String.valueOf(infoMap.get("databaseIndex").length));
 		return infoMap;
 	}
-
+	
+	public static void updateDbInfo(boolean b) {
+		dbsize = infoMap.get("databaseIndex").length;
+		spatialConfigPaths = infoMap.get("spatialConfigPaths");
+		ConfigPaths = infoMap.get("ConfigPaths");
+		if(b){
+			String connectionPath = path + "../../src/main/resources/";
+			for (int k=0; k<ConfigPaths.length; k++){
+				ConfigPaths[k] = connectionPath+ConfigPaths[k];
+			}
+		}
+			    
+		dbnames = infoMap.get("dbnames");
+		connectionURLs = infoMap.get("connectionURL");
+		usernames = infoMap.get("username");
+		passwords = infoMap.get("password");
+		/*for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
+			System.out.println(entry.getKey());
+			for(String str: entry.getValue()){
+				System.out.println(str);
+			}
+			
+			System.out.println();
+		}*/
+		
+	}
+	
+	public static void deactivateDB(int i){
+		String[] newElement;
+		for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
+			newElement = new String[entry.getValue().length-1];
+			for(int j=0;j<i;j++){
+				newElement[j] = entry.getValue()[j];
+			}
+			for(int j=i;j<entry.getValue().length-1;j++){
+				newElement[j] = entry.getValue()[j+1];
+			}
+			infoMap.put(entry.getKey(), newElement);
+		}
+	}
+	
 	public static int dbsize = infoMap.get("databaseIndex").length;
 	public final static int defaultDBIndex = 0;
 	public static String[] spatialConfigPaths = infoMap

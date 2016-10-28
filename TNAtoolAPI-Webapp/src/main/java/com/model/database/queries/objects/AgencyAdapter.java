@@ -19,16 +19,17 @@ package com.model.database.queries.objects;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
+import org.onebusaway.gtfs.model.Agency;
 
-public class AgencyAdapter extends XmlAdapter<AgencyType, AgencyExt> {
+public class AgencyAdapter extends XmlAdapter<AgencyType, Agency> {
 
     @Override
-    public AgencyExt unmarshal(AgencyType arg) throws Exception {
+    public Agency unmarshal(AgencyType arg) throws Exception {
         if (arg == null) {
             return null;
         }
-        AgencyExt a = new AgencyExt();
+        Agency a = new Agency();
         a.setId(arg.id);
         a.setName(arg.name);
         a.setUrl(arg.url);
@@ -36,11 +37,11 @@ public class AgencyAdapter extends XmlAdapter<AgencyType, AgencyExt> {
         a.setLang(arg.lang);
         a.setPhone(arg.phone);
         a.setFareUrl(arg.fareUrl);
-        return new AgencyExt(a);
+        return new Agency(a);
     }
 
     @Override
-    public AgencyType marshal(AgencyExt arg) throws Exception {
+    public AgencyType marshal(Agency arg) throws Exception {
         if (arg == null) {
             return null;
         }

@@ -18,12 +18,13 @@ package com.model.database.queries.util;
 
 import java.util.List;
 
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ShapePointExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ShapePointExt;
+import org.onebusaway.gtfs.model.ShapePoint;
 
 
 public class SphericalDistance {
 	
-	public static double sLength (List<ShapePointExt> points){
+	public static double sLength (List<ShapePoint> points){
 		double SL = 0;
 		for (int i =0; i < points.size()-1; i++ ){
 			SL+=sDistance(points.get(i).getLat(),points.get(i).getLon(), points.get(i+1).getLat(),points.get(i+1).getLon());

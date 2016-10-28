@@ -16,13 +16,18 @@
 
 package com.model.database.queries;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement; 
+
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.SQLExec;
 
 import com.model.database.Databases;
 
@@ -51,6 +56,74 @@ public class UpdateEventManager {
 		}
 	}
     
+	public static void createTables(Connection connection, String[] dbInfo){
+		
+		addFunction(connection, dbInfo);
+		
+		create_playground_tables(connection);
+		
+//		create_gtfs_stop_route_map(connection);
+//		create_gtfs_stop_service_map(connection);
+//		create_gtfs_trip_stops(connection);
+//		create_census_counties_trip_map(connection);
+//		create_census_tracts_trip_map(connection);
+//		create_census_urbans_trip_map(connection);
+//		create_census_places_trip_map(connection);
+//		create_census_congdists_trip_map(connection);
+	}
+	
+	public static void create_playground_tables(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE gtfs_pg_users("
+	        		+ "  username text NOT NULL,"
+	        		+ "  email text NOT NULL,"
+	        		+ "  firstname text,"
+	        		+ "  quota integer NOT NULL,"
+	        		+ "  usedspace integer NOT NULL,"
+	        		+ "  lastname text,"
+	        		+ "  password text NOT NULL,"
+	        		+ "  active boolean NOT NULL,"
+	        		+ "  key integer,"
+	        		+ "  CONSTRAINT users_pkey PRIMARY KEY (username))"
+	        		+ "WITH ("
+	        		+ "  OIDS=FALSE);");
+	        stmt.executeUpdate("ALTER TABLE gtfs_pg_users"
+	        		+ "  OWNER TO postgres;");
+	        
+	        stmt.executeUpdate("CREATE TABLE gtfs_uploaded_feeds("
+	        		+ "  feedname text NOT NULL,"
+	        		+ "  username text,"
+	        		+ "  ispublic boolean NOT NULL,"
+	        		+ "  feedsize integer,"
+	        		+ "  CONSTRAINT feeds_pkey PRIMARY KEY (feedname),"
+	        		+ "  CONSTRAINT gtfs_uploaded_feeds_username_fkey FOREIGN KEY (username)"
+	        		+ "      REFERENCES gtfs_pg_users (username) MATCH SIMPLE"
+	        		+ "      ON UPDATE NO ACTION ON DELETE NO ACTION)"
+	        		+ "WITH ("
+	        		+ "  OIDS=FALSE);");
+	        stmt.executeUpdate("ALTER TABLE gtfs_uploaded_feeds"
+	        		+ "  OWNER TO postgres;");
+	        
+	        stmt.executeUpdate("CREATE TABLE gtfs_selected_feeds("
+	        		+ "  username text NOT NULL,"
+	        		+ "  feedname text NOT NULL,"
+	        		+ "  agency_id text,"
+	        		+ "  CONSTRAINT selected_feeds_pkey PRIMARY KEY (username, feedname),"
+	        		+ "  CONSTRAINT gtfs_selected_feeds_username_fkey FOREIGN KEY (username)"
+	        		+ "      REFERENCES gtfs_pg_users (username) MATCH SIMPLE"
+	        		+ "      ON UPDATE NO ACTION ON DELETE NO ACTION)"
+	        		+ "WITH ("
+	        		+ "  OIDS=FALSE);");
+	        stmt.executeUpdate("ALTER TABLE gtfs_selected_feeds"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }
+	}
+
 	public static void create_census_urbans_trip_map(Connection connection){
 		Statement stmt = null;
 	      try {
@@ -291,8 +364,6 @@ public class UpdateEventManager {
 	public static void updateTables(int dbindex, String agencyId){	
 		  Connection connection = makeConnection(dbindex);
 		  
-		  System.out.println("Adding Function");
-		  addFunction(connection, dbindex);
 		  System.out.println("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
 		  System.out.println("Updating gtfs_stops");
@@ -326,7 +397,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateGtfsTripStops(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_trip_stops LIMIT 1");
 			if(!rs.next()){
@@ -334,8 +405,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_gtfs_trip_stops(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE gtfs_trip_stops DISABLE TRIGGER ALL;");
@@ -360,7 +431,7 @@ public class UpdateEventManager {
 	 *Updates gtfs_feed_info table with the calendar range
 	 */
 	public static void updateCalendarRange(Connection connection, String agencyId){
-		Statement stmt = null;
+		/*Statement stmt = null;
 	      try {
 	        stmt = connection.createStatement();
 	        
@@ -372,7 +443,7 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
-	      }
+	      }*/
 	}
 
 	/**
@@ -380,7 +451,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateGtfsStopServiceMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_stop_service_map LIMIT 1");
 			if(!rs.next()){
@@ -388,8 +459,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_gtfs_stop_service_map(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE gtfs_stop_service_map DISABLE TRIGGER ALL;");
@@ -445,7 +516,30 @@ public class UpdateEventManager {
 	/**
 	 *Adding SQL functions
 	 */
-	public static void addFunction(Connection connection, int dbindex){
+	public static void addFunction(Connection connection, String[] dbInfo){
+		final class SqlExecuter extends SQLExec {
+	        public SqlExecuter() {
+	            Project project = new Project();
+	            project.init();
+	            setProject(project);
+	            setTaskType("sql");
+	            setTaskName("sql");
+	        }
+	    }
+		try {
+			String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+	        SqlExecuter executer = new SqlExecuter();
+	        executer.setSrc(new File(path+"../../src/main/resources/admin/resources/Functions.sql"));
+//	        executer.setClasspath(createClasspath());
+//	        executer.setEscapeProcessing(true);
+	        executer.setDriver("org.postgresql.Driver");
+	        executer.setUrl(dbInfo[4]);
+	        executer.setPassword(dbInfo[6]);
+	        executer.setUserid(dbInfo[5]);
+	        executer.execute();
+	    } catch (Exception e) {
+	        System.out.println("Exception importing database ..."+ e);
+	    }
 		/*String basePath = System.getProperty("user.dir").replace('\\', '/')+"/";
 		Process pr;
 		ProcessBuilder pb;
@@ -519,7 +613,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateGtfsStopRouteMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_stop_route_map LIMIT 1");
 			if(!rs.next()){
@@ -527,8 +621,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_gtfs_stop_route_map(connection);
+		  }*/
+		
 		  
 		  try {
 		    stmt = connection.createStatement();
@@ -575,7 +669,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateCongdistTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_congdists_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -583,8 +677,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_census_congdists_trip_map(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_congdists_trip_map DISABLE TRIGGER ALL;");
@@ -628,7 +722,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateCountyTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_counties_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -636,8 +730,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_census_counties_trip_map(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_counties_trip_map DISABLE TRIGGER ALL;");
@@ -679,7 +773,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateTractTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_tracts_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -687,8 +781,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_census_tracts_trip_map(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_tracts_trip_map DISABLE TRIGGER ALL;");
@@ -730,7 +824,7 @@ public class UpdateEventManager {
 	 */
 	public static void updatePlaceTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_places_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -738,8 +832,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_census_places_trip_map(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_places_trip_map DISABLE TRIGGER ALL;");
@@ -781,7 +875,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateUrbanTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		try{
+		/*try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_urbans_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -789,8 +883,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
-		create_census_urbans_trip_map(connection);
+		  }*/
+		
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_urbans_trip_map DISABLE TRIGGER ALL;");

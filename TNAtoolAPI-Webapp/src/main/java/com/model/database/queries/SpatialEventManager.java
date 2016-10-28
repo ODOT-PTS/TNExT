@@ -26,12 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.gtfs.model.*;
 
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopExt;
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
 import com.model.database.queries.congraph.AgencyCentroid;
 import com.model.database.queries.congraph.ConGraphAgency;
 /*import com.library.model.TransitConnection;
@@ -112,15 +111,15 @@ public class SpatialEventManager {
 		return output;
 	}
 	
-	public static List<TripExt> QueryTripsbyRoute(String agencyID, String routeID, int dbindex) throws SQLException{
-		List<TripExt> output = new ArrayList<TripExt>();
+	public static List<Trip> QueryTripsbyRoute(String agencyID, String routeID, int dbindex) throws SQLException{
+		List<Trip> output = new ArrayList<Trip>();
 		String query = "SELECT * FROM gtfs_trips WHERE route_agencyid = '" + agencyID + "' AND route_id = '" + routeID + "'";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
-		TripExt trip;
+		Trip trip;
 		while ( rs.next() ){
-			trip = new TripExt();
+			trip = new Trip();
 			trip.setEpshape(rs.getString("epshape"));
 			trip.setLength( rs.getDouble("length") + rs.getDouble("tlength") );
 			trip.setTripHeadsign(rs.getString("tripheadsign"));
@@ -131,24 +130,24 @@ public class SpatialEventManager {
 		return output;
 	}
 
-	public static List<StopTimeExt> Querystoptimebytrip(String agencyID, String tripID, int dbindex) throws SQLException{
-		List<StopTimeExt> output = new ArrayList<StopTimeExt>();
+	public static List<StopTime> Querystoptimebytrip(String agencyID, String tripID, int dbindex) throws SQLException{
+		List<StopTime> output = new ArrayList<StopTime>();
 		String query = "SELECT stoptimes.*, stops.name AS stopsname "
 				+ " FROM gtfs_stop_times AS stoptimes INNER JOIN gtfs_stops AS stops ON stops.id = stoptimes.stop_id AND stops.agencyid=stoptimes.stop_agencyid "
 				+ " WHERE trip_agencyid = '" + agencyID + "' AND trip_id = '" + tripID + "'";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
-		StopTimeExt st;
+		StopTime st;
 		while ( rs.next() ){
-			st = new StopTimeExt();
+			st = new StopTime();
 			st.setId(rs.getInt("gid"));
 			st.setStopSequence(rs.getInt("stopsequence"));
 			st.setArrivalTime(rs.getInt("arrivaltime"));
 			st.setDepartureTime(rs.getInt("departuretime"));
 			st.setStopHeadsign(rs.getString("stopheadsign"));
 			st.setTimepoint(rs.getInt("timepoint"));			
-			StopExt stop = new StopExt();
+			Stop stop = new Stop();
 			AgencyAndId agencyAndId = new AgencyAndId(rs.getString("stops_agencyid"), rs.getString("stop_id"));
 			stop.setName(rs.getString("stopname"));
 			stop.setId(agencyAndId);

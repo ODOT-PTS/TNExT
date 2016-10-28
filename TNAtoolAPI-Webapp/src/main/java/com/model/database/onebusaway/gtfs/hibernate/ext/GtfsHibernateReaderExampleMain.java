@@ -49,7 +49,8 @@ import org.onebusaway.gtfs.services.calendar.CalendarService;
 
 import com.model.database.Databases;
 import com.model.database.onebusaway.gtfs.hibernate.ext.HibernateGtfsRelationalDaoImplExt;
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.*;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.*;
+import org.onebusaway.gtfs.model.*;
 
 
 public class GtfsHibernateReaderExampleMain {
@@ -68,25 +69,33 @@ public class GtfsHibernateReaderExampleMain {
 	  for (int k=0; k<Databases.dbsize; k++){
 		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k],k);
 	  }	    
-  }		  
+  }
   
-  public static AgencyExt QueryAgencybyid(String id, int dbindex){
+  public static void updateSessions(){
+	  factory = new HibernateGtfsFactory[Databases.dbsize];
+	  sessions = new SessionFactory[Databases.dbsize];
+	  for (int k=0; k<Databases.dbsize; k++){
+		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k],k);
+	  }
+  }
+  
+  public static Agency QueryAgencybyid(String id, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
-	  AgencyExt a = dao.getAgencyForIdExt(id);
+	  Agency a = dao.getAgencyForIdExt(id);
 	  return a;
   }
   
-  public static StopExt QueryStopbyid(AgencyAndId id, int dbindex){
+  public static Stop QueryStopbyid(AgencyAndId id, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopForIdExt(id);
   }
   
-  public static RouteExt QueryRoutebyid(AgencyAndId route, int dbindex){
+  public static Route QueryRoutebyid(AgencyAndId route, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getRouteForIdExt(route);
   }
   
-  public static List<TripExt> QueryTripsforAgency(String agencyId, int dbindex){
+  public static List<Trip> QueryTripsforAgency(String agencyId, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getTripsForAgency(agencyId);
   }
@@ -117,12 +126,12 @@ public class GtfsHibernateReaderExampleMain {
   }*/
   
   //Alireza
-  public static List<ServiceCalendarExt>  QueryCalendarforAgency(String agency, int dbindex){
+  public static List<ServiceCalendar>  QueryCalendarforAgency(String agency, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	  return dao.getCalendarForAgency(agency);
   }
   
-  public static List<ServiceCalendarDateExt>  QueryCalendarDatesforAgency(String agency, int dbindex){
+  public static List<ServiceCalendarDate>  QueryCalendarDatesforAgency(String agency, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	  return dao.getCalendarDatesForAgency(agency);
   }
@@ -133,7 +142,7 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getShapePointsForShapeId(shapeid);
   }*/
   
-  public static List<FareRuleExt> QueryFareRuleByRoute(RouteExt route, int dbindex){
+  public static List<FareRule> QueryFareRuleByRoute(Route route, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  	  
 	  return dao.getFareRuleForRoute(route);
   }
@@ -168,37 +177,37 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getFarePriceForRoutes(routes);
   }
   
-  public static void updateTrip(TripExt trip, int dbindex){
+  public static void updateTrip(Trip trip, int dbindex){
 	HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	dao.updateTrip(trip);
   }
   
-  public static TripExt getTrip(AgencyAndId id, int dbindex){
+  public static Trip getTrip(AgencyAndId id, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	 
 	  return dao.getTripForIdExt(id);
   }
   
-  public static Collection<FeedInfoExt> QueryAllFeedInfos (int dbindex){
+  public static Collection<FeedInfo> QueryAllFeedInfos (int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getAllFeedInfosExt();
   }
   
-  public static Collection<AgencyExt> QueryAllAgencies (List<String> selectedAgencies, int dbindex){
+  public static Collection<Agency> QueryAllAgencies (List<String> selectedAgencies, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getAllAgencies(selectedAgencies);
   }
   
-  public static Collection<AgencyExt> QuerySelectedAgencies (List<String> selectedAgencies, int dbindex){
+  public static Collection<Agency> QuerySelectedAgencies (List<String> selectedAgencies, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getSelectedAgencies(selectedAgencies);
   }
   
-  public static Collection<RouteExt> QueryAllRoutes (int dbindex){
+  public static Collection<Route> QueryAllRoutes (int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getAllRoutesExt();
   }
   
-  public static Collection<TripExt> QueryAllTrips (int dbindex){
+  public static Collection<Trip> QueryAllTrips (int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getAllTripsExt();
   }
@@ -213,7 +222,7 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getTripsForRoute(route);
   }
   
-  public static List<StopExt> QueryStopsbyAgency (String id, int dbindex){
+  public static List<Stop> QueryStopsbyAgency (String id, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForAgency(id);
   }
@@ -222,37 +231,37 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getStopsForRoute(route);
   }*/
   
-  public static List<StopExt> QueryStopsbyTrip (AgencyAndId trip, int dbindex){
+  public static List<Stop> QueryStopsbyTrip (AgencyAndId trip, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTrip(trip);
   }
   
-  public static List<StopExt> QueryStopsbyTripCounty (AgencyAndId trip, String county, int dbindex){
+  public static List<Stop> QueryStopsbyTripCounty (AgencyAndId trip, String county, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripCounty(trip,county);
   }
   
-  public static List<StopExt> QueryStopsbyTripRegion (AgencyAndId trip, String region, int dbindex){
+  public static List<Stop> QueryStopsbyTripRegion (AgencyAndId trip, String region, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripRegion(trip,region);
   }
   
-  public static List<StopExt> QueryStopsbyTripTract (AgencyAndId trip, String tract, int dbindex){
+  public static List<Stop> QueryStopsbyTripTract (AgencyAndId trip, String tract, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripTract(trip,tract);
   }
   
-  public static List<StopExt> QueryStopsbyTripPlace (AgencyAndId trip, String place, int dbindex){
+  public static List<Stop> QueryStopsbyTripPlace (AgencyAndId trip, String place, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripPlace(trip,place);
   }
   
-  public static List<StopExt> QueryStopsbyTripUrban (AgencyAndId trip, String urban, int dbindex){
+  public static List<Stop> QueryStopsbyTripUrban (AgencyAndId trip, String urban, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripUrban(trip,urban);
   }
   
-  public static List<StopExt> QueryStopsbyTripUrbans (AgencyAndId trip, List<String> urbans, int dbindex){
+  public static List<Stop> QueryStopsbyTripUrbans (AgencyAndId trip, List<String> urbans, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripUrbans(trip,urbans);
   }
@@ -262,7 +271,7 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getCounts(selectedAgencies);
   }
   
-  public static List<StopExt> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
+  public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripCongdist(trip,congdist);
   }
@@ -282,7 +291,7 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getServiceHours(trips);
   }
   
-  public static List<FeedInfoExt> QueryFeedInfoByDefAgencyId(String defaultAgency, int dbindex) {
+  public static List<FeedInfo> QueryFeedInfoByDefAgencyId(String defaultAgency, int dbindex) {
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getFeedInfoByDefAgencyId(defaultAgency);
   }
