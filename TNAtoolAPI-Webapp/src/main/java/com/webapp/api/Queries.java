@@ -256,7 +256,7 @@ public class Queries {
 				.getLocation().getPath();
 
 		BufferedReader reader = new BufferedReader(new FileReader(path
-				+ "../../src/main/webapp/resources/admin/databaseParams.csv"));
+				+ "../../src/main/resources/admin/resources/databaseParams.csv"));
 		reader.readLine();
 		String[] params = reader.readLine().trim().split(",");
 		reader.close();
