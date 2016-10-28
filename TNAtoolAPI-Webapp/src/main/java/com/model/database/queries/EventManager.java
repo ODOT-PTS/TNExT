@@ -54,6 +54,12 @@ static{
 	}
 };
 
+public static void updateSessions(){
+	session = new Session[Hutil.getSessionFactory().length];
+	for (int scnt=0; scnt< session.length; scnt++){
+		session[scnt] = Hutil.getSessionFactory()[scnt].openSession();
+	}
+}
 
 /**
  * returns trip data and shape

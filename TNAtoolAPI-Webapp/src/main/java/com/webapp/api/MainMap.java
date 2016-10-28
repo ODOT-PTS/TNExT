@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -52,17 +53,16 @@ public class MainMap extends HttpServlet {
 	}
 	
 	public void setDatabaseParams() throws IOException{
-		String path = MainMap.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		
-		BufferedReader reader = new BufferedReader(new FileReader(
-				path+"../../src/main/webapp/resources/admin/databaseParams.csv"));
+		ClassLoader classLoader = getClass().getClassLoader();
+		File databaseParamsFile = new File(classLoader.getResource("admin/resources/databaseParams.csv").getFile());
+		
+		BufferedReader reader = new BufferedReader(new FileReader(databaseParamsFile));
 		reader.readLine();
 		String[] params = reader.readLine().trim().split(",");
 		reader.close();
 		
-		String spatialConnectionPath = path+"/../../src/main/resources/com/model/database/connections/spatial";
-		String transitConnectionPath = path+"/../../src/main/resources/com/model/database/connections/transit";
-		File connectionFolder = new File(spatialConnectionPath);
+		File connectionFolder = new File(classLoader.getResource("com/model/database/connections/spatial").getFile());
 		File[] listOfFiles = connectionFolder.listFiles();
 		String[] dbNames = new String[listOfFiles.length];
 	    for (int i = 0; i < listOfFiles.length; i++) {
@@ -71,7 +71,7 @@ public class MainMap extends HttpServlet {
 	    	  parseConnectionFiles(listOfFiles[i],params,dbNames[i]);
 	      }
 	    }
-	    connectionFolder = new File(transitConnectionPath);
+	    connectionFolder = new File(classLoader.getResource("com/model/database/connections/transit").getFile());
 	    listOfFiles = connectionFolder.listFiles();
 		dbNames = new String[listOfFiles.length];
 	    for (int i = 0; i < listOfFiles.length; i++) {
@@ -80,14 +80,12 @@ public class MainMap extends HttpServlet {
 	    	  parseConnectionFiles(listOfFiles[i],params,dbNames[i]);
 	      }
 	    }
-	    String dbInfoPath = path+"../../src/main/webapp/resources/admin/dbInfo.csv";
-	    String dbInfoPathTmp = path+"../../src/main/webapp/resources/admin/dbInfoTmp.csv";
-	    setDatabaseInfoFile(params,dbInfoPath,dbInfoPathTmp);
+	    File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+		File tempFile = new File(classLoader.getResource("admin/resources").getPath()+"/dbInfoTmp.csv");
+	    setDatabaseInfoFile(params,inputFile,tempFile);
 	}
 	
-	private void setDatabaseInfoFile(String[] params, String dbInfoPath, String dbInfoPathTmp) throws IOException{
-		File inputFile = new File(dbInfoPath);
-		File tempFile = new File(dbInfoPathTmp);
+	private void setDatabaseInfoFile(String[] params, File inputFile, File tempFile) throws IOException{
 		
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));

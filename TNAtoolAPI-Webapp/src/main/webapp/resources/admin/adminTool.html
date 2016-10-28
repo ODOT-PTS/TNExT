@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>TNA Software Tool ADMIN</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	
+	<script src="https://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+	<script src="https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+	<script src="https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+<!-- 	<script src="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+ -->	<script src="https://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.iframe-transport.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-process.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-image.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-audio.js"></script>
+<!-- 	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-validate.js"></script>
+ -->	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-ui.js"></script>
+<!-- 	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-jquery-ui.js"></script>
+ -->	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-video.js"></script>
+	<script src="../resources/admin/adminTool.js"></script>
+	<script src="../resources/admin/jquery.fileupload-validate.js"></script>
+	
+	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/css/jquery.fileupload.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/css/jquery.fileupload-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" href="../resources/admin/adminTool.css" />
+	
+	
+</head>
+
+<body style="display:none">
+	<!-- <header>
+		<h1 style="width:60%; margin:auto; margin-top:3%">ADMINISTRATIVE INTERFACE</h1>
+	</header> -->
+	
+	<div id="main">
+		<h1 style="width:60%; margin:auto; margin-top:3%; margin-bottom:1em">ADMINISTRATIVE INTERFACE</h1>
+		<input type="button" id="addDB" class="dbButtons" value="Add a New Database" onclick="addModifyDB(defaultInfo, -1)">
+		
+<!-- 		<input type="button" id="runPlayground" value="Run Playground Add/Remove Processes" onclick="runPlayground('true')"> -->
+		<br><br>
+		<div id="dbList">
+			
+		</div>
+		
+		
+		<div id="dialog-form" title="Database Connection Information">
+		 
+		  <form>
+		    <fieldset id="dialogFields">
+		      
+		    </fieldset>
+		  </form>
+		</div>
+		
+		<div id="gtfs_upload" title="GTFS Add/Remove">
+		 
+		  <div id="gtfs_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>The GTFS feeds are only accepted in a <b>ZIP</b> format.</li>
+			  	<li>The corresponding GTFS text files must be directly within the ZIP file.</li>
+			  	<li>A sample of acceptable GTFS feed can be downloaded from <b><a href="../resources/admin/corvallis_transit_agency.zip" download>here</a></b>.</li>
+			  	<li>Uploaded GTFS feeds are shown in the <b>"Uploaded GTFS Feeds"</b> drop-down list.</li>
+			  	<li>If there is a conflict between the Agency ID's of the GTFS feed being uploaded and the ones that already exist in the database, the feed will not be uploaded</li>
+			  </ul>
+		  </div><br>
+		  <div id="gtfs_current_feeds" class="upload_cards"><h3>Uploaded GTFS Feeds</h3>
+		  	<div id="agencyList"></div>
+		  </div><br>
+		  <div id="gtfs_upload_feeds" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="gtfs_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]" multiple>
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>
+	</div>
+	
+	
+</body>
+
+</html>

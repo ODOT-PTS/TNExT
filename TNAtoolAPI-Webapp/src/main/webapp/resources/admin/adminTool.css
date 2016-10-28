@@ -1,11 +1,163 @@
 body{
-	background-color:#F8F8F8 
+	background: url(../images/wallpaper.jpg) no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	font-family: 'Roboto', sans-serif;
 }
 
 #main{
+	background-color:#F8F8F8;
 	margin: auto;
-	margin-top:50px;
-	width:80%;
-	background-color:#F8F8F8  
+	padding: 2em;
+	margin-top: 4em;
+	width:60%;
+	border-radius: 2px;
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3); 
+	font-size:90%
 }
 
+table{
+	border-collapse: inherit;
+    border-spacing: 5px;
+}
+
+.upload_cards{
+	width:100%;
+	padding: 20px;
+	background-color: #F7F7F7;
+	margin: 0 auto 10px;
+	border-radius: 2px;
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+	overflow: auto;
+	text-decoration: none;
+	/* color: #666;
+	font-weight: 400;
+	text-align: center;
+	display: inline-block; */
+	/* opacity: 0.6;
+	transition: opacity ease 0.5s; */
+}
+
+.databaseDivs {
+	background-color: beige;
+	border: 5px solid #cccccc;
+	border-style: inset;
+	height:420px;
+	min-width: 360px;
+}
+
+.databaseDivs table{
+	padding:1em
+}
+
+.databaseDivs table td{
+	padding:0.2em
+}
+
+.databaseDivs table td:nth-child(2){
+	font-style:italic
+}
+
+.databaseOuterTable input{
+	margin : 0.3em;
+/* 	width: 100%
+ */}
+
+#gtfs_upload{
+	font-size:84%
+}
+
+.dbButtons-class{
+ display: inline-block;
+ border:1px solid #c9ae34;
+ border-radius: 3px 3px 3px 3px;
+ -webkit-border-radius: 3px 3px 3px 3px;
+ -moz-border-radius: 3px 3px 3px 3px;
+ font-family: Verdana;
+ width: 40%;
+ font-size: 16px;
+ padding: 10px 40px;
+ box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d,0 2px 4px 0 #D4D4D4;
+ -moz-box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d,0 2px 4px 0 #D4D4D4;
+ -webkit-box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d,0 2px 4px 0 #D4D4D4;
+ text-shadow: 0 1px 0 #fff;
+ background-image: linear-gradient(to top, #fce374, #fcdf5b);
+ background-color: #fce374;
+ padding-left: 1.5em;
+ 
+}
+.single{
+	width:100%
+}
+.second{
+	width:24%;
+}
+.dbButtons-class:hover, .btn-class:active{
+ border:1px solid #967d09;
+ color: #705D07;
+ box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d;
+ -moz-box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d;
+ -webkit-box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d;
+ background-color: #fcdf5b;
+}
+.dbButtons-class:disabled {
+  opacity: 0.35; 
+  cursor: not-allowed;
+}
+
+.select-class{
+	width:27%;
+	height:80%
+}
+.no_css{
+	text-shadow: none !important;
+	background-image: none !important;
+}
+
+.no_css:hover, .no_css:active{
+	color: black;
+}
+
+.dbButtons {
+	-moz-box-shadow:inset 0px 1px 0px 0px #9acc85;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #9acc85;
+	box-shadow:inset 0px 1px 0px 0px #9acc85;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #74ad5a), color-stop(1, #68a54b));
+	background:-moz-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+	background:-webkit-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+	background:-o-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+	background:-ms-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
+	background:linear-gradient(to bottom, #74ad5a 5%, #68a54b 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#74ad5a', endColorstr='#68a54b',GradientType=0);
+	background-color:#74ad5a;
+	border:1px solid #3b6e22;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:13px;
+	font-weight:bold;
+	padding:6px 12px;
+	text-decoration:none;
+	height: 40px;
+}
+.dbButtons:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #68a54b), color-stop(1, #74ad5a));
+	background:-moz-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+	background:-webkit-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+	background:-o-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+	background:-ms-linear-gradient(top, #68a54b 5%, #74ad5a 100%);
+	background:linear-gradient(to bottom, #68a54b 5%, #74ad5a 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#68a54b', endColorstr='#74ad5a',GradientType=0);
+	background-color:#68a54b;
+}
+.dbButtons:active {
+	position:relative;
+	top:1px;
+}
+
+.ui-widget-overlay {
+   opacity: .70;
+}

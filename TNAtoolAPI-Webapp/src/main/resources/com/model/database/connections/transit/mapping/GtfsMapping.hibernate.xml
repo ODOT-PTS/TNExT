@@ -21,9 +21,9 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="com.model.database">
+<hibernate-mapping package="org.onebusaway">
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt" table="gtfs_agencies">
+    <class name="org.onebusaway.gtfs.model.Agency" table="gtfs_agencies">
         <id name="id" type="string" length="50" />
         <property name="fareUrl" />        
         <property name="lang" />
@@ -35,7 +35,7 @@
         <property name="added" type="string" length="20" />
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.FareAttributeExt" table="gtfs_fare_attributes">
+    <class name="org.onebusaway.gtfs.model.FareAttribute" table="gtfs_fare_attributes">
         <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
             <key-property name="agencyId" length="50" />
             <key-property name="id" />
@@ -48,7 +48,7 @@
         <property name="journeyDuration" />
     </class>
     
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopServiceMap" table="gtfs_stop_service_map">
+    <class name="org.onebusaway.gtfs.model.StopServiceMap" table="gtfs_stop_service_map">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -59,7 +59,7 @@
         </many-to-one>                
     </class> 
    
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.RouteServiceIdMap" table="gtfs_route_serviceid_map">
+    <class name="org.onebusaway.gtfs.model.RouteServiceIdMap" table="gtfs_route_serviceid_map">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -75,7 +75,7 @@
        	<property name="serviceId" />  -->                
     </class>
 
-	<class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopRouteMap" table="gtfs_stop_route_map">
+	<class name="org.onebusaway.gtfs.model.StopRouteMap" table="gtfs_stop_route_map">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>        
@@ -87,7 +87,7 @@
         </many-to-one>                
     </class>
     
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.FareRuleExt" table="gtfs_fare_rules">
+    <class name="org.onebusaway.gtfs.model.FareRule" table="gtfs_fare_rules">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -104,7 +104,7 @@
         <property name="containsId" />
     </class>
     
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.FeedInfoExt" table="gtfs_feed_info">
+    <class name="org.onebusaway.gtfs.model.FeedInfo" table="gtfs_feed_info">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>        
@@ -120,7 +120,7 @@
         <property name="feedName" type="text"/>
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.FrequencyExt" table="gtfs_frequencies">
+    <class name="org.onebusaway.gtfs.model.Frequency" table="gtfs_frequencies">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -136,7 +136,7 @@
         <property name="defaultId" type="string" length="50" />
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.PathwayExt" table="gtfs_pathways">
+    <class name="org.onebusaway.gtfs.model.Pathway" table="gtfs_pathways">
         <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
             <key-property name="agencyId" length="50" />
             <key-property name="id" />
@@ -153,7 +153,7 @@
         <property name="wheelchairTraversalTime" />
     </class>
     
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.RouteExt" table="gtfs_routes">
+    <class name="org.onebusaway.gtfs.model.Route" table="gtfs_routes">
         <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
             <key-property name="agencyId" length="50" />
             <key-property name="id" />
@@ -169,7 +169,7 @@
         <property name="defaultId" type="string" length="50" />
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarExt" table="gtfs_calendars">
+    <class name="org.onebusaway.gtfs.model.ServiceCalendar" table="gtfs_calendars">
         <!--  <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id> -->
@@ -189,7 +189,7 @@
         <property name="endDate" type="org.onebusaway.gtfs.impl.ServiceDateUserType" length="8"/>        
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarDateExt" table="gtfs_calendar_dates">
+    <class name="org.onebusaway.gtfs.model.ServiceCalendarDate" table="gtfs_calendar_dates">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -201,7 +201,7 @@
         </component>
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.ShapePointExt" table="gtfs_shape_points">
+    <class name="org.onebusaway.gtfs.model.ShapePoint" table="gtfs_shape_points">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -215,7 +215,7 @@
         </component>
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopExt" table="gtfs_stops">
+    <class name="org.onebusaway.gtfs.model.Stop" table="gtfs_stops">
         <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
             <key-property name="agencyId" length="50" />
             <key-property name="id" />
@@ -241,7 +241,7 @@
         <property name="congdistId" />
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt" table="gtfs_stop_times">
+    <class name="org.onebusaway.gtfs.model.StopTime" table="gtfs_stop_times">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -266,7 +266,7 @@
 
     </class>
 
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.TransferExt" table="gtfs_transfers">
+    <class name="org.onebusaway.gtfs.model.Transfer" table="gtfs_transfers">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="native" />
         </id>
@@ -299,7 +299,7 @@
         <property name="defaultId" type="string" length="50" />
     </class>
   
-    <class name="com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt" table="gtfs_trips">
+    <class name="org.onebusaway.gtfs.model.Trip" table="gtfs_trips">
 
         <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
             <key-property name="agencyId" length="50" />

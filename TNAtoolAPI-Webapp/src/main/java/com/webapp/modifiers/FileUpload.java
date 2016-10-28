@@ -68,7 +68,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.model.database.*;
-import com.model.database.GtfsDatabaseLoaderMain;
+import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.AddRemoveFeed;
 import com.model.database.queries.objects.UserSession;
 
