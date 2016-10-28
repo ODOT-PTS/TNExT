@@ -5,29 +5,36 @@ var maxAreaSelect = 3;
 var dates = [];
 var agencies = [];
 var areas = [];
+var metrics = [];
+var areaType;
+var reportType;
+var year = 'population';
+var minUrbanPop = 0;
+var maxUrbanPop = 2000000;
+var filterOnUrban = false;
 
 var empYears = [
-		{value:"current", text:"2013"},
-		{value:"2015", text:"2015 (Projection)"},
-		{value:"2020", text:"2020 (Projection)"},
-		{value:"2025", text:"2025 (Projection)"},
-		{value:"2030", text:"2030 (Projection)"},
-		{value:"2035", text:"2035 (Projection)"},
-		{value:"2040", text:"2040 (Projection)"},
-		{value:"2045", text:"2045 (Projection)"},
-		{value:"2050", text:"2050 (Projection)"}
+		{value:"population", text:"2013"},
+		{value:"population2015", text:"2015 (Projection)"},
+		{value:"population2020", text:"2020 (Projection)"},
+		{value:"population2025", text:"2025 (Projection)"},
+		{value:"population2030", text:"2030 (Projection)"},
+		{value:"population2035", text:"2035 (Projection)"},
+		{value:"population2040", text:"2040 (Projection)"},
+		{value:"population2045", text:"2045 (Projection)"},
+		{value:"population2050", text:"2050 (Projection)"}
 ];
 
 var popYears = [
-		{value:"current", text:"2010"},
-		{value:"2015", text:"2015 (Projection)"},
-		{value:"2020", text:"2020 (Projection)"},
-		{value:"2025", text:"2025 (Projection)"},
-		{value:"2030", text:"2030 (Projection)"},
-		{value:"2035", text:"2035 (Projection)"},
-		{value:"2040", text:"2040 (Projection)"},
-		{value:"2045", text:"2045 (Projection)"},
-		{value:"2050", text:"2050 (Projection)"}
+		{value:"population", text:"2010"},
+		{value:"population2015", text:"2015 (Projection)"},
+		{value:"population2020", text:"2020 (Projection)"},
+		{value:"population2025", text:"2025 (Projection)"},
+		{value:"population2030", text:"2030 (Projection)"},
+		{value:"population2035", text:"2035 (Projection)"},
+		{value:"population2040", text:"2040 (Projection)"},
+		{value:"population2045", text:"2045 (Projection)"},
+		{value:"population2050", text:"2050 (Projection)"}
 ];
 
 var T6Years = [
@@ -36,7 +43,7 @@ var T6Years = [
 
 var popMetrics = [
                   {value:"rural", text:"Rural Population"},
-                  {value:"edu", text:"Urban Population"}
+                  {value:"urban", text:"Urban Population"}
                   ];
 
 var serviceMetrics = [
@@ -82,6 +89,7 @@ function flexRepDialog() {
 		$("#flexRepDialog").dialog({
 			width:"auto",
 			resizable: false,
+			modal: true,
 			show : {
 				effect : "slide",
 				duration : 300
@@ -145,14 +153,14 @@ function flexRepDialog() {
   	},
   	addDates : [new Date()]
   });
-  dates.push($('#FlexRepDate').multiDatesPicker('getDates'));
+  dates.push($('#FlexRepDate').multiDatesPicker('getDates')[0]);
 
   
 	html = 
 		'<table id ="FlexRepParamsTable">'
 		+ '<tr>'
     	+ '<td>&nbsp;Pop/Emp Source:</td>'
-    	+ '<td><select id ="yearSel" class="FlexRepParamInput" disabled></td>';
+    	+ '<td><select id ="yearSel" class="FlexRepParamInput" onchange="year=$(this).val();"disabled></td>';
 	html = html.concat(
     	'</tr>'
 		+ '<tr>'
@@ -161,7 +169,7 @@ function flexRepDialog() {
     	+ '</tr>'
     	+ '<tr>'
     	+ '<td>&nbsp;Min. Level of Service (times): </td>'
-    	+ '<td><input type="text" id="LoS" class="FlexRepParamInput" min="1" max="2000000" value="2" onkeypress="return isWholeNumber(event)" disabled></td>'
+    	+ '<td><input type="text" id="LoS" class="FlexRepParamInput" min="1" value="2" onkeypress="return isWholeNumber(event);" disabled></td>'
     	+ '</tr>'
     	+ '</table>');
     $('#FlexRepParams').append(html);
@@ -240,10 +248,10 @@ function flexRepDialog() {
 	 html = html.concat("<input type='checkbox' name='uAreaFilter' onchange='toggleUrbanFilters(this)' unchecked> Filter on urban areas<br>");
 	 html = html.concat("<table id='urbanFilterTable'><tr>" +
 	 		"	<td><span>Min. Urban Pop:</span></td>" +
-	 		"	<td><input id='minUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='return isWholeNumber(event)' value='0' style='width:80px' disabled></td>" +
+	 		"	<td><input id='minUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='minUrbanPop=$(this).val();return isWholeNumber(event)' value='0' style='width:80px' disabled></td>" +
 	 		"</tr><tr>" +
 	 		"	<td><span>Max. Urban Pop:</span></td>" +
-	 		"	<td><input id='maxUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='return isWholeNumber(event)' value='2000000' style='width:80px' disabled></td>" +
+	 		"	<td><input id='maxUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='maxUrbanPop=$(this).val();return isWholeNumber(event)' value='2000000' style='width:80px' disabled></td>" +
 	 		"</tr></table>");
 	 $('#FlexRepUAreas').append(html);
 }
@@ -253,7 +261,8 @@ function flexRepDialog() {
 
 function loadAreaOptions(input){
 	$("#areaList").empty();
-	var areaType = "";
+	areas = [];
+	numSelectedAreas = 0;
 	switch(parseInt($(input).val())) {
     case 0:
         areaType = "state";
@@ -282,9 +291,7 @@ function loadAreaOptions(input){
 				+ dbindex + '&areaType=' + areaType,
 		async : false,
 		success : function(d) {
-			html = '&nbsp;<input type="checkbox" ' 
-				+ '" value="area" onchange=selectAll(this)> '
-				+ '<span class="header2"> Select All </span><hr style="border-top: 1px solid rgba(125, 124, 124, 0.3);">';
+			html = '';
 			$.each(d, function(index, item){
 				html = html.concat('&nbsp;<input type="checkbox" class="areaCheckbox" name="'
 										+ item.name
@@ -317,10 +324,15 @@ function selectAll(input){
 }
 
 function toggleUrbanFilters(input){
-	if(input.checked)
+	if(input.checked){
 		flag = false;
-	else
+		filterOnUrban = true;
+	}
+	else{
 		flag = true;
+		filterOnUrban = false;
+	}
+		
 	$(".urbanFilter").each(function(index, item){
 		$(item).attr('disabled', flag);
 	});
@@ -351,6 +363,7 @@ function showParams(input){
 	$('#yearSel').find('.yearOption').remove();
 	$('#yearSel').find('option').prop('selected',true);
 	$('#FlexRepMetrics').empty();
+	reportType = $(input).val();
 	
 	// Enabling the inputs and showin metric options based on selected report type.
 	switch(parseInt($(input).val())) {
@@ -402,16 +415,12 @@ function appendMetrics(input,objID){
 				+ item.text
 				+ '" value="'
 				+ item.value
-				+ '" onchange=""> '
+				+ '" onchange="updateMetrics(this)"> '
 				+ item.text + '<br>');
 	});
 }
 
 function openFlexRepTable(){
-	alert(isAllInputSelected());
-}
-
-function isAllInputSelected(){
 	var reportTypeFlag = false;
 	var datesFlag = false;
 	var losFlag = false;
@@ -447,9 +456,15 @@ function isAllInputSelected(){
 		yearFlag = true;
 	
 	if (reportType == 0)
-		return reportTypeFlag && datesFlag && agenceisFlag && areasFlag;
+		if (reportTypeFlag && datesFlag && agenceisFlag && areasFlag)
+			window.open('/TNAtoolAPI-Webapp/FlexRep.html');
+		else
+			alert('Enter all required inputs.');
 	else
-		return reportTypeFlag && yearFlag && datesFlag && agenceisFlag && areasFlag && losFlag && sRadiusFlag && metricsFlag;
+		if (reportTypeFlag && yearFlag && datesFlag && agenceisFlag && areasFlag && losFlag && sRadiusFlag && metricsFlag)
+			window.open('/TNAtoolAPI-Webapp/FlexRep.html');
+		else
+			alert('Enter all required inputs.');
 }
 
 function areaSelCheck(input){
@@ -468,6 +483,13 @@ function areaSelCheck(input){
 		areas.splice(agencies.indexOf(areaID));
 		alert('Select at most ' + maxAreaSelect + ' areas.');
 	}
-	
-	console.log(areas);
+}
+
+function updateMetrics(input){
+	metric = input.value;
+	if(input.checked){
+		metrics.push(metric);
+	}else{
+		metrics.splice(metics.indexOf(metric),1);
+	}
 }

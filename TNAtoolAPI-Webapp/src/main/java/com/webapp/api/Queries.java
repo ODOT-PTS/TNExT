@@ -315,7 +315,7 @@ public class Queries {
 			ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
 					, agencyFolder.getAbsolutePath() + "\\" + tempAgencyname + "_" + flag + "_shape"
 					, params[0]
-					, params[2]
+					, "localhost" //params[2]
 					, params[3]
 					, dbName
 					,"\"" + query + "\""
@@ -1008,8 +1008,7 @@ public class Queries {
 		response.AgencyName=allAgencies.get(agency).name;
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
-	if (areaid.equals("null"))
-	{System.out.println("kkkl");
+	if (areaid.equals("null")){
 		 StopsPopMiles = PgisEventManager.stopsPopMiles(0,agency, x, dbindex, popYear,null,null,-1);
 		index += 2;
 	}
@@ -3598,6 +3597,30 @@ Loop:  	for (TripExt trip: routeTrips){
     	return FlexibleReportEventManager.getAreaList(areaType, dbindex);
     }
     
+    
+    @GET
+    @Path("/flexRepPop")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+    		MediaType.TEXT_XML })
+    public Object getFlexRepPop(
+    		@QueryParam("dbindex") Integer dbindex,
+    		@QueryParam("agencies") String agencies,
+    		@QueryParam("dates") String date,
+    		@QueryParam("areas") String areas,
+    		@QueryParam("year") String popyear,
+    		@QueryParam("los") Integer los,
+    		@QueryParam("sradius") Double sradius,
+    		@QueryParam("areaType") String areaType,
+    		@QueryParam("username") String username,
+    		@QueryParam("minUrbanPop") Integer minUrbanPop,
+    		@QueryParam("maxUrbanPop") Integer maxUrbanPop	) throws SQLException{
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	return FlexibleReportEventManager.getFlexRepPop(dbindex,agencies,sdates,days,popyear, areas,los,sradius,areaType,username,minUrbanPop,maxUrbanPop);
+    }
 }
 
 
