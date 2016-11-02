@@ -1069,6 +1069,100 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/copyCensus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object copyCensus(@QueryParam("dbFrom") String dbFrom, @QueryParam("dbTo") String dbTo, @QueryParam("section") String section){
+		String tables;
+		switch (section) {
+	        case "census": tables = "-t census_blocks -t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans -t ";
+	                break;
+	        case "employment": tables = "-t lodes_blocks_rac -t lodes_blocks_wac";
+	                break;
+	        case "parknride": tables = "-t parknride";
+			        break;
+	        case "title6": tables = "-t title_vi_blocks_float";
+	        		break;
+	        case "femployment": tables = "-t lodes_rac_projection_block -t lodes_rac_projection_county";
+					break;
+			default: tables = "";
+					break;
+		} 
+		
+		String[] dbInfoFrom = dbFrom.split(",");
+		String[] p;
+		p = dbInfoFrom[4].split("/");
+		String nameFrom = p[p.length-1];
+		
+		String[] dbInfoTo = dbTo.split(",");
+		p = dbInfoTo[4].split("/");
+		String nameTo = p[p.length-1];
+		
+//		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+//		String batFile = path+"../../src/main/resources/admin/resources/copyPnr.bat";
+		Process pr;
+//		ProcessBuilder pb;
+		
+		String fromHost = dbInfoFrom[4].split(":")[2];
+		fromHost = fromHost.substring(2);
+		String fromUser = dbInfoFrom[5];
+		String fromPass = dbInfoFrom[6];
+		
+		String toHost = dbInfoTo[4].split(":")[2];
+		toHost = toHost.substring(2);
+		String toUser = dbInfoTo[5];
+		String toPass = dbInfoTo[6];
+//		batFile = batFile.substring(1, batFile.length());
+		
+//		test();
+		try{
+			String[] cmdArray = new String[6];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "start";
+		   cmdArray[3] = "cmd";
+		   cmdArray[4] = "/k";
+		   cmdArray[5] = "set PGPASSWORD="+fromPass+"& "
+		   		+ "pg_dump -U "+fromUser+" -h "+fromHost+" "+tables+" "+nameFrom+" > dump & "
+		   		+ "set PGPASSWORD="+toPass+"& "
+		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < pnrDump & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		/*try {
+//			Runtime rt = Runtime.getRuntime();
+//			pr = rt.exec("echo salam");
+			
+//			pb = new ProcessBuilder("cmd", "/c", "start", batFile, fromPass, fromUser, nameFrom, fromHost,
+//					"C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe",
+//					toPass, toUser, nameTo, toHost,
+//					"C:/Program Files/PostgreSQL/9.3/bin/psql.exe");
+			
+			pb = new ProcessBuilder("cmd", "/c", "start", batFile, "123123", "postgres", "census", "localhost",
+					"C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe",
+					"123123", "postgres", "test", "localhost");
+//			pb.redirectErrorStream(true);
+			pr = pb.start();
+			pr.waitFor(5,TimeUnit.MINUTES);
+			System.out.println("done adding");
+			
+//			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+//		    String line;
+//		    while ((line = in.readLine()) != null) {
+//		        System.out.println(line);
+//		    }
+			
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}*/
+		
+		return "done";
+	}
+	
+	@GET
     @Path("/restoreCensus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object restoreCensus(@QueryParam("db") String db){

@@ -655,9 +655,19 @@ function openPnr(index){
 	changeStatus(index, "parknride", !b);
 }
 
-function copyPnr(index){
+function copyCensus(index, section){
+//	alert(section);
 	var dbTo = dbInfo[index].toString();
 	var dbFrom = dbInfo[$("#pnr-select"+index).val()].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/copyCensus?&dbFrom="+dbFrom+"&dbTo="+dbTo+"&section="+section,
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
 }
 
 /**
@@ -797,27 +807,27 @@ $(document).ready(function(){
             			"<tr><td><input type='button' class='gtfs dbButtons-class single' value='Import GTFS Feeds' onclick='openGTFS("+i+")'></td>" +
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='gtfs'></td></tr>"+
             			"<tr><td><input type='button' class='census dbButtons-class' value='Import Census' onclick='openCensus("+i+")'> or " +
-            					"<input type='button' class='census dbButtons-class second' value='Copy from' onclick='copyCensus("+i+")'>" +
+            					"<input type='button' class='census dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"census\")'>" +
             					"<select class='census select-class' id='census-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='census'></td></tr>"+
             			"<tr><td><input type='button' class='emp dbButtons-class' value='Import Employment' onclick='openEmp("+i+")'> or " +
-            					"<input type='button' class='emp dbButtons-class second' value='Copy from' onclick='copyEmp("+i+")'>" +
+            					"<input type='button' class='emp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"employment\")'>" +
             					"<select class='census select-class' id='emp-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='emp'></td></tr>"+
             			"<tr><td><input type='button' class='pnr dbButtons-class' value='Park & Ride' onclick='openPnr("+i+")'> or " +
-            					"<input type='button' class='pnr dbButtons-class second' value='Copy from' onclick='copyPnr("+i+")'>" +
+            					"<input type='button' class='pnr dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"parknride\")'>" +
             					"<select class='pnr select-class' id='pnr-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='pnr'></td></tr>"+
             			"<tr><td><input type='button' class='t6 dbButtons-class' value='Title VI' onclick='openT6("+i+")'> or " +
-            					"<input type='button' class='t6 dbButtons-class second' value='Copy from' onclick='copyT6("+i+")'>" +
+            					"<input type='button' class='t6 dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"title6\")'>" +
             					"<select class='t6 select-class' id='t6-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='t6'></td></tr>"+
-            			"<tr><td><input type='button' class='fpop dbButtons-class' value='Future Population' onclick='openFpop("+i+")'> or " +
-            					"<input type='button' class='fpop dbButtons-class second' value='Copy from' onclick='copyFpop("+i+")'>" +
-            					"<select class='fpop select-class' id='fpop-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
+            			"<tr><td><input type='button' class='fpop dbButtons-class single' value='Future Population' onclick='openFpop("+i+")'>" +
+//            					"<input type='button' class='fpop dbButtons-class second' value='Copy from' onclick='copyFpop("+i+")'>" +
+//            					"<select class='fpop select-class' id='fpop-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='fpop'></td></tr>"+
             			"<tr><td><input type='button' class='femp dbButtons-class' value='Future Employment' onclick='openFemp("+i+")'> or " +
-            					"<input type='button' class='femp dbButtons-class second' value='Copy from' onclick='copyFemp("+i+")'>" +
+            					"<input type='button' class='femp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"femployment\")'>" +
             					"<select class='femp select-class' id='femp-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='femp'></td></tr>"+
             			"<tr><td><input type='button' class='update dbButtons-class no_css single' value='Run Update Queries' style='background-color: rgba(0, 111, 128, 0.21);' onclick='runUpdates("+i+")'></td>"+
