@@ -1486,13 +1486,12 @@ public class DbUpdate {
 		
 //		test();
 		try{
-			String[] cmdArray = new String[6];
+			String[] cmdArray = new String[5];
 		   cmdArray[0] = "cmd";
 		   cmdArray[1] = "/c";
-		   cmdArray[2] = "start";
-		   cmdArray[3] = "cmd";
-		   cmdArray[4] = "/k";
-		   cmdArray[5] = "set PGPASSWORD="+fromPass+"& "
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+fromPass+"& "
 		   		+ "pg_dump -U "+fromUser+" -h "+fromHost+" "+tables+" "+nameFrom+" > dump & "
 		   		+ "set PGPASSWORD="+toPass+"& "
 		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < dump & "

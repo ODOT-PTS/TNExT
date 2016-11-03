@@ -555,13 +555,12 @@ public class UpdateEventManager {
 		Process pr;
 
 		try{
-			String[] cmdArray = new String[6];
+			String[] cmdArray = new String[5];
 		   cmdArray[0] = "cmd";
 		   cmdArray[1] = "/c";
-		   cmdArray[2] = "start";
-		   cmdArray[3] = "cmd";
-		   cmdArray[4] = "/k";
-		   cmdArray[5] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
 		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+path+" & "
 		   		+ "exit";
 		   
