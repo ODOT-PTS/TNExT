@@ -26,7 +26,7 @@ function deleteDb(i){
      });
 }
 
-function addModifyDB(j, index){
+function addModifyDB(j, index, existing){
 	ind = index;
 	var urlValue = "//:/";
 	if(ind!=-1){
@@ -118,7 +118,12 @@ function addModifyDB(j, index){
 	        		        return;
 	        		    }
 	        		}
-	        		addDB();
+	        		if(existing==1){
+	        			addExistingDb();
+	        		}else{
+	        			addDB();
+	        		}
+	        		
 	        	}else{
 	        		alert(d.DBError);
 	        	}
@@ -175,6 +180,30 @@ function dSubmit(){
 	$('#dialogSubmit').click();
 }
 
+function addExistingDb(){
+	var newDB = [];
+	for(var i=0; i<dbInfo[0].length; i++){
+    	newDB.push($('#'+dbInfo[0][i]).val());
+    }
+	newDB[0] --; 
+	newDB[2] = defaultInfo[2]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
+	newDB[3] = defaultInfo[3]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
+	newDB[4]= "jdbc:postgresql://"+newDB[4]+":"+$('#'+dbInfo[0][4]+"p").val()+"/"+$('#'+dbInfo[0][4]+"n").val();
+	newDB[7] = defaultInfo[7];
+	newDB[8] = defaultInfo[8];
+	newDB[9] = defaultInfo[9];
+    var db = newDB.toString();
+    $.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addExistingDB?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	alert(d);
+	    	location.reload(true);
+        }
+    });
+}
 function addDB(){
 	var newDB = [];
 	for(var i=0; i<dbInfo[0].length; i++){
@@ -364,6 +393,8 @@ function deleteFeed(index){
 	
 	var feeds = listOfAgencies(index);
 	$('#agencyList').html(feeds);
+	
+	checkGTFSstatus(currentINDEX);
 //	location.reload(true);
 }
 
@@ -394,6 +425,7 @@ function addFeed(feeds){
 		});
 	}
 //	location.reload(true);
+	checkGTFSstatus(currentINDEX);
 }
 
 function callDBfuntions(dbFunction){
@@ -534,10 +566,10 @@ function deactivateDBs(index){
 /**
  * Changes DB status.
  */
-function changeStatus(index, field, b, updateBool){
-	if(updateBool==undefined || updateBool==null){
-		updateBool=false;
-	}
+function changeStatus(index, field, b){
+//	if(updateBool==undefined || updateBool==null){
+//		updateBool=false;
+//	}
 	var db = dbInfo[index].toString();
 	$.ajax({
         type: "GET",
@@ -547,9 +579,9 @@ function changeStatus(index, field, b, updateBool){
         success: function(d) {
         	callDBfuntions(checkDBStatus);
         	callDBfuntions(setButtonStatus);
-        	if(updateBool){
-        		return;
-        	}
+//        	if(updateBool){
+//        		return;
+//        	}
         	
 //        	location.reload(true);
         }
@@ -596,12 +628,33 @@ function openGTFS(index){
 	$('#gtfs_current_feeds .ui-accordion-content').css('height','400px');
 	GTFSdialog.dialog( "open" );
 	
-//	var status = dbStatus[index];
-//	var b = status.GtfsFeeds;
-//	changeStatus(index, "gtfs_feeds", !b);
-//	if(!b){
-//		changeStatus(index, "update_process", false, true);
-//	}
+}
+
+function checkGTFSstatus(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkGTFSstatus?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].GtfsFeeds!=b){
+        		changeStatus(index, "gtfs_feeds", b);
+        	}
+        	runUpdates(index);
+        	/*if(!b){
+        		if(dbStatus[index].Updated){
+        			changeStatus(index, "update_process", false);
+        		}
+        	}*/
+        }
+	});
 }
 
 /**
@@ -611,7 +664,7 @@ function runUpdates(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 //	var b = status.Updated;
-	changeStatus(index, "update_process", true);
+//	changeStatus(index, "update_process", true);
 }
 
 /**
@@ -624,6 +677,29 @@ function openFpop(index){
 	changeStatus(index, "future_pop", !b);
 }
 
+function checkFpopstatus(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkFpopstatus?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].FuturePop!=b){
+        		changeStatus(index, "future_pop", b);
+        	}
+        	
+        }
+	});
+}
+
+
 /**
  * Opens Future Employment dialog.
  */
@@ -633,6 +709,29 @@ function openFemp(index){
 	var b = status.FutureEmp;
 	changeStatus(index, "future_emp", !b);
 }
+
+function checkfEmpstatus(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkfEmpstatus?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].FutureEmp!=b){
+        		changeStatus(index, "future_emp", b);
+        	}
+        	
+        }
+	});
+}
+
 
 /**
  * Opens Title 6 dialog.
@@ -645,6 +744,28 @@ function openT6(index){
 	
 }
 
+function checkT6status(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkT6status?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].Title6!=b){
+        		changeStatus(index, "title6", b);
+        	}
+        	
+        }
+	});
+}
+
 /**
  * Opens PnR dialog.
  */
@@ -655,20 +776,29 @@ function openPnr(index){
 	changeStatus(index, "parknride", !b);
 }
 
-function copyCensus(index, section){
-//	alert(section);
-	var dbTo = dbInfo[index].toString();
-	var dbFrom = dbInfo[$("#pnr-select"+index).val()].toString();
+function checkPNRstatus(index){
+	var db = dbInfo[index].toString();
+	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/copyCensus?&dbFrom="+dbFrom+"&dbTo="+dbTo+"&section="+section,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkPNRstatus?&db="+db,
         dataType: "text",
         async: false,
-        success: function(d) {
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].Parknride!=b){
+        		changeStatus(index, "parknride", b);
+        	}
         	
         }
 	});
 }
+
+
 
 /**
  * Opens Employment dialog.
@@ -680,6 +810,29 @@ function openEmp(index){
 	changeStatus(index, "employment", !b);
 	
 }
+
+function checkEmpstatus(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkEmpstatus?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].Employment!=b){
+        		changeStatus(index, "employment", b);
+        	}
+        	
+        }
+	});
+}
+
 
 /**
  * Opens Census dialog.
@@ -696,13 +849,71 @@ function openCensus(index){
         }
 	});
 	
-	var status = dbStatus[index];
-	var b = status.Census;
-	changeStatus(index, "census", !b);
-	if(!b){
-		changeStatus(index, "update_process", false, true);
-	}
+//	var status = dbStatus[index];
+//	var b = status.Census;
+//	changeStatus(index, "census", !b);
+//	if(!b){
+//		changeStatus(index, "update_process", false, true);
+//	}
 }
+
+function checkCensusstatus(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkCensusstatus?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].Census!=b){
+        		changeStatus(index, "census", b);
+        	}
+        	runUpdates(index);
+        	
+        }
+	});
+}
+
+function copyCensus(index, section){
+//	alert(section);
+	var dbTo = dbInfo[index].toString();
+	var dbFrom = dbInfo[$("#pnr-select"+index).val()].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/copyCensus?&dbFrom="+dbFrom+"&dbTo="+dbTo+"&section="+section,
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	switch(section) {
+        	case "census": 
+        			checkCensusstatus(index);
+        			checkFpopstatus(index);
+            		break;
+		    case "employment": 
+		    		checkEmpstatus(index);
+ 		            break;
+		    case "parknride": 
+		    		checkPNRstatus(index);
+			        break;
+		    case "title6": 
+		    		checkT6status(index);
+		    		break;
+		    case "femployment": 
+		    		checkfEmpstatus(index);
+					break;
+			default:
+					break;
+        	}
+        }
+	});
+}
+
 
 /**
  * Deletes uploaded GTFS feeds.

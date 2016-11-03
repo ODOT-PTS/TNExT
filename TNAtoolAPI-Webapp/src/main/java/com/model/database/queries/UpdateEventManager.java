@@ -517,7 +517,8 @@ public class UpdateEventManager {
 	 *Adding SQL functions
 	 */
 	public static void addFunction(Connection connection, String[] dbInfo){
-		final class SqlExecuter extends SQLExec {
+		
+		/*final class SqlExecuter extends SQLExec {
 	        public SqlExecuter() {
 	            Project project = new Project();
 	            project.init();
@@ -538,8 +539,34 @@ public class UpdateEventManager {
 	        executer.setUserid(dbInfo[5]);
 	        executer.execute();
 	    } catch (Exception e) {
-	        System.out.println("Exception importing database ..."+ e);
-	    }
+	    	e.printStackTrace();
+	    }*/
+		String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		path = path+"../../src/main/resources/admin/resources/Functions.sql";
+		path = path.substring(1, path.length());
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		Process pr;
+
+		try{
+			String[] cmdArray = new String[6];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "start";
+		   cmdArray[3] = "cmd";
+		   cmdArray[4] = "/k";
+		   cmdArray[5] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+path+" "
+		   		+ "";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 		/*String basePath = System.getProperty("user.dir").replace('\\', '/')+"/";
 		Process pr;
 		ProcessBuilder pb;
