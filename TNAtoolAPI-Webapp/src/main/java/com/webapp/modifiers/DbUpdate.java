@@ -1805,17 +1805,16 @@ public class DbUpdate {
 //		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
     	Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
-//    	f.delete();
+//    	System.out.println(source.delete());
     	String message = "done";
 		args[4] = feed;
 		try{
 			GtfsDatabaseLoaderMain.main(args);	
 		}catch(Exception e){
 			message = e.getMessage();
-			target.delete();
+			System.out.println(target.delete());
 			return message;
 		}
-		
 		
 		for(int i=0;i<4;i++){
 			feedname = removeLastChar(feedname);
