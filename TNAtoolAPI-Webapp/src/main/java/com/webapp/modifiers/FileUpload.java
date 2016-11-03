@@ -794,7 +794,7 @@ public class FileUpload extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-		UpdateEventManager.updateTables(DBINDEX, defaultId);
+//		UpdateEventManager.updateTables(DBINDEX, defaultId); //to be fixed
 		
 		return "Feed added and updated";
 	}
