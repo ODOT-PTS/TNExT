@@ -1480,6 +1480,8 @@ public class DbUpdate {
 		toHost = toHost.substring(2);
 		String toUser = dbInfoTo[5];
 		String toPass = dbInfoTo[6];
+		fromHost = "localhost"; //to be deleted
+		toHost = "localhost"; //to be deleted
 //		batFile = batFile.substring(1, batFile.length());
 		
 //		test();

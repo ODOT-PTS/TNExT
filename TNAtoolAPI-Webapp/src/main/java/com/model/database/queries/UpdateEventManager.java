@@ -545,6 +545,7 @@ public class UpdateEventManager {
 		path = path+"../../src/main/resources/admin/resources/Functions.sql";
 		path = path.substring(1, path.length());
 		String host = dbInfo[4].split(":")[2];
+		host = "localhost"; //to be deleted
 		host = host.substring(2);
 		String[] p;
 		p = dbInfo[4].split("/");
@@ -559,8 +560,8 @@ public class UpdateEventManager {
 		   cmdArray[3] = "cmd";
 		   cmdArray[4] = "/k";
 		   cmdArray[5] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+path+" "
-		   		+ "";
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+path+" &"
+		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		}catch(Exception e) {
