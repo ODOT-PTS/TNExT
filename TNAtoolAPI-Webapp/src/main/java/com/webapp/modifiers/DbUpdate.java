@@ -1495,7 +1495,7 @@ public class DbUpdate {
 		   cmdArray[5] = "set PGPASSWORD="+fromPass+"& "
 		   		+ "pg_dump -U "+fromUser+" -h "+fromHost+" "+tables+" "+nameFrom+" > dump & "
 		   		+ "set PGPASSWORD="+toPass+"& "
-		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < pnrDump & "
+		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < dump & "
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);

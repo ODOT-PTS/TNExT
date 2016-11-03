@@ -545,8 +545,9 @@ public class UpdateEventManager {
 		path = path+"../../src/main/resources/admin/resources/Functions.sql";
 		path = path.substring(1, path.length());
 		String host = dbInfo[4].split(":")[2];
-		host = "localhost"; //to be deleted
 		host = host.substring(2);
+		host = "localhost"; //to be deleted
+
 		String[] p;
 		p = dbInfo[4].split("/");
 		String name = p[p.length-1];
