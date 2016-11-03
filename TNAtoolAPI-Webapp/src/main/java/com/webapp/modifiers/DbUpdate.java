@@ -1169,6 +1169,35 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/checkUpdatestatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkUpdatestatus(@QueryParam("db") String db){
+		String response = "false";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where uploaded=False limit 1;");
+			
+			if(!rs.next()){
+				response = "true";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkGTFSstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	
+	@GET
     @Path("/checkT6status")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkT6status(@QueryParam("db") String db){
@@ -1443,7 +1472,7 @@ public class DbUpdate {
     public Object copyCensus(@QueryParam("dbFrom") String dbFrom, @QueryParam("dbTo") String dbTo, @QueryParam("section") String section){
 		String tables;
 		switch (section) {
-	        case "census": tables = "-t census_blocks -t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
+	        case "census": tables = "-t census_blocks -t census_blocks_reference -t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
 	                break;
 	        case "employment": tables = "-t lodes_blocks_rac -t lodes_blocks_wac";
 	                break;
@@ -1882,8 +1911,8 @@ public class DbUpdate {
 	        		+ "calendar as (select cals.agencyid, least(cals.calstart, calds.calstart) as calstart, greatest(cals.calend, calds.calend) as calend from calendars cals full join calendardates calds using(agencyid)) "
 	        		+ "update gtfs_feed_info set startdate= calendar.calstart::varchar , enddate=calendar.calend::varchar from calendar where defaultid = agencyid;");
 	        
-			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic) "
-					+ "VALUES ('"+feedname+"','admin',False);");
+			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic, updated) "
+					+ "VALUES ('"+feedname+"','admin',False, False);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+feedname+"','"+defaultId+"');");
 			
@@ -1910,7 +1939,7 @@ public class DbUpdate {
         return str;
     }
 	
-	@GET
+	/*@GET
     @Path("/updateSingleFeed")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object updateSingleFeed(@QueryParam("dbindex") int dbindex, @QueryParam("feedname") String feedname){
@@ -1935,9 +1964,39 @@ public class DbUpdate {
 		System.out.println(defaultId);
 		UpdateEventManager.updateTables(dbindex, defaultId);
 		return "done";
-	}
+	}*/
 	
 	@GET
+    @Path("/updateFeeds")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object updateFeeds(@QueryParam("db") String db, @QueryParam("username") String username){
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT gfi.defaultid agency FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
+					+ "ON gfi.feedname=guf.feedname WHERE guf.username = '"+username+"' AND guf.updated=False;");
+			while(rs.next()){
+				UpdateEventManager.updateTables(c, rs.getString("agency"));
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		
+		
+		return "done";
+	}
+	
+	
+	/*@GET
     @Path("/updateFeeds")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object updateFeeds(@QueryParam("db") String db, @QueryParam("folder") String folder){
@@ -1961,7 +2020,7 @@ public class DbUpdate {
 		}
 		
 		return "done";
-	}
+	}*/
 	
 	/*@GET
     @Path("/addPsqlFunctions")

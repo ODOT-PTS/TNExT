@@ -647,7 +647,8 @@ function checkGTFSstatus(index){
         	if(dbStatus[index].GtfsFeeds!=b){
         		changeStatus(index, "gtfs_feeds", b);
         	}
-        	runUpdates(index);
+        	checkUpdatestatus(index);
+//        	runUpdates(index);
         	/*if(!b){
         		if(dbStatus[index].Updated){
         			changeStatus(index, "update_process", false);
@@ -662,9 +663,36 @@ function checkGTFSstatus(index){
  */
 function runUpdates(index){
 	var db = dbInfo[index].toString();
-	var status = dbStatus[index];
-//	var b = status.Updated;
-//	changeStatus(index, "update_process", true);
+	$.ajax({
+	    type: "GET",
+	    url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateFeeds?&db="+db+"&username=admin",
+	    dataType: "text",
+	    async: false,
+	    success: function(b) {
+	    	checkUpdatestatus(index);
+	    }
+	});
+}
+
+function checkUpdatestatus(index){
+	var db = dbInfo[index].toString();
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkUpdatestatus?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	if(b=="true"){
+        		b = true;
+        	}else{
+        		b = false;
+        	}
+        	if(dbStatus[index].Updated!=b){
+        		changeStatus(index, "update_process", b);
+        	}
+        }
+	});
 }
 
 /**
@@ -839,19 +867,19 @@ function checkEmpstatus(index){
  */
 function openCensus(index){
 	var db = dbInfo[index].toString();
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/restoreCensus?&db="+db,
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	
-        }
-	});
+//	$.ajax({
+//        type: "GET",
+//        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/restoreCensus?&db="+db,
+//        dataType: "text",
+//        async: false,
+//        success: function(d) {
+//        	
+//        }
+//	});
 	
-//	var status = dbStatus[index];
-//	var b = status.Census;
-//	changeStatus(index, "census", !b);
+	var status = dbStatus[index];
+	var b = status.Census;
+	changeStatus(index, "census", !b);
 //	if(!b){
 //		changeStatus(index, "update_process", false, true);
 //	}
@@ -874,7 +902,8 @@ function checkCensusstatus(index){
         	if(dbStatus[index].Census!=b){
         		changeStatus(index, "census", b);
         	}
-        	runUpdates(index);
+        	checkUpdatestatus(index);
+//        	runUpdates(index);
         	
         }
 	});

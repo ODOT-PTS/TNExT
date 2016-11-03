@@ -97,6 +97,7 @@ public class UpdateEventManager {
 	        		+ "  feedname text NOT NULL,"
 	        		+ "  username text,"
 	        		+ "  ispublic boolean NOT NULL,"
+	        		+ "  updated boolean NOT NULL,"
 	        		+ "  feedsize integer,"
 	        		+ "  CONSTRAINT feeds_pkey PRIMARY KEY (feedname),"
 	        		+ "  CONSTRAINT gtfs_uploaded_feeds_username_fkey FOREIGN KEY (username)"
@@ -362,8 +363,8 @@ public class UpdateEventManager {
 	/**
 	 *Updates all the additional tables. This is called every time a new feed is added to the database
 	 */
-	public static void updateTables(int dbindex, String agencyId){	
-		  Connection connection = makeConnection(dbindex);
+	public static void updateTables(Connection connection, String agencyId){	
+//		  Connection connection = makeConnection(dbindex);
 		  
 		  System.out.println("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
@@ -386,11 +387,11 @@ public class UpdateEventManager {
 		  updatePlaceTripMap(connection, agencyId);
 		  System.out.println("Updating census_congdists_trip_map");
 		  updateCongdistTripMap(connection, agencyId);
-		  System.out.println("Updating gtfs_feed_info");
-		  updateCalendarRange(connection, agencyId);
+//		  System.out.println("Updating gtfs_feed_info");
+//		  updateCalendarRange(connection, agencyId);
 		  
 		  
-		  dropConnection(connection);
+//		  dropConnection(connection);
 	}
 	
 	/**
@@ -398,7 +399,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateGtfsTripStops(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_trip_stops LIMIT 1");
 			if(!rs.next()){
@@ -406,8 +407,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		  create_gtfs_trip_stops(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE gtfs_trip_stops DISABLE TRIGGER ALL;");
@@ -452,7 +453,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateGtfsStopServiceMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_stop_service_map LIMIT 1");
 			if(!rs.next()){
@@ -460,8 +461,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		  create_gtfs_stop_service_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE gtfs_stop_service_map DISABLE TRIGGER ALL;");
@@ -643,7 +644,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateGtfsStopRouteMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_stop_route_map LIMIT 1");
 			if(!rs.next()){
@@ -651,8 +652,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		create_gtfs_stop_route_map(connection);
 		  
 		  try {
 		    stmt = connection.createStatement();
@@ -699,7 +700,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateCongdistTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_congdists_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -707,8 +708,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		create_census_congdists_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_congdists_trip_map DISABLE TRIGGER ALL;");
@@ -752,7 +753,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateCountyTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_counties_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -760,8 +761,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		create_census_counties_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_counties_trip_map DISABLE TRIGGER ALL;");
@@ -803,7 +804,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateTractTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_tracts_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -811,8 +812,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		create_census_tracts_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_tracts_trip_map DISABLE TRIGGER ALL;");
@@ -854,7 +855,7 @@ public class UpdateEventManager {
 	 */
 	public static void updatePlaceTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_places_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -862,8 +863,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		create_census_places_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_places_trip_map DISABLE TRIGGER ALL;");
@@ -905,7 +906,7 @@ public class UpdateEventManager {
 	 */
 	public static void updateUrbanTripMap(Connection connection, String agencyId){
 		Statement stmt = null;  
-		/*try{
+		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM census_urbans_trip_map LIMIT 1");
 			if(!rs.next()){
@@ -913,8 +914,8 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }*/
-		
+		  }
+		create_census_urbans_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_urbans_trip_map DISABLE TRIGGER ALL;");
