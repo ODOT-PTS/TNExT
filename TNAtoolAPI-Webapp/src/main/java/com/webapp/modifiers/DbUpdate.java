@@ -1499,6 +1499,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
