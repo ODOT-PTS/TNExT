@@ -319,8 +319,8 @@ public class Queries {
 			String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
 			ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
 					, agencyFolder.getAbsolutePath() + "\\" + tempAgencyname + "_" + flag + "_shape"
-					, params[0]
-					, "localhost" //params[2]
+					, "localhost" //params[0]
+					, params[2]
 					, params[3]
 					, dbName
 					,"\"" + query + "\""
