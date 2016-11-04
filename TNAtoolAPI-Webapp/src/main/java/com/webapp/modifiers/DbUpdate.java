@@ -1982,7 +1982,7 @@ public class DbUpdate {
 			while(rs.next()){
 				UpdateEventManager.updateTables(c, rs.getString("agency"));
 				feed = rs.getString("feed");
-				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname="+feed+" AND username = '"+username+";");
+				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feed+"' AND username = '"+username+"';");
 			}
 			
 		} catch (SQLException e) {
