@@ -1973,16 +1973,20 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
-		String feed;
+		List<String> agencies = new ArrayList<String>();
+		List<String> feeds = new ArrayList<String>();
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT gfi.defaultid agency, guf.feedname feed FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
 					+ "ON gfi.feedname=guf.feedname WHERE guf.username = '"+username+"' AND guf.updated=False;");
 			while(rs.next()){
-				UpdateEventManager.updateTables(c, rs.getString("agency"));
-				feed = rs.getString("feed");
-				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feed+"' AND username = '"+username+"';");
+				agencies.add(rs.getString("agency"));
+				feeds.add(rs.getString("feed"));
+			}
+			for(int i=0; i<feeds.size();i++){
+				UpdateEventManager.updateTables(c, agencies.get(i));
+				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
 			}
 			
 		} catch (SQLException e) {
