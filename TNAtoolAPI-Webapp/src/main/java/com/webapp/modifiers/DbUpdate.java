@@ -1180,13 +1180,13 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where uploaded=False limit 1;");
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where updated=False limit 1;");
 			
 			if(!rs.next()){
 				response = "true";
 			}
 		} catch (SQLException e) {
-			System.out.println(e.getMessage()+", from: checkGTFSstatus method");
+			System.out.println(e.getMessage()+", from: checkUpdatestatus method");
 //			e.printStackTrace();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
@@ -1195,8 +1195,7 @@ public class DbUpdate {
 		
 		return response;
 	}
-	
-	
+
 	@GET
     @Path("/checkT6status")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
