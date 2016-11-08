@@ -1000,7 +1000,6 @@ public class DbUpdate {
 			c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
 			statement.executeUpdate("CREATE DATABASE "+name);
-//			addCensus(dbInfo[5], dbInfo[6], name);
 			statement.close();
 			c.close();
 			
@@ -1069,12 +1068,410 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/addExistingDB")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addExistingDB(@QueryParam("db") String db){
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		ClassLoader classLoader = getClass().getClassLoader();
+		File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+		File dstfile = new File(path+"../../src/main/resources/admin/resources/dbInfo.csv");
+		String[] dbInfo = db.split(",");
+		String[] p;
+		
+//		PDBerror error = new PDBerror();
+		String DBError = "";
+		
+		boolean b = false;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		String url = "";
+		for (int k=0;k<p.length-1;k++){
+			url += p[k]+"/";
+		}
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT 1 AS result FROM pg_database WHERE datname='"+name+"';");
+			
+			if(rs.next()){
+				if(rs.getInt("result")==1){
+					DBError = "Database was successfully added";
+				}else{
+					DBError = "Database "+name+" could not be found.";
+				}
+			}
+			
+			statement.close();
+			c.close();
+			
+			
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+		    for(int i=0; i<dbInfo.length-1; i++){
+		    	out.print(dbInfo[i]+",");
+		    }
+		    out.print(dbInfo[dbInfo.length-1] + System.getProperty("line.separator"));
+		    out.close();
+		    
+		    Files.copy(file.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		    
+		    file = new File(classLoader.getResource("admin/resources/censusDb.cfg.xml").getFile());
+			dstfile = new File(path + dbInfo[2]);
+    		parseXmlFile(file, dstfile, dbInfo, true);
+    		Files.copy(dstfile.toPath(), new File(path+"../../src/main/resources/"+dbInfo[2]).toPath(), StandardCopyOption.REPLACE_EXISTING);
+    		
+    		file = new File(classLoader.getResource("admin/resources/gtfsDb.cfg.xml").getFile());
+			dstfile = new File(path + dbInfo[3]);
+    		parseXmlFile(file, dstfile, dbInfo, false);
+    		Files.copy(dstfile.toPath(), new File(path+"../../src/main/resources/"+dbInfo[3]).toPath(), StandardCopyOption.REPLACE_EXISTING);
+    		
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		System.out.println(DBError);
+		return DBError;
+	}
+	
+	@GET
+    @Path("/checkGTFSstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkGTFSstatus(@QueryParam("db") String db){
+		String response = "false";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_feed_info limit 1;");
+			
+			if(rs.next()){
+				response = "true";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkGTFSstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
+    @Path("/checkUpdatestatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkUpdatestatus(@QueryParam("db") String db){
+		String response = "false";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where updated=False limit 1;");
+			
+			if(!rs.next()){
+				response = "true";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkUpdatestatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+
+	@GET
+    @Path("/checkT6status")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkT6status(@QueryParam("db") String db){
+		String response = "false";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM title_vi_blocks_float limit 1;");
+			
+			if(rs.next()){
+				response = "true";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkT6status method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
+    @Path("/checkPNRstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkPNRstatus(@QueryParam("db") String db){
+		String response = "false";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * FROM parknride limit 1;");
+			
+			if(rs.next()){
+				response = "true";
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkPNRstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
+    @Path("/checkEmpstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkEmpstatus(@QueryParam("db") String db){
+		String response = "false";
+		boolean rac = false;
+		boolean wac = false;
+		ResultSet rs;
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT * FROM lodes_blocks_wac limit 1;");
+			if(rs.next()){
+				wac = true;
+			}
+			rs = statement.executeQuery("SELECT * FROM lodes_blocks_rac limit 1;");
+			if(rs.next()){
+				rac = true;
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkEmpstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		if(wac && rac){
+			response = "true";
+		}
+		
+		return response;
+	}
+	
+	@GET
+    @Path("/checkfEmpstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkfEmpstatus(@QueryParam("db") String db){
+		String response = "false";
+		boolean rac = false;
+		boolean wac = false;
+		ResultSet rs;
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT * FROM lodes_rac_projection_block limit 1;");
+			if(rs.next()){
+				wac = true;
+			}
+			rs = statement.executeQuery("SELECT * FROM lodes_rac_projection_county limit 1;");
+			if(rs.next()){
+				rac = true;
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkfEmpstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		if(wac && rac){
+			response = "true";
+		}
+		
+		return response;
+	}
+	
+	@GET
+    @Path("/checkFpopstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkFpopstatus(@QueryParam("db") String db){
+		String response = "false";
+		boolean census_blocks = false;
+		boolean census_congdists = false;
+		boolean census_counties = false;
+		boolean census_places = false;
+		boolean census_tracts = false;
+		boolean census_urbans = false;
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs;
+		Integer value;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			
+			rs = statement.executeQuery("SELECT population2040 FROM census_blocks limit 1;");
+			while(rs.next()){
+				value = rs.getInt("population2040");
+				if(value!=null)
+				census_blocks = true;
+			}
+			
+			rs = statement.executeQuery("SELECT population2040 FROM census_congdists limit 1;");
+			while(rs.next()){
+				value = rs.getInt("population2040");
+				if(value!=null)
+				census_congdists = true;
+			}
+			
+			rs = statement.executeQuery("SELECT population2040 FROM census_counties limit 1;");
+			while(rs.next()){
+				value = rs.getInt("population2040");
+				if(value!=null)
+				census_counties  = true;
+			}
+			
+			rs = statement.executeQuery("SELECT population2040 FROM census_places limit 1;");
+			while(rs.next()){
+				value = rs.getInt("population2040");
+				if(value!=null)
+				census_places = true;
+			}
+			
+			rs = statement.executeQuery("SELECT population2040 FROM census_tracts limit 1;");
+			while(rs.next()){
+				value = rs.getInt("population2040");
+				if(value!=null)
+				census_tracts = true;
+			}
+			
+			rs = statement.executeQuery("SELECT population2040 FROM census_urbans limit 1;");
+			while(rs.next()){
+				value = rs.getInt("population2040");
+				if(value!=null)
+				census_urbans = true;
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkFpopstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		if(census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
+			response = "true";
+		}
+		
+		return response;
+	}
+	
+	@GET
+    @Path("/checkCensusstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkCensusstatus(@QueryParam("db") String db){
+		String response = "false";
+		boolean census_blocks = false;
+		boolean census_congdists = false;
+		boolean census_counties = false;
+		boolean census_places = false;
+		boolean census_tracts = false;
+		boolean census_urbans = false;
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			
+			rs = statement.executeQuery("SELECT * FROM census_blocks limit 1;");
+			if(rs.next()){
+				census_blocks = true;
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM census_congdists limit 1;");
+			if(rs.next()){
+				census_congdists = true;
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM census_counties limit 1;");
+			if(rs.next()){
+				census_counties = true;
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM census_places limit 1;");
+			if(rs.next()){
+				census_places = true;
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM census_tracts limit 1;");
+			if(rs.next()){
+				census_tracts = true;
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM census_urbans limit 1;");
+			if(rs.next()){
+				census_urbans = true;
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkCensusstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		if(census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
+			response = "true";
+		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/copyCensus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object copyCensus(@QueryParam("dbFrom") String dbFrom, @QueryParam("dbTo") String dbTo, @QueryParam("section") String section){
 		String tables;
 		switch (section) {
-	        case "census": tables = "-t census_blocks -t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans -t ";
+	        case "census": tables = "-t census_blocks -t census_blocks_reference -t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
 	                break;
 	        case "employment": tables = "-t lodes_blocks_rac -t lodes_blocks_wac";
 	                break;
@@ -1111,23 +1508,25 @@ public class DbUpdate {
 		toHost = toHost.substring(2);
 		String toUser = dbInfoTo[5];
 		String toPass = dbInfoTo[6];
+		fromHost = "localhost"; //to be deleted
+		toHost = "localhost"; //to be deleted
 //		batFile = batFile.substring(1, batFile.length());
 		
 //		test();
 		try{
-			String[] cmdArray = new String[6];
+			String[] cmdArray = new String[5];
 		   cmdArray[0] = "cmd";
 		   cmdArray[1] = "/c";
-		   cmdArray[2] = "start";
-		   cmdArray[3] = "cmd";
-		   cmdArray[4] = "/k";
-		   cmdArray[5] = "set PGPASSWORD="+fromPass+"& "
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+fromPass+"& "
 		   		+ "pg_dump -U "+fromUser+" -h "+fromHost+" "+tables+" "+nameFrom+" > dump & "
 		   		+ "set PGPASSWORD="+toPass+"& "
-		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < pnrDump & "
+		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < dump & "
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -1436,17 +1835,16 @@ public class DbUpdate {
 //		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
     	Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
-//    	f.delete();
+//    	System.out.println(source.delete());
     	String message = "done";
 		args[4] = feed;
 		try{
 			GtfsDatabaseLoaderMain.main(args);	
 		}catch(Exception e){
 			message = e.getMessage();
-			target.delete();
+			System.out.println(target.delete());
 			return message;
 		}
-		
 		
 		for(int i=0;i<4;i++){
 			feedname = removeLastChar(feedname);
@@ -1512,8 +1910,8 @@ public class DbUpdate {
 	        		+ "calendar as (select cals.agencyid, least(cals.calstart, calds.calstart) as calstart, greatest(cals.calend, calds.calend) as calend from calendars cals full join calendardates calds using(agencyid)) "
 	        		+ "update gtfs_feed_info set startdate= calendar.calstart::varchar , enddate=calendar.calend::varchar from calendar where defaultid = agencyid;");
 	        
-			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic) "
-					+ "VALUES ('"+feedname+"','admin',False);");
+			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic, updated) "
+					+ "VALUES ('"+feedname+"','admin',False, False);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+feedname+"','"+defaultId+"');");
 			
@@ -1540,7 +1938,7 @@ public class DbUpdate {
         return str;
     }
 	
-	@GET
+	/*@GET
     @Path("/updateSingleFeed")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object updateSingleFeed(@QueryParam("dbindex") int dbindex, @QueryParam("feedname") String feedname){
@@ -1565,9 +1963,47 @@ public class DbUpdate {
 		System.out.println(defaultId);
 		UpdateEventManager.updateTables(dbindex, defaultId);
 		return "done";
-	}
+	}*/
 	
 	@GET
+    @Path("/updateFeeds")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object updateFeeds(@QueryParam("db") String db, @QueryParam("username") String username){
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		List<String> agencies = new ArrayList<String>();
+		List<String> feeds = new ArrayList<String>();
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT gfi.defaultid agency, guf.feedname feed FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
+					+ "ON gfi.feedname=guf.feedname WHERE guf.username = '"+username+"' AND guf.updated=False;");
+			while(rs.next()){
+				agencies.add(rs.getString("agency"));
+				feeds.add(rs.getString("feed"));
+			}
+			for(int i=0; i<feeds.size();i++){
+				UpdateEventManager.updateTables(c, agencies.get(i));
+				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		
+		
+		return "done";
+	}
+	
+	
+	/*@GET
     @Path("/updateFeeds")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object updateFeeds(@QueryParam("db") String db, @QueryParam("folder") String folder){
@@ -1591,7 +2027,7 @@ public class DbUpdate {
 		}
 		
 		return "done";
-	}
+	}*/
 	
 	/*@GET
     @Path("/addPsqlFunctions")

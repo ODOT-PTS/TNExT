@@ -1,7 +1,4 @@
-﻿/*************************************************************
- * First of two methods. Pass in a geometry (LINESTRING only).
- * Returns ASCII-encoded point array for use in Google Maps.
- ************************************************************/
+
 CREATE OR REPLACE FUNCTION GoogleEncodeLine
 (
   g GEOMETRY
@@ -41,10 +38,7 @@ RETURN gEncoded;
 End
 $$ LANGUAGE plpgsql;
 
-/**************************************************************
- * Second of two methods. Accepts a signed integer (LON or LAT
- * by 1e5) and returns an ASCII-encoded coordinate expression.
- *************************************************************/
+
 CREATE OR REPLACE FUNCTION GoogleEncodeSignedInteger(c INT)
 RETURNS VARCHAR(255) AS $$
 DECLARE
@@ -72,10 +66,6 @@ RETURN e;
 End
 $$ LANGUAGE plpgsql;
 
-/**************************************************************
- * Second of two methods. Accepts a signed integer (LON or LAT
- * by 1e5) and returns an ASCII-encoded coordinate expression.
- *************************************************************/
 CREATE OR REPLACE FUNCTION GoogleEncodeSignedInteger(c INT)
 RETURNS VARCHAR(255) AS $$
 DECLARE
