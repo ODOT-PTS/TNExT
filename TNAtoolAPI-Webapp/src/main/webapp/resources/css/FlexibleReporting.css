@@ -60,10 +60,17 @@ hr {
     color: black;
     font-size: 110%;
     margin: 5px;
-    background-color: #76946d;
+    background-color: #54f524;
     padding: 7px 30px 7px 30px;
     border-radius: 10px;
     font-weight: bold;
-	
+    border-color: burlywood;
 }
 
+.urbanFilter:disabled{
+	cursor: no-drop;
+}
+
+.FlexRepParamInput:disabled{
+	cursor: no-drop;
+}

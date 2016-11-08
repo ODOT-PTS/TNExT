@@ -1,3 +1,19 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU  General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+
 var numSelectedAgencies = 0;
 var numSelectedAreas = 0; 
 var maxAgenSelect = 3;
@@ -8,21 +24,22 @@ var areas = [];
 var metrics = [];
 var areaType;
 var reportType;
-var year = 'population';
 var minUrbanPop = 0;
 var maxUrbanPop = 2000000;
 var filterOnUrban = false;
+var wac = false;
+var rac = true;
 
 var empYears = [
-		{value:"population", text:"2013"},
-		{value:"population2015", text:"2015 (Projection)"},
-		{value:"population2020", text:"2020 (Projection)"},
-		{value:"population2025", text:"2025 (Projection)"},
-		{value:"population2030", text:"2030 (Projection)"},
-		{value:"population2035", text:"2035 (Projection)"},
-		{value:"population2040", text:"2040 (Projection)"},
-		{value:"population2045", text:"2045 (Projection)"},
-		{value:"population2050", text:"2050 (Projection)"}
+		{value:"current", text:"2013"},
+		{value:"2015", text:"2015 (Projection)"},
+		{value:"2020", text:"2020 (Projection)"},
+		{value:"2025", text:"2025 (Projection)"},
+		{value:"2030", text:"2030 (Projection)"},
+		{value:"2035", text:"2035 (Projection)"},
+		{value:"2040", text:"2040 (Projection)"},
+		{value:"2045", text:"2045 (Projection)"},
+		{value:"2050", text:"2050 (Projection)"}
 ];
 
 var popYears = [
@@ -42,27 +59,28 @@ var T6Years = [
         ];
 
 var popMetrics = [
-                  {value:"rural", text:"Rural Population"},
-                  {value:"urban", text:"Urban Population"}
+                  {value:["rural"], text:"Rural Population"},
+                  {value:["urban"], text:"Urban Population"}
                   ];
 
 var serviceMetrics = [
-                  {value:"routeMiles", text:"Route Miles"},
-                  {value:"routeStops", text:"Route Stops"},
-                  {value:"stopsPerMile", text:"Stops Per Route Mile"},
-                  {value:"serviceHours", text:"Service Hours"},
-                  {value:"serviceMiles", text:"Service Miles"},
-                  {value:"serviceStops", text:"Service Stops"}
+                  {value:["routeMiles"], text:"Route Miles"},
+                  {value:["routeStops"], text:"Route Stops"},
+                  {value:["stopsPerMile"], text:"Stops Per Route Mile"},
+                  {value:["serviceHours"], text:"Service Hours"},
+                  {value:["serviceMiles"], text:"Service Miles"},
+                  {value:["serviceStops"], text:"Service Stops"}
                   ];
 
 var empMetrics = [
-                  {value:"age", text:"Age"},
-                  {value:"edu", text:"Educational Attainment"},
-                  {value:"earning", text:"Earning"},
-                  {value:"sector", text:"NAICS sectors"},
-                  {value:"race", text:"Race"},
-                  {value:"sex", text:"Sex"},
-                  {value:"ethnicity", text:"Ethnicity"},
+                  {value:["ca01","ca02","ca03"], text:"Age"},
+                  {value:["cd01","cd02","cd03","cd04"], text:"Educational Attainment"},
+                  {value:["ce01","ce02","ce03"], text:"Earning"},
+                  {value:["cns01","cns02","cns03","cns04","cns05","cns06","cns07","cns08","cns09","cns10",
+      		            "cns11","cns12","cns13","cns14","cns15","cns16","cns17","cns18","cns19","cns20"], text:"NAICS Sectors"},
+                  {value:["cr01","cr02","cr03","cr04","cr05","cr07"], text:"Race"},
+                  {value:["c201","cs02"], text:"Sex"},
+                  {value: ["ct01","ct02"], text:"Ethnicity"},
                   ];
 
 var T6Metrics = [
@@ -160,17 +178,26 @@ function flexRepDialog() {
 		'<table id ="FlexRepParamsTable">'
 		+ '<tr>'
     	+ '<td>&nbsp;Pop/Emp Source:</td>'
-    	+ '<td><select id ="yearSel" class="FlexRepParamInput" onchange="year=$(this).val();"disabled></td>';
+    	+ '<td><select id ="yearSel" class="FlexRepParamInput" onchange="updateEmpType(this);"disabled></td></tr>'
+    	+ '<tr>'
+    	+ '<td>&nbsp;Emp. Type: </td>'
+    	+ '<td><select id ="empType" class="FlexRepParamInput" onchange="updateEmpType(this);" disabled>'
+    	+ ' <option id="racSelect" value="RAC">RAC - Residence Area Characteristics</option>'
+    	+ ' <option value="WAC">WAC - Workplace Area Characteristics</option>'    	
+    	+ ' <option value="WACRAC">WAC & RAC - Residence and Workplace Area Characteristics</option>'
+    	+ '</td></tr>'
+    	+ '</tr>'
+	
+	
 	html = html.concat(
-    	'</tr>'
-		+ '<tr>'
+		'<tr>'
     	+ '<td>&nbsp;Search Radius (mi.):</td>'
     	+ '<td><input type="text" id="Sradius" class="FlexRepParamInput" value="0.25" onkeypress="return isNumber(event)" disabled></td>'
     	+ '</tr>'
     	+ '<tr>'
     	+ '<td>&nbsp;Min. Level of Service (times): </td>'
     	+ '<td><input type="text" id="LoS" class="FlexRepParamInput" min="1" value="2" onkeypress="return isWholeNumber(event);" disabled></td>'
-    	+ '</tr>'
+    	+ '</tr>'    	
     	+ '</table>');
     $('#FlexRepParams').append(html);
     $('.FlexRepParamInput').css('width',$('.FlexRepSectionHeader').width() - document.getElementById('FlexRepParamsTable').rows[0].cells[0].offsetWidth-10+'px');
@@ -218,7 +245,7 @@ function flexRepDialog() {
 
 	//////////////// appending geographical areas ////////////////
 	var areas = [
-			{name:"State", id:0},
+			//{name:"State", id:0},
 			{name:"County", id:1},
 			{name:"Census Place", id:2},
 			{name:"Congressional District", id:3},
@@ -228,7 +255,7 @@ function flexRepDialog() {
 	
 	$('#FlexRepAreas').append('<div class="FlexRepSectionHeader"><b>4. Geographical Areas</b><div><br>');
 	$('#FlexRepAreas').append("<div id='areaSelect' ></div>");
-	html = "<span class='header2'> Select area type:</span><hr>";
+	html = "<span class='header2'> Select up to 3 area:</span><hr>";
 	html = html.concat("<select name='GeoArea' id ='GeoArea' onchange='loadAreaOptions(this)'>");
 	html = html.concat("<option disabled selected> Select</option>");
 	$(areas).each(function(index,item){
@@ -363,6 +390,7 @@ function showParams(input){
 	$('#yearSel').find('.yearOption').remove();
 	$('#yearSel').find('option').prop('selected',true);
 	$('#FlexRepMetrics').empty();
+	metrics = [];
 	reportType = $(input).val();
 	
 	// Enabling the inputs and showin metric options based on selected report type.
@@ -374,6 +402,7 @@ function showParams(input){
     case 1: // Population  
     	$('#accordion').accordion( "option", "disabled", false );
     	$('.FlexRepParamInput').prop('disabled',false);
+    	$('#empType').prop('disabled',true);
     	$('#yearSel').append(getYearsOption($(input).val()));
     	appendMetrics(popMetrics, 'FlexRepMetrics');
     	break;
@@ -386,6 +415,7 @@ function showParams(input){
     case 3: // Title VI
     	$('#accordion').accordion( "option", "disabled", false );
     	$('.FlexRepParamInput').prop('disabled',false);
+    	$('#empType').prop('disabled',true);
     	$('#yearSel').append(getYearsOption($(input).val()));
     	appendMetrics(T6Metrics, 'FlexRepMetrics');
         break;
@@ -485,11 +515,40 @@ function areaSelCheck(input){
 	}
 }
 
-function updateMetrics(input){
+function updateMetrics( input ){
 	metric = input.value;
+	console.log(metric);
 	if(input.checked){
-		metrics.push(metric);
+		metrics = metrics.concat(metric.split(","));
 	}else{
-		metrics.splice(metics.indexOf(metric),1);
+		$.each(metric.split(","), function(index, item){
+			metrics.splice(metrics.indexOf(item),1);
+		});
 	}
+}
+
+function updateEmpType(input){
+	var empType = $(input).val(); 
+	if ( empType == 'WACRAC'){
+		wac = rac = true;
+	} else if ( empType == 'WAC'){
+		wac = true;
+		rac = false;
+	} else {
+		wac = false;
+		rac = true;
+	}
+}
+
+function updateEmpType(input){
+	console.log(reportType + ' test ' + input.value);
+	if(reportType == 2){
+		if (input.value != 'current'){
+			$("select option[value*='WAC']").prop('disabled',true);
+			$("select option[value*='WACRAC']").prop('disabled',true);
+		}else{
+			$("select option[value*='WAC']").prop('disabled',false);
+			$("select option[value*='WACRAC']").prop('disabled',false);
+		}		
+	}		
 }

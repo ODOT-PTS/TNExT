@@ -298,7 +298,7 @@ public class Queries {
 						+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
 						+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
 						+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
-						+ " WHERE routes.agencyid = '" + agencyId + "'";
+						+ " WHERE trips.agencyid = '" + agencyId + "'";
 			} else if (flag.equals("stops")) {
 				query += "SELECT agencies.name AS PRVDR_NM, ('1899-12-30'||' '||current_time)::date AS arrival_ti, ('1899-12-30'||' '||current_time)::date AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
 						+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
@@ -3625,6 +3625,33 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] sdates = datedays[0];
     	String[] days = datedays[1];
     	return FlexibleReportEventManager.getFlexRepPop(dbindex,agencies,sdates,days,popyear, areas,los,sradius,areaType,username,minUrbanPop,maxUrbanPop);
+    }
+    
+    @GET
+    @Path("/flexRepEmp")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+    		MediaType.TEXT_XML })
+    public Object getFlexRepEmp(
+    		@QueryParam("dbindex") Integer dbindex,
+    		@QueryParam("agencies") String agencies,
+    		@QueryParam("dates") String date,
+    		@QueryParam("areas") String areas,
+    		@QueryParam("year") String popyear,
+    		@QueryParam("los") Integer los,
+    		@QueryParam("sradius") Double sradius,
+    		@QueryParam("areaType") String areaType,
+    		@QueryParam("username") String username,
+    		@QueryParam("minUrbanPop") Integer minUrbanPop,
+    		@QueryParam("maxUrbanPop") Integer maxUrbanPop,
+    		@QueryParam("wac") Boolean wac,
+    		@QueryParam("rac") Boolean rac,
+    		@QueryParam("metrics") String metrics) throws SQLException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	return FlexibleReportEventManager.getFlexRepEmp(dbindex,agencies,sdates,days,popyear,areas,los,sradius,areaType,username,minUrbanPop,maxUrbanPop,wac,rac,metrics.split(","));
     }
 }
 
