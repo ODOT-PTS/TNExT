@@ -1985,10 +1985,16 @@ public class DbUpdate {
 				feeds.add(rs.getString("feed"));
 			}
 			for(int i=0; i<feeds.size();i++){
+				System.out.println((i+1));
 				UpdateEventManager.updateTables(c, agencies.get(i));
 				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
 			}
 			
+			statement.close();
+			statement = c.createStatement();
+			System.out.println("vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();
