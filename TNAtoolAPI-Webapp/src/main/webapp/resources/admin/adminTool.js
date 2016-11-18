@@ -428,6 +428,38 @@ function addFeed(feeds){
 	checkGTFSstatus(currentINDEX);
 }
 
+function addPnr(fileName){
+	var db = dbInfo[currentINDEX].toString();
+	alert(fileName);
+//	$('#deletePNR').prop('disabled', false);
+	
+	/*var feeds = new Array();
+	
+	$('.selectFeed'+index).each(function(){
+		if($(this).is(':checked')){
+			feeds.push($(this).attr('id'));
+		}
+	});
+	feeds.join("$$");*/
+	/*for(var i=0; i<feeds.length; i++){
+		$.ajax({
+	        type: "GET",
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+feeds[i]+"&db="+db,
+//	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+folder+"Feeds/"+feeds[i]+"&db="+db,
+	        dataType: "text",
+	        async: false,
+	        success: function(d) {
+	        	if(d=="done"){
+	        		console.log(feeds[i]+" was successfully added");
+	        	}else{
+	        		console.log(feeds[i]+" could not be added. Error: "+d);
+	        	}
+	        }
+		});
+	}
+	checkGTFSstatus(currentINDEX);*/
+}
+
 function callDBfuntions(dbFunction){
 	for(var i=1;i<dbInfo.length;i++){
 		dbFunction(i);
@@ -466,6 +498,18 @@ function setButtonStatus(dbNumber){
 			$('#dbButtons'+dbNumber+' input.update').prop('disabled', false);
 		}else{
 			$('#dbButtons'+dbNumber+' input.update').prop('disabled', true);
+		}
+		if(dbStatus[dbNumber].Census){
+			$('#dbButtons'+dbNumber+' input.fpop').prop('disabled', false);
+			$('#dbButtons'+dbNumber+' input.t6').prop('disabled', false);
+		}else{
+			$('#dbButtons'+dbNumber+' input.fpop').prop('disabled', true);
+			$('#dbButtons'+dbNumber+' input.t6').prop('disabled', true);
+		}
+		if(dbStatus[dbNumber].Employment){
+			$('#dbButtons'+dbNumber+' input.femp').prop('disabled', false);
+		}else{
+			$('#dbButtons'+dbNumber+' input.femp').prop('disabled', true);
 		}
 	}
 }
@@ -800,8 +844,30 @@ function checkT6status(index){
 function openPnr(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
-	var b = status.Parknride;
-	changeStatus(index, "parknride", !b);
+	currentINDEX = index;
+	if(!status.Parknride){
+		$('#deletePNR').prop('disabled', true);
+	}
+	PNRdialog.dialog( "open" );
+	
+//	var db = dbInfo[index].toString();
+//	var status = dbStatus[index];
+//	var b = status.Parknride;
+//	changeStatus(index, "parknride", !b);
+}
+
+function deletePNR(){
+	var db = dbInfo[currentINDEX].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletePNR?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	changeStatus(index, "parknride", false);
+        	$('#deletePNR').prop('disabled', true);
+        }
+	});
 }
 
 function checkPNRstatus(index){
@@ -996,6 +1062,7 @@ var currentINDEX;
 var currentFiles;
 var dialog;
 var GTFSdialog;
+var PNRdialog;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1114,6 +1181,70 @@ $(document).ready(function(){
 	      }
 	 });
 	
+	runGTFSfunctions();
+	runPnRfunctions();
+	
+	$('body').css('display','');
+	$('#dbAccordion .ui-accordion-content').css('height','100%');
+	
+	
+});
+
+function deleteUploadedPNR(){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedPNR",
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
+
+function runPnRfunctions(){
+	deleteUploadedPNR(); //to be implemented
+	
+	'use strict';
+	$('#pnr_upload_form').fileupload({
+        url: '/TNAtoolAPI-Webapp/admin',
+        acceptFileTypes: /(csv)$/i,
+        singleFileUploads: true,
+        formData: {data: "pnr"},
+        sequentialUploads: true,
+        maxFileSize: 50000000,
+    }).bind('fileuploadalways', function (e, data){
+//    	addFeed(data.files[0].name);
+//    	currentFiles.push(data.files[0].name);
+    	addPnr(data.files[0].name);
+    })/*.bind('fileuploadstopped', function (e) {
+//    	alert();
+    	addFeed(currentFiles);
+    }).bind('fileuploadstart', function (e) {
+    	currentFiles = [];
+    	deleteProcessGTFS();
+    });*/
+	$('#gtfs_upload_form > div').css('margin-right','0px');
+	
+	PNRdialog = $( "#pnr_upload" ).dialog({
+	      autoOpen: false,
+	      height: $(window).height()*0.7,
+	      width: 900,
+	      modal: true,
+	      buttons: {
+//	        "Submit": dSubmit,
+	        Close: function() {
+	        	PNRdialog.dialog( "close" );
+	        }
+	      },
+	      close: function() {
+	    	  $("table tbody.files").empty();
+	    	  deleteUploadedPNR();
+	      }
+	 });
+}
+
+function runGTFSfunctions(){
 	//gtfs dialog
 	deleteUploadedGTFS();
 	
@@ -1122,7 +1253,7 @@ $(document).ready(function(){
         url: '/TNAtoolAPI-Webapp/admin',
         acceptFileTypes: /(zip)$/i,
         singleFileUploads: true,
-//        formData: {user: username},
+        formData: {data: "gtfs"},
         sequentialUploads: true,
         maxFileSize: 50000000,
     }).bind('fileuploadalways', function (e, data){
@@ -1136,18 +1267,6 @@ $(document).ready(function(){
     	deleteProcessGTFS();
     });
 	$('#gtfs_upload_form > div').css('margin-right','0px');
-	
-	/*$('#gtfs_upload_form').addClass('fileupload-processing');
-    $.ajax({
-        url: $('#fileupload').fileupload('option', 'url'),
-        dataType: 'json',
-        context: $('#fileupload')[0]
-    }).always(function () {
-        $(this).removeClass('fileupload-processing');
-    }).done(function (result) {
-        $(this).fileupload('option', 'done')
-            .call(this, $.Event('done'), {result: result});
-    });*/
 	
 	GTFSdialog = $( "#gtfs_upload" ).dialog({
 	      autoOpen: false,
@@ -1166,12 +1285,4 @@ $(document).ready(function(){
 	    	  deleteUploadedGTFS();
 	      }
 	 });
-	
-	
-	
-	$('body').css('display','');
-	$('#dbAccordion .ui-accordion-content').css('height','100%');
-	
-	
-});
-				
+}

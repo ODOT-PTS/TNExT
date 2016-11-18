@@ -1253,6 +1253,31 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deletePNR")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deletePNR(@QueryParam("db") String db){
+		String response = "done";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			statement.executeQuery("DELETE FROM parknride;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: deletePNR method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/checkEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkEmpstatus(@QueryParam("db") String db){
@@ -1747,6 +1772,22 @@ public class DbUpdate {
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		
 		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
+		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+	    if(files!=null) { 
+	        for(File f: files) {
+	        	f.delete();
+	        }
+	    }
+		return "done";
+	}
+	@GET
+    @Path("/deleteUploadedPNR")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteUploadedPNR() throws IOException{
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
+		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/pnr");
 		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
 	    if(files!=null) { 

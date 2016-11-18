@@ -53,14 +53,13 @@ public class Admin extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//		System.out.println("hellp");
 		response.setContentType("application/json");
 	    PrintWriter out = response.getWriter();
 	    JSONArray json = new JSONArray();
 	    JSONObject rs = new JSONObject();
 //		String feed = "";
 //		String error = "";
-//		String username = "";
+		String data = "";
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 		//System.out.println(System.currentTimeMillis());
         if (isMultipart) {
@@ -71,49 +70,70 @@ public class Admin extends HttpServlet {
 	        try {
 		        List<FileItem> items = upload.parseRequest(new ServletRequestContext(request));
 		        
-//		        for(FileItem item: items){
-//		        	if (item.isFormField()) {
-//		        		username = item.getString();
-//		        	}
-//		        }
-		        
 		        for(FileItem item: items){
-		            if (!item.isFormField()) {
-		                String fileName = item.getName();
-//		                fileName=changeFeedName(fileName, username);
-		                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		                File loc = new File(path
-		        				+ "../../src/main/webapp/resources/admin/uploads/gtfs");
-		                if (!loc.exists()) {
-		                	boolean status = loc.mkdirs();
-		                }
-		                File uploadedFile = new File(loc + "/" + fileName);
-		                String feed = uploadedFile.getAbsolutePath();
-		                item.write(uploadedFile);
-		                
-		                //changeCSV(feed, username);
-		                JSONObject jsono = new JSONObject();
-                        jsono.put("name", fileName);
-                        jsono.put("size", item.getSize());
-                        jsono.put("url", "upload?getfile=" + fileName);
-                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
-                        jsono.put("delete_url", "upload?delfile=" + fileName);
-                        jsono.put("delete_type", "GET");
-                        json.put(jsono);
-                        
-//                      addUploadInfo(feed, fileName, item.getSize(),username);
-//		                error = addFeed(feed, fileName, item.getSize(),username);
-//		                System.out.println(error);
-		            }
+		        	if (item.isFormField()) {
+		        		data = item.getString();
+		        	}
 		        }
+		        if(data.equals("gtfs")){
+		        	for(FileItem item: items){
+			            if (!item.isFormField()) {
+			                String fileName = item.getName();
+			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File(path
+			        				+ "../../src/main/webapp/resources/admin/uploads/gtfs");
+			                if (!loc.exists()) {
+			                	boolean status = loc.mkdirs();
+			                }
+			                File uploadedFile = new File(loc + "/" + fileName);
+			                String feed = uploadedFile.getAbsolutePath();
+			                item.write(uploadedFile);
+			                
+			                JSONObject jsono = new JSONObject();
+	                        jsono.put("name", fileName);
+	                        jsono.put("size", item.getSize());
+	                        jsono.put("url", "upload?getfile=" + fileName);
+	                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
+	                        jsono.put("delete_url", "upload?delfile=" + fileName);
+	                        jsono.put("delete_type", "GET");
+	                        json.put(jsono);
+	                        
+			            }
+			        }
+		        }else if(data.equals("pnr")){
+		        	for(FileItem item: items){
+			            if (!item.isFormField()) {
+			                String fileName = item.getName();
+			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File(path
+			        				+ "../../src/main/webapp/resources/admin/uploads/pnr");
+			                if (!loc.exists()) {
+			                	boolean status = loc.mkdirs();
+			                }
+			                File uploadedFile = new File(loc + "/" + fileName);
+			                String feed = uploadedFile.getAbsolutePath();
+			                item.write(uploadedFile);
+			                
+			                JSONObject jsono = new JSONObject();
+	                        jsono.put("name", fileName);
+	                        jsono.put("size", item.getSize());
+	                        jsono.put("url", "upload?getfile=" + fileName);
+	                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
+	                        jsono.put("delete_url", "upload?delfile=" + fileName);
+	                        jsono.put("delete_type", "GET");
+	                        json.put(jsono);
+	                        
+			            }
+			        }
+		        }
+		        
 	        } catch (FileUploadException e) {
 	        	e.printStackTrace();
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        } 
 	        
-//	        updateQuota(username);
-	        
+       
 	        try {
 				rs.put("files", json);
 			} catch (JSONException e) {
@@ -123,8 +143,6 @@ public class Admin extends HttpServlet {
 			out.flush();
 			out.close();
 			
-	        //error = updateFeeds();
-            //System.out.println(error);
         }
 	}
 
