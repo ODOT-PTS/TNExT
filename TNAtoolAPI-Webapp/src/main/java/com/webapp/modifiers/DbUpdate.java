@@ -1972,6 +1972,164 @@ public class DbUpdate {
 		return message;
 	}
 	
+	@GET
+    @Path("/addPnr")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addPnr(@QueryParam("fileName") String fileName, @QueryParam("db") String db) throws IOException, SQLException{
+//		String [] args = new String[5];
+		String[] dbInfo = db.split(",");
+//		args[0] = "--driverClass=\"org.postgresql.Driver\"";
+//		args[1] = "--url=\""+dbInfo[4]+"\"";
+//		args[2] = "--username=\""+dbInfo[5]+"\"";
+//		args[3] = "--password=\""+dbInfo[6]+"\"";
+		
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		File source = new File(path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName);
+//		String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
+//		File target = new File(feed);
+//		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+//    	Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//    	System.out.println(source.delete());
+    	String message = "done";
+//		args[4] = feed;
+//		try{
+//			GtfsDatabaseLoaderMain.main(args);	
+//		}catch(Exception e){
+//			message = e.getMessage();
+//			System.out.println(target.delete());
+//			return message;
+//		}
+		
+//		for(int i=0;i<4;i++){
+//			feedname = removeLastChar(feedname);
+//		}
+//		String[] feedName = feedname.split("/");
+//		String fName = feedName[feedName.length-1];
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+//		String defaultId = "";
+//		String agencyNames = "";
+//		String agencyIds = "";
+		c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+//		System.out.println("1");
+		try {			
+			statement = c.createStatement();
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS parknride("
+					+ "pnrid integer PRIMARY KEY NOT NULL, "
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "lotName text,"
+					+ "location text,"
+					+ "city character varying (30),"
+					+ "zipcode integer,"
+					+ "countyID character varying(5) NOT NULL,"
+					+ "county character varying(50) NOT NULL,"
+					+ "spaces integer,"
+					+ "accessibleSpaces integer,"
+					+ "bikeRackSpaces integer,"
+					+ "bikeLockerSpaces integer,"
+					+ "electricVehicleSpaces integer,"
+					+ "carSharing text,"
+					+ "transitService text, "
+					+ "availability text,"
+					+ "timeLimit text,"
+					+ "restroom text,"
+					+ "benches text,"
+					+ "shelter text,"
+					+ "indoorWaitingArea text,"
+					+ "trashCan text,"
+					+ "lighting text,"
+					+ "securityCameras text,"
+					+ "sidewalks text,"
+					+ "pnrSignage text,"
+					+ "lotSurface text,"
+					+ "propertyOwner text,"
+					+ "localExpert text,"
+					+ "FOREIGN KEY (countyid)"
+					+ "      REFERENCES census_counties (countyid) MATCH SIMPLE"
+					+ "      ON UPDATE NO ACTION ON DELETE NO ACTION"
+					+ ")WITH ("
+					+ "  OIDS=FALSE"
+					+ ");");
+			statement.executeUpdate("ALTER TABLE parknride"
+					+ "  OWNER TO postgres;");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+//		System.out.println("2");
+		try{				
+			statement = c.createStatement();
+			statement.executeUpdate("COPY parknride "
+					+ "FROM '"+path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName+"' DELIMITER ',' CSV HEADER;");
+		} catch (SQLException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+			source.delete();
+			return message;
+		}
+//		System.out.println("3");
+		try{			
+			statement = c.createStatement();
+			statement.executeUpdate("ALTER TABLE parknride "
+					+ "ADD geom geometry(Point, 2993);");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+//		System.out.println("4");
+		try{			
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE parknride "
+					+ "SET geom = ST_transform(ST_setsrid(ST_MakePoint(lon, lat),4326), 2993);");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+//		System.out.println("5");
+		try{			
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE parknride SET lotName='N/A' WHERE lotName IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET location='N/A' WHERE location IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET city='N/A' WHERE city IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET county='N/A' WHERE county IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET spaces=0 WHERE spaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET accessiblespaces=0 WHERE accessiblespaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET bikerackspaces=0 WHERE bikerackspaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET bikelockerspaces=0 WHERE bikelockerspaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET electricvehiclespaces=0 WHERE electricvehiclespaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET carsharing='N/A' WHERE carsharing IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET transitservice='N/A' WHERE transitservice IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET availability='N/A' WHERE availability IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET timelimit='N/A' WHERE timelimit IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET restroom='N/A' WHERE restroom IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET shelter='N/A' WHERE shelter IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET trashcan='N/A' WHERE trashcan IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET lighting='N/A' WHERE lighting IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET securitycameras='N/A' WHERE securitycameras IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET sidewalks='N/A' WHERE sidewalks IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET pnrsignage='N/A' WHERE pnrsignage IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET lotsurface='N/A' WHERE lotsurface IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET propertyowner='N/A' WHERE propertyowner IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET localexpert='N/A' WHERE localexpert IS NULL;");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			message = e.getMessage();
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+			source.delete();
+		}
+		
+//		System.out.println("done");
+//		return new TransitError(feedname +"Has been added to the database");
+		return message;
+	}
+	
+	
 	public String removeLastChar(String str) {
     	if (str.length() > 0) {
             str = str.substring(0, str.length()-1);
@@ -2026,16 +2184,19 @@ public class DbUpdate {
 				feeds.add(rs.getString("feed"));
 			}
 			for(int i=0; i<feeds.size();i++){
-				System.out.println((i+1));
+				System.out.println(agencies.get(i));
 				UpdateEventManager.updateTables(c, agencies.get(i));
 				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
+				System.out.println("vacuum start");
+				statement.executeUpdate("VACUUM");
+				System.out.println("vacuum finish");
 			}
 			
 			statement.close();
-			statement = c.createStatement();
-			System.out.println("vacuum start");
-			statement.executeUpdate("VACUUM");
-			System.out.println("vacuum finish");
+//			statement = c.createStatement();
+//			System.out.println("vacuum start");
+//			statement.executeUpdate("VACUUM");
+//			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();

@@ -430,34 +430,25 @@ function addFeed(feeds){
 
 function addPnr(fileName){
 	var db = dbInfo[currentINDEX].toString();
-	alert(fileName);
-//	$('#deletePNR').prop('disabled', false);
-	
-	/*var feeds = new Array();
-	
-	$('.selectFeed'+index).each(function(){
-		if($(this).is(':checked')){
-			feeds.push($(this).attr('id'));
-		}
-	});
-	feeds.join("$$");*/
-	/*for(var i=0; i<feeds.length; i++){
-		$.ajax({
-	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+feeds[i]+"&db="+db,
+//	alert(fileName);
+		
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db,
 //	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+folder+"Feeds/"+feeds[i]+"&db="+db,
-	        dataType: "text",
-	        async: false,
-	        success: function(d) {
-	        	if(d=="done"){
-	        		console.log(feeds[i]+" was successfully added");
-	        	}else{
-	        		console.log(feeds[i]+" could not be added. Error: "+d);
-	        	}
-	        }
-		});
-	}
-	checkGTFSstatus(currentINDEX);*/
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	if(d=="done"){
+        		console.log(fileName+" was successfully added");
+        		$('#deletePNR').prop('disabled', false);
+        	}else{
+        		console.log(fileName+" could not be added. Error: "+d);
+        	}
+        }
+	});
+	
+	checkPNRstatus(currentINDEX);
 }
 
 function callDBfuntions(dbFunction){
@@ -1203,7 +1194,7 @@ function deleteUploadedPNR(){
 }
 
 function runPnRfunctions(){
-	deleteUploadedPNR(); //to be implemented
+	deleteUploadedPNR(); 
 	
 	'use strict';
 	$('#pnr_upload_form').fileupload({
@@ -1216,6 +1207,7 @@ function runPnRfunctions(){
     }).bind('fileuploadalways', function (e, data){
 //    	addFeed(data.files[0].name);
 //    	currentFiles.push(data.files[0].name);
+//    	console.log(data);
     	addPnr(data.files[0].name);
     })/*.bind('fileuploadstopped', function (e) {
 //    	alert();
