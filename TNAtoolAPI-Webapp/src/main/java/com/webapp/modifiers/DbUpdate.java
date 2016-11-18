@@ -1264,7 +1264,7 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			statement.executeQuery("DELETE FROM parknride;");
+			statement.executeUpdate("DELETE FROM parknride;");
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletePNR method");
@@ -1984,7 +1984,9 @@ public class DbUpdate {
 //		args[3] = "--password=\""+dbInfo[6]+"\"";
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		File source = new File(path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName);
+		path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path.substring(1, path.length());
+		File source = new File(path);
 //		String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
 //		File target = new File(feed);
 //		File[] files = gtfsFolder.listFiles();
