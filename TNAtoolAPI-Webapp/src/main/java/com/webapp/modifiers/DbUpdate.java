@@ -2064,7 +2064,7 @@ public class DbUpdate {
 		try{				
 			statement = c.createStatement();
 			statement.executeUpdate("COPY parknride "
-					+ "FROM '"+path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName+"' DELIMITER ',' CSV HEADER;");
+					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();

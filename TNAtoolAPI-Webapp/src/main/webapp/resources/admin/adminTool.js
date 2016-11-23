@@ -493,9 +493,12 @@ function setButtonStatus(dbNumber){
 		if(dbStatus[dbNumber].Census){
 			$('#dbButtons'+dbNumber+' input.fpop').prop('disabled', false);
 			$('#dbButtons'+dbNumber+' input.t6').prop('disabled', false);
+			$('#dbButtons'+dbNumber+' input.pnr').prop('disabled', false);
 		}else{
 			$('#dbButtons'+dbNumber+' input.fpop').prop('disabled', true);
 			$('#dbButtons'+dbNumber+' input.t6').prop('disabled', true);
+			$('#dbButtons'+dbNumber+' input.pnr').prop('disabled', true);
+
 		}
 		if(dbStatus[dbNumber].Employment){
 			$('#dbButtons'+dbNumber+' input.femp').prop('disabled', false);
