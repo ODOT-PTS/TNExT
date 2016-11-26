@@ -1987,6 +1987,9 @@ public class DbUpdate {
 		path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
 		path = path.substring(1, path.length());
 		File source = new File(path);
+		source.setExecutable(true);
+		source.setReadable(true);
+		source.setWritable(true);
 //		String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
 //		File target = new File(feed);
 //		File[] files = gtfsFolder.listFiles();
