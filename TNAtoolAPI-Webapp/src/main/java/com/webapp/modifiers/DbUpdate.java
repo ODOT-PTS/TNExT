@@ -1956,9 +1956,6 @@ public class DbUpdate {
 		path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
 		path = path.substring(1, path.length());
 		File source = new File(path);
-		System.out.println(source.setExecutable(true,false));
-		System.out.println(source.setReadable(true,false));
-		System.out.println(source.setWritable(true,false));
     	String message = "done";
 		Connection c = null;
 		Statement statement = null;
@@ -2024,9 +2021,9 @@ public class DbUpdate {
 			   cmdArray[2] = "cmd";
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
-			   		+ " -c \"\\copy parknride FROM '"+path+"' DELIMITER ',' CSV HEADER"
-			   		+ "exit";
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy parknride FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " $ exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   pr.waitFor(5,TimeUnit.MINUTES);
