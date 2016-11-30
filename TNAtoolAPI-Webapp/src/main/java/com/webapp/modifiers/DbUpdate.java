@@ -1264,7 +1264,7 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			statement.executeUpdate("DELETE FROM parknride;");
+			statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletePNR method");
@@ -1556,32 +1556,6 @@ public class DbUpdate {
 			e.printStackTrace();
 		}
 		
-		/*try {
-//			Runtime rt = Runtime.getRuntime();
-//			pr = rt.exec("echo salam");
-			
-//			pb = new ProcessBuilder("cmd", "/c", "start", batFile, fromPass, fromUser, nameFrom, fromHost,
-//					"C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe",
-//					toPass, toUser, nameTo, toHost,
-//					"C:/Program Files/PostgreSQL/9.3/bin/psql.exe");
-			
-			pb = new ProcessBuilder("cmd", "/c", "start", batFile, "123123", "postgres", "census", "localhost",
-					"C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe",
-					"123123", "postgres", "test", "localhost");
-//			pb.redirectErrorStream(true);
-			pr = pb.start();
-			pr.waitFor(5,TimeUnit.MINUTES);
-			System.out.println("done adding");
-			
-//			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-//		    String line;
-//		    while ((line = in.readLine()) != null) {
-//		        System.out.println(line);
-//		    }
-			
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}*/
 		
 		return "done";
 	}
@@ -2035,11 +2009,31 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
-		try{				
-			statement = c.createStatement();
-			statement.executeUpdate("COPY parknride "
-					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
-		} catch (SQLException ex) {
+		
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		host = "localhost"; //to be deleted
+		Process pr;
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+			   		+ " -c \"\\copy parknride FROM '"+path+"' DELIMITER ',' CSV HEADER"
+			   		+ "exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+//			statement = c.createStatement();
+//			statement.executeUpdate("COPY parknride "
+//					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
+		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
 			if (rs != null) try { rs.close(); } catch (SQLException e) {}

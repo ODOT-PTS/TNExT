@@ -858,7 +858,7 @@ function deletePNR(){
         dataType: "text",
         async: false,
         success: function(b) {
-        	changeStatus(index, "parknride", false);
+        	changeStatus(currentINDEX, "parknride", false);
         	$('#deletePNR').prop('disabled', true);
         }
 	});
