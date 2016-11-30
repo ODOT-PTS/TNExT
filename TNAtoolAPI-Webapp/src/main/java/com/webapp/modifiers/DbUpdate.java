@@ -2023,7 +2023,7 @@ public class DbUpdate {
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
 				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
 				   		+ " -c \"\\copy parknride FROM '"+path+"' DELIMITER ',' CSV HEADER\""
-				   		+ " $ exit";
+				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   pr.waitFor(5,TimeUnit.MINUTES);
