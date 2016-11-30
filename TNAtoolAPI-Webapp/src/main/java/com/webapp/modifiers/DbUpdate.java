@@ -1976,51 +1976,23 @@ public class DbUpdate {
     @Path("/addPnr")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object addPnr(@QueryParam("fileName") String fileName, @QueryParam("db") String db) throws IOException, SQLException{
-//		String [] args = new String[5];
 		String[] dbInfo = db.split(",");
-//		args[0] = "--driverClass=\"org.postgresql.Driver\"";
-//		args[1] = "--url=\""+dbInfo[4]+"\"";
-//		args[2] = "--username=\""+dbInfo[5]+"\"";
-//		args[3] = "--password=\""+dbInfo[6]+"\"";
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
 		path = path.substring(1, path.length());
 		File source = new File(path);
-		source.setExecutable(true);
-		source.setReadable(true);
-		source.setWritable(true);
-//		String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
-//		File target = new File(feed);
-//		File[] files = gtfsFolder.listFiles();
-//		System.out.println(files.length);
-//    	Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
-//    	System.out.println(source.delete());
+		System.out.println(source.setExecutable(true,false));
+		System.out.println(source.setReadable(true,false));
+		System.out.println(source.setWritable(true,false));
     	String message = "done";
-//		args[4] = feed;
-//		try{
-//			GtfsDatabaseLoaderMain.main(args);	
-//		}catch(Exception e){
-//			message = e.getMessage();
-//			System.out.println(target.delete());
-//			return message;
-//		}
-		
-//		for(int i=0;i<4;i++){
-//			feedname = removeLastChar(feedname);
-//		}
-//		String[] feedName = feedname.split("/");
-//		String fName = feedName[feedName.length-1];
 		Connection c = null;
 		Statement statement = null;
 		ResultSet rs = null;
-//		String defaultId = "";
-//		String agencyNames = "";
-//		String agencyIds = "";
 		c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
-//		System.out.println("1");
 		try {			
 			statement = c.createStatement();
+			statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS parknride("
 					+ "pnrid integer PRIMARY KEY NOT NULL, "
 					+ "lat double precision NOT NULL,"
@@ -2063,7 +2035,6 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
-//		System.out.println("2");
 		try{				
 			statement = c.createStatement();
 			statement.executeUpdate("COPY parknride "
@@ -2077,7 +2048,6 @@ public class DbUpdate {
 			source.delete();
 			return message;
 		}
-//		System.out.println("3");
 		try{			
 			statement = c.createStatement();
 			statement.executeUpdate("ALTER TABLE parknride "
@@ -2085,7 +2055,6 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
-//		System.out.println("4");
 		try{			
 			statement = c.createStatement();
 			statement.executeUpdate("UPDATE parknride "
@@ -2093,7 +2062,6 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
-//		System.out.println("5");
 		try{			
 			statement = c.createStatement();
 			statement.executeUpdate("UPDATE parknride SET lotName='N/A' WHERE lotName IS NULL;");
@@ -2129,8 +2097,6 @@ public class DbUpdate {
 			source.delete();
 		}
 		
-//		System.out.println("done");
-//		return new TransitError(feedname +"Has been added to the database");
 		return message;
 	}
 	
