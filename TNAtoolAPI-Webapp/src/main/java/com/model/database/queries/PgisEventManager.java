@@ -271,111 +271,18 @@ public class PgisEventManager {
 		String id = countyId+"";
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String query =	"WITH aids AS ("
-						+ "SELECT agency_id AS aid "
-						+ "FROM gtfs_selected_feeds "
-						+ "WHERE username='"+username+"'), "
-						
-						+ "temp1 AS ("
-						+ "SELECT parknride.*,"+
-							"	gtfs_stops.name stopname, "+
-							"	gtfs_stops.id stopid "+
-							"FROM parknride CROSS JOIN gtfs_stops "+
-							"WHERE ST_dwithin(parknride.geom, gtfs_stops.location, "+radius+") "+
-							"ORDER BY pnrid), "+
-			
-							"temp2 AS (SELECT temp1.*, gtfs_stop_route_map.agencyid , gtfs_stop_route_map.routeid "+
-							"FROM temp1 CROSS JOIN gtfs_stop_route_map "+
-							"WHERE temp1.stopid=gtfs_stop_route_map.stopid), "+
-			
-							"temp3 AS (SELECT temp2.*, gtfs_routes.longname routename, gtfs_routes.agencyid agenid "+
-							"FROM temp2 CROSS JOIN gtfs_routes "+
-							"WHERE temp2.routeid = gtfs_routes.id), "
-							+ "temp4 AS ("
-							+ "	SELECT temp3.* "
-							+ "	FROM temp3 INNER JOIN aids "
-							+ "	ON temp3.agenid = aids.aid "
-							+ "	)," +
-							
-							"temp5 AS (SELECT temp4.*, gtfs_agencies.name agencyname "+
-							"FROM temp4 CROSS JOIN gtfs_agencies "+
-							"WHERE temp4.agenid=gtfs_agencies.id), "+
-			
-							"temp6 AS (SELECT pnrid,  "+
-							"	lotname, "+
-							"	location, "+
-							"	city, "+
-							"	zipcode, "+
-							"	spaces,  "+
-							"	accessiblespaces, "+
-							"	lat, "+
-							"	lon, "+
-							"	bikerackspaces, "+
-							"	bikelockerspaces,  "+
-							"	electricvehiclespaces, "+ 
-							"	carsharing, "+
-							"	transitservice, "+
-							"	availability, "+
-							"	timelimit, "+
-							"	restroom, "+
-							"	benches, "+
-							"	shelter, "+
-							"	indoorwaitingarea, "+ 
-							"	trashcan, "+
-							"	lighting, "+
-							"	securitycameras, "+
-							"	sidewalks, "+
-							"	pnrsignage, "+
-							"	lotsurface, "+
-							"	propertyowner, "+
-							"	localexpert, "+
-							"	county, "+
-							"   countyid, "+
-							"	array_agg(agencyname) agencies,"
-							+ "	array_agg(stopid) stopids,"
-							+ "	array_agg(stopname) stopnames,"
-							+ "	array_agg(routeid) routeids,"
-							+ "	array_agg(routename) routenames,"
-							+ "array_agg(stopname) stops, "+
-							" count(stopname) count "+
-							"FROM temp5 "+
-							"GROUP BY pnrid, "+
-							"lotname, "+
-							"	location, "+
-							"	city, "+
-							"	zipcode, "+
-							"	spaces, "+
-							"	accessiblespaces, "+
-							"	lat, "+
-							"	lon, "+
-							"	bikerackspaces, "+
-							"	bikelockerspaces, "+
-							"	electricvehiclespaces, "+
-							"	carsharing, "+
-							"	transitservice, "+
-							"	availability, "+
-							"	timelimit, "+
-							"	restroom, "+
-							"	benches, "+
-							"	shelter, "+
-							"	indoorwaitingarea,"+
-							"	trashcan, "+
-							"	lighting, "+
-							"	securitycameras, "+
-							"	sidewalks, "+
-							"	pnrsignage, "+
-							"	lotsurface,"+
-							"	propertyowner, "+
-							"	localexpert, "+
-							"	county, "+
-							"   countyid),"
-							+ " temp7 AS (SELECT parknride.*, temp6.agencies, temp6.stopids, temp6.stopnames, temp6.routeids, temp6.routenames FROM parknride LEFT OUTER JOIN temp6"
-							+ "	ON temp6.pnrid = parknride.pnrid)"
-							
-							+ " SELECT * FROM temp7"
-							+ " WHERE countyid='"+id+"'"
-							+ "	ORDER BY pnrid;";
-		
+		String query =	"WITH aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds WHERE username='admin' order by aid), "
+				+ "pnr AS (SELECT  parknride.* FROM parknride INNER JOIN census_counties AS counties ON ST_contains(ST_Transform(counties.shape,2993), parknride.geom) WHERE counties.countyid = '" + countyId + "'),"
+				+ "temp1 AS (SELECT pnr.*,	gtfs_stops.name stopname, 	gtfs_stops.id stopid, gtfs_stops.agencyid AS agencyid_def "
+				+ "		FROM pnr LEFT JOIN gtfs_stops "
+				+ "		ON ST_dwithin(pnr.geom, gtfs_stops.location, " + radius + ") ORDER BY pnrid), "
+				+ "temp2 AS (SELECT temp1.*, map.routeid, map.agencyid FROM temp1 LEFT JOIN (SELECT * FROM gtfs_stop_route_map WHERE agencyid_def IN (SELECT aid FROM aids)) AS map ON temp1.stopid=map.stopid AND temp1.agencyid_def = map.agencyid_def ), "
+				+ "temp3 AS (SELECT temp2.*, gtfs_routes.longname routename FROM temp2 LEFT JOIN gtfs_routes ON temp2.routeid = gtfs_routes.id AND temp2.agencyid = gtfs_routes.agencyid ), "
+				+ "temp4 AS (SELECT temp3.*, gtfs_agencies.name agencyname FROM temp3 LEFT JOIN gtfs_agencies ON temp3.agencyid=gtfs_agencies.id ), "
+				+ "temp5 AS (SELECT pnrid, lotname, location, city, zipcode, spaces, accessiblespaces, lat, lon, bikerackspaces, bikelockerspaces, electricvehiclespaces, carsharing, transitservice, availability, timelimit, restroom, benches,shelter,indoorwaitingarea,trashcan,"
+				+ " 	lighting, 	securitycameras, 	sidewalks, 	pnrsignage, 	lotsurface, 	propertyowner, 	localexpert, 	county,countyid, array_agg(agencyname) agencies,array_agg(stopid) stopids,array_agg(stopname) stopnames,array_agg(routeid) routeids,array_agg(routename) routenames,array_agg(stopname) stops,  count(stopname) count "
+				+ "		FROM temp4 GROUP BY pnrid, lotname,location,city, zipcode,spaces,accessiblespaces,lat,lon,bikerackspaces,bikelockerspaces,electricvehiclespaces,carsharing, transitservice, availability, timelimit, restroom,benches,shelter,indoorwaitingarea,trashcan, 	lighting, 	securitycameras, 	sidewalks, 	pnrsignage, 	lotsurface,	propertyowner, 	localexpert, 	county,countyid) "
+				+ "SELECT * FROM temp5 ORDER BY pnrid";		
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(query); 

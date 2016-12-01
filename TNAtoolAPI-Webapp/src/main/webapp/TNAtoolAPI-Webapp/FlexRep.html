@@ -71,7 +71,6 @@ $(document).ready(function(){
 	filterOnUrban = window.opener.filterOnUrban;
 	wac = window.opener.wac;
 	rac = window.opener.rac;
-
 	if (filterOnUrban){
 		minUrbanPop = $("#minUrbanPop", window.opener.document).val();
 		maxUrbanPop = $("#maxUrbanPop", window.opener.document).val();
@@ -120,17 +119,16 @@ $(document).ready(function(){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepEmp?dbindex=3&agencies='+agencies+'&year='+year+'&dates='+dates+'&areas='+ areas+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&wac='+wac+'&rac='+rac+'&metrics='+metrics,
+			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepEmp?dbindex=3&agencies='+agencies+'&year='+year+'&dates='+dates+'&areas='+ areas+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&wac='+wac+'&rac='+rac+'&metrics='+metrics.values,
 			async: false,
 			success: function(d){
-				console.log(d);
 				html = '<table id="RT" class="display" align="center">';
 				tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
 				'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
 				'<th class="metric" title=".">Area ID</th>'+
 				'<th class="metric" title=".">Area Name</th>';
 				
-				$.each(metrics,function(index,item){
+				$.each(metrics.values,function(index,item){
 					if (wac){
 						tmp += '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">' + item + ' Served (WAC)</th>'
 						+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius stops of all stops in the given area times service stops.">' + item + ' SS (WAC)</th>'
@@ -150,7 +148,7 @@ $(document).ready(function(){
 					+ '<td>' + item.areaId + '</td>'
 					+ '<td>' + item.areaName + '</td>';
 					
-					$.each(metrics,function(j,cat){
+					$.each(metrics.values,function(j,cat){
 						if (wac){						
 							html += '<td>' + numWithCommas(item[cat + "_served_wac"]) + '</td>'
 							+ '<td>' + numWithCommas(item[cat + "_ss_wac"]) + '</td>'
@@ -169,6 +167,44 @@ $(document).ready(function(){
 				table = buildDatatables();
 			}
 		})	
+	}else if (reportType == 3){
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepT6?dbindex=3&agencies='+agencies+'&dates='+dates+'&areas='+ areas+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&metrics='+metrics.values,
+			async: false,
+			success: function(d){
+				html = '<table id="RT" class="display" align="center">';
+				tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+				'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+				'<th class="metric" title=".">Area ID</th>'+
+				'<th class="metric" title=".">Area Name</th>';
+				
+				$.each(metrics.names,function(index,item){
+					tmp += '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">' + item + ' Served</th>'
+					+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius stops of all stops in the given area times service stops.">' + item + ' SS</th>'
+					+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receive a specified minimum level of service.">' + item + ' LOS</th>';
+				});
+				html += '<thead>'+tmp+'</thead><tbody>';
+				
+				$.each(d, function(i,item){
+					html += '<tr><td>' + item.agencyId + '</td>'
+					+ '<td>' + item.agencyName + '</td>'
+					+ '<td>' + item.areaId + '</td>'
+					+ '<td>' + item.areaName + '</td>';
+					
+					$.each(metrics.values,function(j,cat){
+						html += '<td>' + numWithCommas(item[cat + "_served"]) + '</td>'
+						+ '<td>' + numWithCommas(item[cat + "_ss"]) + '</td>'
+						+ '<td>' + numWithCommas(item[cat + "_los"]) + '</td>';
+					});
+					html += '</tr>';
+				});
+				html += '</tbody></table>';
+				$('#displayReport').append($(html));
+				table = buildDatatables();
+			}
+		});
 	}
 });
 

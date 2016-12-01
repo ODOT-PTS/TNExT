@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -300,33 +301,54 @@ public class Queries {
 						+ " INNER JOIN " + feeds + " AS feeds ON feeds.aid = routes.agencyid "
 						+ " WHERE trips.agencyid = '" + agencyId + "'";
 			} else if (flag.equals("stops")) {
-				query += "SELECT agencies.name AS PRVDR_NM, ('1899-12-30'||' '||current_time)::date AS arrival_ti, ('1899-12-30'||' '||current_time)::date AS departure_, stops.id AS stop_id, stops.name AS stops_name,"
-						+ " 	stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stops_url,"
-						+ " 	feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, stops.location AS shape "
-						+ "		FROM gtfs_stops AS stops "
-						+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-						+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id "
-						+ "		INNER JOIN " + feeds + " AS feeds ON feeds.aid = map.agencyid "
-						+ "		WHERE map.agencyid ='" + agencyId + "'";
+				query = "SELECT agencies.name AS PRVDR_NM, "
+						+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
+						+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
+						+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
+						+ "		CASE "
+						+ "         WHEN stoptimes.arrivaltime > 86400 "
+						+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
+						+ "         WHEN stoptimes.arrivaltime = -999 "
+						+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
+						+ "		  	ELSE "
+						+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
+						+ "		END AS arrival_time,"
+						+ "		CASE "
+						+ "         	WHEN stoptimes.departuretime > 86400 "
+						+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
+						+ "             WHEN stoptimes.departuretime = -999 "
+						+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
+						+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
+						+ "		END AS departure_time,"
+						+ "		stoptimes.stopsequence AS stop_sequence,"
+						+ "		stops.location AS shape"
+						+ "		FROM gtfs_stops AS stops"
+						+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
+						+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
+						+ "		INNER JOIN  (SELECT '" + agencyId + "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '" + agencyId + "' || '%') AS feeds ON feeds.aid = map.agencyid"
+						+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
+						+ "		WHERE map.agencyid ='" + agencyId + "' ORDER BY stop_id";
 			}
-			
+
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
 			File agencyFolder = new File(path + "/" + flag + "_shape_" + uniqueString + "/" + tempAgencyname + "_" + flag);
 			agencyFolder.mkdirs();
 
 			// Run the command to generate shapefiles for the agency
-			String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
+//			String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
 			ProcessBuilder pb = new ProcessBuilder("cmd","/c",generatorPath
 					, agencyFolder.getAbsolutePath() + "\\" + tempAgencyname + "_" + flag + "_shape"
-					, "localhost" //params[0]
-					, params[2]
+					, params[0]
+					, "localhost" // params[2]
 					, params[3]
 					, dbName
-					,"\"" + query + "\""
-					, psqlPath);	
-
+					, "\"" + query + "\""
+					, "pgsql2shp");	
+			pb.redirectErrorStream(true);
 			Process pr = pb.start();
+			BufferedReader reader2 = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			while (reader2.readLine() != null){}
 			pr.waitFor(5,TimeUnit.MINUTES);
 		}
 
@@ -3652,6 +3674,30 @@ Loop:  	for (Trip trip: routeTrips){
     	String[] sdates = datedays[0];
     	String[] days = datedays[1];
     	return FlexibleReportEventManager.getFlexRepEmp(dbindex,agencies,sdates,days,popyear,areas,los,sradius,areaType,username,minUrbanPop,maxUrbanPop,wac,rac,metrics.split(","));
+    }
+    
+    @GET
+    @Path("/flexRepT6")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+    		MediaType.TEXT_XML })
+    public Object getFlexRepT6(
+    		@QueryParam("dbindex") Integer dbindex,
+    		@QueryParam("agencies") String agencies,
+    		@QueryParam("dates") String date,
+    		@QueryParam("areas") String areas,
+    		@QueryParam("los") Integer los,
+    		@QueryParam("sradius") Double sradius,
+    		@QueryParam("areaType") String areaType,
+    		@QueryParam("username") String username,
+    		@QueryParam("minUrbanPop") Integer minUrbanPop,
+    		@QueryParam("maxUrbanPop") Integer maxUrbanPop,
+    		@QueryParam("metrics") String metrics) throws SQLException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
+    	String[] dates = date.split(",");
+    	String[][] datedays = daysOfWeekString(dates);
+    	String[] fulldates = fulldate(dates);
+    	String[] sdates = datedays[0];
+    	String[] days = datedays[1];
+    	return FlexibleReportEventManager.getFlexRepT6(dbindex,agencies,sdates,days,areas,los,sradius,areaType,username,minUrbanPop,maxUrbanPop,metrics.split(","));
     }
 }
 

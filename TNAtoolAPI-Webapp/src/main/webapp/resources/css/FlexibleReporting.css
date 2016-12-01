@@ -2,13 +2,18 @@
 	width:1325px;
 }
 .flexRepDialogSection{
-	overflow-y: scroll;
-	overflow-x: scroll;
 	height : 400px;
 	width: 20%;
 	float: left;
 	white-space:nowrap;
-	}
+}
+	
+.FlexRepSectionContainer{
+	width:initial;
+	height:inherit;
+	overflow-y: scroll;
+	overflow-x: scroll;
+}
 
 .FlexRepSectionHeader{
 	width:inherit-6;
@@ -60,6 +65,7 @@ hr {
     color: black;
     font-size: 110%;
     margin: 5px;
+    margin-top: 35px;
     background-color: #54f524;
     padding: 7px 30px 7px 30px;
     border-radius: 10px;

@@ -21,7 +21,9 @@ var maxAreaSelect = 3;
 var dates = [];
 var agencies = [];
 var areas = [];
-var metrics = [];
+var metrics={};
+metrics['values'] = [];
+metrics['names'] = [];
 var areaType;
 var reportType;
 var minUrbanPop = 0;
@@ -84,11 +86,45 @@ var empMetrics = [
                   ];
 
 var T6Metrics = [
-                  {value:"age", text:"Age"},
-                  {value:"disability", text:"Disability"},
-                  {value:"ethnicity", text:"Ethnicity"},
-                  {value:"language", text:"Language"},
-                  {value:"poverty", text:"Poverty"}
+                  {value:["from5to17", "from18to64","above65"],
+                	  name:["Age: 5-17", "Age: 18-64", "65 and older"],
+                	  text:"Age"},
+                  {value:["with_disability", "without_disability"],
+                		  name:["With Disability", "No Disability"],
+                		  text:"Disability"},
+                  {value:["american_indian_and_alaska_native",
+                          "asian",
+                          "black_or_african_american",
+                          "hispanic_or_latino",
+                          "native_hawaiian_and_other_pacific_islander",
+                          "other_races",
+                          "two_or_more",
+                          "white"],
+                          name:["American Indian or Alaska Native",
+                                 "Asian",
+                                 "Black or African American",
+                                 "Hispanic or Latino",
+                                 "Native Hawaiian or Other Pacific Islander",
+                                 "Other Races",
+                                 "Two or More",
+                                 "White"],
+                          text:"Ethnicity"},
+                  {value:["asian_and_pacific_island",
+                        	  "other_languages",
+                        	  "english",
+                        	  "spanish",
+                        	  "indo_european"],
+                        	  name:["Asian & Pacific Islander",
+                        	        "English",
+                        	        "Indo European",
+                        	        "Other Languages",
+                        	        "Spanish"],
+                        	  text:"Language"},
+                  {value:["below_poverty",
+                          "above_povery"],
+                          name:["Above Paverty Line",
+                                "Below Poverty Line"],
+                          text:"Poverty"}
                   ];
 
 function flexRepDialog() {
@@ -134,7 +170,8 @@ function flexRepDialog() {
 	
 	//////////////// appending list of report types ////////////////
 	$('#FlexRepTypes').append('<div class="FlexRepSectionHeader"><b>1. Report Type</b><div><br>');
-	$('#FlexRepTypes').append('<span class="header2" >Select report type:</span><hr>');
+	$('#FlexRepTypes').append('<div id="FlexRepTypesContainer" class="FlexRepSectionContainer"><div>');
+	$('#FlexRepTypesContainer').append('<span class="header2" >Select report type:</span><hr>');
 	var repotTypes = [
 	 			{name:"Transit Service", id:0},
 	 			{name:"Population", id:1},
@@ -145,11 +182,12 @@ function flexRepDialog() {
 	$(repotTypes).each(function(index,item){
 		html = html.concat(' <input type="radio" name="reportType" class="reportType" value="' + item.id + '" onchange="showParams(this)">&nbsp;' + item.name + '<br>'); 
 	});
-	$('#FlexRepTypes').append(html + "</form>");
+	$('#FlexRepTypesContainer').append(html + "</form>");
 	
 	
 	//////////////// appending parameters to select from ////////////////
 	$('#FlexRepParamsHeader').append('<div class="FlexRepSectionHeader"><b>2. Report Parameters</b><div><br>');
+	$('#FlexRepParamsHeader').append('<div id="FlexRepclass="FlexRepSectionHeader"><div>');
 	html = '&nbsp;Date:<br><div id="accordion" style="text-align:center">'
   	  +'<h3><span id="datesLen">(1)&nbsp;</span>date(s) selected</h3>'
   	  +'<div id="FlexRepDate"></div>'
@@ -178,7 +216,7 @@ function flexRepDialog() {
 		'<table id ="FlexRepParamsTable">'
 		+ '<tr>'
     	+ '<td>&nbsp;Pop/Emp Source:</td>'
-    	+ '<td><select id ="yearSel" class="FlexRepParamInput" onchange="updateEmpType(this);"disabled></td></tr>'
+    	+ '<td><select id ="yearSel" class="FlexRepParamInput" onchange="updateEmpType(this);updateEmpMetrics(this);" disabled></td></tr>'
     	+ '<tr>'
     	+ '<td>&nbsp;Emp. Type: </td>'
     	+ '<td><select id ="empType" class="FlexRepParamInput" onchange="updateEmpType(this);" disabled>'
@@ -204,9 +242,9 @@ function flexRepDialog() {
     
     
 	///////////////// appending List of agencies ////////////////
-	var header = '<div class="FlexRepSectionHeader"><b>3. Agencies</b><div><br>';
-	$('#FlexRepAgencies').append(header);
-	$('#FlexRepAgencies').append('<span class="header2">&nbsp;Select up to ' + maxAgenSelect + ' agencies:</span><hr>');
+	$('#FlexRepAgencies').append('<div class="FlexRepSectionHeader"><b>3. Agencies</b><div><br>');
+	$('#FlexRepAgencies').append('<div id="FlexRepAgenciesContainer" class="FlexRepSectionContainer"><div>');
+	$('#FlexRepAgenciesContainer').append('<span class="header2">&nbsp;Select up to ' + maxAgenSelect + ' agencies:</span><hr>');
 	var agencies = [];
 	var sortedAgencyList = [];
 	$.ajax({
@@ -239,7 +277,7 @@ function flexRepDialog() {
 										+ '" onchange=agencySelCheck(this)> '
 										+ item.name + '<br>');
 					});
-				$('#FlexRepAgencies').append(html);
+				$('#FlexRepAgenciesContainer').append(html);
 			}
 		});
 
@@ -254,7 +292,9 @@ function flexRepDialog() {
 	];
 	
 	$('#FlexRepAreas').append('<div class="FlexRepSectionHeader"><b>4. Geographical Areas</b><div><br>');
-	$('#FlexRepAreas').append("<div id='areaSelect' ></div>");
+	$('#FlexRepAreas').append('<div id="FlexRepAreasContainer" class="FlexRepSectionContainer"><div>');
+	
+	$('#FlexRepAreasContainer').append("<div id='areaSelect' ></div>");
 	html = "<span class='header2'> Select up to 3 area:</span><hr>";
 	html = html.concat("<select name='GeoArea' id ='GeoArea' onchange='loadAreaOptions(this)'>");
 	html = html.concat("<option disabled selected> Select</option>");
@@ -267,11 +307,12 @@ function flexRepDialog() {
 	$('#areaSelect').append(html);
 	
 
-	$('#FlexRepAreas').append('<div id="areaList"></div>');
+	$('#FlexRepAreasContainer').append('<div id="areaList"></div>');
 	
 	//////////////// appending urban areas as additional filter ////////////////
-	 html = '<div class="FlexRepSectionHeader"><b>5. Urban Areas Filter</b><div>';	 
-	 html = html.concat("<span class='header2'> Filter on urban areas:</span><hr>");
+	 $('#FlexRepUAreas').append('<div class="FlexRepSectionHeader"><b>5. Urban Areas Filter</b><div>');
+	 $('#FlexRepUAreas').append('<div id="FlexRepUAreasContainer" class="FlexRepSectionContainer"></div>');
+	 html = "<span class='header2'> Filter on urban areas:</span><hr>";
 	 html = html.concat("<input type='checkbox' name='uAreaFilter' onchange='toggleUrbanFilters(this)' unchecked> Filter on urban areas<br>");
 	 html = html.concat("<table id='urbanFilterTable'><tr>" +
 	 		"	<td><span>Min. Urban Pop:</span></td>" +
@@ -280,11 +321,8 @@ function flexRepDialog() {
 	 		"	<td><span>Max. Urban Pop:</span></td>" +
 	 		"	<td><input id='maxUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='maxUrbanPop=$(this).val();return isWholeNumber(event)' value='2000000' style='width:80px' disabled></td>" +
 	 		"</tr></table>");
-	 $('#FlexRepUAreas').append(html);
+	 $('#FlexRepUAreasContainer').append(html);
 }
-
-
-
 
 function loadAreaOptions(input){
 	$("#areaList").empty();
@@ -440,11 +478,14 @@ function getYearsOption(input){
 }
 
 function appendMetrics(input,objID){
+	console.log(input);
 	$.each(input,function(index,item){
 		$('#'+objID).append('&nbsp;<input type="checkbox" class="metricCheckbox" name="'
 				+ item.text
 				+ '" value="'
 				+ item.value
+				+ '"names="'
+				+ item.name
 				+ '" onchange="updateMetrics(this)"> '
 				+ item.text + '<br>');
 	});
@@ -516,39 +557,63 @@ function areaSelCheck(input){
 }
 
 function updateMetrics( input ){
-	metric = input.value;
-	console.log(metric);
+	console.log('metrics :');
+	console.log(metrics.length);
 	if(input.checked){
-		metrics = metrics.concat(metric.split(","));
+		if (metrics.values == undefined){
+			metrics.values = [];
+			metrics.names = [];
+		}
+		metrics.values = metrics.values.concat(input.value.split(","));
+		metrics.names = metrics.names.concat($(input).attr('names').split(","))
 	}else{
-		$.each(metric.split(","), function(index, item){
-			metrics.splice(metrics.indexOf(item),1);
+		$.each(input.value.split(","), function(index, item){
+			metrics.values.splice(metrics.values.indexOf(item),1);
+		});
+		$.each($(input).attr('names').split(","), function(index, item){
+			metrics.names.splice(metrics.names.indexOf(item),1);
+		});
+	}
+	console.log(metrics);
+}
+
+function updateEmpMetrics(input){
+	var year = $(input).val();
+	if ( year != 'current'){
+		$('#FlexRepMetrics').find('.metricCheckbox').each(function(index, item){
+			if(item.name != "NAICS Sectors"){
+				$(item).prop('disabled',true);
+				$(item).prop('checked', false);
+			}
+		});
+	}else{
+		$('#FlexRepMetrics').find('.metricCheckbox').each(function(index, item){
+				$(item).prop('disabled',false);
 		});
 	}
 }
 
 function updateEmpType(input){
-	var empType = $(input).val(); 
-	if ( empType == 'WACRAC'){
-		wac = rac = true;
-	} else if ( empType == 'WAC'){
-		wac = true;
-		rac = false;
-	} else {
-		wac = false;
-		rac = true;
+	if (input.id == 'yearSel'){
+		if(reportType == 2){
+			if (input.value == 'current'){
+				$("select option[value*='WAC']").prop('disabled',false);
+				$("select option[value*='WACRAC']").prop('disabled',false);
+			}else{
+				$("select option[value*='WAC']").prop('disabled',true);
+				$("select option[value*='WACRAC']").prop('disabled',true);
+			}		
+		}
+	}else if (input.id = 'empType'){
+		var empType = input.value;
+		if ( empType == 'WACRAC'){
+			wac = rac = true;
+		} else if ( empType == 'WAC'){
+			wac = true;
+			rac = false;
+		} else {
+			wac = false;
+			rac = true;
+		}
 	}
-}
-
-function updateEmpType(input){
-	console.log(reportType + ' test ' + input.value);
-	if(reportType == 2){
-		if (input.value != 'current'){
-			$("select option[value*='WAC']").prop('disabled',true);
-			$("select option[value*='WACRAC']").prop('disabled',true);
-		}else{
-			$("select option[value*='WAC']").prop('disabled',false);
-			$("select option[value*='WACRAC']").prop('disabled',false);
-		}		
-	}		
 }

@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.model.database.queries.flexibleReport.FlexRepEmp;
 import com.model.database.queries.flexibleReport.FlexRepPop;
+import com.model.database.queries.flexibleReport.FlexRepT6;
 import com.model.database.queries.objects.GeoArea;
 
 public class FlexibleReportEventManager {
@@ -160,8 +161,6 @@ public class FlexibleReportEventManager {
 			mapTable = "census_places_trip_map";
 			table = "census_places";
 			areaTypeName = "pname";
-		} else if (areaType.equals("state")) {
-
 		} else if (areaType.equals("odotRegion")) {
 			areaId = "regionid";
 			Id = "regionid";
@@ -357,9 +356,7 @@ public class FlexibleReportEventManager {
 			mapTable = "census_places_trip_map";
 			table = "census_places";
 			areaTypeName = "pname";
-		} else if (areaType.equals("state")) {
-
-		} else if (areaType.equals("odotRegion")) {
+		}  else if (areaType.equals("odotRegion")) {
 			areaId = "regionid";
 			Id = "regionid";
 			mapTable = "census_counties_trip_map";
@@ -534,9 +531,9 @@ public class FlexibleReportEventManager {
 		}
 
 		if (wac && rac) {
-			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, countyid AS areaid, cname AS areaname "
-					+ "			FROM aids CROSS JOIN census_counties "
-					+ "			WHERE countyid IN "
+			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, " + Id + " AS areaid, cname AS areaname "
+					+ "			FROM aids CROSS JOIN " + table
+					+ "			WHERE " + Id + " IN "
 					+ areas
 					+ ") "
 					+ "SELECT combination_list.* ";
@@ -553,9 +550,9 @@ public class FlexibleReportEventManager {
 					+ "	LEFT JOIN emp_served_cumulated_rac USING (areaid,agencyid) "
 					+ "	LEFT JOIN emp_los_cumulated_rac USING (areaid,agencyid) ";
 		} else if (wac) {
-			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, countyid AS areaid, cname AS areaname "
-					+ "			FROM aids CROSS JOIN census_counties "
-					+ "			WHERE countyid IN "
+			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, " + Id + " AS areaid, cname AS areaname "
+					+ "			FROM aids CROSS JOIN " + table
+					+ "			WHERE " + Id + " IN "
 					+ areas
 					+ ") "
 					+ "SELECT combination_list.* ";
@@ -567,9 +564,9 @@ public class FlexibleReportEventManager {
 					+ "	LEFT JOIN emp_served_cumulated_wac USING (areaid,agencyid) "
 					+ "	LEFT JOIN emp_los_cumulated_wac USING (areaid,agencyid) ";
 		} else {
-			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, countyid AS areaid, cname AS areaname "
-					+ "			FROM aids CROSS JOIN census_counties "
-					+ "			WHERE countyid IN "
+			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, " + Id + " AS areaid, cname AS areaname "
+					+ "			FROM aids CROSS JOIN " + table
+					+ "			WHERE " + Id + " IN "
 					+ areas
 					+ ") "
 					+ "SELECT combination_list.* ";
@@ -625,4 +622,213 @@ public class FlexibleReportEventManager {
 		return output;
 	}
 
+	public static List<FlexRepT6> getFlexRepT6(int dbindex, String agencies,
+			String[] date, String[] day, String areas, int los,
+			double sradius, String areaType, String username, int minUrbanPop,
+			int maxUrbanPop, String[] categories)
+			throws SQLException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException {
+		
+			
+		List<FlexRepT6> output = new ArrayList<FlexRepT6>();
+		agencies = "('" + agencies.replace(",", "','") + "')";
+		areas = "('" + areas.replace(",", "','") + "')";
+
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+
+		String areaId = "";
+		String Id = "";
+		String mapTable = "";
+		String table = "";
+		String areaTypeName = "";
+		if (areaType.equals("county")) {
+			areaId = "LEFT(blockid,5)";
+			Id = "countyid";
+			mapTable = "census_counties_trip_map";
+			table = "census_counties";
+			areaTypeName = "cname";
+		} else if (areaType.equals("urban")) {
+			areaId = "urbanid";
+			Id = "urbanid";
+			mapTable = "census_urbans_trip_map";
+			table = "census_urbans";
+			areaTypeName = "uname";
+		} else if (areaType.equals("congDist")) {
+			areaId = "congdistid";
+			Id = "congdistid";
+			mapTable = "census_congdists_trip_map";
+			table = "census_congdists";
+			areaTypeName = "cname";
+		} else if (areaType.equals("place")) {
+			areaId = "placeid";
+			Id = "placeid";
+			mapTable = "census_places_trip_map";
+			table = "census_places";
+			areaTypeName = "pname";
+		}  else if (areaType.equals("odotRegion")) {
+			areaId = "regionid";
+			Id = "regionid";
+			mapTable = "census_counties_trip_map";
+			table = "(SELECT '1' AS regionid UNION SELECT '2a' UNION SELECT '2b' UNION SELECT '3' UNION SELECT '4' UNION SELECT '5') AS census_regions ";
+			areaTypeName = "'Region '||regionid";
+		}
+
+		String query = "WITH aids AS (SELECT id AS aid, name AS agencyname FROM gtfs_agencies WHERE id IN "
+				+ agencies
+				+ "), "
+
+				+ "allstops AS (SELECT stops.agencyid AS agencyid_def, map.agencyid, map.stopid, stops.name AS stopname, stops.location "
+				+ "FROM gtfs_stop_service_map AS map INNER JOIN gtfs_stops AS stops  "
+				+ "ON map.stopid = stops.id AND agencyid_def = stops.agencyid "
+				+ "WHERE map.agencyid IN "
+				+ agencies
+				+ ") , "
+
+				+ "allblocks AS (SELECT blocks.blockid, poptype, "
+				+ areaId
+				+ " AS areaid, urbanid, "
+				+ "stops.stopid, stops.stopname, stops.agencyid "
+				+ "FROM census_blocks AS blocks JOIN allstops AS stops "
+				+ "ON ST_DISTANCE(blocks.location, stops.location)< "
+				+ sradius
+				+ " " + "WHERE " + areaId + " IN " + areas + "), "
+
+				+ "svcids AS (";
+		for (int i = 0; i < date.length; i++) {
+			query += "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="
+					+ date[i]
+					+ " and enddate::int>="
+					+ date[i]
+					+ " and "
+					+ day[i]
+					+ " = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from "
+					+ "gtfs_calendar_dates where date='"
+					+ date[i]
+					+ "' and exceptiontype=2) union select serviceid_agencyid, "
+					+ "serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"
+					+ date[i] + "' and exceptiontype=1)";
+			if (i + 1 < date.length)
+				query += " union all ";
+		}
+		query += "), trips as (select trip.route_agencyid as aid, trip.route_id as routeid, map.tripid, map.length, map.tlength  "
+				+ "FROM svcids INNER JOIN gtfs_trips trip USING(serviceid_agencyid, serviceid_id)  "
+				+ "INNER JOIN "
+				+ mapTable
+				+ "  AS map ON trip.id = map.tripid AND trip.agencyid = map.agencyid WHERE map."
+				+ Id
+				+ " IN "
+				+ areas
+				+ "), "
+
+				+ "tempstops AS (SELECT stoptimes.stop_agencyid AS agencyid_def, trip_agencyid AS agencyid, stoptimes.stop_id, count(tripid) AS visits "
+				+ "FROM trips INNER JOIN gtfs_stop_times AS stoptimes  "
+				+ "ON stoptimes.trip_agencyid = trips.aid AND trips.tripid = stoptimes.trip_id GROUP BY stop_agencyid, stop_id,trip_agencyid), "
+
+				+ "stops AS (SELECT tempstops.agencyid, stops.agencyid AS agencyid_def, stops.id AS stopid, stops.name AS stopname, stops.location, tempstops.visits "
+				+ "FROM tempstops INNER JOIN gtfs_stops AS stops ON stop_id = id AND agencyid_def = stops.agencyid), "
+
+				+ "blocks AS (SELECT blocks.blockid, poptype, "
+				+ areaId
+				+ " AS areaid, urbanid, "
+				+ "stops.stopid, stops.stopname, stops.agencyid, visits "
+				+ "FROM census_blocks AS blocks JOIN stops  "
+				+ "ON ST_DISTANCE(blocks.location, stops.location)<"
+				+ sradius
+				+ "WHERE "
+				+ areaId
+				+ " IN "
+				+ areas
+				+ "), "
+				+ "urbanfilter AS (SELECT urbanid, uname, utype, landarea, waterarea, population2010 FROM census_urbans  "
+				+ "WHERE population2010 >= " + minUrbanPop + " AND population2010 <="
+				+ maxUrbanPop
+				+ "), "
+				+ "urbanfilteredblocks AS (SELECT blocks.* FROM blocks INNER JOIN urbanfilter USING(urbanid) UNION ALL SELECT * FROM blocks WHERE poptype='R'), "
+
+				+ "urbanfilteredallblocks AS (SELECT allblocks.* FROM allblocks INNER JOIN urbanfilter USING(urbanid) UNION ALL SELECT * FROM allblocks WHERE poptype='R'), ";
+
+		
+			query += " t6_ss AS (SELECT areaid, agencyid";
+			for (String category : categories)
+				query += ",sum(" + category + "*visits)::bigint AS " + category + "_ss";
+
+			query += " FROM title_vi_blocks_float AS t6 INNER JOIN urbanfilteredblocks USING(blockid) GROUP BY areaid, agencyid), "
+					+ "t6_los AS (SELECT blockid, areaid, sum(visits) AS visits, agencyid ";
+			for (String category : categories)
+				query += "," + category ;
+
+			query += "	FROM urbanfilteredblocks INNER JOIN title_vi_blocks_float AS t6 USING (blockid) "
+					+ "	GROUP BY blockid, areaid, agencyid ";
+
+			for (String category : categories)
+				query += "," + category ;
+
+			query += "), "
+					+ "t6_los_cumulated AS (SELECT agencyid, areaid ";
+			for (String category : categories)
+				query += ",sum(" + category + ") AS " + category + "_los";
+
+			query += "	FROM t6_los GROUP BY areaid, agencyid), "
+					+ "t6_served AS (SELECT blockid, areaid, agencyid ";
+
+			for (String category : categories)
+				query += "," + category;
+
+			query += "	FROM title_vi_blocks_float INNER JOIN urbanfilteredallblocks USING (blockid) "
+					+ "	GROUP BY blockid, areaid, agencyid";
+
+			for (String category : categories)
+				query += "," + category;
+
+			query += "), t6_served_cumulated AS (SELECT agencyid, areaid";
+
+			for (String category : categories)
+				query += ", sum( " + category + ")::int AS " + category
+						+ "_served";
+
+			query += "	FROM t6_served GROUP BY agencyid, areaid), ";
+		
+
+		
+			query += " combination_list AS (select aids.aid AS agencyid, aids.agencyname, " + Id + " AS areaid, cname AS areaname "
+					+ "			FROM aids CROSS JOIN " + table
+					+ "			WHERE " + Id + " IN "
+					+ areas
+					+ ") "
+					+ "SELECT combination_list.* ";
+			for (String category : categories) {
+				query += "," + category + "_served, " + category
+						+ "_los, " + category + "_ss";
+			}
+			query += "	FROM  combination_list LEFT JOIN t6_ss USING(areaid,agencyid) "
+					+ "	LEFT JOIN t6_served_cumulated USING (areaid,agencyid) "
+					+ "	LEFT JOIN t6_los_cumulated USING (areaid,agencyid) ";
+		
+		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		while (rs.next()) {
+			FlexRepT6 i = new FlexRepT6();
+			i.agencyId = rs.getString("agencyid");
+			i.agencyName = rs.getString("agencyname");
+			i.areaId = rs.getString("areaid");
+			i.areaName = rs.getString("areaname");
+			for (String cat : categories) {
+				Field f1 = i.getClass().getDeclaredField(cat + "_served");
+				f1.setAccessible(true);
+				f1.set(i, rs.getInt(cat + "_served"));
+
+				Field f2 = i.getClass().getDeclaredField(cat + "_ss");
+				f2.setAccessible(true);
+				f2.set(i, rs.getLong(cat + "_ss"));
+
+				Field f3 = i.getClass().getDeclaredField(cat + "_los");
+				f3.setAccessible(true);
+				f3.set(i, rs.getInt(cat + "_los"));
+			}
+			output.add(i);
+		}
+		connection.close();
+		return output;
+	}
 }
