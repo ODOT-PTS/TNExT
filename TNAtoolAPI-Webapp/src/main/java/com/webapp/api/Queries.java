@@ -349,7 +349,7 @@ public class Queries {
 			Process pr = pb.start();
 			BufferedReader reader2 = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			while (reader2.readLine() != null){}
-			pr.waitFor(5,TimeUnit.MINUTES);
+			pr.waitFor(5,TimeUnit.MINUTES); 
 		}
 
         ZipParameters parameters = new ZipParameters();
