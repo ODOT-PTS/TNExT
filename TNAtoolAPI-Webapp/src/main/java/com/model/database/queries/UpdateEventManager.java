@@ -387,13 +387,87 @@ public class UpdateEventManager {
 		  updatePlaceTripMap(connection, agencyId);
 		  System.out.println("Updating census_congdists_trip_map");
 		  updateCongdistTripMap(connection, agencyId);
-//		  System.out.println("Updating gtfs_feed_info");
-//		  updateCalendarRange(connection, agencyId);
-		  
+		  System.out.println("Updating gtfs_agencies");
+		  updateGtfsAgencies(connection, agencyId);
+		  System.out.println("Updating agencymapping");
+		  updateAgencyMapping(connection, agencyId);
 		  
 //		  dropConnection(connection);
 	}
 	
+	private static void updateAgencyMapping(Connection connection, String agencyId) {
+		Statement stmt = null;  
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("DROP TABLE IF EXISTS agencymapping;");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS agencymapping( "
+					+ "agencyID text, "
+					+ "contained_agencies text[], "
+					+ "PRIMARY KEY( agencyID ));");
+		}catch ( Exception e ) {
+			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+		
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("WITH temp1 as (SELECT stops.lat,stops.lon,map.stopid, map.agencyid , stops.location,stops.name "
+					+ "FROM gtfs_stop_service_map AS map JOIN gtfs_stops AS stops ON map.agencyid_def=stops.agencyid AND map.stopid=stops.id), "
+					+ "tempt AS (SELECT ST_convexhull(St_collect(location)) as b1, agencyid as a FROM temp1 group by a), "
+					+ "tempx as (SELECT a.a as id1 ,b.a as id2,a.b1 as shape1,b.b1 as shape2,ST_within(b.b1,a.b1) as id1_in_id2 from tempt as a CROSS join tempt as b), "
+					+ "tempy as (Select id1,array_agg(id2) as ca FROM tempx WHERE id1_in_id2='t'group by id1) "
+					+ "INSERT INTO agencymapping(agencyID, contained_agencies) "
+					+ "SELECT id1,ca FROM tempy;");
+		}catch ( Exception e ) {
+			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+		
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("ALTER TABLE agencymapping ADD COLUMN centralized boolean;");
+		}catch ( Exception e ) {
+			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+		
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("with temp1 as (select id,centralized from gtfs_agencies) "
+					+ "UPDATE agencymapping "
+					+ "SET centralized = (select centralized from temp1 "
+					+ "WHERE agencyid=id)");
+		}catch ( Exception e ) {
+			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+
+		
+	}
+
+	private static void updateGtfsAgencies(Connection connection, String agencyId) {
+		Statement stmt = null;  
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("ALTER TABLE gtfs_agencies ADD centralized BOOLEAN;");
+		}catch ( Exception e ) {
+			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("WITH criteriaTable AS (WITH stops AS (SELECT stops.location, stops.id, map.agencyid "
+					+ "FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
+					+ "ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def), "
+					+ "stops1 AS (SELECT * FROM stops), "
+					+ "stops2 AS (SELECT * FROM stops) "
+					+ "SELECT stops1.agencyid, AVG(ST_Distance(stops1.location, stops2.location)) <= 45000 AS criteria "
+					+ "FROM stops1 INNER JOIN stops2 USING(agencyid) "
+					+ "GROUP BY stops1.agencyid, stops2.agencyid) "
+					+ "UPDATE gtfs_agencies	"
+					+ "SET centralized = (SELECT criteria FROM criteriaTable WHERE agencyid=id);");
+		}catch ( Exception e ) {
+			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+
+		
+	}
+
 	/**
 	 *Updates gtfs_trip_stops table
 	 */
@@ -598,7 +672,20 @@ public class UpdateEventManager {
 		try{
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT AddGeometryColumn( 'public', 'gtfs_trips', 'shape', 4326, 'linestring', 2 );");
+		}catch ( Exception e ) {
+			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("ALTER TABLE gtfs_trips ALTER COLUMN uid TYPE varchar(1000);");
+		}catch ( Exception e ) {
+			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+		}
+		try{
+			stmt = connection.createStatement();
+			stmt.executeUpdate("DROP INDEX IF EXISTS trips_shapeids");
 			stmt.executeUpdate("create INDEX trips_shapeids on gtfs_trips (shapeid_agencyid,shapeid_id);");
+			stmt.executeUpdate("DROP INDEX IF EXISTS tripids");
 			stmt.executeUpdate("create unique index tripids on gtfs_trips (agencyid,id);");
 			
 		  }catch ( Exception e ) {
@@ -607,7 +694,7 @@ public class UpdateEventManager {
 		
 	      try{
 	    	  stmt = connection.createStatement();
-	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips DISABLE TRIGGER ALL;");
+	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips DISABLE TRIGGER ALL;"); 
 	    	  
 	    	  stmt.executeUpdate("update gtfs_trips trip set shape = tss.shape, epshape=GoogleEncodeLine(tss.shape), length = (tss.length)/1609.34, estlength=0 FROM "
 	    	  		+ "(select ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)) as shape, ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),2993)) as length,"

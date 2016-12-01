@@ -67,9 +67,9 @@
 			  <ul>
 			  	<li>The GTFS feeds are only accepted in a <b>ZIP</b> format.</li>
 			  	<li>The corresponding GTFS text files must be directly within the ZIP file.</li>
-			  	<li>A sample of acceptable GTFS feed can be downloaded from <b><a href="../resources/admin/corvallis_transit_agency.zip" download>here</a></b>.</li>
+			  	<li>A sample of acceptable GTFS feed can be downloaded from <b><a href="../resources/admin/sampleFiles/corvallis_transit_agency.zip" download>here</a></b>.</li>
 			  	<li>Uploaded GTFS feeds are shown in the <b>"Uploaded GTFS Feeds"</b> drop-down list.</li>
-			  	<li>If there is a conflict between the Agency ID's of the GTFS feed being uploaded and the ones that already exist in the database, the feed will not be uploaded</li>
+			  	<li>If there is a conflict between the Agency ID of the GTFS feed being uploaded and the Agency ID's that already exist in the database, the feed will not be uploaded</li>
 			  </ul>
 		  </div><br>
 		  <div id="gtfs_current_feeds" class="upload_cards"><h3>Uploaded GTFS Feeds</h3>
@@ -84,6 +84,118 @@
 			                    <i class="glyphicon glyphicon-plus"></i>
 			                    <span>Add files...</span>
 			                    <input type="file" name="files[]" multiple>
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>
+	
+		<div id="pnr_upload" title="Park & Ride Add/Remove">
+		 
+		  <div id="pnr_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>The only accepted format for park & ride data is <b>CSV</b>.</li>
+			  	<li>A sample of acceptable park & ride CSV file can be downloaded from <b><a href="../resources/admin/sampleFiles/oregon_pnr_data.csv" download>here</a></b>.</li>
+			  	<li>The names and the order of the columns must be exactly the same as the sample file provided.</li>
+			  	<li>If the values are not available for some of the columns, just leave them empty in the csv file.</li>
+			  </ul>
+		  </div><br>
+		  <div id="pnr_delete_card" class="upload_cards">
+			  <button type="button" id="deletePNR" class="btn btn-danger delete" onclick="deletePNR()"><span>Delete Existing Park & Ride Data</span></button>
+		  </div><br>
+		  <div id="pnr_upload_feeds" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="pnr_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]">
 			                </span>
 			                <button type="submit" class="btn btn-primary start">
 			                    <i class="glyphicon glyphicon-upload"></i>

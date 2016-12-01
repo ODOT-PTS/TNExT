@@ -1253,6 +1253,31 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deletePNR")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deletePNR(@QueryParam("db") String db){
+		String response = "done";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: deletePNR method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/checkEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkEmpstatus(@QueryParam("db") String db){
@@ -1531,32 +1556,6 @@ public class DbUpdate {
 			e.printStackTrace();
 		}
 		
-		/*try {
-//			Runtime rt = Runtime.getRuntime();
-//			pr = rt.exec("echo salam");
-			
-//			pb = new ProcessBuilder("cmd", "/c", "start", batFile, fromPass, fromUser, nameFrom, fromHost,
-//					"C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe",
-//					toPass, toUser, nameTo, toHost,
-//					"C:/Program Files/PostgreSQL/9.3/bin/psql.exe");
-			
-			pb = new ProcessBuilder("cmd", "/c", "start", batFile, "123123", "postgres", "census", "localhost",
-					"C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe",
-					"123123", "postgres", "test", "localhost");
-//			pb.redirectErrorStream(true);
-			pr = pb.start();
-			pr.waitFor(5,TimeUnit.MINUTES);
-			System.out.println("done adding");
-			
-//			BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-//		    String line;
-//		    while ((line = in.readLine()) != null) {
-//		        System.out.println(line);
-//		    }
-			
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}*/
 		
 		return "done";
 	}
@@ -1756,6 +1755,22 @@ public class DbUpdate {
 	    }
 		return "done";
 	}
+	@GET
+    @Path("/deleteUploadedPNR")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteUploadedPNR() throws IOException{
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
+		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/pnr");
+		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+	    if(files!=null) { 
+	        for(File f: files) {
+	        	f.delete();
+	        }
+	    }
+		return "done";
+	}
 	
 	@GET
     @Path("/deleteProcessGTFS")
@@ -1931,6 +1946,152 @@ public class DbUpdate {
 		return message;
 	}
 	
+	@GET
+    @Path("/addPnr")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addPnr(@QueryParam("fileName") String fileName, @QueryParam("db") String db) throws IOException, SQLException{
+		String[] dbInfo = db.split(",");
+		
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path.substring(1, path.length());
+		File source = new File(path);
+    	String message = "done";
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+		try {			
+			statement = c.createStatement();
+			statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS parknride("
+					+ "pnrid integer PRIMARY KEY NOT NULL, "
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "lotName text,"
+					+ "location text,"
+					+ "city character varying (30),"
+					+ "zipcode integer,"
+					+ "countyID character varying(5) NOT NULL,"
+					+ "county character varying(50) NOT NULL,"
+					+ "spaces integer,"
+					+ "accessibleSpaces integer,"
+					+ "bikeRackSpaces integer,"
+					+ "bikeLockerSpaces integer,"
+					+ "electricVehicleSpaces integer,"
+					+ "carSharing text,"
+					+ "transitService text, "
+					+ "availability text,"
+					+ "timeLimit text,"
+					+ "restroom text,"
+					+ "benches text,"
+					+ "shelter text,"
+					+ "indoorWaitingArea text,"
+					+ "trashCan text,"
+					+ "lighting text,"
+					+ "securityCameras text,"
+					+ "sidewalks text,"
+					+ "pnrSignage text,"
+					+ "lotSurface text,"
+					+ "propertyOwner text,"
+					+ "localExpert text,"
+					+ "FOREIGN KEY (countyid)"
+					+ "      REFERENCES census_counties (countyid) MATCH SIMPLE"
+					+ "      ON UPDATE NO ACTION ON DELETE NO ACTION"
+					+ ")WITH ("
+					+ "  OIDS=FALSE"
+					+ ");");
+			statement.executeUpdate("ALTER TABLE parknride"
+					+ "  OWNER TO postgres;");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		host = "localhost"; //to be deleted
+		Process pr;
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy parknride FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " & exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+//			statement = c.createStatement();
+//			statement.executeUpdate("COPY parknride "
+//					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
+		} catch (InterruptedException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+			source.delete();
+			return message;
+		}
+		try{			
+			statement = c.createStatement();
+			statement.executeUpdate("ALTER TABLE parknride "
+					+ "ADD geom geometry(Point, 2993);");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		try{			
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE parknride "
+					+ "SET geom = ST_transform(ST_setsrid(ST_MakePoint(lon, lat),4326), 2993);");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		try{			
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE parknride SET lotName='N/A' WHERE lotName IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET location='N/A' WHERE location IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET city='N/A' WHERE city IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET county='N/A' WHERE county IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET spaces=0 WHERE spaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET accessiblespaces=0 WHERE accessiblespaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET bikerackspaces=0 WHERE bikerackspaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET bikelockerspaces=0 WHERE bikelockerspaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET electricvehiclespaces=0 WHERE electricvehiclespaces IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET carsharing='N/A' WHERE carsharing IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET transitservice='N/A' WHERE transitservice IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET availability='N/A' WHERE availability IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET timelimit='N/A' WHERE timelimit IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET restroom='N/A' WHERE restroom IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET shelter='N/A' WHERE shelter IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET trashcan='N/A' WHERE trashcan IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET lighting='N/A' WHERE lighting IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET securitycameras='N/A' WHERE securitycameras IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET sidewalks='N/A' WHERE sidewalks IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET pnrsignage='N/A' WHERE pnrsignage IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET lotsurface='N/A' WHERE lotsurface IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET propertyowner='N/A' WHERE propertyowner IS NULL;");
+			statement.executeUpdate("UPDATE parknride SET localexpert='N/A' WHERE localexpert IS NULL;");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			message = e.getMessage();
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+			source.delete();
+		}
+		
+		return message;
+	}
+	
+	
 	public String removeLastChar(String str) {
     	if (str.length() > 0) {
             str = str.substring(0, str.length()-1);
@@ -1985,10 +2146,19 @@ public class DbUpdate {
 				feeds.add(rs.getString("feed"));
 			}
 			for(int i=0; i<feeds.size();i++){
+				System.out.println(agencies.get(i));
 				UpdateEventManager.updateTables(c, agencies.get(i));
 				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
+				System.out.println("vacuum start");
+				statement.executeUpdate("VACUUM");
+				System.out.println("vacuum finish");
 			}
 			
+			statement.close();
+//			statement = c.createStatement();
+//			System.out.println("vacuum start");
+//			statement.executeUpdate("VACUUM");
+//			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();
