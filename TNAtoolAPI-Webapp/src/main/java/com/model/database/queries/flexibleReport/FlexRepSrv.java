@@ -14,17 +14,48 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.model.database.queries.objects;
+package com.model.database.queries.flexibleReport;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "PnrInCountyList")
-public class PnrInCountyList {
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-	@XmlElement(name = "PnrInCountyList")
-	public List<PnrInCounty> PnrCountiesList;
-
+@XmlRootElement( name = "FlexRepSrv")
+public class FlexRepSrv {
+	@XmlAttribute
+	@JsonSerialize
+	public String areaId;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String areaName;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String agencyId;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public String agencyName;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int routeStops;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public int serviceStops;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public double routeMiles;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public double serviceMiles;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public long serviceSeconds;
 }

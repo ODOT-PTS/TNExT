@@ -360,7 +360,7 @@
 	    	<div id="FlexRepUAreas" class="flexRepDialogSection"></div>
     	</div>
     	<br><br><br>
-    	<div style="clear:both;"><input type='submit' id='flexRepSubmit' value='Submit' onclick='openFlexRepTable()'></div>
+    	<div style="clear:both;text-align:center;"><input type='submit' id='flexRepSubmit' value='Submit' onclick='openFlexRepTable()'></div>
     </div>
    	<script type="text/javascript" src="resources/js/client.js"></script>
 </body>

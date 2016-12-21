@@ -350,8 +350,11 @@ function getMetadata() {
 	output = output.concat('\r\n\r\n\r\nReport Parameters\r\n');
 	output = output.concat('--------------------\r\n');	
 	$(".input").each(function(index, object) {
-		if ($(object).is('select'))
-				output = output.concat(object.dataset.label + ': ' + $("#" + $(object).attr('id') + " option[value='"+ object.value +"']").text() + '\r\n');
+		console.log($(object).attr('class'));
+		if ($(object).is('td'))
+			output = output.concat(object.dataset.label + ': ' + $(object).text() + '\r\n');
+		else if ($(object).is('select'))
+			output = output.concat(object.dataset.label + ': ' + $("#" + $(object).attr('id') + " option[value='"+ object.value +"']").text() + '\r\n');
 		else
 			output = output.concat(object.dataset.label + ': ' + object.value + '\r\n');
 	});

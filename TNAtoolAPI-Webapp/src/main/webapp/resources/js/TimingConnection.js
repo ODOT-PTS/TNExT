@@ -121,18 +121,18 @@ function getTimingConReport(input) {
 	$('#progressbar').show();
 	trips = {};
 	html = '<table id="RT" class="display" align="center">';
-	tmp = '<tr><th class="metric" title="">Row</th>'
-			+ '<th class="metric" title="Stop belonging to the selected trip." >Stop ID 1</th>'
-			+ '<th class="metric" title="Stop belonging to the selected trip.">Stop 1</th>'
-			+ '<th class="metric" title="Stop belonging to the connected trip.">Stop ID 2</th>'
-			+ '<th class="metric" title="Stop belonging to the connected trip.">Stop 2</th>'
-			+ '<th class="metric" title="The agency that is connected to the selected agency by having a stop and route accessable within the specified radius and time window.">Connected Agency</th>'
-			+ '<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">Connected Route ID</th>'
-			+ '<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">Connected Route</th>'
-			+ '<th class="metric" title="Time of arrival at stop 1.">Stop1 Arrival</th>'
-			+ '<th class="metric" title="Time of departure from stop 2.">Stop2 Departure</th>'
-			+ '<th class="metric" title="The difference between arriving at stop1 and departing from stop2.">Time Difference </th></tr>';
-	html += '<thead>' + tmp + '</thead><tbody>';
+	tmp = '<tr><th class="metric" title="">#</th>'+
+		'<th class="metric" title="Stop belonging to the selected trip." >From - Stop ID</th>'+
+		'<th class="metric" title="Stop belonging to the selected trip.">From - Stop Name</th>'+
+		'<th class="metric" title="Stop belonging to the connected trip.">To - Stop ID</th>'+
+		'<th class="metric" title="Stop belonging to the connected trip.">To - Stop Name</th>'+
+		'<th class="metric" title="The agency that is connected to the selected agency by having a stop and route accessable within the specified radius and time window.">To - Agency</th>'+
+		'<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route ID</th>'+
+		'<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route Name</th>'+
+		'<th class="metric" title="Time of arrival at stop 1.">Arrival at Stop 1</th>'+
+		'<th class="metric" title="Time of departure from stop 2.">Departure from Stop 2</th>'+
+		'<th class="metric" title="The difference between arriving at stop1 and departing from stop2.">Time Difference </th></tr>';
+	html += '<thead>'+tmp+'</thead><tbody>';
 
 	$.ajax({
 		type : 'GET',

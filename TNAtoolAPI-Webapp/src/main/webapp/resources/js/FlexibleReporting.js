@@ -18,6 +18,7 @@ var numSelectedAgencies = 0;
 var numSelectedAreas = 0; 
 var maxAgenSelect = 3;
 var maxAreaSelect = 3;
+var maxDateSelect = 3;
 var dates = [];
 var agencies = [];
 var areas = [];
@@ -26,7 +27,7 @@ metrics['values'] = [];
 metrics['names'] = [];
 var areaType;
 var reportType;
-var minUrbanPop = 0;
+var minUrbanPop = 2500;
 var maxUrbanPop = 2000000;
 var filterOnUrban = false;
 var wac = false;
@@ -81,7 +82,7 @@ var empMetrics = [
                   {value:["cns01","cns02","cns03","cns04","cns05","cns06","cns07","cns08","cns09","cns10",
       		            "cns11","cns12","cns13","cns14","cns15","cns16","cns17","cns18","cns19","cns20"], text:"NAICS Sectors"},
                   {value:["cr01","cr02","cr03","cr04","cr05","cr07"], text:"Race"},
-                  {value:["c201","cs02"], text:"Sex"},
+                  {value:["cs01","cs02"], text:"Sex"},
                   {value: ["ct01","ct02"], text:"Ethnicity"},
                   ];
 
@@ -121,7 +122,7 @@ var T6Metrics = [
                         	        "Spanish"],
                         	  text:"Language"},
                   {value:["below_poverty",
-                          "above_povery"],
+                          "above_poverty"],
                           name:["Above Paverty Line",
                                 "Below Poverty Line"],
                           text:"Poverty"}
@@ -137,6 +138,7 @@ function flexRepDialog() {
 	$('#FlexRepParams').empty();
 	$('#FlexRepSectionHeader').empty();
 	$('#FlexRepTypes').empty();
+	dates = agencies = areas = [];
 	
 	// loading dialog box
 	$(function() {
@@ -203,8 +205,14 @@ function flexRepDialog() {
   	onSelect : function(date) {
   		if (dates.includes(date))
   			dates.splice(dates.indexOf(date),1);
-  		else
-  			dates.push(date);
+  		else{
+  			if (dates.length < maxDateSelect)
+  				dates.push(date);
+  			else{
+  				$('#FlexRepDate').multiDatesPicker('toggleDate', date);
+  				alert('Select at most ' + maxDateSelect + ' agencies.');
+  			}
+  		}
   		$('#datesLen').text('(' + dates.length + ') ');
   	},
   	addDates : [new Date()]
@@ -312,14 +320,24 @@ function flexRepDialog() {
 	//////////////// appending urban areas as additional filter ////////////////
 	 $('#FlexRepUAreas').append('<div class="FlexRepSectionHeader"><b>5. Urban Areas Filter</b><div>');
 	 $('#FlexRepUAreas').append('<div id="FlexRepUAreasContainer" class="FlexRepSectionContainer"></div>');
-	 html = "<span class='header2'> Filter on urban areas:</span><hr>";
-	 html = html.concat("<input type='checkbox' name='uAreaFilter' onchange='toggleUrbanFilters(this)' unchecked> Filter on urban areas<br>");
+	 html = "<span class='header2'>&nbspFilter on urban areas (optional):</span><hr>";
+	 html = html.concat("&nbsp<input type='checkbox' name='uAreaFilter' id='uAreaFilter' onchange='toggleUrbanFilters(this)' unchecked> Filter on urban areas<br><br>");
+	 
+	 
 	 html = html.concat("<table id='urbanFilterTable'><tr>" +
-	 		"	<td><span>Min. Urban Pop:</span></td>" +
-	 		"	<td><input id='minUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='minUrbanPop=$(this).val();return isWholeNumber(event)' value='0' style='width:80px' disabled></td>" +
+			 "	<td><span>&nbspProjection Year:</span></td>" );
+	 html = html.concat("<td><select disabled name='uAreaYear' id ='uAreaYear' class='urbanFilter' style='height:20px;width:84px;'>");
+	 $.each(popYears,function(index, item){
+		html = html.concat('<option value="'
+			+ item.value + '" onchange="alert(this)"> '
+			+ item.text + '</option>');
+	 });
+	 html = html.concat('</select></tr><tr>');
+ 	 html = html.concat("<td><span>&nbspMin. Urban Pop:</span></td>" +
+	 		"	<td><input id='minUrbanPop' class='urbanFilter' min='2500' max='2000000' type='number' onkeypress='minUrbanPop=$(this).val();return isWholeNumber(event)' value='2500' style='width:80px' disabled></td>" +
 	 		"</tr><tr>" +
-	 		"	<td><span>Max. Urban Pop:</span></td>" +
-	 		"	<td><input id='maxUrbanPop' class='urbanFilter' min='0' max='2000000' type='number' onkeypress='maxUrbanPop=$(this).val();return isWholeNumber(event)' value='2000000' style='width:80px' disabled></td>" +
+	 		"	<td><span>&nbspMax. Urban Pop:</span></td>" +
+	 		"	<td><input id='maxUrbanPop' class='urbanFilter' min='2500' max='2000000' type='number' onkeypress='maxUrbanPop=$(this).val();return isWholeNumber(event)' value='2000000' style='width:80px' disabled></td>" +
 	 		"</tr></table>");
 	 $('#FlexRepUAreasContainer').append(html);
 }
@@ -328,6 +346,15 @@ function loadAreaOptions(input){
 	$("#areaList").empty();
 	areas = [];
 	numSelectedAreas = 0;
+	
+	// disable filtering on urban areas if urban area is already selected as the geographical area to report on.
+	if ($(input).val() == 5){
+		$('#uAreaFilter').attr('disabled', true);
+		$('#uAreaFilter').attr('checked', false);
+	}else
+		$('#uAreaFilter').attr('disabled', false);
+	
+	
 	switch(parseInt($(input).val())) {
     case 0:
         areaType = "state";
@@ -419,7 +446,6 @@ function agencySelCheck(input){
 		agencies.splice(agencies.indexOf(agencyID));
 		alert('Select at most ' + maxAgenSelect + ' agencies.');
 	}
-	console.log(agencies);
 }
 
 function showParams(input){
@@ -431,7 +457,7 @@ function showParams(input){
 	metrics = [];
 	reportType = $(input).val();
 	
-	// Enabling the inputs and showin metric options based on selected report type.
+	// Enabling the inputs and showing metric options based on selected report type.
 	switch(parseInt($(input).val())) {
     case 0: // Transit Services
     	$('#accordion').accordion( "option", "disabled", false );
@@ -478,7 +504,6 @@ function getYearsOption(input){
 }
 
 function appendMetrics(input,objID){
-	console.log(input);
 	$.each(input,function(index,item){
 		$('#'+objID).append('&nbsp;<input type="checkbox" class="metricCheckbox" name="'
 				+ item.text
@@ -557,8 +582,6 @@ function areaSelCheck(input){
 }
 
 function updateMetrics( input ){
-	console.log('metrics :');
-	console.log(metrics.length);
 	if(input.checked){
 		if (metrics.values == undefined){
 			metrics.values = [];
@@ -579,17 +602,19 @@ function updateMetrics( input ){
 
 function updateEmpMetrics(input){
 	var year = $(input).val();
-	if ( year != 'current'){
-		$('#FlexRepMetrics').find('.metricCheckbox').each(function(index, item){
-			if(item.name != "NAICS Sectors"){
-				$(item).prop('disabled',true);
-				$(item).prop('checked', false);
-			}
-		});
-	}else{
-		$('#FlexRepMetrics').find('.metricCheckbox').each(function(index, item){
-				$(item).prop('disabled',false);
-		});
+	if (reportType == 2){ // For employment report
+		if ( year != 'current'){
+			$('#FlexRepMetrics').find('.metricCheckbox').each(function(index, item){
+				if(item.name != "NAICS Sectors"){
+					$(item).prop('disabled',true);
+					$(item).prop('checked', false);
+				}
+			});
+		}else{
+			$('#FlexRepMetrics').find('.metricCheckbox').each(function(index, item){
+					$(item).prop('disabled',false);
+			});
+		}	
 	}
 }
 
@@ -602,6 +627,8 @@ function updateEmpType(input){
 			}else{
 				$("select option[value*='WAC']").prop('disabled',true);
 				$("select option[value*='WACRAC']").prop('disabled',true);
+				$("#empType").val("RAC");
+				rac = true; wac = false;
 			}		
 		}
 	}else if (input.id = 'empType'){

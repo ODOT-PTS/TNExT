@@ -19,9 +19,7 @@ public class FlexRepT6 {
 	public String agencyId;
 	@XmlAttribute
 	@JsonSerialize
-	public String agencyName;
-	
-	
+	public String agencyName;	
 	
 	@XmlAttribute
 	@JsonSerialize
@@ -82,7 +80,7 @@ public class FlexRepT6 {
 	public int below_poverty_los;
 	@XmlAttribute
 	@JsonSerialize
-	public int above_povery_los;
+	public int above_poverty_los;
 	
 	@XmlAttribute
 	@JsonSerialize
@@ -143,7 +141,7 @@ public class FlexRepT6 {
 	public long below_poverty_ss;
 	@XmlAttribute
 	@JsonSerialize
-	public long above_povery_ss;
+	public long above_poverty_ss;
 	
 	@XmlAttribute
 	@JsonSerialize
@@ -204,5 +202,5 @@ public class FlexRepT6 {
 	public int below_poverty_served;
 	@XmlAttribute
 	@JsonSerialize
-	public int above_povery_served;	
+	public int above_poverty_served;	
 }

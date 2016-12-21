@@ -478,14 +478,14 @@ function openReport2() {
 					+ '<td>' + racData.EmpDataList2[i].name + '</td>';
 			if ($('#reportType').val() == "Agencies") {
 				html += '<td>'
-						+ numWithCommas(racData.EmpDataList2[i].c000served)
+						+ numWithCommas(racData.EmpDataList2[i].c000served.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(wacData.EmpDataList2[i].c000served)
+						+ numWithCommas(wacData.EmpDataList2[i].c000served.toFixed(0))
 						+ '</td>';
 			} else {
-				html += '<td>' + numWithCommas(racData.EmpDataList2[i].c000)
+				html += '<td>' + numWithCommas(racData.EmpDataList2[i].c000.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(wacData.EmpDataList2[i].c000) + '</td>';
+						+ numWithCommas(wacData.EmpDataList2[i].c000.toFixed(0)) + '</td>';
 			}
 
 			var resultSetRac = {};
@@ -553,17 +553,17 @@ function openReport2() {
 					}
 				});
 				if ($('#reportType').val() != 'Agencies')
-					html += '<td>' + numWithCommas(racSummation) + '</td>';
-				html += '<td>' + numWithCommas(racPopServedSummation) + '</td>'
-						+ '<td>' + numWithCommas(racPopAtLOSSummation)
+					html += '<td>' + numWithCommas(racSummation.toFixed(0)) + '</td>';
+				html += '<td>' + numWithCommas(racPopServedSummation.toFixed(0)) + '</td>'
+						+ '<td>' + numWithCommas(racPopAtLOSSummation.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(racServedByServiceSummation) + '</td>';
+						+ numWithCommas(racServedByServiceSummation.toFixed(0)) + '</td>';
 				if ($('#reportType').val() != 'Agencies')
-					html += '<td>' + numWithCommas(wacSummation) + '</td>';
-				html += '<td>' + numWithCommas(wacPopServedSummation) + '</td>'
-						+ '<td>' + numWithCommas(wacPopAtLOSSummation)
+					html += '<td>' + numWithCommas(wacSummation.toFixed(0)) + '</td>';
+				html += '<td>' + numWithCommas(wacPopServedSummation.toFixed(0)) + '</td>'
+						+ '<td>' + numWithCommas(wacPopAtLOSSummation.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(wacServedByServiceSummation) + '</td>';
+						+ numWithCommas(wacServedByServiceSummation.toFixed(0)) + '</td>';
 			}
 		};
 	} else if (racBool) {
@@ -603,10 +603,10 @@ function openReport2() {
 							html += '<tr><td>' + item.id + '</a></td>' + '<td>'
 									+ item.name + '</td>';
 							if ($('#reportType').val() == 'Agencies')
-								html += '<td>' + numWithCommas(item.c000served)
+								html += '<td>' + numWithCommas(item.c000served.toFixed(0))
 										+ '</td>';
 							else
-								html += '<td>' + numWithCommas(item.c000)
+								html += '<td>' + numWithCommas(item.c000.toFixed(0))
 										+ '</td>';
 
 							// filling in the other columns of the datatable
@@ -632,16 +632,16 @@ function openReport2() {
 										});
 								if ($('#reportType').val() != 'Agencies')
 									html += '<td>'
-											+ numWithCommas(racSummation)
+											+ numWithCommas(racSummation.toFixed(0))
 											+ '</td>';
 								html += '<td>'
-										+ numWithCommas(racPopServedSummation)
+										+ numWithCommas(racPopServedSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(racPopAtLOSSummation)
+										+ numWithCommas(racPopAtLOSSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(racServedByServiceSummation)
+										+ numWithCommas(racServedByServiceSummation.toFixed(0))
 										+ '</td>';
 							}
 						});
@@ -678,10 +678,10 @@ function openReport2() {
 							html += '<tr><td>' + item.id + '</td>' + '<td>'
 									+ item.name + '</td>';
 							if ($('#reportType').val() == 'Agencies')
-								html += '<td>' + numWithCommas(item.c000served)
+								html += '<td>' + numWithCommas(item.c000served.toFixed(0))
 										+ '</td>';
 							else
-								html += '<td>' + numWithCommas(item.c000)
+								html += '<td>' + numWithCommas(item.c000.toFixed(0))
 										+ '</td>';
 
 							// filling in the other columns of the datatable
@@ -707,16 +707,16 @@ function openReport2() {
 										});
 								if ($('#reportType').val() != 'Agencies')
 									html += '<td>'
-											+ numWithCommas(wacSummation)
+											+ numWithCommas(wacSummation.toFixed(0))
 											+ '</td>';
 								html += '<td>'
-										+ numWithCommas(wacPopServedSummation)
+										+ numWithCommas(wacPopServedSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(wacPopAtLOSSummation)
+										+ numWithCommas(wacPopAtLOSSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(wacServedByServiceSummation)
+										+ numWithCommas(wacServedByServiceSummation.toFixed(0))
 										+ '</td>';
 
 							}

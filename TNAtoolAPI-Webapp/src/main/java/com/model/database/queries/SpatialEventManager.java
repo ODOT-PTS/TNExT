@@ -58,12 +58,16 @@ public class SpatialEventManager {
 		Statement stmt = null;
 		String query;
 		if (lat.length == 1) // If selected area is a circle
-			query = "SELECT * FROM parknride "
+			query = "SELECT parknride.*, county.countyid AS county_id, county.cname AS county_name "
+					+ " FROM parknride INNER JOIN census_counties AS county "
+					+ " ON ST_Within(ST_Setsrid(ST_Makepoint(parknride.lon,parknride.lat),4326), county.shape) "
 					+ " WHERE ST_DWITHIN(parknride.geom,ST_transform(ST_setsrid(ST_MakePoint("
 					+ lon[0] + ", " + lat[0] + "),4326), 2993), " + radius
 					+ ")";
 		else { // If selected area is a polygon or rectangle
-			query = "SELECT * FROM parknride "
+			query = "SELECT parknride.*, county.countyid AS county_id, county.cname AS county_name "
+					+ " FROM parknride INNER JOIN census_counties AS county "
+					+ " ON ST_Within(ST_Setsrid(ST_Makepoint(parknride.lon,parknride.lat),4326), county.shape) "
 					+ " WHERE ST_CONTAINS( ST_transform(st_geometryfromtext('POLYGON((";
 			for (int i = 0; i < lat.length; i++) {
 				query += lon[i] + " " + lat[i] + ",";
@@ -71,7 +75,6 @@ public class SpatialEventManager {
 			query = query += lon[0] + " " + lat[0]; // Closing the polygon loop
 			query += "))', 4326),2993), parknride.geom)";
 		}
-//		System.out.println(query);
 		stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
@@ -83,8 +86,8 @@ public class SpatialEventManager {
 			i.location = rs.getString("location");
 			i.city = rs.getString("city");
 			i.zipcode = rs.getInt("zipcode");
-			i.countyid = rs.getString("countyid");
-			i.county = rs.getString("county");
+			i.countyid = rs.getString("county_id");
+			i.county = rs.getString("county_name");
 			i.spaces = rs.getInt("spaces");
 			i.accessiblespaces = rs.getInt("accessiblespaces");
 			i.bikerackspaces = rs.getInt("bikerackspaces");

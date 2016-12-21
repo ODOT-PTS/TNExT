@@ -4,6 +4,10 @@ var missedConsPolylines = []; // Array of Leaflet Polylines
 var accessibleCons = L.featureGroup(); // Leaflet object
 var accessibleConsPolylines = []; // Array of Leaflet Polylines
 var originalTrip; // L.Polyline
+var originalTripPattern = {patterns: [
+	        // defines a pattern of 15px-wide dashes, repeated every 20px on the line
+	        {offset: 5, repeat: 50, symbol: L.Symbol.arrowHead({pixelSize: 15, headAngle: 45, pathOptions: {fillOpacity: 0.6, weight: 0}})}
+	    ]};
 
 $(document)
 		.ready(
@@ -34,6 +38,7 @@ $(document)
 					missedCons.addTo(map);
 
 					d = L.PolylineUtil.decode(parent.trips[0].tripShape1);
+					
 					points = [ d ];
 					var polyline = L.multiPolyline(points, {
 						weight : 4,
@@ -41,14 +46,20 @@ $(document)
 						opacity : .8,
 						smoothFactor : 1
 					});
-					polyline.bindPopup('<br><b>Route ID:</b> '
+					originalTrip = L.featureGroup([polyline,L.polylineDecorator(points, {
+						patterns: [
+					           // defines a pattern of 15px-wide dashes, repeated every 20px on the line
+					           {offset: 5, repeat: 50, symbol: L.Symbol.arrowHead({pixelSize: 15, headAngle: 45, pathOptions: {fillOpacity: 0.6, weight: 0}})}
+				           ]
+						})
+			         ]);
+					originalTrip.bindPopup('<br><b>Route ID:</b> '
 							+ parent.trips[0].routeId
 							+ '<br><b>Route Name:</b> '
 							+ parent.trips[0].routeName + '<br><b>Agency:</b> '
 							+ parent.trips[0].agencyName);
-					originalTrip = polyline;
-					map.addLayer(polyline);
-
+					map.addLayer(originalTrip);
+					
 					$.each(parent.trips, function(i, item) {
 						d = L.PolylineUtil.decode(item.tripShape2);
 						points = [ d ];
@@ -58,6 +69,14 @@ $(document)
 							opacity : .5,
 							smoothFactor : 1
 						});
+						var directedPolyline = L.featureGroup([polyline, L.polylineDecorator(points, {
+							patterns: [
+						           // defines a pattern of 15px-wide dashes, repeated every 20px on the line
+						           {offset: 5, repeat: 50, symbol: L.Symbol.arrowHead({pixelSize: 15, headAngle: 45, 
+						        	   pathOptions: {fillOpacity: 0.6, color: getColor(item), weight: 0}})}
+					           ]
+							})
+						]);
 						var popupHtml = '<b><b>Connection number:</b> '
 								+ (i + 1) + '<br><b>Route ID:</b> '
 								+ item.routeId + '<br><b>Route Name:</b> '
@@ -70,13 +89,13 @@ $(document)
 							popupHtml += '<br><b>Time Difference:-</b> '
 									+ secToHour(Math.abs(item.timeDiff));
 
-						polyline.bindPopup(popupHtml);
+						directedPolyline.bindPopup(popupHtml);
 						if (item.timeDiff > 0) {
-							accessibleCons.addLayer(polyline);
-							accessibleConsPolylines.push(polyline);
+							accessibleCons.addLayer(directedPolyline);
+							accessibleConsPolylines.push(directedPolyline);
 						} else {
-							missedCons.addLayer(polyline);
-							missedConsPolylines.push(polyline);
+							missedCons.addLayer(directedPolyline);
+							missedConsPolylines.push(directedPolyline);
 						}
 					});
 				});

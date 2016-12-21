@@ -233,9 +233,10 @@ public class PgisEventManager {
 		ParknRideCountiesList results = new ParknRideCountiesList();
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String querytext =	"SELECT pr.countyid, pr.county, count(pr.countyid) count, sum(pr.spaces) spaces, sum(pr.accessiblespaces) accessiblespaces " +
-				"FROM parknride pr " + 
-				"GROUP BY pr.countyid, pr.county;";
+		String querytext =	"SELECT county.countyid, county.cname AS countyname, COUNT(pnrid) AS count, SUM(pr.spaces) AS spaces, SUM(pr.accessiblespaces) AS accessiblespaces "
+				+ "		FROM parknride AS pr INNER JOIN census_counties AS county "
+				+ "		ON ST_Within(ST_SetSrid(ST_Makepoint(pr.lon,pr.lat),4326), county.shape) "
+				+ "		GROUP BY county.countyid, county.cname";
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(querytext); 
@@ -243,7 +244,7 @@ public class PgisEventManager {
 	        while ( rs.next() ) {
 	        	ParknRideCounties instance = new ParknRideCounties();
 	        	instance.countyId = rs.getString("countyid");
-	        	instance.cname = rs.getString("county");
+	        	instance.cname = rs.getString("countyname");
 	        	instance.count = rs.getString("count");
 	        	instance.spaces = rs.getString("spaces");
 	        	instance.accessibleSpaces = rs.getString("accessiblespaces");
@@ -259,7 +260,6 @@ public class PgisEventManager {
 	        // 
 	      }
 	      dropConnection(connection);
-	      
 	      return results;
 	}
 	
