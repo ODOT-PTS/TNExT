@@ -86,7 +86,6 @@ public class Admin extends HttpServlet {
 			                	boolean status = loc.mkdirs();
 			                }
 			                File uploadedFile = new File(loc + "/" + fileName);
-			                String feed = uploadedFile.getAbsolutePath();
 			                item.write(uploadedFile);
 			                
 			                JSONObject jsono = new JSONObject();
@@ -111,7 +110,30 @@ public class Admin extends HttpServlet {
 			                	boolean status = loc.mkdirs();
 			                }
 			                File uploadedFile = new File(loc + "/" + fileName);
-			                String feed = uploadedFile.getAbsolutePath();
+			                item.write(uploadedFile);
+			                
+			                JSONObject jsono = new JSONObject();
+	                        jsono.put("name", fileName);
+	                        jsono.put("size", item.getSize());
+	                        jsono.put("url", "upload?getfile=" + fileName);
+	                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
+	                        jsono.put("delete_url", "upload?delfile=" + fileName);
+	                        jsono.put("delete_type", "GET");
+	                        json.put(jsono);
+	                        
+			            }
+			        }
+		        }else if(data.equals("t6")){
+		        	for(FileItem item: items){
+			            if (!item.isFormField()) {
+			                String fileName = item.getName();
+			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File(path
+			        				+ "../../src/main/webapp/resources/admin/uploads/t6");
+			                if (!loc.exists()) {
+			                	boolean status = loc.mkdirs();
+			                }
+			                File uploadedFile = new File(loc + "/" + fileName);
 			                item.write(uploadedFile);
 			                
 			                JSONObject jsono = new JSONObject();

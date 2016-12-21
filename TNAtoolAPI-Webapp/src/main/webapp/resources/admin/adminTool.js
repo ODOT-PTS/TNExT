@@ -451,6 +451,28 @@ function addPnr(fileName){
 	checkPNRstatus(currentINDEX);
 }
 
+function addT6(){
+	var db = dbInfo[currentINDEX].toString();
+//	alert(fileName);
+		
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db, 
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	if(d=="done"){
+        		console.log("T6 files added was successfully added");
+        		$('#deleteT6').prop('disabled', false);
+        	}else{
+        		console.log("T6 files could not be added. Error: "+d);
+        	}
+        }
+	});
+	
+	checkT6status(currentINDEX);
+}
+
 function callDBfuntions(dbFunction){
 	for(var i=1;i<dbInfo.length;i++){
 		dbFunction(i);
@@ -494,11 +516,12 @@ function setButtonStatus(dbNumber){
 			$('#dbButtons'+dbNumber+' input.fpop').prop('disabled', false);
 			$('#dbButtons'+dbNumber+' input.t6').prop('disabled', false);
 			$('#dbButtons'+dbNumber+' input.pnr').prop('disabled', false);
+			$('#dbButtons'+dbNumber+' input.emp').prop('disabled', false);
 		}else{
 			$('#dbButtons'+dbNumber+' input.fpop').prop('disabled', true);
 			$('#dbButtons'+dbNumber+' input.t6').prop('disabled', true);
 			$('#dbButtons'+dbNumber+' input.pnr').prop('disabled', true);
-
+			$('#dbButtons'+dbNumber+' input.emp').prop('disabled', true);
 		}
 		if(dbStatus[dbNumber].Employment){
 			$('#dbButtons'+dbNumber+' input.femp').prop('disabled', false);
@@ -805,8 +828,14 @@ function checkfEmpstatus(index){
 function openT6(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
-	var b = status.Title6;
-	changeStatus(index, "title6", !b);
+	currentINDEX = index;
+	if(!status.Parknride){
+		$('#deleteT6').prop('disabled', true);
+	}
+	T6dialog.dialog( "open" );
+	
+//	var b = status.Title6;
+//	changeStatus(index, "title6", !b);
 	
 }
 
@@ -828,6 +857,20 @@ function checkT6status(index){
         		changeStatus(index, "title6", b);
         	}
         	
+        }
+	});
+}
+
+function deleteT6(){
+	var db = dbInfo[currentINDEX].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteT6?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	changeStatus(currentINDEX, "title6", false);
+        	$('#deleteT6').prop('disabled', true);
         }
 	});
 }
@@ -1057,6 +1100,7 @@ var currentFiles;
 var dialog;
 var GTFSdialog;
 var PNRdialog;
+var T6dialog;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1177,12 +1221,25 @@ $(document).ready(function(){
 	
 	runGTFSfunctions();
 	runPnRfunctions();
+	runT6functions();
 	
 	$('body').css('display','');
 	$('#dbAccordion .ui-accordion-content').css('height','100%');
 	
 	
 });
+
+function deleteUploadedT6(){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedT6",
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
 
 function deleteUploadedPNR(){
 	$.ajax({
@@ -1219,7 +1276,7 @@ function runPnRfunctions(){
     	currentFiles = [];
     	deleteProcessGTFS();
     });*/
-	$('#gtfs_upload_form > div').css('margin-right','0px');
+	$('#pnr_upload_form > div').css('margin-right','0px');
 	
 	PNRdialog = $( "#pnr_upload" ).dialog({
 	      autoOpen: false,
@@ -1235,6 +1292,40 @@ function runPnRfunctions(){
 	      close: function() {
 	    	  $("table tbody.files").empty();
 	    	  deleteUploadedPNR();
+	      }
+	 });
+}
+
+function runT6functions(){
+	deleteUploadedT6(); 
+	
+	'use strict';
+	$('#t6_upload_form').fileupload({
+        url: '/TNAtoolAPI-Webapp/admin',
+        acceptFileTypes: /(csv)$/i,
+        singleFileUploads: true,
+        formData: {data: "t6"},
+        sequentialUploads: true,
+        maxFileSize: 50000000,
+    }).bind('fileuploadstopped', function (e) {
+    	addT6();
+    });
+	$('#t6_upload_form > div').css('margin-right','0px');
+	
+	T6dialog = $( "#t6_upload" ).dialog({
+	      autoOpen: false,
+	      height: $(window).height()*0.7,
+	      width: 900,
+	      modal: true,
+	      buttons: {
+//	        "Submit": dSubmit,
+	        Close: function() {
+	        	PNRdialog.dialog( "close" );
+	        }
+	      },
+	      close: function() {
+	    	  $("table tbody.files").empty();
+	    	  deleteUploadedT6();
 	      }
 	 });
 }

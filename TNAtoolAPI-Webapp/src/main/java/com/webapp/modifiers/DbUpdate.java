@@ -1278,6 +1278,31 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deleteT6")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteT6(@QueryParam("db") String db){
+		String response = "done";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			statement.executeUpdate("DROP TABLE IF EXISTS title_vi_blocks_float;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: deletePNR method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/checkEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkEmpstatus(@QueryParam("db") String db){
@@ -1773,6 +1798,23 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deleteUploadedT6")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteUploadedT6() throws IOException{
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
+		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/t6");
+		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+	    if(files!=null) { 
+	        for(File f: files) {
+	        	f.delete();
+	        }
+	    }
+		return "done";
+	}
+	
+	@GET
     @Path("/deleteProcessGTFS")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deleteProcessGTFS() throws IOException{
@@ -1963,16 +2005,15 @@ public class DbUpdate {
 		c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 		try {			
 			statement = c.createStatement();
-			statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS parknride("
-					+ "pnrid integer PRIMARY KEY NOT NULL, "
+					+ "pnrid integer NOT NULL, "
 					+ "lat double precision NOT NULL,"
 					+ "lon double precision NOT NULL,"
 					+ "lotName text,"
 					+ "location text,"
 					+ "city character varying (30),"
 					+ "zipcode integer,"
-					+ "countyID character varying(5) NOT NULL,"
+					+ "countyID character(5) NOT NULL,"
 					+ "county character varying(50) NOT NULL,"
 					+ "spaces integer,"
 					+ "accessibleSpaces integer,"
@@ -1995,6 +2036,7 @@ public class DbUpdate {
 					+ "lotSurface text,"
 					+ "propertyOwner text,"
 					+ "localExpert text,"
+					+ "PRIMARY KEY (pnrid,countyID),"
 					+ "FOREIGN KEY (countyid)"
 					+ "      REFERENCES census_counties (countyid) MATCH SIMPLE"
 					+ "      ON UPDATE NO ACTION ON DELETE NO ACTION"
@@ -2022,7 +2064,10 @@ public class DbUpdate {
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
 				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
-				   		+ " -c \"\\copy parknride FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " -c \"\\copy parknride (pnrid,lat,lon,lotName,location,city,zipcode,countyID,county,spaces,accessibleSpaces,"
+				   		+ "bikeRackSpaces,bikeLockerSpaces,electricVehicleSpaces,carSharing,transitService,availability,timeLimit,"
+				   		+ "restroom,benches,shelter,indoorWaitingArea,trashCan,lighting,securityCameras,sidewalks,pnrSignage,lotSurface,propertyOwner,localExpert) "
+				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
@@ -2091,6 +2136,120 @@ public class DbUpdate {
 		return message;
 	}
 	
+	@GET
+    @Path("/addT6")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addT6(@QueryParam("db") String db) throws SQLException{
+		String[] dbInfo = db.split(",");
+		
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path.substring(1, path.length());
+		File source = new File(path);*/
+    	String message = "";
+		System.out.println(message);
+		
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		host = "localhost"; //to be deleted
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		Process pr;
+		String sqlPath;
+    	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+",";
+		}
+		
+		String[] fileNames = {"b03002.sql","b16004.sql","b17021.sql","b18101.sql","b19037.sql"};
+		for(String fname:fileNames){
+			path = path+"../../src/main/webapp/resources/admin/uploads/t6/"+fname;
+			path = path.substring(1, path.length());
+			try{
+				File file = new File(path);
+			}catch(NullPointerException e){
+				message += e.toString();
+				continue;
+			}
+			
+			sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/"+fname;
+	    	sqlPath = sqlPath.substring(1, sqlPath.length());
+			try{
+				String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+			   		+ "exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+			}catch(Exception e) {
+				e.printStackTrace();
+				message += e.toString()+",";
+			}
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		   message += "done";
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+",";
+		}
+		
+		return message;
+	}
 	
 	public String removeLastChar(String str) {
     	if (str.length() > 0) {

@@ -285,6 +285,148 @@
 </script>
 		</div>
 		</div>
+	
+	<div id="t6_upload" title="Title VI Add/Remove">
+		 
+		  <div id="t6_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>The only accepted format for Title VI data is <b>CSV</b>.</li>
+			  	<li>Six different files must be uploaded. The name and format (column order and names) must <b>exactly</b> be according to the sample files provided below.</li>
+			  	<ol style="font-size:80%">
+				  	<li><b><a href="../resources/admin/sampleFiles/b03002.csv" download>b03002.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b16004.csv" download>b16004.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b17021.csv" download>b17021.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b18101.csv" download>b18101.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b19037.csv" download>b19037.csv</a></b></li>
+			  	</ol>
+			  	<li>These files can be downloaded from <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a> according to the following instructions:
+			  	<ol style="font-size:80%">
+				  	<li>Go to <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a></li>
+				  	<li>Use the "Log in" button to log into your account. You can create a new account for free, if you do not have one.</li>
+				  	<li>Once logged in, go to the <a href="https://data2.nhgis.org/main" target="_blank">"Select Data" (or "main")</a> page.</li>
+				  	<li>Click on "Geographic Level" button and select "Block Group" (except for b18101 table for which you should select "Census Tract").</li>
+				  	<li>Click the "Submit" button.</li>
+				  	<li>Click on "Years" button and select the most recent range from the list of "5-Year Ranges".</li>
+				  	<li>Click the "Submit" button.</li>
+				  	<li>In the list of tables provided at the bottom of the page, look for the table name you want to download (e.g. b03002).</li>
+				  	<li>Once found, select that table by clicking on the "plus" sign on its left.</li>
+				  	<li>Click the green "Continue" button on the top-right corner of the page.</li>
+				  	<li>Click "Continue" again.</li>
+				  	<li>On the "Review and Submit" page, under "Table File Structure", make sure the "Comma delimited (best for GIS)" is selected only.</li>
+				  	<li>Under "Source Tables", click on the "Geographic Extents" button and select the desired state.</li>
+				  	<li>Submit the request.</li>
+				  	<li>It will take you to the download page in which you will see a table of your requests.</li>
+				  	<li>You have to wait until the table is ready to download. It usually takes a few minutes.</li>
+				  	<li>Once available, you can click on its name and download the file.</li>
+				  	<li>Once available, you can click on its name and download the file.</li>
+				  	<li>There will be two CSV and two TXT files (the txt files are the metadata files for the csv files).</li>
+				  	<li>You are going to use the CSV file that ends with an "E" (which stands for estimates).</li>
+				  	<li>The column names are in codes. You can use the metadata txt file to find the columns you need.</li>
+			  	</ol>
+			  	</li>
+			  </ul>
+		  </div><br>
+		  <div id="t6_delete_card" class="upload_cards">
+			  <button type="button" id="deleteT6" class="btn btn-danger delete" onclick="deleteT6()"><span>Delete Existing Title VI Data</span></button>
+		  </div><br>
+		  <div id="t6_upload_feeds" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="t6_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[] multiple">
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>
 	</div>
 	
 	
