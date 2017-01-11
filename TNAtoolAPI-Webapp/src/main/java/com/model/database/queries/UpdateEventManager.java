@@ -480,7 +480,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE gtfs_trip_stops;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
 		  }
 		  create_gtfs_trip_stops(connection);
 	      try {
@@ -697,7 +697,7 @@ public class UpdateEventManager {
 	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips DISABLE TRIGGER ALL;"); 
 	    	  
 	    	  stmt.executeUpdate("update gtfs_trips trip set shape = tss.shape, epshape=GoogleEncodeLine(tss.shape), length = (tss.length)/1609.34, estlength=0 FROM "
-	    	  		+ "(select ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)) as shape, ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),2993)) as length,"
+	    	  		+ "(select ST_SimplifyPreserveTopology(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),0.00001) as shape, ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),2993)) as length,"
 	    	  		+ "shppoint.shapeid_agencyid as agencyid, shppoint.shapeid_id as shapeid from (select * from gtfs_shape_points where shapeid_agencyid='"+agencyId+"' order by shapeid_agencyid, shapeid_id, sequence) as shppoint "
 	    	  		+ "group by agencyid, shapeid) "
 	    	  		+ "as tss where tss.agencyid = trip.shapeid_agencyid and tss.shapeid = trip.shapeid_id;");
@@ -794,23 +794,32 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_congdists_trip_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
 		  }
 		create_census_congdists_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_congdists_trip_map DISABLE TRIGGER ALL;");
 	        
-	        stmt.executeUpdate("with groutes as(SELECT routeid, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi "
-	        		+ "FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stops "
-	        		+ "ON map.agencyid = stops.agencyid AND map.stopid = stops.id "
-	        		+ "GROUP BY routeid)"
+	        stmt.executeUpdate("WITH covered_trips AS (SELECT congdists.congdistid,  trips.id,trips.agencyid "
+	        		+ "FROM gtfs_trips AS trips INNER JOIN census_congdists AS congdists "
+	        		+ "ON ST_Contains(congdists.shape, trips.shape) "
+	        		+ "WHERE serviceid_agencyid='" + agencyId + "'), "
+	        		+ "output1 AS (SELECT trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, covered_trips.congdistid,"
+	        		+ "	ST_Multi(trip.shape) AS shape, ST_Length(st_transform(trip.shape,2993))/1609.34 AS length , trip.uid"
+	        		+ "	FROM gtfs_trips AS trip INNER JOIN covered_trips USING(id,agencyid)), "
+	        		+ "intersected_trips AS (SELECT trips.id,trips.agencyid FROM gtfs_trips AS trips LEFT JOIN covered_trips USING (id,agencyid) WHERE serviceid_agencyid='" + agencyId + "' AND covered_trips.id IS NULL),"
+	        		+ "intersections as (select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, county.congdistid,"
+	        		+ "	ST_Intersection(trip.shape,county.shape) as intersection, trip.uid "
+	        		+ "	from gtfs_trips trip "
+	        		+ "	inner join intersected_trips USING (id, agencyid)"
+	        		+ "	inner join census_congdists county on  st_intersects(county.shape,trip.shape)=true), "
+	        		+ "output2 AS (select id, agencyid, serviceid_agencyid, serviceid_id, route_id, congdistid,"
+	        		+ "	st_multi(ST_CollectionExtract(st_union(intersection),2)), (ST_Length(st_transform(intersection,2993))/1609.34), uid "
+	        		+ "	from intersections"
+	        		+ "	group by id, agencyid, serviceid_agencyid, serviceid_id, route_id, congdistid, intersection, uid) "
 	        		+ "insert into census_congdists_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  congdistid, shape, length, uid) "
-	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, congdist.congdistid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,congdist.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,congdist.shape),2993))/1609.34), trip.uid "
-	        		+ "from gtfs_trips trip "
-	        		+ "inner join groutes on trip.route_id=groutes.routeid "
-	        		+ "inner join census_congdists congdist on  st_intersects(congdist.shape,trip.shape)=true and st_intersects(congdist.shape,multi)=true where trip.serviceid_agencyid='"+agencyId+"' "
-    				+ "group by trip.id, trip.agencyid, congdist.congdistid;");
+	        		+ "SELECT * FROM output1 UNION SELECT * FROM output2");
 	        stmt.executeUpdate("update census_congdists_trip_map set stopscount = res.cnt+0 from "
 	        		+ "(select count(stop.id) as cnt, stop.congdistid as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
 	        		+ "from gtfs_stops stop inner join gtfs_stop_times stime "
@@ -847,23 +856,32 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_counties_trip_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
 		  }
 		create_census_counties_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_counties_trip_map DISABLE TRIGGER ALL;");
 	        
-	        stmt.executeUpdate("with groutes as(SELECT routeid, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi "
-	        		+ "FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stops "
-	        		+ "ON map.agencyid = stops.agencyid AND map.stopid = stops.id "
-	        		+ "GROUP BY routeid)"
+	        stmt.executeUpdate("WITH covered_trips AS (SELECT counties.countyid, counties.odotregionid, trips.id,trips.agencyid "
+	        		+ "	FROM gtfs_trips AS trips INNER JOIN census_counties AS counties "
+	        		+ "	ON ST_Contains(counties.shape, trips.shape) "
+	        		+ "	WHERE serviceid_agencyid='"+agencyId+"'),"
+	        		+ "output1 AS (SELECT trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, covered_trips.countyid, covered_trips.odotregionid, "
+	        		+ "	ST_Multi(trip.shape) AS shape, ST_Length(st_transform(trip.shape,2993))/1609.34 AS length , trip.uid"
+	        		+ "	FROM gtfs_trips AS trip INNER JOIN covered_trips USING(id,agencyid)),"
+	        		+ "intersected_trips AS (SELECT trips.id,trips.agencyid FROM gtfs_trips AS trips LEFT JOIN covered_trips USING (id,agencyid) WHERE serviceid_agencyid='"+agencyId+"' AND covered_trips.id IS NULL),"
+	        		+ "intersections as (select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, county.countyid, county.odotregionid, "
+	        		+ "	ST_Intersection(trip.shape,county.shape) as intersection, trip.uid "
+	        		+ "	from gtfs_trips trip "
+	        		+ "	inner join intersected_trips USING (id, agencyid)"
+	        		+ "	inner join census_counties county on  st_intersects(county.shape,trip.shape)=true),"
+	        		+ "output2 AS (select id, agencyid, serviceid_agencyid, serviceid_id, route_id, countyid, odotregionid, "
+	        		+ "	st_multi(ST_CollectionExtract(st_union(intersection),2)), (ST_Length(st_transform(intersection,2993))/1609.34), uid "
+	        		+ "	from intersections"
+	        		+ "	group by id, agencyid, serviceid_agencyid, serviceid_id, route_id, countyid, odotregionid,intersection ,uid)"
 	        		+ "insert into census_counties_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  countyid, regionid, shape, length, uid) "
-	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, county.countyid, county.odotregionid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,county.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,county.shape),2993))/1609.34), trip.uid "
-	        		+ "from gtfs_trips trip "
-	        		+ "inner join groutes on trip.route_id=groutes.routeid "
-	        		+ "inner join census_counties county on  st_intersects(county.shape,trip.shape)=true and st_intersects(county.shape,multi)=true where trip.serviceid_agencyid='"+agencyId+"' "
-    				+ "group by trip.id, trip.agencyid, county.countyid;");
+	        		+ "SELECT * FROM output1 UNION SELECT * FROM output2");
 	        stmt.executeUpdate("update census_counties_trip_map set stopscount = res.cnt+0 from "
 	        		+ "(select count(stop.id) as cnt, substring(stop.blockid,1,5) as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
 	        		+ "from gtfs_stops stop inner join gtfs_stop_times stime "
@@ -898,23 +916,32 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_tracts_trip_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
 		  }
 		create_census_tracts_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_tracts_trip_map DISABLE TRIGGER ALL;");
 	        
-	        stmt.executeUpdate("with groutes as(SELECT routeid, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi "
-	        		+ "FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stops "
-	        		+ "ON map.agencyid = stops.agencyid AND map.stopid = stops.id "
-	        		+ "GROUP BY routeid)"
+	        stmt.executeUpdate("WITH covered_trips AS (SELECT tracts.tractid, trips.id, trips.agencyid "
+	        		+ "FROM gtfs_trips AS trips INNER JOIN census_tracts AS tracts "
+	        		+ "	ON ST_Contains(tracts.shape, trips.shape) "
+	        		+ "	WHERE serviceid_agencyid='" + agencyId + "'),"
+	        		+ "output1 AS (SELECT trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, covered_trips.tractid,"
+	        		+ "	ST_Multi(trip.shape) AS shape, ST_Length(st_transform(trip.shape,2993))/1609.34 AS length , trip.uid"
+	        		+ "	FROM gtfs_trips AS trip INNER JOIN covered_trips USING(id,agencyid)),"
+	        		+ "intersected_trips AS (SELECT trips.id,trips.agencyid FROM gtfs_trips AS trips LEFT JOIN covered_trips USING (id,agencyid) WHERE serviceid_agencyid='" + agencyId + "' AND covered_trips.id IS NULL),"
+	        		+ "intersections as (select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, tracts.tractid, "
+	        		+ "	ST_Intersection(trip.shape,tracts.shape) as intersection, trip.uid "
+	        		+ "	from gtfs_trips trip "
+	        		+ "	inner join intersected_trips USING (id, agencyid)"
+	        		+ "	inner join census_tracts tracts on st_intersects(tracts.shape,trip.shape)),"
+	        		+ "output2 AS (select id, agencyid, serviceid_agencyid, serviceid_id, route_id, tractid,"
+	        		+ "	st_multi(ST_CollectionExtract(st_union(intersection),2)), (ST_Length(st_transform(intersection,2993))/1609.34), uid "
+	        		+ "	from intersections"
+	        		+ "	group by id, agencyid, serviceid_agencyid, serviceid_id, route_id, tractid, intersection ,uid) "
 	        		+ "insert into census_tracts_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  tractid, shape, length, uid) "
-	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, tract.tractid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,tract.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,tract.shape),2993))/1609.34), trip.uid "
-	        		+ "from gtfs_trips trip "
-	        		+ "inner join groutes on trip.route_id=groutes.routeid "
-	        		+ "inner join census_tracts tract on  st_intersects(tract.shape,trip.shape)=true and st_intersects(tract.shape,multi)=true where trip.serviceid_agencyid='"+agencyId+"' "
-    				+ "group by trip.id, trip.agencyid, tract.tractid;");
+	        		+ "SELECT * FROM output1 UNION SELECT * FROM output2");
 	        stmt.executeUpdate("update census_tracts_trip_map set stopscount = res.cnt+0 from "
 	        		+ "(select count(stop.id) as cnt, substring(stop.blockid,1,11) as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
 	        		+ "from gtfs_stops stop inner join gtfs_stop_times stime "
@@ -949,23 +976,32 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_places_trip_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
 		  }
 		create_census_places_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_places_trip_map DISABLE TRIGGER ALL;");
 	        
-	        stmt.executeUpdate("with groutes as(SELECT routeid, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi "
-	        		+ "FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stops "
-	        		+ "ON map.agencyid = stops.agencyid AND map.stopid = stops.id "
-	        		+ "GROUP BY routeid)"
+	        stmt.executeUpdate("WITH covered_trips AS (SELECT places.placeid, trips.id,trips.agencyid "
+	        		+ "	FROM gtfs_trips AS trips INNER JOIN census_places AS places "
+	        		+ "	ON ST_Contains(places.shape, trips.shape) "
+	        		+ "	WHERE serviceid_agencyid='" + agencyId + "'),"
+	        		+ "output1 AS (SELECT trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, covered_trips.placeid,"
+	        		+ "	ST_Multi(trip.shape) AS shape, ST_Length(st_transform(trip.shape,2993))/1609.34 AS length , trip.uid"
+	        		+ "	FROM gtfs_trips AS trip INNER JOIN covered_trips USING(id,agencyid)),"
+	        		+ "intersected_trips AS (SELECT trips.id,trips.agencyid FROM gtfs_trips AS trips LEFT JOIN covered_trips USING (id,agencyid) WHERE serviceid_agencyid='" + agencyId + "' AND covered_trips.id IS NULL),"
+	        		+ "intersections as (select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, places.placeid, "
+	        		+ "	ST_Intersection(trip.shape,places.shape) as intersection, trip.uid "
+	        		+ "	from gtfs_trips trip "
+	        		+ "	inner join intersected_trips USING (id, agencyid)"
+	        		+ "	inner join census_places places on st_intersects(places.shape,trip.shape)),"
+	        		+ "output2 AS (select id, agencyid, serviceid_agencyid, serviceid_id, route_id, placeid,"
+	        		+ "	st_multi(ST_CollectionExtract(st_union(intersection),2)), (ST_Length(st_transform(intersection,2993))/1609.34), uid "
+	        		+ "	from intersections"
+	        		+ "	group by id, agencyid, serviceid_agencyid, serviceid_id, route_id, placeid, intersection ,uid) "
 	        		+ "insert into census_places_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  placeid, shape, length, uid) "
-	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, place.placeid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,place.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,place.shape),2993))/1609.34), trip.uid "
-	        		+ "from gtfs_trips trip "
-	        		+ "inner join groutes on trip.route_id=groutes.routeid "
-	        		+ "inner join census_places place on  st_intersects(place.shape,trip.shape)=true and st_intersects(place.shape,multi)=true where trip.serviceid_agencyid='"+agencyId+"' "
-    				+ "group by trip.id, trip.agencyid, place.placeid;");
+	        		+ "SELECT * FROM output1 UNION SELECT * FROM output2");
 	        stmt.executeUpdate("update census_places_trip_map set stopscount = res.cnt+0 from "
 	        		+ "(select count(stop.id) as cnt, stop.placeid as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
 	        		+ "from gtfs_stops stop inner join gtfs_stop_times stime "
@@ -1000,23 +1036,32 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_urbans_trip_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
 		  }
 		create_census_urbans_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE census_urbans_trip_map DISABLE TRIGGER ALL;");
 	        
-	        stmt.executeUpdate("with groutes as(SELECT routeid, ST_multi(ST_Collect(ST_SetSRID(ST_MakePoint(stops.lon, stops.lat), 4326))) multi "
-	        		+ "FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stops "
-	        		+ "ON map.agencyid = stops.agencyid AND map.stopid = stops.id "
-	        		+ "GROUP BY routeid)"
+	        stmt.executeUpdate("WITH covered_trips AS (SELECT urbans.urbanid, trips.id, trips.agencyid "
+	        		+ "	FROM gtfs_trips AS trips INNER JOIN census_urbans AS urbans "
+	        		+ "	ON ST_Contains(urbans.shape, trips.shape) "
+	        		+ "	WHERE serviceid_agencyid='" + agencyId + "'),"
+	        		+ "output1 AS (SELECT trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, covered_trips.urbanid,"
+	        		+ "	ST_Multi(trip.shape) AS shape, ST_Length(st_transform(trip.shape,2993))/1609.34 AS length , trip.uid"
+	        		+ "	FROM gtfs_trips AS trip INNER JOIN covered_trips USING(id,agencyid)),"
+	        		+ "intersected_trips AS (SELECT trips.id,trips.agencyid FROM gtfs_trips AS trips LEFT JOIN covered_trips USING (id,agencyid) WHERE serviceid_agencyid='" + agencyId + "' AND covered_trips.id IS NULL),"
+	        		+ "intersections as (select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, urbans.urbanid, "
+	        		+ "	ST_Intersection(trip.shape,urbans.shape) as intersection, trip.uid "
+	        		+ "	from gtfs_trips trip "
+	        		+ "	inner join intersected_trips USING (id, agencyid)"
+	        		+ "	inner join census_urbans urbans on st_intersects(urbans.shape,trip.shape)),"
+	        		+ "output2 AS (select id, agencyid, serviceid_agencyid, serviceid_id, route_id, urbanid,"
+	        		+ "	st_multi(ST_CollectionExtract(st_union(intersection),2)), (ST_Length(st_transform(intersection,2993))/1609.34), uid "
+	        		+ "	from intersections"
+	        		+ "	group by id, agencyid, serviceid_agencyid, serviceid_id, route_id, urbanid, intersection ,uid) "
 	        		+ "insert into census_urbans_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  urbanid, shape, length, uid) "
-	        		+ "select trip.id, trip.agencyid, trip.serviceid_agencyid, trip.serviceid_id, trip.route_id, urban.urbanid, st_multi(ST_CollectionExtract(st_union(ST_Intersection(trip.shape,urban.shape)),2)), (ST_Length(st_transform(ST_Intersection(trip.shape,urban.shape),2993))/1609.34), trip.uid "
-	        		+ "from gtfs_trips trip "
-	        		+ "inner join groutes on trip.route_id=groutes.routeid "
-	        		+ "inner join census_urbans urban on  st_intersects(urban.shape,trip.shape)=true and st_intersects(urban.shape,multi)=true where trip.serviceid_agencyid='"+agencyId+"' "
-    				+ "group by trip.id, trip.agencyid, urban.urbanid;");
+	        		+ "SELECT * FROM output1 UNION SELECT * FROM output2");
 	        stmt.executeUpdate("update census_urbans_trip_map set stopscount = res.cnt+0 from "
 	        		+ "(select count(stop.id) as cnt, stop.urbanid as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
 	        		+ "from gtfs_stops stop inner join gtfs_stop_times stime "

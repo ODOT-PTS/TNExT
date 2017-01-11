@@ -473,6 +473,28 @@ function addT6(){
 	checkT6status(currentINDEX);
 }
 
+function addEmp(){
+	var db = dbInfo[currentINDEX].toString();
+//	alert(fileName);
+		
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db, 
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	if(d=="done"){
+        		console.log("Employment files were successfully added");
+        		$('#deleteEmp').prop('disabled', false);
+        	}else{
+        		console.log("Employment files could not be added. Error: "+d);
+        	}
+        }
+	});
+	
+	checkT6status(currentINDEX);
+}
+
 function callDBfuntions(dbFunction){
 	for(var i=1;i<dbInfo.length;i++){
 		dbFunction(i);
@@ -937,10 +959,30 @@ function checkPNRstatus(index){
 function openEmp(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
-	var b = status.Employment;
-	changeStatus(index, "employment", !b);
+	currentINDEX = index;
+	if(!status.Employment){
+		$('#deleteEmp').prop('disabled', true);
+	}
+	EMPdialog.dialog( "open" );
+//	var b = status.Employment;
+//	changeStatus(index, "employment", !b);
 	
 }
+
+function deleteEmp(){
+	var db = dbInfo[currentINDEX].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteEmp?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	changeStatus(currentINDEX, "employment", false);
+        	$('#deleteEmp').prop('disabled', true);
+        }
+	});
+}
+
 
 function checkEmpstatus(index){
 	var db = dbInfo[index].toString();
@@ -1101,6 +1143,7 @@ var dialog;
 var GTFSdialog;
 var PNRdialog;
 var T6dialog;
+var EMPdialog;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1222,6 +1265,7 @@ $(document).ready(function(){
 	runGTFSfunctions();
 	runPnRfunctions();
 	runT6functions();
+	runEMPfunctions();
 	
 	$('body').css('display','');
 	$('#dbAccordion .ui-accordion-content').css('height','100%');
@@ -1233,6 +1277,18 @@ function deleteUploadedT6(){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedT6",
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
+
+function deleteUploadedEmp(){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedEmp",
         dataType: "text",
         async: false,
         success: function(d) {
@@ -1326,6 +1382,40 @@ function runT6functions(){
 	      close: function() {
 	    	  $("table tbody.files").empty();
 	    	  deleteUploadedT6();
+	      }
+	 });
+}
+
+function runEMPfunctions(){
+	deleteUploadedEmp(); 
+	
+	'use strict';
+	$('#emp_upload_form').fileupload({
+        url: '/TNAtoolAPI-Webapp/admin',
+        acceptFileTypes: /(csv)$/i,
+        singleFileUploads: true,
+        formData: {data: "emp"},
+        sequentialUploads: true,
+        maxFileSize: 50000000,
+    }).bind('fileuploadstopped', function (e) {
+    	addEmp();
+    });
+	$('#emp_upload_form > div').css('margin-right','0px');
+	
+	EMPdialog = $( "#emp_upload" ).dialog({
+	      autoOpen: false,
+	      height: $(window).height()*0.7,
+	      width: 900,
+	      modal: true,
+	      buttons: {
+//	        "Submit": dSubmit,
+	        Close: function() {
+	        	EMPdialog.dialog( "close" );
+	        }
+	      },
+	      close: function() {
+	    	  $("table tbody.files").empty();
+	    	  deleteUploadedEmp();
 	      }
 	 });
 }
