@@ -61,10 +61,8 @@ var selectedAgencies=Array();
 var polylines = Array();
 var stopsCluster;
 var text='';
-
 map.addLayer(connectionMarkers);
 map.addLayer(connectionPolylines);
-
 
 ///*********Beginning of on-Map connected agencies report*******///
 var dialog2=$("#connectedAgencies-form").dialog({
@@ -1783,3 +1781,8 @@ $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append(
  * Timing connection wizard
  */
 $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="flexRepButton"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="timing-conneciton-button" style="border-radius:5px; background-color:#FFF" onclick="flexRepDialog()">F</button></div>');
+
+/*
+ * Datadump Report 
+ */
+//$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="shapefile-export-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="shapefile-export-button" style="border-radius:5px; background-color:#FFF" onclick="openDatadumpRep()">CSV</button></div>');

@@ -1,0 +1,108 @@
+body{
+	background-color: #cdf8ff;
+}
+
+.container2 {
+	text-align:center;
+	width: 100%;
+	overflow-y: auto; 	
+}
+
+.container2 #dialogBox {
+	width: 500px;
+	height: 600px;
+	background-color : rgba(232, 232, 232, 0.84);
+	position: relative;
+    margin: 0 auto;
+    margin-top: 35px;
+    padding: 10px;
+    padding-bottom : 0px;
+    border-radius: 25px;
+    border: 2px solid rgba(136, 136, 136, 1);
+    box-shadow: 2px 2px 2px #888888;
+    overflow-y: auto;    
+}
+
+#submit{
+	text-align: center;
+	font-size: 105%;
+    color: black;
+    background-color: rgba(84, 245, 36, 0.51);
+    padding: 5px 30px 5px 30px;
+    border-radius: 10px;
+    border-color: rgb(136, 136, 136);
+    cursor: pointer;
+    margin-top: 1%;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+
+.progressbar{
+	width:78%;
+	margin-top:80px;
+}
+
+h3 {
+	style="width:90%";
+	height: 20px;
+}
+.input {
+	width: 295px;
+	padding-left: 3px;
+	margin-left: 5px;
+}
+
+.header {
+	height: 10%;
+	margin-top : 10px;
+	font-size: 130%;;
+	overflow-y: auto;
+}
+
+.content{
+	height: 77%;
+	overflow-y: auto;
+}
+
+.footer{
+	height: 10%;
+	overflow-y: auto;
+}
+
+.td1 {
+	text-align: right;
+	vertical-align: top;
+	font-size: 90%;
+}
+
+.td2 {
+	text-align: left;
+}
+
+hr {
+	margin: 15px;
+	margin-bottom: 5px;
+}
+
+table {
+	margin: 0 auto;
+}
+
+.headerBC {
+	padding-left: 5px;
+	width: 295px;
+}
+
+.datepicker{
+	font-size: 90%;
+}
+
+.progress-label{
+	font-size: 95%;
+}

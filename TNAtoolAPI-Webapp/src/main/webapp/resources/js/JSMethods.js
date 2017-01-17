@@ -489,7 +489,7 @@ function go(key) {
 											'getDates').length
 											+ " day(s) selected<span class='IOSym' style='font-size:10'>" + dateIOnumber + "</span>");
 					$('.selectedDate').css("text-align", "center");
-					$('.ui-accordion-header').css({'width':'90%','font-size':'80%','margin':'auto','text-align':'center'});
+					$('.ui-accordion-header').css({'width':'100%','font-size':'80%','margin':'auto','text-align':'center'});
 				}
 			});
 

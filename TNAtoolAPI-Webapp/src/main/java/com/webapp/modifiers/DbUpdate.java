@@ -19,13 +19,10 @@ package com.webapp.modifiers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -40,7 +37,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -60,43 +56,38 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
 import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException; 
-import net.lingala.zip4j.io.ZipOutputStream;
+import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
-import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.FileItemFactory;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.apache.tomcat.util.http.fileupload.RequestContext;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
-import com.model.database.*;
+import com.goebl.simplify.Point;
+import com.goebl.simplify.Simplify;
+import com.model.database.Databases;
+import com.model.database.FeedNames;
+import com.model.database.GtfsDatabaseLoaderMain;
+import com.model.database.PDBerror;
+import com.model.database.UserInfo;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
 import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.DatabaseStatus;
 import com.model.database.queries.util.Hutil;
-import com.webapp.api.MainMap;
 import com.webapp.api.Queries;
-
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
 
 
 @Path("/dbupdate")
@@ -2679,6 +2670,89 @@ public class DbUpdate {
 		}
 	    
 	    return fn;
-	}            
+	}         
+	
+	@GET
+	@Path("/simplify")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object simplify() throws ZipException, FileNotFoundException {
+		ZipFile zFile = new ZipFile("D:/ziptest/trimet-portland-or-us.zip");
+		zFile.extractAll("D:/ziptest/trimet-portland-or-us/");		
+		File OriginalFile = new File("D:/ziptest/trimet-portland-or-us/shapes.txt");
+        String line = "";
+        String cvsSplitBy = ",";
+        String header = "";
+        List<ShapeRecord> records = new ArrayList<ShapeRecord>();
+        try (BufferedReader br = new BufferedReader(new FileReader(OriginalFile))) {
+        	boolean skipChar = true;
+        	while ((line = br.readLine()) != null) {  
+        		// use comma as separator
+        		if (skipChar){
+        			header = line;
+        			skipChar = false;
+        			continue;
+        		}
+        		String[] values = line.split(cvsSplitBy);
+        		records.add( new ShapeRecord(values[0],
+	            		Double.parseDouble(values[1]), 
+	            		Double.parseDouble(values[2]),
+	            		Integer.parseInt(values[3]),
+	            		Double.parseDouble(values[4])));
+        	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        OriginalFile.delete();
+        
+        ShapeRecord[] recordsArray = new ShapeRecord[records.size()];
+        recordsArray = records.toArray(recordsArray);
+        Simplify<ShapeRecord> simplify = new Simplify<ShapeRecord>(recordsArray);
+        ShapeRecord[] simplifiedRecords = simplify.simplify(recordsArray, 0.00005, true);
+        
+        PrintWriter writer = new PrintWriter("D:/ziptest/trimet-portland-or-us/shapes.txt");
+        writer.print(header + "\n");
+        int seqCounter = 0;
+        try{
+        	for ( ShapeRecord s : simplifiedRecords){
+        		if (seqCounter > s.getSeq())
+            		seqCounter = 0;
+            	writer.print(s.getid() + "," + s.getX() + "," + s.getY() + "," + seqCounter++ + "," + s.getDisTrav() + "\n");
+        	}
+    	}catch(NullPointerException e){}
+        writer.close();
+        File folder = new File("D:/ziptest/trimet-portland-or-us"); 
+        File[] files = folder.listFiles();
+        ZipFile zipFile = new ZipFile("D:/ziptest/trimet-portland-or-us_simplified.zip");
+        ZipParameters parameters = new ZipParameters();
+		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+		parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
+        folder.delete();
+        System.out.println("Done modifying feed shapes");
+        return null;
+	}
+	
+	private class ShapeRecord implements Point{
+		private final String id;
+		private final double lat;
+		private final double lng;
+		private final int sequence;
+		private final double distTraveled;
+		
+		private ShapeRecord(String id, double lat, double lng, int sequence, double distTraveled){
+			this.lat = lat;
+			this.lng = lng;			
+			this.id = id;
+			this.sequence = sequence;
+			this.distTraveled = distTraveled;
+		}
+		
+		public String getid(){return this.id;}
+		public double getX(){return this.lat;}
+		public double getY(){return this.lng;}
+		public int getSeq(){return this.sequence;}
+		public double getDisTrav(){return this.distTraveled;}
+	}
 	
 }

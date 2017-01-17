@@ -40,6 +40,7 @@
 	<script type="text/javascript" src="resources/js/JSMethods.js"></script>
 	<script type="text/javascript" src="resources/js/ShapefileGenerator.js"></script>
 	<script type="text/javascript" src="resources/js/FlexibleReporting.js"></script>
+	<script type="text/javascript" src="resources/js/Datadump.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="resources/css/client.css" />	
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.css" />
@@ -56,6 +57,7 @@
 	<link rel="stylesheet" type="text/css" href="vendors/DataTables/css/dataTables.tableTools.css" />
 	<link rel="stylesheet" type="text/css" href="vendors/leaflet-0.7/leaflet.css" /> 
 	<link rel="stylesheet" type="text/css" href="vendors/leaflet-0.7/search/Control.Geocoder.css" />
+	
 	
 	<!-- Google Analytics Tracking -->	
 	<script>

@@ -19,11 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,7 +52,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.io.ZipOutputStream;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
@@ -68,24 +64,13 @@ import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
-import org.onebusaway.gtfs.model.ShapePoint;
-import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import com.model.database.Databases;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.FareRuleExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.FeedInfoExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.RouteExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarDateExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.ServiceCalendarExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopTimeExt;
-//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.TripExt;
 import com.model.database.queries.EventManager;
 import com.model.database.queries.FlexibleReportEventManager;
 import com.model.database.queries.PgisEventManager;
@@ -348,23 +333,19 @@ public class Queries {
 						+ "		WHERE map.agencyid ='" + agencyId
 						+ "' ORDER BY stop_id";
 			}
-
+			System.out.println(query);
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name
-					.replaceAll("[^a-zA-Z0-9\\-]", "");
+					.replaceAll("[^a-zA-Z0-9\\-]", "");			
 			File agencyFolder = new File(path + "/" + flag + "_shape_"
 					+ uniqueString + "/" + tempAgencyname + "_" + flag);
 			agencyFolder.mkdirs();
 
 			// Run the command to generate shapefiles for the agency
-			// String psqlPath =
-			// "C:/Program Files/PostgreSQL/9.4/bin/pgsql2shp.exe";
 			ProcessBuilder pb = new ProcessBuilder("cmd", "/c", generatorPath,
 					agencyFolder.getAbsolutePath() + "\\" + tempAgencyname
-							+ "_" + flag + "_shape",
-					"localhost" // params[0]
-					, params[2], params[3], dbName, "\"" + query + "\"",
-					"pgsql2shp");
+							+ "_" + flag + "_shape", params[0], params[2],
+					params[3], dbName, "\"" + query + "\"", "pgsql2shp");
 			pb.redirectErrorStream(true);
 			Process pr = pb.start();
 			BufferedReader reader2 = new BufferedReader(new InputStreamReader(
@@ -1527,6 +1508,7 @@ public class Queries {
 	 * 
 	 * @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 	 * MediaType.TEXT_XML }) public Object getSAR(@QueryParam("key") double key,
+	 * 
 	 * @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String
 	 * username, @QueryParam("areaid") String areaId, @QueryParam("type")
 	 * Integer type) throws JSONException { if (dbindex==null || dbindex<0 ||
@@ -4365,8 +4347,7 @@ public class Queries {
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
 			@QueryParam("maxUrbanPop") Integer maxUrbanPop,
 			@QueryParam("uAreaYear") String uAreaYear,
-			@QueryParam("key") Double key
-			) throws SQLException {
+			@QueryParam("key") Double key) throws SQLException {
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
 		String[] fulldates = fulldate(dates);
@@ -4421,10 +4402,9 @@ public class Queries {
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
 			@QueryParam("maxUrbanPop") Integer maxUrbanPop,
 			@QueryParam("wac") Boolean wac, @QueryParam("rac") Boolean rac,
-			@QueryParam("metrics") String metrics,
-			@QueryParam("key") Double key) throws SQLException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+			@QueryParam("metrics") String metrics, @QueryParam("key") Double key)
+			throws SQLException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException {
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
 		String[] fulldates = fulldate(dates);
@@ -4432,7 +4412,8 @@ public class Queries {
 		String[] days = datedays[1];
 		return FlexibleReportEventManager.getFlexRepEmp(dbindex, agencies,
 				sdates, days, popyear, areas, los, sradius, areaType, username,
-				urbanFilter, urbanYear, minUrbanPop, maxUrbanPop, wac, rac, metrics.split(","),key);
+				urbanFilter, urbanYear, minUrbanPop, maxUrbanPop, wac, rac,
+				metrics.split(","), key);
 	}
 
 	@GET
@@ -4450,10 +4431,9 @@ public class Queries {
 			@QueryParam("urbanYear") String urbanYear,
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
 			@QueryParam("maxUrbanPop") Integer maxUrbanPop,
-			@QueryParam("metrics") String metrics,
-			@QueryParam("key") Double key) throws SQLException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+			@QueryParam("metrics") String metrics, @QueryParam("key") Double key)
+			throws SQLException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException {
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
 		String[] fulldates = fulldate(dates);
@@ -4461,6 +4441,7 @@ public class Queries {
 		String[] days = datedays[1];
 		return FlexibleReportEventManager.getFlexRepT6(dbindex, agencies,
 				sdates, days, areas, los, sradius, areaType, username,
-				urbanFilter,urbanYear,minUrbanPop, maxUrbanPop, metrics.split(","),key);
-	}
+				urbanFilter, urbanYear, minUrbanPop, maxUrbanPop,
+				metrics.split(","), key);
+	}	
 }

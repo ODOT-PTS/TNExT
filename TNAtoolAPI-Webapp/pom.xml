@@ -49,6 +49,13 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<!-- https://mvnrepository.com/artifact/com.goebl/simplify -->
+		<dependency>
+		    <groupId>com.goebl</groupId>
+		    <artifactId>simplify</artifactId>
+		    <version>1.0.0</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/au.com.bytecode/opencsv -->
 		<dependency>
 			<groupId>au.com.bytecode</groupId>
