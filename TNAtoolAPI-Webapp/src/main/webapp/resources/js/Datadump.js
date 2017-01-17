@@ -1,4 +1,39 @@
-var reportType,popYear,dbIndex,sRadius,los,dates,csvContent,progressVal,agencies,areaIDs;
+var reportType,popYear,dbIndex,sRadius,los,dates,csvContent,progressVal,agencies,areaIDs,areaType;
+var tempHeaders = 'Route Miles' + ','
+	+ 'Stops Per Square Mile' + ','
+	+ 'Stops Per Service Mile' + ','
+	+ 'Service Hours' + ','
+	+ 'Service Miles' + ','
+	+ 'Service Miles Per Square Mile' + ','
+	+ 'Miles of Service Per Capita' + ','
+	+ 'Urban Population Served' + ','
+	+ 'Rural Population Served' + ','
+	+ 'Percent of Population Served' + ','
+	+ 'Percent of Population Served at Level of Service' + ','
+	+ 'Urban Population Served at Level of Service' + ','
+	+ 'Rural Population Served at Level of Service' + ','
+	+ 'Percent of Population Unserved' + ','
+	+ 'Service Stops' + ','
+	+ 'Urban Population Served By Service' + ','
+	+ 'Rural Population Served By Service' + ','
+	+ 'Employment Served (RAC)' + ','
+	+ 'Percent of Employment (RAC)  Served' + ','
+	+ 'Percent of Employment (RAC)  Served at Level of Service' + ','
+	+ 'Employment (RAC)  Served at Level of Service' + ','
+	+ 'Percent of Employment (RAC) Unserved' + ','
+	+ 'Employment (RAC) Served By Service' + ','
+	+ 'Employees (WAC) Served' + ','
+	+ 'Percent of Employees (WAC) Served' + ','
+	+ 'Percent of Employees (WAC) Served at Level of Service' + ','
+	+ 'Employees (WAC)  Served at Level of Service' + ','
+	+ 'Percent of Employee (WAC) Unserved' + ','
+	+ 'Employees (WAC) Served By Service' + ','
+	+ 'Connected Communities' + ','
+	+ 'Hours of Service' + ','
+	+ 'Minimum Fare' + ','
+	+ 'Average Fare' + ','
+	+ 'Median Fare' + ','
+	+ 'Maximum Fare' + '\n';
 
 function openDatadumpRep() {
 	var d = new Date();
@@ -23,57 +58,34 @@ function generateDatadump() {
 	
 	switch (parseInt(reportType)) {
 	case 0: // counties
-		csvContent += 'County' + ','
-		+ 'Route Miles' + ','
-		+ 'Stops Per Square Mile' + ','
-		+ 'Stops Per Service Mile' + ','
-		+ 'Service Hours' + ','
-		+ 'Service Miles' + ','
-		+ 'Service Miles Per Square Mile' + ','
-		+ 'Miles of Service Per Capita' + ','
-		+ 'Urban Population Served' + ','
-		+ 'Rural Population Served' + ','
-		+ 'Percent of Population Served' + ','
-		+ 'Percent of Population Served at Level of Service' + ','
-		+ 'Urban Population Served at Level of Service' + ','
-		+ 'Rural Population Served at Level of Service' + ','
-		+ 'Percent of Population Unserved' + ','
-		+ 'Service Stops' + ','
-		+ 'Urban Population Served By Service' + ','
-		+ 'Rural Population Served By Service' + ','
-		+ 'Employment Served (RAC)' + ','
-		+ 'Percent of Employment (RAC)  Served' + ','
-		+ 'Percent of Employment (RAC)  Served at Level of Service' + ','
-		+ 'Employment (RAC)  Served at Level of Service' + ','
-		+ 'Percent of Employment (RAC) Unserved' + ','
-		+ 'Employment (RAC) Served By Service' + ','
-		+ 'Employees (WAC) Served' + ','
-		+ 'Percent of Employees (WAC) Served' + ','
-		+ 'Percent of Employees (WAC) Served at Level of Service' + ','
-		+ 'Employees (WAC)  Served at Level of Service' + ','
-		+ 'Percent of Employee (WAC) Unserved' + ','
-		+ 'Employees (WAC) Served By Service' + ','
-		+ 'Connected Communities' + ','
-		+ 'Hours of Service' + ','
-		+ 'Minimum Fare' + ','
-		+ 'Average Fare' + ','
-		+ 'Median Fare' + ','
-		+ 'Maximum Fare' + '\n';
+		areaType = 0;
+		csvContent = 'County' + ',' + tempHeaders;		
 		areaIDs = getAreaIDs('county');
-		console.log(areaIDs);
-		runAjaxCounties (0, 'Counties_Extended_Reports_Dump');
+		runAjaxAreas(0, areaType, 'Counties_Extended_Reports_Dump');
 		break;
-	case 1: // census places
-		// code
+	case 1: // places
+		areaType = 2;
+		csvContent += 'Census Place' + ',' + tempHeaders;
+		areaIDs = getAreaIDs('place');
+		runAjaxAreas(0, areaType, 'Places_Extended_Reports_Dump');
 		break;
 	case 2: // congressional district
-		// code
+		areaType = 5;
+		csvContent += 'Congressional  District' + ',' + tempHeaders;
+		areaIDs = getAreaIDs('congDist');
+		runAjaxAreas(0, areaType, 'Congressional_Districts_Extended_Reports_Dump');
 		break;
 	case 3: // urban areas
-		// code
+		areaType = 3;
+		csvContent += 'Urban Area' + ',' + tempHeaders;
+		areaIDs = getAreaIDs('urban');
+		runAjaxAreas(0, areaType, 'Urban_Areas_Extended_Reports_Dump');
 		break;
 	case 4: // ODOT transit regions
-		// code
+		areaType = 4;
+		csvContent += 'ODOT Transit Region' + ',' + tempHeaders;
+		areaIDs = getAreaIDs('odotRegion');
+		runAjaxAreas(0, areaType, 'ODOT_Transit_Regions_Extended_Reports_Dump');
 		break;
 	case 5: // Agencies
 		csvContent += 'AgencyName' + ',' + 'Route Miles' + ',' + 'Route Stops'
@@ -108,16 +120,20 @@ function generateDatadump() {
 	}	
 }
 
-function runAjaxCounties(ind,fileName){
+function runAjaxAreas(ind,areaType,fileName){
+	console.log(areaIDs[ind]);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=0&areaid='+areaIDs[ind]
+		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
 			+ '&x='+sRadius+'&l=2'+'&n='+keyName+'&day='+w_qstringd+'&key='+ key
 			+ '&dbindex=' + dbindex + '&los' + los + '&popYear='+popYear
 			+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null,
 		async: true,
 		success: function(d){
+			if (areaType == 4) // area names of some of the ODOT regions are null, thus they are replaced by the region ID. 
+				d.AreaName = 'Region ' + areaIDs[ind];
+			
 			csvContent += d.AreaName + ","
 				+ d.RouteMiles + ","
 				+ d.StopsPersqMile + ","
@@ -157,18 +173,20 @@ function runAjaxCounties(ind,fileName){
 					+ d.AverageFare + ","
 					+ d.MedianFare + ","
 					+ d.MaxFare + "\n";
-				progressVal = Math.floor((ind + 1) / areaIDs.length * 100);
+				progressVal = Math.max(Math.floor((ind + 1) / areaIDs.length * 100),1);
 				ind += 1;
 				if (ind < areaIDs.length)
-					setTimeout(function(){runAjaxCounties(ind,fileName);},100);
+					setTimeout(function(){runAjaxAreas(ind,areaType,fileName);},100);
 				else
 					createCSV(fileName);
 			}
-		});
+	});
 }
+
 function runAjaxAgency(ind, fileName){
 	if (ind > agencies.length)
 		return false;
+	console.log(agencies[ind]);
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
@@ -179,7 +197,7 @@ function runAjaxAgency(ind, fileName){
 				+ '&geoid=null&dbindex=' + dbindex,
 		async : false,
 		success : function(d) {
-			csvContent += d.AgencyName + ',' + d.RouteMiles + ','
+			csvContent += d.AgencyName.replace(/,/g,'') + ',' + d.RouteMiles + ','
 					+ d.StopCount + ',' + d.StopPerRouteMile + ','
 					+ d.ServiceHours + ',' + d.ServiceMiles + ','
 					+ d.UPopWithinX + ',' + d.RPopWithinX + ','
@@ -197,7 +215,7 @@ function runAjaxAgency(ind, fileName){
 			else
 				csvContent += d.wacServedByService + ',';
 			csvContent += d.HoursOfService + '\n';
-			progressVal = Math.floor((ind + 1) / agencies.length * 100);
+			progressVal = Math.max(Math.floor((ind + 1) / agencies.length * 100),1);
 			ind += 1;
 			if (ind < agencies.length)
 				setTimeout(function(){runAjaxAgency(ind,fileName);},100);
@@ -224,7 +242,6 @@ function loadProgressBar() {
 function runProgressbar(){
 	var prog = false;
 	function progress() {
-		console.log('asd');
 		if (progressVal == 0) {
 			if (prog) {
 				progressVal = 100;
@@ -244,6 +261,7 @@ function runProgressbar(){
 	}	
 	timeVar = setInterval(progress, 100);
 }
+
 function createCSV(fileName){
 	var a = document.createElement('a');
 	a.href = 'data:attachment/csv,' + encodeURIComponent(csvContent);
@@ -263,7 +281,6 @@ function getAreaIDs(areaType){
 				+ dbindex + '&areaType=' + areaType,
 		async : false,
 		success : function(d) {
-			console.log("D",d);
 			$.each(d,function(index,item){
 				areas.push(item.id);
 			});
