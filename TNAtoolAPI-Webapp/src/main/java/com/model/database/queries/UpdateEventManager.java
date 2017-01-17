@@ -697,7 +697,7 @@ public class UpdateEventManager {
 	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips DISABLE TRIGGER ALL;"); 
 	    	  
 	    	  stmt.executeUpdate("update gtfs_trips trip set shape = tss.shape, epshape=GoogleEncodeLine(tss.shape), length = (tss.length)/1609.34, estlength=0 FROM "
-	    	  		+ "(select ST_SimplifyPreserveTopology(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),0.001) as shape, ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),2993)) as length,"
+	    	  		+ "(select ST_SimplifyPreserveTopology(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),0.00001) as shape, ST_Length(st_transform(ST_MakeLine(ST_setsrid(ST_MakePoint(shppoint.lon, shppoint.lat),4326)),2993)) as length,"
 	    	  		+ "shppoint.shapeid_agencyid as agencyid, shppoint.shapeid_id as shapeid from (select * from gtfs_shape_points where shapeid_agencyid='"+agencyId+"' order by shapeid_agencyid, shapeid_id, sequence) as shppoint "
 	    	  		+ "group by agencyid, shapeid) "
 	    	  		+ "as tss where tss.agencyid = trip.shapeid_agencyid and tss.shapeid = trip.shapeid_id;");
