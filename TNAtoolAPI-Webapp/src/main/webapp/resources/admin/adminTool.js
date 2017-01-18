@@ -492,7 +492,29 @@ function addEmp(){
         }
 	});
 	
-	checkT6status(currentINDEX);
+	checkEmpstatus(currentINDEX);
+}
+
+function addfEmp(){
+	var db = dbInfo[currentINDEX].toString();
+//	alert(fileName);
+		
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db, 
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	if(d=="done"){
+        		console.log("Employment Projecion files were successfully added");
+        		$('#deleteEmp').prop('disabled', false);
+        	}else{
+        		console.log("Employment Projection files could not be added. Error: "+d);
+        	}
+        }
+	});
+	
+	checkfEmpstatus(currentINDEX);
 }
 
 function callDBfuntions(dbFunction){
@@ -817,8 +839,11 @@ function checkFpopstatus(index){
 function openFemp(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
-	var b = status.FutureEmp;
-	changeStatus(index, "future_emp", !b);
+	currentINDEX = index;
+	if(!status.FutureEmp){
+		$('#deletefEmp').prop('disabled', true);
+	}
+	FEMPdialog.dialog( "open" );
 }
 
 function checkfEmpstatus(index){
@@ -839,6 +864,20 @@ function checkfEmpstatus(index){
         		changeStatus(index, "future_emp", b);
         	}
         	
+        }
+	});
+}
+
+function deletefEmp(){
+	var db = dbInfo[currentINDEX].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefEmp?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	changeStatus(currentINDEX, "future_emp", false);
+        	$('#deletefEmp').prop('disabled', true);
         }
 	});
 }
@@ -929,6 +968,7 @@ function deletePNR(){
 	});
 }
 
+
 function checkPNRstatus(index){
 	var db = dbInfo[index].toString();
 	
@@ -950,6 +990,7 @@ function checkPNRstatus(index){
         }
 	});
 }
+
 
 
 
@@ -1144,6 +1185,7 @@ var GTFSdialog;
 var PNRdialog;
 var T6dialog;
 var EMPdialog;
+var FEMPdialog;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1266,6 +1308,7 @@ $(document).ready(function(){
 	runPnRfunctions();
 	runT6functions();
 	runEMPfunctions();
+	runFEMPfunctions();
 	
 	$('body').css('display','');
 	$('#dbAccordion .ui-accordion-content').css('height','100%');
@@ -1289,6 +1332,18 @@ function deleteUploadedEmp(){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedEmp",
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
+
+function deleteUploadedfEmp(){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedfEmp",
         dataType: "text",
         async: false,
         success: function(d) {
@@ -1352,6 +1407,41 @@ function runPnRfunctions(){
 	 });
 }
 
+function runFEMPfunctions(){
+	deleteUploadedfEmp(); 
+	
+	'use strict';
+	$('#femp_upload_form').fileupload({
+        url: '/TNAtoolAPI-Webapp/admin',
+        acceptFileTypes: /(csv)$/i,
+        singleFileUploads: true,
+        formData: {data: "femp"},
+        sequentialUploads: true,
+        maxFileSize: 50000000,
+    }).bind('fileuploadalways', function (e, data){
+    	addfEmp(data.files[0].name);
+    })
+	$('#femp_upload_form > div').css('margin-right','0px');
+	
+	FEMPdialog = $( "#femp_upload" ).dialog({
+	      autoOpen: false,
+	      height: $(window).height()*0.7,
+	      width: 900,
+	      modal: true,
+	      buttons: {
+//	        "Submit": dSubmit,
+	        Close: function() {
+	        	FEMPdialog.dialog( "close" );
+	        }
+	      },
+	      close: function() {
+	    	  $("table tbody.files").empty();
+	    	  deleteUploadedfEmp();
+	      }
+	 });
+}
+
+
 function runT6functions(){
 	deleteUploadedT6(); 
 	
@@ -1376,7 +1466,7 @@ function runT6functions(){
 	      buttons: {
 //	        "Submit": dSubmit,
 	        Close: function() {
-	        	PNRdialog.dialog( "close" );
+	        	T6dialog.dialog( "close" );
 	        }
 	      },
 	      close: function() {

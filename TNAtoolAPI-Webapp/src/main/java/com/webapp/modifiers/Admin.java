@@ -171,6 +171,30 @@ public class Admin extends HttpServlet {
 	                        
 			            }
 			        }
+		        }else if(data.equals("femp")){
+		        	for(FileItem item: items){
+			            if (!item.isFormField()) {
+			                String fileName = item.getName();
+			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File(path
+			        				+ "../../src/main/webapp/resources/admin/uploads/femp");
+			                if (!loc.exists()) {
+			                	boolean status = loc.mkdirs();
+			                }
+			                File uploadedFile = new File(loc + "/" + fileName);
+			                item.write(uploadedFile);
+			                
+			                JSONObject jsono = new JSONObject();
+	                        jsono.put("name", fileName);
+	                        jsono.put("size", item.getSize());
+	                        jsono.put("url", "upload?getfile=" + fileName);
+	                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
+	                        jsono.put("delete_url", "upload?delfile=" + fileName);
+	                        jsono.put("delete_type", "GET");
+	                        json.put(jsono);
+	                        
+			            }
+			        }
 		        }
 		        
 	        } catch (FileUploadException e) {

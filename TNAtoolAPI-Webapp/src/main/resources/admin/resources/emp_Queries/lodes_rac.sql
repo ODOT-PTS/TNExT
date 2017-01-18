@@ -47,7 +47,7 @@ PRIMARY KEY(blockid)
 );
 
 COPY lodes_blocks_rac 
-FROM '../../../../webapp/resources/admin/uploads/emp/rac.csv.csv' DELIMITER ',' CSV HEADER;
+FROM '../../../../webapp/resources/admin/uploads/emp/rac.csv' DELIMITER ',' CSV HEADER;
 
 ALTER TABLE lodes_blocks_rac
 ADD location geometry(Point,2993);

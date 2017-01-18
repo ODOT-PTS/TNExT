@@ -1320,6 +1320,32 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deletefEmp")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deletefEmp(@QueryParam("db") String db){
+		String response = "done";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			statement.executeUpdate("DROP TABLE IF EXISTS lodes_rac_projection_block;");
+			statement.executeUpdate("DROP TABLE IF EXISTS lodes_rac_projection_county;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: deletefEmp method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/checkEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkEmpstatus(@QueryParam("db") String db){
@@ -1849,6 +1875,23 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deleteUploadedfEmp")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteUploadedfEmp() throws IOException{
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
+		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/femp");
+		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+	    if(files!=null) { 
+	        for(File f: files) {
+	        	f.delete();
+	        }
+	    }
+		return "done";
+	}
+	
+	@GET
     @Path("/deleteProcessGTFS")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deleteProcessGTFS() throws IOException{
@@ -2300,7 +2343,7 @@ public class DbUpdate {
 		path = path.substring(1, path.length());
 		File source = new File(path);*/
     	String message = "";
-		System.out.println(message);
+//		System.out.println(message);
 		
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
@@ -2332,6 +2375,74 @@ public class DbUpdate {
 		}
 		
 		sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_wac.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+",";
+		}
+		
+		if(message.equals("")){
+			message = "done";
+		}
+		
+		return message;
+	}
+	
+	@GET
+    @Path("/addfEmp")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addfEmp(@QueryParam("db") String db) throws SQLException{
+		String[] dbInfo = db.split(",");
+		
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path.substring(1, path.length());
+		File source = new File(path);*/
+    	String message = "";
+//		System.out.println(message);
+		
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		host = "localhost"; //to be deleted
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		Process pr;
+		String sqlPath;
+    	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
