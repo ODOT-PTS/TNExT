@@ -1,0 +1,66 @@
+#header{
+	position: absolute;
+	height: 70px;
+	left: 0;
+	right: 0;
+	top: 0;
+	width: 100%;	
+	background-image: url("../images/wallpaper.jpg");
+	border-style: groove;
+}
+
+#fading-box{
+	height: 100%;
+	background-color: white;
+	float:left;
+	width: 10px;
+	box-shadow: 19px 0 28px 24px white;
+}
+
+#header-title{
+	display: table-cell;
+	font-size: 25pt;
+	vertical-align: middle;
+	padding-top: 15px;
+	padding-left: 50px;
+	font-weight: bold;
+	text-shadow: 3px 2px white;
+}
+
+#left-bar{
+	position: absolute;
+  	top: 72px;
+  	bottom: 0;
+  	left: 1px;
+  	width : 19.5%;
+	border-style: groove;
+	background-color: rgba(153, 179, 204, 0.4);
+}
+
+#map{
+	position: absolute;
+  	top: 70px;
+  	bottom: 0;
+  	left: 20%;
+	right: 20%;
+	width: 60%;	
+	border-style: groove;
+}
+
+#right-bar{
+	position: absolute;
+  	top: 70px;
+  	bottom: 0;
+  	right: 0;
+  	width : 20%;
+	border-style: groove;
+	background-color: rgba(153, 179, 204, 0.4);
+}
+
+#logo{
+	 float: left;	
+}
+a{
+	text-decoration: none;
+	color:black;
+}

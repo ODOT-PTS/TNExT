@@ -344,7 +344,7 @@ public class Queries {
 			// Run the command to generate shapefiles for the agency
 			ProcessBuilder pb = new ProcessBuilder("cmd", "/c", generatorPath,
 					agencyFolder.getAbsolutePath() + "\\" + tempAgencyname
-							+ "_" + flag + "_shape", params[0], params[2],
+							+ "_" + flag + "_shape", "localhost" /*params[0]*/, params[2],
 					params[3], dbName, "\"" + query + "\"", "pgsql2shp");
 			pb.redirectErrorStream(true);
 			Process pr = pb.start();
@@ -352,7 +352,7 @@ public class Queries {
 					pr.getInputStream()));
 			while (reader2.readLine() != null) {
 			}
-			pr.waitFor(5, TimeUnit.MINUTES);
+			pr.waitFor(10, TimeUnit.MINUTES);
 		}
 
 		ZipParameters parameters = new ZipParameters();

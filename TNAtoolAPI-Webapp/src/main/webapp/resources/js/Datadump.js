@@ -41,7 +41,7 @@ function openDatadumpRep() {
 			.join('/');
 	var keyName = setDates(qstringd);
 	window.open('/TNAtoolAPI-Webapp/Datadump.html?&n=' + keyName
-			+ '&dbindex=3&popYear=' + popYear);
+			+ '&dbindex='+ dbindex + '&popYear=' + popYear);
 }
 
 function generateDatadump() {
@@ -121,13 +121,16 @@ function generateDatadump() {
 }
 
 function runAjaxAreas(ind,areaType,fileName){
-	console.log(areaIDs[ind]);
+	console.log('/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
+	+ '&x='+sRadius+'&l=2'+'&n='+keyName+'&day='+dates+'&key='+ key
+	+ '&dbindex=' + $('#dbselect').val() + '&los' + los + '&popYear='+popYear
+	+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
-			+ '&x='+sRadius+'&l=2'+'&n='+keyName+'&day='+w_qstringd+'&key='+ key
-			+ '&dbindex=' + dbindex + '&los' + los + '&popYear='+popYear
+			+ '&x='+sRadius+'&l=2'+'&n='+keyName+'&day='+dates+'&key='+ key
+			+ '&dbindex=' + $('#dbselect').val() + '&los' + los + '&popYear='+popYear
 			+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null,
 		async: true,
 		success: function(d){
@@ -186,7 +189,11 @@ function runAjaxAreas(ind,areaType,fileName){
 function runAjaxAgency(ind, fileName){
 	if (ind > agencies.length)
 		return false;
-	console.log(agencies[ind]);
+	console.log('/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
+				+ agencies[ind] + '&day=' + dates + '&key=' + key + '&popYear='
+				+ popYear + '&areaId=null&type=' + 0 + '&username='
+				+ getSession() + '&x=' + sRadius + '&geotype=' + -1
+				+ '&geoid=null&dbindex=' + $('#dbselect').val());
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
@@ -194,7 +201,7 @@ function runAjaxAgency(ind, fileName){
 				+ agencies[ind] + '&day=' + dates + '&key=' + key + '&popYear='
 				+ popYear + '&areaId=null&type=' + 0 + '&username='
 				+ getSession() + '&x=' + sRadius + '&geotype=' + -1
-				+ '&geoid=null&dbindex=' + dbindex,
+				+ '&geoid=null&dbindex=' + $('#dbselect').val(),
 		async : false,
 		success : function(d) {
 			csvContent += d.AgencyName.replace(/,/g,'') + ',' + d.RouteMiles + ','
