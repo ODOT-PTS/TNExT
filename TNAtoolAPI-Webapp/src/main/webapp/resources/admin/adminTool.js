@@ -507,9 +507,31 @@ function addfEmp(){
         success: function(d) {
         	if(d=="done"){
         		console.log("Employment Projecion files were successfully added");
-        		$('#deleteEmp').prop('disabled', false);
+        		$('#deletefEmp').prop('disabled', false);
         	}else{
         		console.log("Employment Projection files could not be added. Error: "+d);
+        	}
+        }
+	});
+	
+	checkfEmpstatus(currentINDEX);
+}
+
+function addfPop(){
+	var db = dbInfo[currentINDEX].toString();
+//	alert(fileName);
+		
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db, 
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	if(d=="done"){
+        		console.log("Population Projecion files were successfully added");
+        		$('#deletefPop').prop('disabled', false);
+        	}else{
+        		console.log("Population Projection files could not be added. Error: "+d);
         	}
         }
 	});
@@ -806,8 +828,13 @@ function checkUpdatestatus(index){
 function openFpop(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
-	var b = status.FuturePop;
-	changeStatus(index, "future_pop", !b);
+	currentINDEX = index;
+	if(!status.FuturePop){
+		$('#deletefPop').prop('disabled', true);
+	}
+	FPOPdialog.dialog( "open" );
+//	var b = status.FuturePop;
+//	changeStatus(index, "future_pop", !b);
 }
 
 function checkFpopstatus(index){
@@ -828,6 +855,20 @@ function checkFpopstatus(index){
         		changeStatus(index, "future_pop", b);
         	}
         	
+        }
+	});
+}
+
+function deletefPop(){
+	var db = dbInfo[currentINDEX].toString();
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefPop?&db="+db,
+        dataType: "text",
+        async: false,
+        success: function(b) {
+        	changeStatus(currentINDEX, "future_pop", false);
+        	$('#deletefPop').prop('disabled', true);
         }
 	});
 }
@@ -1186,6 +1227,7 @@ var PNRdialog;
 var T6dialog;
 var EMPdialog;
 var FEMPdialog;
+var FPOPdialog;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1309,6 +1351,7 @@ $(document).ready(function(){
 	runT6functions();
 	runEMPfunctions();
 	runFEMPfunctions();
+	runFPOPfunctions();
 	
 	$('body').css('display','');
 	$('#dbAccordion .ui-accordion-content').css('height','100%');
@@ -1344,6 +1387,18 @@ function deleteUploadedfEmp(){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedfEmp",
+        dataType: "text",
+        async: false,
+        success: function(d) {
+        	
+        }
+	});
+}
+
+function deleteUploadedfPop(){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteUploadedfPop",
         dataType: "text",
         async: false,
         success: function(d) {
@@ -1506,6 +1561,40 @@ function runEMPfunctions(){
 	      close: function() {
 	    	  $("table tbody.files").empty();
 	    	  deleteUploadedEmp();
+	      }
+	 });
+}
+
+function runFPOPfunctions(){
+	deleteUploadedfPop(); 
+	
+	'use strict';
+	$('#fpop_upload_form').fileupload({
+        url: '/TNAtoolAPI-Webapp/admin',
+        acceptFileTypes: /(csv)$/i,
+        singleFileUploads: true,
+        formData: {data: "fpop"},
+        sequentialUploads: true,
+        maxFileSize: 50000000,
+    }).bind('fileuploadalways', function (e, data){
+    	addfPop(data.files[0].name);
+    })
+	$('#fpop_upload_form > div').css('margin-right','0px');
+	
+	FPOPdialog = $( "#fpop_upload" ).dialog({
+	      autoOpen: false,
+	      height: $(window).height()*0.7,
+	      width: 900,
+	      modal: true,
+	      buttons: {
+//	        "Submit": dSubmit,
+	        Close: function() {
+	        	FPOPdialog.dialog( "close" );
+	        }
+	      },
+	      close: function() {
+	    	  $("table tbody.files").empty();
+	    	  deleteUploadedfPop();
 	      }
 	 });
 }
