@@ -269,7 +269,8 @@ public class SpatialEventManager {
 //		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
 		String query = "SELECT name, lat, lon FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
 				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-				+ " WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";;
+				+ " WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";
+		System.out.println(query);
 		ResultSet rs = stmt.executeQuery(query);
 		List<ConGraphCluster> clusters = new ArrayList<ConGraphCluster>();
 		List<Coordinate> points = new ArrayList<Coordinate>();
@@ -279,22 +280,23 @@ public class SpatialEventManager {
 			points.add(c);
 		}
 		
+		// handling agencies with no trips scheduled for them
+		if ( points.isEmpty())
+			return null;
+		
 		while (!points.isEmpty()){
 			Set<Coordinate> clusterPoints = new HashSet<Coordinate>();
 			Coordinate currenPoint = points.remove(0);
 			clusterPoints.add(currenPoint);
-			
 			for ( Coordinate p : points ){
 				if (ConGraphAgencyGraph.getDistance(currenPoint, p) < RADIUS){
 					clusterPoints.add(p);
 				}
 			}
-			
 			ConGraphCluster c = new ConGraphCluster( clusterPoints );
 			points.removeAll(clusterPoints);
 			clusters.add(c); 
 		}
-		
 		ConGraphAgencyGraph response = new ConGraphAgencyGraph(agencyID, clusters);
 		return response;
 	}

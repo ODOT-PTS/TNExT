@@ -56,8 +56,7 @@ $(document).ready(function(){
 		async: true,
 		success: function(item){	
 			docMetadata = item.metadata;
-			appendNavigation(item.AreaName);
-			//$('h2').append(item.AreaName+' Extended Report <br><hr>');	
+			appendNavigation(item.AreaName);				
 			html += '<tr><td class="metric" title="Identification number associated with the geographic area.">Geo ID<td>'+ item.AreaId 
 			+'</td></tr><tr><td class="metric" title="Name of the geographic area.">Name</td><td>' + item.AreaName 
 			+'</td></tr><tr><td class="metric" title="Summation of the lengths of the longest trips within the given geographic area.">Route Miles </td><td>'+ numberconv(item.RouteMiles) 

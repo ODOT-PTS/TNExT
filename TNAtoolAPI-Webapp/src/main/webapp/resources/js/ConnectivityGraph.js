@@ -52,7 +52,7 @@ function toggleConGraphDialog() {
 		$("#con-graph-dialog").dialog({
 			autoOpen : false,
 			height : dialogheight,
-			width : 350,
+			width : 400,
 			minWidth : 200,
 			minHeight : 350,
 			modal : false,
@@ -60,9 +60,13 @@ function toggleConGraphDialog() {
 			resizable : true,
 			closeOnEscape : false,
 			position : {
-				my : "left top",
-				at : "right top",
-				of : "#con-graph-button"
+				my : "left+40 top+45",
+				at : "left top",
+				of : "#map"
+			},
+			show : {
+				effect : "slide",
+				duration : 300
 			},
 			buttons : {},
 			close : function() {

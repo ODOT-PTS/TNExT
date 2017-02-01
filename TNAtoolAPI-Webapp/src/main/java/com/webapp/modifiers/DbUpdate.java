@@ -2788,9 +2788,9 @@ public class DbUpdate {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object simplify() throws ZipException, FileNotFoundException {
-		ZipFile zFile = new ZipFile("D:/ziptest/trimet-portland-or-us.zip");
-		zFile.extractAll("D:/ziptest/trimet-portland-or-us/");		
-		File OriginalFile = new File("D:/ziptest/trimet-portland-or-us/shapes.txt");
+		ZipFile zFile = new ZipFile("D:/ziptest/trimet.zip");
+		zFile.extractAll("D:/ziptest/trimet");		
+		File OriginalFile = new File("D:/ziptest/trimet/shapes.txt");
         String line = "";
         String cvsSplitBy = ",";
         String header = "";
@@ -2821,7 +2821,7 @@ public class DbUpdate {
         Simplify<ShapeRecord> simplify = new Simplify<ShapeRecord>(recordsArray);
         ShapeRecord[] simplifiedRecords = simplify.simplify(recordsArray, 0.00005, true);
         
-        PrintWriter writer = new PrintWriter("D:/ziptest/trimet-portland-or-us/shapes.txt");
+        PrintWriter writer = new PrintWriter("D:/ziptest/trimet/shapes.txt");
         writer.print(header + "\n");
         int seqCounter = 0;
         try{
@@ -2832,9 +2832,9 @@ public class DbUpdate {
         	}
     	}catch(NullPointerException e){}
         writer.close();
-        File folder = new File("D:/ziptest/trimet-portland-or-us"); 
+        File folder = new File("D:/ziptest/trimet"); 
         File[] files = folder.listFiles();
-        ZipFile zipFile = new ZipFile("D:/ziptest/trimet-portland-or-us_simplified.zip");
+        ZipFile zipFile = new ZipFile("D:/ziptest/trimet_simplified.zip");
         ZipParameters parameters = new ZipParameters();
 		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
 		parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
