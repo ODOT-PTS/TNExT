@@ -1346,6 +1346,48 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/deletefPop")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deletefPop(@QueryParam("db") String db){
+		String response = "done";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			statement.executeUpdate("UPDATE census_blocks SET "
+					+ "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
+					+ "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
+			statement.executeUpdate("UPDATE census_tracts SET "
+					+ "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
+					+ "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
+			statement.executeUpdate("UPDATE census_counties SET "
+					+ "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
+					+ "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
+			statement.executeUpdate("UPDATE census_congdists SET "
+					+ "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
+					+ "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
+			statement.executeUpdate("UPDATE census_places SET "
+					+ "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
+					+ "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
+			statement.executeUpdate("UPDATE census_urbans SET "
+					+ "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
+					+ "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: deletefPop method");
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/checkEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkEmpstatus(@QueryParam("db") String db){
@@ -1881,6 +1923,23 @@ public class DbUpdate {
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		
 		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/femp");
+		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+	    if(files!=null) { 
+	        for(File f: files) {
+	        	f.delete();
+	        }
+	    }
+		return "done";
+	}
+	
+	@GET
+    @Path("/deleteUploadedfPop")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteUploadedfPop() throws IOException{
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
+		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/fpop");
 		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
 	    if(files!=null) { 
@@ -2463,6 +2522,51 @@ public class DbUpdate {
 		
 		if(message.equals("")){
 			message = "done";
+		}
+		
+		return message;
+	}
+	
+	@GET
+    @Path("/addfPop")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addfPop(@QueryParam("db") String db) throws SQLException{
+		String[] dbInfo = db.split(",");
+		
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path.substring(1, path.length());
+		File source = new File(path);*/
+    	String message = "done";
+//		System.out.println(message);
+		
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		host = "localhost"; //to be deleted
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		Process pr;
+		String sqlPath;
+    	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/futurePopBlocks.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
 		}
 		
 		return message;
