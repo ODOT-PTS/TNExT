@@ -4827,7 +4827,7 @@ GeoArea response = new GeoArea();
 		 }
     	  }
 populationyear="population"+popYear;
-System.out.println(query);
+//System.out.println(query);
 try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 

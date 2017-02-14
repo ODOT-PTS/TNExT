@@ -137,7 +137,7 @@ function runAjaxAreas(ind,areaType,fileName){
 			if (areaType == 4) // area names of some of the ODOT regions are null, thus they are replaced by the region ID. 
 				d.AreaName = 'Region ' + areaIDs[ind];
 			
-			csvContent += d.AreaName + ","
+			csvContent += "\"" + d.AreaName + "\","
 				+ d.RouteMiles + ","
 				+ d.StopsPersqMile + ","
 				+ d.StopPerServiceMile + ","

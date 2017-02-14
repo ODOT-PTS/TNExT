@@ -4208,6 +4208,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object connectivityGraph(@QueryParam("x") Double x,
+			@QueryParam("key") double key,
 			@QueryParam("day") String date,
 			@QueryParam("username") String session,
 			@QueryParam("dbindex") Integer dbindex) throws SQLException {
@@ -4229,16 +4230,94 @@ public class Queries {
 
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
+		int totalLoad = agencies.size();
+		int counter = 1;
 		for (Entry<String, ConGraphAgency> i : agencies.entrySet()) {
 			e = SpatialEventManager.getConGraphObj(i.getKey(),
 					i.getValue().name, fulldate, day, session, x, stmt);
 			response.set.addAll(e);
+			setprogVal(key, (int) Math.floor((counter*100)/totalLoad) );
+			counter++;
 		}
-
+		stmt.close();
 		connection.close();
 		return response;
 	}
 
+	/**
+	 * returns the number of connection of the given length between the two agency on the given date. 
+	 * @param dbindex
+	 * @param username
+	 * @param date
+	 * @param radius
+	 * @param agencyID1
+	 * @param agencyID2
+	 * @return
+	 * @throws SQLException
+	 */
+	@GET
+	@Path("/getConnections")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getConnections(
+			@QueryParam("dbindex") int dbindex,
+			@QueryParam("username") String username,
+			@QueryParam("date") String date,
+			@QueryParam("radius") double radius,
+			@QueryParam("aid1") String agencyID1,
+			@QueryParam("aid2") String agencyID2) throws SQLException{
+		String fulldate = null;
+		String day = null;
+		String[] dates = date.split(",");
+		String[][] datedays = daysOfWeekString(dates);
+		fulldate = datedays[0][0];
+		day = datedays[1][0];
+		Connection connection = PgisEventManager.makeConnection(dbindex);
+		Statement stmt = connection.createStatement();
+		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'),"
+				+ "svcids as (select serviceid_agencyid, serviceid_id "
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID1 + "'"
+				+ " 	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day + "= 1 and serviceid_agencyid||serviceid_id "
+				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ "	union select serviceid_agencyid, serviceid_id "
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = '" + agencyID1 + "' where date='" + fulldate + "' and exceptiontype=1),"
+				+ " trips AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
+				+ "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
+				+ " a1stops AS (select stime.trip_agencyid as agencyid, gtfs_agencies.name as agencyname, stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location"
+				+ "	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
+				+ "	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid"
+				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
+				+ "	where stop.agencyid IN (SELECT aid FROM aids)"
+				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon),"
+				+ " svcids1 as (select serviceid_agencyid, serviceid_id"
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid"
+				+ "	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day  + "= 1 and gc.serviceid_agencyid = '" + agencyID2 + "'"
+				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ " union select serviceid_agencyid, serviceid_id"
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='" + fulldate + "' and exceptiontype=1 and gcd.serviceid_agencyid = '" + agencyID2 + "' ),"
+				+ " trips1 AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
+				+ " from svcids1 inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
+				+ " a2stops AS (select a1stops.agencyid AS a1id, a1stops.agencyname AS a1name, stime.trip_agencyid as a2id, gtfs_agencies.name as a2name,"
+				+ " stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location, ST_DISTANCE(stop.location, a1stops.location)::NUMERIC AS dist"
+				+ " from gtfs_stops stop inner join a1stops on ST_DISTANCE(stop.location, a1stops.location) < " + radius 
+				+ "	inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
+				+ "	inner join trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid"
+				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
+				+ "	where stop.agencyid IN (SELECT aid FROM aids)"
+				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon,a1stops.agencyid, a1stops.agencyname,a1stops.location)"
+				+ " select a1id, a1name, a2id, a2name, COUNT(dist) AS connections"
+				+ "	FROM a2stops "
+				+ "	GROUP BY a1id, a1name, a2id, a2name";
+//		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		rs.next();
+		double connections = rs.getInt("connections");
+		stmt.close();
+		connection.close();
+		return connections;
+	}
+	
+	
 	@GET
 	@Path("/agencyCentriods")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -4268,6 +4347,7 @@ public class Queries {
 				response.list.add(i);
 			}
 		}
+		stmt.close();
 		connection.close();
 		return response;
 	}
@@ -4486,7 +4566,6 @@ public class Queries {
 			IllegalArgumentException, IllegalAccessException {
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
-		String[] fulldates = fulldate(dates);
 		String[] sdates = datedays[0];
 		String[] days = datedays[1];
 		return FlexibleReportEventManager.getFlexRepT6(dbindex, agencies,
