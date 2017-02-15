@@ -4798,13 +4798,13 @@ GeoArea response = new GeoArea();
     	  }
        
       } else if (type==4) { //ODOT Regions
-    	  query="with temp as (Select sum(waterarea) as waterarea,sum(landarea) as landarea,regionname,regionid,sum(population"+popYear+") as population"+popYear+" from census_counties where regionid="+id1+" group by regionid,regionname),"
-    			  +"temp1 as (select blockid ,regionid  from temp left join census_blocks  using(regionid)),"
-    			  +" employment as (select sum(C000_"+popYear+") as employment,regionid from temp1 left join lodes_rac_projection_block  using(blockid) group by  regionid),"
-      			 +"employees as (select sum(c000) as employees,regionid from temp1 left join lodes_blocks_wac using(blockid) group by regionid )"
-    			  +"select * from temp cross join employment cross join employees ";
-      areaID="regionid";
-	  areaName="regionname";
+    	  query="with temp as (Select sum(waterarea) as waterarea,sum(landarea) as landarea,odotregionname,odotregionid,sum(population"+popYear+") as population"+popYear+" from census_counties where odotregionid="+id1+" group by odotregionid,odotregionname),"
+		   	 +"temp1 as (select blockid ,odotregionid  from temp left join census_blocks  on census_blocks.regionid=temp.odotregionid),"
+		   	 +" employment as (select sum(C000_"+popYear+") as employment,odotregionid from temp1 left join lodes_rac_projection_block  using(blockid) group by  odotregionid),"
+		     	+"employees as (select sum(c000) as employees,odotregionid from temp1 left join lodes_blocks_wac using(blockid) group by odotregionid )"
+		   	 +"select * from temp cross join employment cross join employees ";
+		     areaID="odotregionid";
+		 areaName="odotregionname";
 	  } else {// census place or congressional district    	  
     	  if (type == 2) {
 		  query="with temp as (Select * from census_places where placeid="+id1+"),"
