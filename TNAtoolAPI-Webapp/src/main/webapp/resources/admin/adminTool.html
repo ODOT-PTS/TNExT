@@ -65,11 +65,12 @@
 		 
 		  <div id="gtfs_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
-			  	<li>The GTFS feeds are only accepted in a <b>ZIP</b> format.</li>
+			  	<li>GTFS feeds to be uploaded must be provided as separate <b>ZIP</b> files.</li>
+			  	<li>Multiple ZIP files can be uploaded at the same time.</li>
+			  	<li>An example of a properly formatted GTFS feed file that can be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/corvallis_transit_agency.zip" download>here</a></b>.</li>
 			  	<li>The corresponding GTFS text files must be directly within the ZIP file.</li>
-			  	<li>A sample of acceptable GTFS feed can be downloaded from <b><a href="../resources/admin/sampleFiles/corvallis_transit_agency.zip" download>here</a></b>.</li>
-			  	<li>Uploaded GTFS feeds are shown in the <b>"Uploaded GTFS Feeds"</b> drop-down list.</li>
-			  	<li>If there is a conflict between the Agency ID of the GTFS feed being uploaded and the Agency ID's that already exist in the database, the feed will not be uploaded</li>
+			  	<li>GTFS feed files that have been successfully uploaded are displayed in the <b>"Uploaded GTFS Feeds"</b> drop-down list.</li>
+			  	<li>If there is a conflict between the Agency ID of a new GTFS feed being uploaded and the Agency ID of a GTFS feed already present in the database, the new GTFS feed will not be uploaded</li>
 			  </ul>
 		  </div><br>
 		  <div id="gtfs_current_feeds" class="upload_cards"><h3>Uploaded GTFS Feeds</h3>
@@ -173,15 +174,39 @@
 </script>
 		</div>
 		</div>
+		
+		<div id="census_upload" title="Census Population Add/Remove">
+		 
+		  <div id="census_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Census population data for different states can be selected to be imported into the current database from the list below.</li>
+			  	<li>The population data for the selected states is imported from the pre-built database "census_reference" which is based on Census 2010 population data.</li>
+			  	<li>If a new "census_reference" database is needed to be created (say for Census 2020), the instructions, as well as the sql queries, can be found <b><a href="../resources/admin/sampleFiles/buildCensus10.sql" download>here</a></b>.</li>
+			  </ul>
+		  </div><br>
+		  <!-- <div id="census_import" class="upload_cards"> -->
+		  	<div style="float:left;width:35%;height:350px;margin-left:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States available to be imported into the current database:</p><br>
+		  	<table id="availablestates" style="background-color:white"></table>
+		  	<br>
+		  	<input type="button" value="Import" onclick="addCensus()"; style="width: 60%;">
+		  	</div>
+		  	<div style="float:right;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States already imported into the current database:</p><br>
+		  	<table id="importedstates" style="background-color:white;"></table>
+		  	</div>
+		  <!-- </div> --><br>
+		  
+		</div>
 	
 		<div id="pnr_upload" title="Park & Ride Add/Remove">
 		 
 		  <div id="pnr_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
-			  	<li>The only accepted format for park & ride data is <b>CSV</b>.</li>
-			  	<li>A sample of acceptable park & ride CSV file can be downloaded from <b><a href="../resources/admin/sampleFiles/oregon_pnr_data.csv" download>here</a></b>.</li>
-			  	<li>The names and the order of the columns must be exactly the same as the sample file provided.</li>
-			  	<li>If the values are not available for some of the columns, just leave them empty in the csv file.</li>
+			  	<li>Park & Ride data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>A sample of a Park & Ride CSV file properly formatted to be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/oregon_pnr_data.csv" download>here</a></b>.</li>
+			  	<li>The names and the order of the columns in the CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the sample CSV file.</li>
+			  	<li>If data are not available for some of the columns in the CSV file to be uploaded, just leave those columns empty.</li>
 			  </ul>
 		  </div><br>
 		  <div id="pnr_delete_card" class="upload_cards">
@@ -290,39 +315,44 @@
 		 
 		  <div id="t6_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
-			  	<li>The only accepted format for Title VI data is <b>CSV</b>.</li>
-			  	<li>Six different files must be uploaded. The name and the format (column order and names) of the files must <b>exactly</b> be according to the sample files provided below.</li>
-			  	<ol style="font-size:80%">
+			  	<li>Title VI data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>Five different CSV files must be uploaded (as shown in the list below). The names and the order of the columns in the CSV files to be uploaded must be <b>exactly</b> the same as those shown in the example CSV files accessible via their corresponding hyperlink.</li>
+			  	<table id="t6Table">
+			  		<tr><td></td><td><b>File Name</b></td><td><b>Description</b></td></tr>
+			  		<tr><td>1.</td><td><a href="../resources/admin/sampleFiles/b03002.csv" download>b03002.csv</a></td><td>Hispanic or Latino Origin by Race</td></tr>
+			  		<tr><td>2.</td><td><a href="../resources/admin/sampleFiles/b16004.csv" download>b16004.csv</a></td><td>Age by Language Spoken at Home by Ability to Speak English for the Population 5 Years and Over</td></tr>
+			  		<tr><td>3.</td><td><a href="../resources/admin/sampleFiles/b17021.csv" download>b17021.csv</a></td><td>Poverty Status of Individuals in the Past 12 Months by Living Arrangement</td></tr>
+			  		<tr><td>4.</td><td><a href="../resources/admin/sampleFiles/b18101.csv" download>b18101.csv</a></td><td>Sex by Age by Disability Status</td></tr>
+			  		<tr><td>5.</td><td><a href="../resources/admin/sampleFiles/b19037.csv" download>b19037.csv</a></td><td>Age of Householder by Household Income in the Past 12 Months (in 2015 Inflation-Adjusted Dollar</td></tr>
+			  	</table>
+			  	<!-- <ol style="font-size:80%">
 				  	<li><b><a href="../resources/admin/sampleFiles/b03002.csv" download>b03002.csv</a></b></li> 
 				  	<li><b><a href="../resources/admin/sampleFiles/b16004.csv" download>b16004.csv</a></b></li> 
 				  	<li><b><a href="../resources/admin/sampleFiles/b17021.csv" download>b17021.csv</a></b></li> 
 				  	<li><b><a href="../resources/admin/sampleFiles/b18101.csv" download>b18101.csv</a></b></li> 
 				  	<li><b><a href="../resources/admin/sampleFiles/b19037.csv" download>b19037.csv</a></b></li>
-			  	</ol>
-			  	<li>These files can be downloaded from <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a> according to the following instructions:
+			  	</ol> -->
+			  	
+			  	<li>The data for each of the five files listed in the table above must be requested and downloaded <u><b>separately</b></u> from the website <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a> by following these steps:
 			  	<ol style="font-size:80%">
-				  	<li>Go to <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a></li>
-				  	<li>Use the "Log in" button to log into your account. You can create a new account for free, if you do not have one.</li>
-				  	<li>Once logged in, go to the <a href="https://data2.nhgis.org/main" target="_blank">"Select Data" (or "main")</a> page.</li>
-				  	<li>Click on "Geographic Level" button and select "Block Group" (except for b18101 table for which you should select "Census Tract").</li>
-				  	<li>Click the "Submit" button.</li>
-				  	<li>Click on "Years" button and select the most recent range from the list of "5-Year Ranges".</li>
-				  	<li>Click the "Submit" button.</li>
-				  	<li>In the list of tables provided at the bottom of the page, look for the table name you want to download (e.g. b03002).</li>
-				  	<li>Once found, select that table by clicking on the "plus" sign on its left.</li>
-				  	<li>Click the green "Continue" button on the top-right corner of the page.</li>
+				  	<li>Go to <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a>.</li>
+				  	<li>Click on the "Log in" button to log into your account. If you do not have an account, you can create one for free.</li>
+				  	<li>Once you log in, the "NHGIS Data Finder" page will be displayed automatically which contains four buttons labeled "Geographic Levels", "Year", "Topics", and "Datasets".
+				  	<li>Click on the button labeled "Geographic Levels". This action will open a window that displays different levels for which Title VI data can be selected (e.g., Nation, State, County, etc). To select one of these levels, you must click on the corresponding yellow plus sign (+) icon.</li>
+				  	<li>To access the data to create the files "b03002.csv", "b16004.csv", "b17021.csv", and "b19037.csv", the level "Block Group" must be selected by clicking on the corresponding yellow plus sign. To access the data to create the file "b18101.csv", the level "Census Tract" must be selected. Once the appropriate level has been selected, click the "Submit" button. <b>REMINDER: Each of these files must be created separately</b></b>.</li>
+				  	<li>Click on the button labeled "Years" and then select the most recent range from the list labeled "5-Year Ranges." Click the "Submit" button when done.</li>
+				  	<li>The table displayed in the bottom half of the browser window now lists tables constrained by the year range just selected. The second column of this table is labeled "Table Name". Look for the name of the table you want to download (e.g., "B03002"). You may need to use the page navigation controls shown at the bottom of the browser window.</li>
+				  	<li>Once found, select the table by clicking on the yellow plus sign icon displayed on leftmost column.</li>
+				  	<li>Scroll to the top of the browser window and click on the green button labeled "Continue" on the <b>Data Cart</b> panel.</li>
 				  	<li>Click "Continue" again.</li>
-				  	<li>On the "Review and Submit" page, under "Table File Structure", make sure the "Comma delimited (best for GIS)" is selected only.</li>
-				  	<li>Under "Source Tables", click on the "Geographic Extents" button and select the desired state.</li>
-				  	<li>Submit the request.</li>
-				  	<li>It will take you to the download page in which you will see a table of your requests.</li>
-				  	<li>You have to wait until the table is ready to download. It usually takes a few minutes.</li>
-				  	<li>Once available, you can click on its name and download the file.</li>
-				  	<li>Once available, you can click on its name and download the file.</li>
-				  	<li>There will be two CSV and two TXT files (the txt files are the metadata files for the csv files).</li>
-				  	<li>You are going to use the CSV file that ends with an "E" (which stands for estimates).</li>
-				  	<li>The column names are in codes. You can use the metadata txt file to find the columns you need.</li>
-			  	</ol>
+				  	<li>On the "Review and Submit" page under "Table File Structure," make sure the option "Comma delimited (best for GIS)" is the only one selected.</li>
+				  	<li>Under "Source Tables," click on the button labeled "Geographic Extents" and select the desired US state (e.g., Oregon). Click on the button labeled "Submit".</li>
+				  	<li>On the "Review and Submit" page, click on the button labeled "Submit" displayed at the bottom of the page. This action will open the "Extracts History" page which shows all data requests.</li>
+				  	<li>Wait until your table is ready to download. This process usually takes a few minutes.</li>
+				  	<li>Once the data request has been processed (this usually takes a few minutes), the NHGIS site will send an automatic email to the address used for registration. Alternatively, the browser page "Extract History" can be refreshed until the column labeled "Download Table Data" displays a hyperlink.</li>
+				  	<li>Click on the hyperlink labeled "tables" to download a ZIP file containing the Title VI data for the selected table (e.g., B03002).</li>
+<!-- 				  	<li>For each table downloaded, there will be two CSV and two TXT files (the TXT files are the metadata files for the csv files). The CSV file whose name ends with an "E" (which stands for estimates) is the one needed by the TNA Software Tool.</li>
+ -->				  	<li>The column names of the CSV files are coded. You can use the metadata TXT file to identify the columns you need.</li>
 			  	</li>
 			  </ul>
 		  </div><br>
@@ -432,24 +462,25 @@
 		 
 		  <div id="emp_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
-			  	<li>The only accepted format for Employment data is <b>CSV</b>.</li>
-			  	<li>Two files must be uploaded. The name and the format (column order and names) of the files must be <b>exactly</b> according to the sample files provided below.</li>
+			  	<li>Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>Two files with employment data must be uploaded.</li>
+			  	<li>The names and the order of the columns in the CSV file to be uploaded must be exactly the same as those shown in the following sample CSV files:
 			  	<ol style="font-size:80%">
 				  	<li><b><a href="../resources/admin/sampleFiles/or_rac_S000_JT00.csv" download>or_rac_S000_JT00.csv</a></b></li> 
 				  	<li><b><a href="../resources/admin/sampleFiles/or_wac_S000_JT00.csv" download>or_wac_S000_JT00.csv</a></b></li> 
-			  	</ol>
-			  	<li>These files can be downloaded from <a href="https://lehd.ces.census.gov/data/" target="_blank">lehd.ces.census.gov/data/</a> a follows:
+			  	</ol></li>
+			  	<li>Employment data to create the required files can be downloaded from <a href="https://lehd.ces.census.gov/data/" target="_blank">lehd.ces.census.gov/data/</a> by following these steps:
 			  	<ol style="font-size:80%">
-				  	<li>Once the page is loaded, scroll down to get to the "LEHD Origin-Destination Employment Statistics (LODES)" section.</li>
-				  	<li>Select LODES7 from the "version" dropdown list.</li>
-				  	<li>Select the desired state from the "state" dropdown list.</li>
-				  	<li>Select RAC from the "type" dropdown list.</li>
-				  	<li>Click on "view files" button.</li>
+				  	<li>Once the lehd.ces.census.gov/data/ page is loaded, scroll down to the section titled "LEHD Origin-Destination Employment Statistics (LODES)"..</li>
+				  	<li>Select <b>LODES7</b> from the dropdown list labeled "Version".</li>
+				  	<li>Select the desired state from the dropdown list labeled "State".</li>
+				  	<li>Select <b>Residence Area Characteristics (RAC)</b> from the dropdown list labeled "Type".</li>
+				  	<li>Click on the button labeled "View Files".</li>
 				  	<li>From the list, find the file called "or_rac_S000_JT00_[desired year].csv.gz".</li>
-				  	<li>Right click on the file and save the file.</li>
+				  	<li>Right click on the hyperlinked file name and save the file to a desired location.</li>
 				  	<li>Decompress the file to get the "or_rac_S000_JT00_[desired year].csv" file.</li>
-				  	<li>Rename the file to "or_rac_S000_JT00.csv" file.</li>
-				  	<li>Repeat steps 4 to 9 for WAC data type.</li>
+				  	<li>Rename the file as "or_rac_S000_JT00.csv".</li>
+				  	<li>Repeat steps 4 to 9 to download WAC data.</li>
 			  	</ol>
 			  	</li>
 			  </ul>
@@ -560,13 +591,13 @@
 		 
 		  <div id="femp_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
-			  	<li>The only accepted format for Employment Projection data is <b>CSV</b>.</li>
-			  	<li>The name and the format (column order and names) of the uploaded file must <b>exactly</b> be according to the sample file provided below.</li>
-			  	<li>A sample of acceptable Employment Projection CSV file can be downloaded from <b><a href="../resources/admin/sampleFiles/future_employment.csv" download>here</a></b>.</li>
+			  	<li>Future Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>An example of a properly formatted Employment Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_employment.csv" download>here</a></b>.</li>
+			  	<li>The names and the order of the columns in the Employment Projection CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  </ul>
 		  </div><br>
 		  <div id="femp_delete_card" class="upload_cards">
-			  <button type="button" id="deletefEmp" class="btn btn-danger delete" onclick="deletefEmp()"><span>Delete Existing Employment Projection Data</span></button>
+			  <button type="button" id="deletefEmp" class="btn btn-danger delete" onclick="deletefEmp()"><span>Delete Existing Future Employment Data</span></button>
 		  </div><br>
 		  <div id="femp_upload_files" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
@@ -671,9 +702,9 @@
 		 
 		  <div id="fpop_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
-			  	<li>The only accepted format for Population Projection data is <b>CSV</b>.</li>
-			  	<li>The name and the format (column order and names) of the uploaded file must <b>exactly</b> be according to the sample file provided below.</li>
-			  	<li>A sample of acceptable Population Projection CSV file can be downloaded from <b><a href="../resources/admin/sampleFiles/future_population.csv" download>here</a></b>.</li>
+			  	<li>Population Projection data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>An example of a properly formatted Population Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_population.csv" download>here</a></b>.</li>
+			  	<li>The names and the order of the columns in the Population Projection CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  </ul>
 		  </div><br>
 		  <div id="fpop_delete_card" class="upload_cards">
@@ -777,6 +808,22 @@
 </script>
 		</div>
 		</div>	
+		
+		<div id="gtfsFeedbackDialog" title="GTFS Add/Remove/Update Progress"><div style="width:100%;overflow:auto">
+		  <br><p style="font-style: italic;text-align:center"><img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px"><span id="gtfsFeedbackMessage"></span></p><br>
+		  <table id="gtfsProgressTable" style="width:100%;">
+		  </table>
+		</div></div>
+		
+		<!-- <div id="censusFeedbackDialog" title="Census Population Add/Remove Progress"><div style="width:100%;overflow:auto">
+		  <br><p style="font-style: italic;text-align:center"><img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px"><span id="censusFeedbackMessage"></span></p><br>
+		  <table id="censusProgressTable" style="width:100%;">
+		  </table>
+		</div></div> -->
+		
+		<div id="otherFeedbackDialog" title="Data Import/Remove Progress"><div style="width:100%">
+		  <br><p style="font-style: italic;text-align:center" id="otherFeedbackMessage"></p><br>
+		</div></div>
 		
 	</div>
 	

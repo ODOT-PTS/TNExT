@@ -1126,8 +1126,8 @@ var overlayMaps = {
 		"Tracts": tract,
 		"ODOT Transit Regions": odot,
 		"Congressional Districts": congdist,
-		"Urbanized Areas 50k+": urban50k,
-		"Urbanized Areas 25k+": urban25k
+		"Urbanized Areas": urban50k,
+		"Urban Clusters 25k+": urban25k
 	};
 
 map.addControl(new L.Control.Layers(baseMaps,overlayMaps));

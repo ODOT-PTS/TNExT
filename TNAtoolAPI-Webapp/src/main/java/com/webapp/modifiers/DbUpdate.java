@@ -68,8 +68,11 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
+import org.apache.tomcat.util.http.fileupload.FileDeleteStrategy;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.hibernate.JDBCException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -87,6 +90,7 @@ import com.model.database.queries.EventManager;
 import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.DatabaseStatus;
 import com.model.database.queries.util.Hutil;
+import com.model.database.queries.util.StateInits;
 import com.webapp.api.Queries;
 
 
@@ -102,6 +106,8 @@ public class DbUpdate {
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];
 //	private static final int DBINDEX = Databases.dbsize-1;
 	public final static String VERSION = "V4.16.07";
+	public static boolean gtfsUpload = false;
+	public static String gtfsMessage="";
 	
 	public static List<String> getSelectedAgencies(String username){
 		List<String> selectedAgencies = new ArrayList<String>();
@@ -1247,7 +1253,7 @@ public class DbUpdate {
     @Path("/deletePNR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deletePNR(@QueryParam("db") String db){
-		String response = "done";
+		String message = "done";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
@@ -1259,20 +1265,20 @@ public class DbUpdate {
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletePNR method");
-//			e.printStackTrace();
+			message = e.getMessage();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		return response;
+		return message;
 	}
 	
 	@GET
     @Path("/deleteT6")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deleteT6(@QueryParam("db") String db){
-		String response = "done";
+		String message = "done";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
@@ -1284,20 +1290,21 @@ public class DbUpdate {
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deleteT6 method");
+			message = e.getMessage();
 //			e.printStackTrace();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		return response;
+		return message;
 	}
 	
 	@GET
     @Path("/deleteEmp")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deleteEmp(@QueryParam("db") String db){
-		String response = "done";
+		String message = "done";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
@@ -1310,20 +1317,21 @@ public class DbUpdate {
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deleteEmp method");
+			message = e.getMessage();
 //			e.printStackTrace();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		return response;
+		return message;
 	}
 	
 	@GET
     @Path("/deletefEmp")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deletefEmp(@QueryParam("db") String db){
-		String response = "done";
+		String message = "done";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
@@ -1336,20 +1344,21 @@ public class DbUpdate {
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletefEmp method");
+			message = e.getMessage();
 //			e.printStackTrace();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		return response;
+		return message;
 	}
 	
 	@GET
     @Path("/deletefPop")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deletefPop(@QueryParam("db") String db){
-		String response = "done";
+		String message = "done";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
@@ -1378,13 +1387,14 @@ public class DbUpdate {
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletefPop method");
+			message = e.getMessage();
 //			e.printStackTrace();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		return response;
+		return message;
 	}
 	
 	@GET
@@ -1606,7 +1616,7 @@ public class DbUpdate {
     public Object copyCensus(@QueryParam("dbFrom") String dbFrom, @QueryParam("dbTo") String dbTo, @QueryParam("section") String section){
 		String tables;
 		switch (section) {
-	        case "census": tables = "-t census_blocks -t census_blocks_reference -t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
+	        case "census": tables = "-t census_blocks -t "+"census_blocks_reference "+"-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
 	                break;
 	        case "employment": tables = "-t lodes_blocks_rac -t lodes_blocks_wac";
 	                break;
@@ -1668,6 +1678,180 @@ public class DbUpdate {
 		
 		
 		return "done";
+	}
+	
+	@GET
+    @Path("/removeCensus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object removeCensus(@QueryParam("stateid") String stateid, @QueryParam("states") String states, @QueryParam("db") String db) throws IOException{
+		String message = "done";
+		StateInits st = new StateInits();
+
+		String[] stateids = states.split("$%$");
+		String sql ="";
+		for(String str:stateids){
+			if(!str.equals(stateid)){
+				sql += " AND uname NOT LIKE '%"+st.stateInitials.get(str);
+			}
+		}
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			
+			statement = c.createStatement();
+			statement.executeUpdate("DELETE FROM census_states WHERE stateid = '"+stateid+"';");
+			statement.executeUpdate("DELETE FROM census_congdists WHERE stateid = '"+stateid+"';");
+			statement.executeUpdate("DELETE FROM census_counties WHERE stateid = '"+stateid+"';");
+			statement.executeUpdate("DELETE FROM census_tracts WHERE stateid = '"+stateid+"';");
+			statement.executeUpdate("DELETE FROM census_places WHERE stateid = '"+stateid+"';");
+			statement.executeUpdate("DELETE FROM census_blocks WHERE stateid = '"+stateid+"';");
+			statement.executeUpdate("DELETE FROM census_urbans WHERE uname LIKE '%"+st.stateInitials.get(stateid)+"%'"+sql+";");
+			statement.executeUpdate("VACUUM;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			message = e.getMessage();
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return message;
+	}
+	
+	@GET
+    @Path("/importCensus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object importCensus(@QueryParam("stateid") String stateid, @QueryParam("db") String db) throws IOException{
+		String[] dbInfo = db.split(",");
+		String[] states = stateid.split("$%$");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		String message = "";
+		String[] dbURL = dbInfo[4].split("/");
+		dbURL[dbURL.length-1] = "census_reference";
+		
+		dbInfo[4] = "";
+		for(int i=0;i<dbURL.length-1;i++){
+			dbInfo[4]+=dbURL[i]+"/";
+		}
+		dbInfo[4]+=dbURL[dbURL.length-1];
+		StateInits st = new StateInits();
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			
+			statement = c.createStatement();
+			statement.executeUpdate("TRUNCATE TABLE census_states;");
+			statement.executeUpdate("TRUNCATE TABLE census_counties;");
+			statement.executeUpdate("TRUNCATE TABLE census_congdists;");
+			statement.executeUpdate("TRUNCATE TABLE census_tracts;");
+			statement.executeUpdate("TRUNCATE TABLE census_places;");
+			statement.executeUpdate("TRUNCATE TABLE census_urbans;");
+			statement.executeUpdate("TRUNCATE TABLE census_blocks;");
+			statement.executeUpdate("VACUUM;");
+			for(String state:states){
+				statement.executeUpdate("INSERT INTO census_states select * FROM census_states_ref WHERE stateid = '"+state+"';");
+				statement.executeUpdate("INSERT INTO census_congdists select * FROM census_congdists_ref WHERE stateid = '"+state+"';");
+				statement.executeUpdate("INSERT INTO census_counties select * FROM census_counties_ref WHERE stateid = '"+state+"';");
+				statement.executeUpdate("INSERT INTO census_tracts select * FROM census_tracts_ref WHERE stateid = '"+state+"';");
+				statement.executeUpdate("INSERT INTO census_places select * FROM census_places_ref WHERE stateid = '"+state+"';");
+				statement.executeUpdate("INSERT INTO census_blocks select * FROM census_blocks_ref WHERE stateid = '"+state+"';");
+				statement.executeUpdate("INSERT INTO census_urbans select * FROM census_urbans_ref WHERE uname LIKE '%"+st.stateInitials.get(state)+"%' ON CONFLICT DO NOTHING;");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			message += e.getMessage();
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		dbInfo = db.split(",");
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			
+			statement = c.createStatement();
+			statement.executeUpdate("DROP TABLE IF EXISTS census_states;");
+			statement.executeUpdate("DROP TABLE IF EXISTS census_congdists;");
+			statement.executeUpdate("DROP TABLE IF EXISTS census_counties;");
+			statement.executeUpdate("DROP TABLE IF EXISTS census_tracts;");
+			statement.executeUpdate("DROP TABLE IF EXISTS census_places;");
+			statement.executeUpdate("DROP TABLE IF EXISTS census_urbans;");
+			statement.executeUpdate("DROP TABLE IF EXISTS census_blocks;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			message += e.getMessage();
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		if(message.equals("")){
+			message = "done";
+		}
+		
+		String[] p;
+		p = dbInfo[4].split("/");
+		String nameFrom = "census_reference";
+		String nameTo = p[p.length-1];
+		
+		Process pr;
+		
+		String fromHost = dbInfo[4].split(":")[2];
+		fromHost = fromHost.substring(2);
+		String fromUser = dbInfo[5];
+		String fromPass = dbInfo[6];
+		
+		String toHost = fromHost;
+		String toUser = fromUser;
+		String toPass = fromPass;
+		fromHost = "localhost"; //to be deleted
+		toHost = "localhost"; //to be deleted
+		
+		String tables = "-t census_blocks "+"-t census_states "+"-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+fromPass+"& "
+		   		+ "pg_dump -U "+fromUser+" -h "+fromHost+" "+tables+" "+nameFrom+" > dump & "
+		   		+ "set PGPASSWORD="+toPass+"& "
+		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < dump & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(10, TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			
+			statement = c.createStatement();
+			statement.executeUpdate("VACUUM;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return message;
 	}
 	
 	@GET
@@ -1768,6 +1952,7 @@ public class DbUpdate {
 		String agencyId = "";
 		String agencyIds = "";
 		String[] agencyIdList;
+		String message = "done";
 		
 		String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
 									{"census_places_trip_map","agencyid_def"},
@@ -1838,15 +2023,14 @@ public class DbUpdate {
 			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			
+			message = e.getMessage();
 		} finally {
 			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
-		PDBerror error = new PDBerror();
-		error.DBError = "done";
-		return error;
+		message = feedname+"%%"+message;
+		return message;
 	}
 	
 	@GET
@@ -2013,7 +2197,7 @@ public class DbUpdate {
 	@GET
     @Path("/addfeed")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object addfeed(@QueryParam("feedname") String feedname, @QueryParam("db") String db) throws IOException{
+    public Object addfeed(@QueryParam("feedname") String feedname, @QueryParam("feedsize") String feedsize, @QueryParam("db") String db) throws IOException{
 		String [] args = new String[5];
 		String[] dbInfo = db.split(",");
 		args[0] = "--driverClass=\"org.postgresql.Driver\"";
@@ -2031,17 +2215,35 @@ public class DbUpdate {
 //    	System.out.println(source.delete());
     	String message = "done";
 		args[4] = feed;
-		try{
+		for(int i=0;i<4;i++){
+			feedname = removeLastChar(feedname);
+		}
+		GtfsDatabaseLoaderMain.main(args);	
+		if(gtfsUpload){
+			gtfsUpload = false;
+			message = gtfsMessage;
+			gtfsMessage = "";
+			System.out.println(target.delete());
+			return feedname+"%%"+message;
+		}
+		gtfsMessage = "";
+		gtfsUpload = false;
+		/*try{
 			GtfsDatabaseLoaderMain.main(args);	
 		}catch(Exception e){
 			message = e.getMessage();
 			System.out.println(target.delete());
-			return message;
-		}
+			
+//			try{
+//				FileDeleteStrategy.FORCE.delete(target);
+//			}catch(IOException ioe){
+//				ioe.printStackTrace();
+//			}
+			
+			return feedname+"%%"+message;
+		}*/
 		
-		for(int i=0;i<4;i++){
-			feedname = removeLastChar(feedname);
-		}
+		
 //		String[] feedName = feedname.split("/");
 //		String fName = feedName[feedName.length-1];
 		Connection c = null;
@@ -2103,8 +2305,8 @@ public class DbUpdate {
 	        		+ "calendar as (select cals.agencyid, least(cals.calstart, calds.calstart) as calstart, greatest(cals.calend, calds.calend) as calend from calendars cals full join calendardates calds using(agencyid)) "
 	        		+ "update gtfs_feed_info set startdate= calendar.calstart::varchar , enddate=calendar.calend::varchar from calendar where defaultid = agencyid;");
 	        
-			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic, updated) "
-					+ "VALUES ('"+feedname+"','admin',False, False);");
+			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize,updated) "
+					+ "VALUES ('"+feedname+"','admin',False,'"+feedsize+"', False);");
 			statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) "
 					+ "VALUES ('admin','"+feedname+"','"+defaultId+"');");
 			
@@ -2121,7 +2323,7 @@ public class DbUpdate {
 		
 //		System.out.println("done");
 //		return new TransitError(feedname +"Has been added to the database");
-		return message;
+		return feedname+"%%"+message;
 	}
 	
 	@GET
@@ -2607,6 +2809,36 @@ public class DbUpdate {
 	}*/
 	
 	@GET
+    @Path("/updateNext")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object updateNext(@QueryParam("db") String db, @QueryParam("agency") String agency, @QueryParam("feed") String feed, @QueryParam("username") String username){
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		String message = "done";
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			
+			System.out.println(agency);
+			UpdateEventManager.updateTables(c, agency);
+			statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feed+"' AND username = '"+username+"';");
+			System.out.println("vacuum start");
+			statement.executeUpdate("VACUUM");
+			System.out.println("vacuum finish");
+			
+			statement.close();
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+			message = e.getMessage();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		return agency+"%%"+message;
+	}
+	
+	@GET
     @Path("/updateFeeds")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object updateFeeds(@QueryParam("db") String db, @QueryParam("username") String username){
@@ -2614,42 +2846,39 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
-		List<String> agencies = new ArrayList<String>();
-		List<String> feeds = new ArrayList<String>();
+//		List<String> agencies = new ArrayList<String>();
+//		List<String> feeds = new ArrayList<String>();
+		PDBerror lists = new PDBerror();
+		
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT gfi.defaultid agency, guf.feedname feed FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
+			ResultSet rs = statement.executeQuery("SELECT gfi.defaultid agency, guf.feedname feed, guf.feedsize size FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
 					+ "ON gfi.feedname=guf.feedname WHERE guf.username = '"+username+"' AND guf.updated=False;");
 			while(rs.next()){
-				agencies.add(rs.getString("agency"));
-				feeds.add(rs.getString("feed"));
+				lists.agencies.add(rs.getString("agency"));
+				lists.feeds.add(rs.getString("feed"));
+				lists.sizes.add("size");
 			}
-			for(int i=0; i<feeds.size();i++){
+			/*for(int i=0; i<feeds.size();i++){
 				System.out.println(agencies.get(i));
 				UpdateEventManager.updateTables(c, agencies.get(i));
 				statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
 				System.out.println("vacuum start");
 				statement.executeUpdate("VACUUM");
 				System.out.println("vacuum finish");
-			}
+			}*/
 			
 			statement.close();
-//			statement = c.createStatement();
-//			System.out.println("vacuum start");
-//			statement.executeUpdate("VACUUM");
-//			System.out.println("vacuum finish");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			//e.printStackTrace();
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
 		
-		
-		return "done";
+		return lists;
 	}
 	
 	
@@ -2843,6 +3072,85 @@ public class DbUpdate {
 	}    
 	
 	@GET
+    @Path("/getImportedStates")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getImportedStates(@QueryParam("db") String db) throws IOException{
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		PDBerror results = new PDBerror();
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			
+			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks order by stateid;");
+			while ( rs.next() ) {
+				results.stateids.add(rs.getString("stateids"));
+			}
+			for(String id:results.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					results.states.add(rs.getString("sname"));
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		return results;
+	}
+	
+	@GET
+    @Path("/getAvailableStates")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getAvailableStates(@QueryParam("db") String db) throws IOException{
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		PDBerror results = new PDBerror();
+		String[] dbURL = dbInfo[4].split("/");
+		dbURL[dbURL.length-1] = "census_reference";
+		
+		dbInfo[4] = "";
+		for(int i=0;i<dbURL.length-1;i++){
+			dbInfo[4]+=dbURL[i]+"/";
+		}
+		dbInfo[4]+=dbURL[dbURL.length-1];
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			
+			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks order by stateid;");
+			while ( rs.next() ) {
+				results.stateids.add(rs.getString("stateids"));
+			}
+			for(String id:results.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					results.states.add(rs.getString("sname"));
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			//e.printStackTrace();
+			
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		return results;
+	}
+
+	
+	@GET
     @Path("/feedlist")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object listf(@QueryParam("foldername") String directoryName, @QueryParam("db") String db) throws IOException{
@@ -2948,7 +3256,63 @@ public class DbUpdate {
         return null;
 	}
 	
-	private class ShapeRecord implements Point{
+	public static void shapeSimplifier(File feed, String path) throws ZipException, FileNotFoundException {
+		ZipFile zFile = new ZipFile(feed);
+		zFile.extractAll(path+"/");		
+		File OriginalFile = new File(path+"/shapes.txt");
+        String line = "";
+        String cvsSplitBy = ",";
+        String header = "";
+        List<ShapeRecord> records = new ArrayList<ShapeRecord>();
+        try (BufferedReader br = new BufferedReader(new FileReader(OriginalFile))) {
+        	boolean skipChar = true;
+        	while ((line = br.readLine()) != null) {  
+        		// use comma as separator
+        		if (skipChar){
+        			header = line;
+        			skipChar = false;
+        			continue;
+        		}
+        		String[] values = line.split(cvsSplitBy);
+        		records.add( new ShapeRecord(values[0],
+	            		Double.parseDouble(values[1]), 
+	            		Double.parseDouble(values[2]),
+	            		Integer.parseInt(values[3]),
+	            		Double.parseDouble(values[4])));
+        	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        OriginalFile.delete();
+        
+        ShapeRecord[] recordsArray = new ShapeRecord[records.size()];
+        recordsArray = records.toArray(recordsArray);
+        Simplify<ShapeRecord> simplify = new Simplify<ShapeRecord>(recordsArray);
+        ShapeRecord[] simplifiedRecords = simplify.simplify(recordsArray, 0.00005, true);
+        
+        PrintWriter writer = new PrintWriter(path+"/shapes.txt");
+        writer.print(header + "\n");
+        int seqCounter = 0;
+        try{
+        	for ( ShapeRecord s : simplifiedRecords){
+        		if (seqCounter > s.getSeq())
+            		seqCounter = 0;
+            	writer.print(s.getid() + "," + s.getX() + "," + s.getY() + "," + seqCounter++ + "," + s.getDisTrav() + "\n");
+        	}
+    	}catch(NullPointerException e){}
+        writer.close();
+        File folder = new File(path); 
+        File[] files = folder.listFiles();
+        ZipFile zipFile = new ZipFile(path+".zip");
+        ZipParameters parameters = new ZipParameters();
+		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+		parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
+        folder.delete();
+        System.out.println("Done modifying feed shapes");
+	}
+	
+	private static class ShapeRecord implements Point{
 		private final String id;
 		private final double lat;
 		private final double lng;

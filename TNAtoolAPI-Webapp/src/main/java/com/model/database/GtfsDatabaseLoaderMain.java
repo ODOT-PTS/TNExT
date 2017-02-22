@@ -59,8 +59,6 @@ public class GtfsDatabaseLoaderMain {
 
   private void run(String[] args) throws IOException {
     CommandLine cli = parseCommandLineOptions(args);
-
-    String path = GtfsDatabaseLoaderMain.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     
     args = cli.getArgs();
     if (args.length != 1) {
@@ -95,8 +93,14 @@ public class GtfsDatabaseLoaderMain {
 
     GtfsMutableRelationalDao dao = factory.getDao();
     reader.setEntityStore(dao);
-    reader.run();
-    reader.close();
+    try{
+    	reader.run();
+    }catch(Exception e){
+    	DbUpdate.gtfsMessage=e.getMessage();
+    	DbUpdate.gtfsUpload=true;
+    }finally{
+    	reader.close();
+    }
   }
 
   private CommandLine parseCommandLineOptions(String[] args) {

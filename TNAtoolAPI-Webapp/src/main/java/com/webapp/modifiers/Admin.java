@@ -87,6 +87,10 @@ public class Admin extends HttpServlet {
 			                }
 			                File uploadedFile = new File(loc + "/" + fileName);
 			                item.write(uploadedFile);
+			                String str = fileName.split("\\.")[0];
+			                if(item.getSize()>5000000){
+			                	DbUpdate.shapeSimplifier(uploadedFile, loc+ "/" + fileName.split("\\.")[0]);
+			                }
 			                
 			                JSONObject jsono = new JSONObject();
 	                        jsono.put("name", fileName);

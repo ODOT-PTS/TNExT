@@ -769,7 +769,8 @@ public class UpdateEventManager {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE gtfs_stops DISABLE TRIGGER ALL;");
 	        
-	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;");
+//	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;");
+//	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set placeid=shape.placeid from census_places shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set congdistid=shape.congdistid from census_congdists shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true;");
 	        stmt.executeUpdate("update gtfs_stops stop set regionid = county.odotregionid from census_counties county where stop.agencyid='"+agencyId+"' and left(stop.blockid,5)= county.countyid::varchar(5);");
@@ -779,6 +780,18 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }
+	      
+	      try{
+	        stmt = connection.createStatement();
+        	stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
+	        
+	      }catch (Exception e){
+	    	  try{
+	  	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;");
+		        }catch(Exception ex){
+		        	ex.printStackTrace();
+		        }
 	      }
 	}
 	

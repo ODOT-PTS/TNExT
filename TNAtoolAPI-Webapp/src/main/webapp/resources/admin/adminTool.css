@@ -23,6 +23,19 @@ table{
     border-spacing: 5px;
 }
 
+#t6Table td{
+	border:1px solid;
+}
+
+#t6Table{
+	border-collapse: collapse;
+    font-size: 80%;
+}
+
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
+
 .upload_cards{
 	width:100%;
 	padding: 20px;

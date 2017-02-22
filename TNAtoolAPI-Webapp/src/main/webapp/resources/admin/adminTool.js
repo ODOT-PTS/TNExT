@@ -343,202 +343,6 @@ function listOfFeeds(index){
 	return html;
 }
 
-function updateFeed(index){
-	var indexx = 1001+index;
-	var dbindex = index-1;
-	
-	var feeds = new Array();
-	$('.selectFeed'+indexx).each(function(){
-		if($(this).is(':checked')){
-			feeds.push($(this).attr('id'));
-		}
-	});
-	
-	for(var i=0; i<feeds.length; i++){
-		//alert(feeds[i]);
-		$.ajax({
-	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateSingleFeed?&feedname="+feeds[i]+"&dbindex="+dbindex,
-	        dataType: "json",
-	        async: false,
-	        success: function(d) {
-	        }
-		});
-	}
-	
-	location.reload(true);
-}
-
-function deleteFeed(index){
-	var db = dbInfo[index].toString();
-	indexx = 1001+index;
-	var feeds = new Array();
-	
-	$('.selectFeed'+indexx).each(function(){
-		if($(this).is(':checked')){
-			feeds.push($(this).attr('id'));
-		}
-	});
-//	console.log(feeds);
-	for(var i=0; i<feeds.length; i++){
-		$.ajax({
-	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefeed?&feedname="+feeds[i]+"&db="+db,
-	        dataType: "json",
-	        async: false,
-	        success: function(d) {
-	        }
-		});
-	}
-	
-	var feeds = listOfAgencies(index);
-	$('#agencyList').html(feeds);
-	
-	checkGTFSstatus(currentINDEX);
-//	location.reload(true);
-}
-
-function addFeed(feeds){
-	var db = dbInfo[currentINDEX].toString();
-	/*var feeds = new Array();
-	
-	$('.selectFeed'+index).each(function(){
-		if($(this).is(':checked')){
-			feeds.push($(this).attr('id'));
-		}
-	});
-	feeds.join("$$");*/
-	for(var i=0; i<feeds.length; i++){
-		$.ajax({
-	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+feeds[i]+"&db="+db,
-//	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+folder+"Feeds/"+feeds[i]+"&db="+db,
-	        dataType: "text",
-	        async: false,
-	        success: function(d) {
-	        	if(d=="done"){
-	        		console.log(feeds[i]+" was successfully added");
-	        	}else{
-	        		console.log(feeds[i]+" could not be added. Error: "+d);
-	        	}
-	        }
-		});
-	}
-//	location.reload(true);
-	checkGTFSstatus(currentINDEX);
-}
-
-function addPnr(fileName){
-	var db = dbInfo[currentINDEX].toString();
-//	alert(fileName);
-		
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db,
-//	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+folder+"Feeds/"+feeds[i]+"&db="+db,
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	if(d=="done"){
-        		console.log(fileName+" was successfully added");
-        		$('#deletePNR').prop('disabled', false);
-        	}else{
-        		console.log(fileName+" could not be added. Error: "+d);
-        	}
-        }
-	});
-	
-	checkPNRstatus(currentINDEX);
-}
-
-function addT6(){
-	var db = dbInfo[currentINDEX].toString();
-//	alert(fileName);
-		
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db, 
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	if(d=="done"){
-        		console.log("T6 files added was successfully added");
-        		$('#deleteT6').prop('disabled', false);
-        	}else{
-        		console.log("T6 files could not be added. Error: "+d);
-        	}
-        }
-	});
-	
-	checkT6status(currentINDEX);
-}
-
-function addEmp(){
-	var db = dbInfo[currentINDEX].toString();
-//	alert(fileName);
-		
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db, 
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	if(d=="done"){
-        		console.log("Employment files were successfully added");
-        		$('#deleteEmp').prop('disabled', false);
-        	}else{
-        		console.log("Employment files could not be added. Error: "+d);
-        	}
-        }
-	});
-	
-	checkEmpstatus(currentINDEX);
-}
-
-function addfEmp(){
-	var db = dbInfo[currentINDEX].toString();
-//	alert(fileName);
-		
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db, 
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	if(d=="done"){
-        		console.log("Employment Projecion files were successfully added");
-        		$('#deletefEmp').prop('disabled', false);
-        	}else{
-        		console.log("Employment Projection files could not be added. Error: "+d);
-        	}
-        }
-	});
-	
-	checkfEmpstatus(currentINDEX);
-}
-
-function addfPop(){
-	var db = dbInfo[currentINDEX].toString();
-//	alert(fileName);
-		
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db, 
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	if(d=="done"){
-        		console.log("Population Projecion files were successfully added");
-        		$('#deletefPop').prop('disabled', false);
-        	}else{
-        		console.log("Population Projection files could not be added. Error: "+d);
-        	}
-        }
-	});
-	
-	checkfEmpstatus(currentINDEX);
-}
-
 function callDBfuntions(dbFunction){
 	for(var i=1;i<dbInfo.length;i++){
 		dbFunction(i);
@@ -733,7 +537,7 @@ function checkDuplicateFeeds(feed){
 }
 
 /**
- * Opens GTFS dialog.
+ * GTFS add/remove.
  */
 function openGTFS(index){
 	var db = dbInfo[index].toString();
@@ -755,6 +559,125 @@ function openGTFS(index){
 	$('#gtfs_current_feeds .ui-accordion-content').css('height','400px');
 	GTFSdialog.dialog( "open" );
 	
+}
+
+
+
+function deletenext(i,db){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefeed?&feedname="+currentFiles[i]+"&db="+db,
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	var f = d.split("%%")[0];
+        	d = d.split("%%")[1];
+        	if(d=="done"){
+        		$('#del_'+f).html("Successfully removed").css('color','green');
+        	}else{
+        		$('#del_'+f).html("Could not be removed. Error: "+d).css('color','red');
+        	}
+        	gtfsIndex++;
+        	if(gtfsIndex<currentFiles.length){
+        		deletenext(gtfsIndex,db);
+        	}else{
+//        		gtfsFeedbackDialog.dialog( "close" );
+        		$('#gtfsFeedbackMessage').html("Completed.");
+        		gtfsFeedbackDialog.dialog('option', 'buttons', closeButton);
+        		inProcess = false;
+        		$('#agencyList').html(listOfAgencies(currentINDEX));
+        		checkGTFSstatus(currentINDEX);
+        	}
+        }
+	});
+}
+
+function deleteFeed(index){
+	inProcess = true;
+	var db = dbInfo[index].toString();
+	indexx = 1001+index;
+	currentFiles = [];
+	
+	$('.selectFeed'+indexx).each(function(){
+		if($(this).is(':checked')){
+			currentFiles.push($(this).attr('id'));
+		}
+	});
+	
+	if(currentFiles.length>0){
+		$('#gtfsFeedbackMessage').html("Deleting GTFS Feeds... Please do not close or refresh the page.");
+		var html='<tr style="font-size:bold"><th style="width:30%; text-align:center">GTFS Feed Name</th><th style="width:70%; text-align:center">Status</th></tr>';
+		for(var i=0; i<currentFiles.length; i++){
+			html+="<tr><td style='text-align:center'>"+currentFiles[i]+"</td><td id='del_"+currentFiles[i]+"' style='text-align:center'>In progress..</td></tr>";
+		}
+		$('#gtfsProgressTable').html( html );
+		gtfsFeedbackDialog.dialog( "open" );
+//		setTimeout(function(){
+//			gtfsIndex=0;
+//			deletenext(gtfsIndex,db);
+//		}, 2000);
+		gtfsIndex=0;
+		deletenext(gtfsIndex,db);
+	}
+	
+}
+
+function addnext(i,db){
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfeed?&feedname="+currentFiles[i]+"&feedsize="+currentSizes[i]+"&db="+db,
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	var f = d.split("%%")[0];
+        	d = d.split("%%")[1];
+        	if(d=="done"){
+//        		console.log(feeds[i]+" was successfully added");
+        		$('#'+f).html("Successfully added").css('color','green');
+        	}else{
+//        		console.log(feeds[i]+" could not be added. Error: "+d);
+        		$('#'+f).html("Could not be added. Error: "+d).css('color','red');
+        	}
+        	gtfsIndex++;
+        	if(gtfsIndex<currentFiles.length){
+        		addnext(gtfsIndex,db);
+        	}else{
+//        		gtfsFeedbackDialog.dialog( "close" );
+        		$('#gtfsFeedbackMessage').html("Completed.");
+        		gtfsFeedbackDialog.dialog('option', 'buttons', closeButton);
+        		inProcess = false;
+        		checkGTFSstatus(currentINDEX);
+        	}
+        	
+        }
+	});
+}
+
+function addFeed(){
+	var largeFeed = false;
+	for(var i=0;i<currentSizes.length;i++){
+		if(currentSizes[i]>5000000){
+			largeFeed=true;
+		}
+	}
+	if(currentFiles.length>0){
+		inProcess = true;
+		var html = "Uploading GTFS Feeds... Please do not close or refresh the page.";
+		if(largeFeed){
+			html+="<br><br>One (or more) of the selected feeds is larger than 5MB.<br>This process can take up to an hour.";
+		}
+		$('#gtfsFeedbackMessage').html(html);
+		html='<tr style="font-size:bold"><th style="width:30%; text-align:center">GTFS Feed Name</th><th style="width:70%; text-align:center">Status</th></tr>';
+		for(var i=0; i<currentFiles.length; i++){
+			html+="<tr><td style='text-align:center'>"+currentFiles[i]+"</td><td id='"+currentFiles[i].split(".")[0]+"' style='text-align:center'>In progress..</td></tr>";
+		}
+		$('#gtfsProgressTable').html( html );
+		gtfsFeedbackDialog.dialog( "open" );
+		var db = dbInfo[currentINDEX].toString();
+		gtfsIndex=0;
+		addnext(gtfsIndex,db);
+	}
 }
 
 function checkGTFSstatus(index){
@@ -788,15 +711,96 @@ function checkGTFSstatus(index){
 /**
  * Runs Update Queries.
  */
+function updateFeed(index){
+	var indexx = 1001+index;
+	var dbindex = index-1;
+	
+	var feeds = new Array();
+	$('.selectFeed'+indexx).each(function(){
+		if($(this).is(':checked')){
+			feeds.push($(this).attr('id'));
+		}
+	});
+	
+	for(var i=0; i<feeds.length; i++){
+		//alert(feeds[i]);
+		$.ajax({
+	        type: "GET",
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateSingleFeed?&feedname="+feeds[i]+"&dbindex="+dbindex,
+	        dataType: "json",
+	        async: false,
+	        success: function(d) {
+	        }
+		});
+	}
+	
+	location.reload(true);
+}
+function updatenext(i,db){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateNext?&feed="+currentFiles[i]+"&db="+db+"&agency="+currentAgencies[i]+"&username="+username,
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	var f = d.split("%%")[0];
+        	d = d.split("%%")[1];
+        	if(d=="done"){
+        		$('#'+f).html("Successfully updated").css('color','green');
+        	}else{
+        		$('#'+f).html("Could not be updated. Error: "+d).css('color','red');
+        	}
+        	gtfsIndex++;
+        	if(gtfsIndex<currentFiles.length){
+        		updatenext(gtfsIndex,db);
+        	}else{
+//        		gtfsFeedbackDialog.dialog( "close" );
+        		$('#gtfsFeedbackMessage').html("Completed.");
+        		gtfsFeedbackDialog.dialog('option', 'buttons', closeButton);
+        		inProcess = false;
+        		checkUpdatestatus(currentINDEX);
+        	}
+        }
+	});
+}
+
 function runUpdates(index){
 	var db = dbInfo[index].toString();
+	currentINDEX = index;
+	
 	$.ajax({
 	    type: "GET",
 	    url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateFeeds?&db="+db+"&username=admin",
-	    dataType: "text",
+	    dataType: "json",
 	    async: false,
 	    success: function(b) {
-	    	checkUpdatestatus(index);
+	    	var largeFeed = false;
+	    	var sizes = b.sizes;
+	    	currentFiles = b.feeds;
+	    	currentAgencies = b.agencies;
+	    	for(var i=0;i<sizes.length;i++){
+	    		if(sizes[i]>5000000){
+	    			largeFeed = true;
+	    		}
+	    	}
+	    	if(currentAgencies.length>0){
+	    		inProcess = true;
+	    		var html = "Updating GTFS Feeds... Please do not close or refresh the page.";
+	    		if(largeFeed){
+	    			html+="<br><br>One (or more) of the selected feeds is larger than 5MB.<br>This process can take up to a few hours.";
+	    		}
+	    		$('#gtfsFeedbackMessage').html(html);
+	    		html='<tr style="font-size:bold"><th style="width:30%; text-align:center">Agency Name</th><th style="width:70%; text-align:center">Status</th></tr>';
+	    		for(var i=0; i<currentAgencies.length; i++){
+	    			html+="<tr><td style='text-align:center'>"+currentAgencies[i]+"</td><td id='"+currentAgencies[i]+"' style='text-align:center'>In progress..</td></tr>";
+	    		}
+	    		$('#gtfsProgressTable').html( html );
+	    		gtfsFeedbackDialog.dialog( "open" );
+	    		gtfsIndex=0;
+		    	updatenext(gtfsIndex,db);
+	    	}
+	    	
+	    	
 	    }
 	});
 }
@@ -859,16 +863,56 @@ function checkFpopstatus(index){
 	});
 }
 
+function addfPop(){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Uploading Population Projection data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db, 
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	if(d=="done"){
+        		$('#otherFeedbackMessage').html("Population Projecion data was successfully added");
+        		$('#deletefPop').prop('disabled', false);
+        	}else{
+        		$('#otherFeedbackMessage').html("Population Projection data could not be added. Error: "+d);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	checkfEmpstatus(currentINDEX);
+        }
+	});
+	
+	
+}
 function deletefPop(){
 	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Deleting Population Projection data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefPop?&db="+db,
         dataType: "text",
         async: false,
         success: function(b) {
-        	changeStatus(currentINDEX, "future_pop", false);
-        	$('#deletefPop').prop('disabled', true);
+        	if(b = "done"){
+        		$('#otherFeedbackMessage').html("Population Projection data was successfully removed.");
+        		changeStatus(currentINDEX, "future_pop", false);
+            	$('#deletefPop').prop('disabled', true);
+        	}else{
+        		$('#otherFeedbackMessage').html("Population Projection data could not be removed. Error: "+b);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	
         }
 	});
 }
@@ -885,6 +929,33 @@ function openFemp(index){
 		$('#deletefEmp').prop('disabled', true);
 	}
 	FEMPdialog.dialog( "open" );
+}
+function addfEmp(){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Uploading Future Employment data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db, 
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	if(d=="done"){
+        		$('#otherFeedbackMessage').html("Employment Projecion data was successfully added");
+        		$('#deletefEmp').prop('disabled', false);
+        	}else{
+        		$('#otherFeedbackMessage').html("Future Employment data could not be added. Error: "+d);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	checkfEmpstatus(currentINDEX);
+        }
+	});
+	
+	
 }
 
 function checkfEmpstatus(index){
@@ -911,22 +982,62 @@ function checkfEmpstatus(index){
 
 function deletefEmp(){
 	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Deleting Future Employment data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefEmp?&db="+db,
         dataType: "text",
-        async: false,
+        async: true,
         success: function(b) {
-        	changeStatus(currentINDEX, "future_emp", false);
-        	$('#deletefEmp').prop('disabled', true);
+        	if(b = "done"){
+        		$('#otherFeedbackMessage').html("Future Employment data was successfully removed.");
+        		changeStatus(currentINDEX, "future_emp", false);
+            	$('#deletefEmp').prop('disabled', true);
+        	}else{
+        		$('#otherFeedbackMessage').html("Future Employment data could not be removed. Error: "+b);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	
         }
 	});
 }
 
 
 /**
- * Opens Title 6 dialog.
+ * Title 6 add/remove.
  */
+function addT6(){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Uploading Title VI data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db, 
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	if(d=="done"){
+        		$('#otherFeedbackMessage').html("Title VI data was successfully added");
+        		$('#deleteT6').prop('disabled', false);
+        	}else{
+        		$('#otherFeedbackMessage').html("Title VI data could not be added. Error: "+d);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	checkT6status(currentINDEX);
+        }
+	});
+	
+	
+}
 function openT6(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
@@ -965,14 +1076,27 @@ function checkT6status(index){
 
 function deleteT6(){
 	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Deleting Title VI data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteT6?&db="+db,
         dataType: "text",
-        async: false,
+        async: true,
         success: function(b) {
-        	changeStatus(currentINDEX, "title6", false);
-        	$('#deleteT6').prop('disabled', true);
+        	if(b = "done"){
+        		$('#otherFeedbackMessage').html("Title VI data was successfully removed.");
+        		changeStatus(currentINDEX, "title6", false);
+            	$('#deleteT6').prop('disabled', true);
+        	}else{
+        		$('#otherFeedbackMessage').html("Title VI data could not be removed. Error: "+b);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	
         }
 	});
 }
@@ -995,16 +1119,58 @@ function openPnr(index){
 //	changeStatus(index, "parknride", !b);
 }
 
+function addPnr(fileName){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Uploading Park & Ride data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db,
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	if(d=="done"){
+        		$('#otherFeedbackMessage').html("Park & Ride data was successfully added");
+        		$('#deletePNR').prop('disabled', false);
+        	}else{
+        		$('#otherFeedbackMessage').html("Park & Ride data could not be added. Error: "+d);
+        	}
+        	
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	checkPNRstatus(currentINDEX);
+        }
+	});
+	
+}
+
+
 function deletePNR(){
 	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Deleting Park & Ride data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletePNR?&db="+db,
         dataType: "text",
-        async: false,
+        async: true,
         success: function(b) {
-        	changeStatus(currentINDEX, "parknride", false);
-        	$('#deletePNR').prop('disabled', true);
+        	if(b = "done"){
+        		$('#otherFeedbackMessage').html("Park & Ride data was successfully removed.");
+        		changeStatus(currentINDEX, "parknride", false);
+            	$('#deletePNR').prop('disabled', true);
+        	}else{
+        		$('#otherFeedbackMessage').html("Park & Ride data could not be removed. Error: "+b);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	
         }
 	});
 }
@@ -1050,17 +1216,58 @@ function openEmp(index){
 //	changeStatus(index, "employment", !b);
 	
 }
+function addEmp(){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Uploading Employment data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db, 
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	if(d=="done"){
+        		$('#otherFeedbackMessage').html("Employment data was successfully added");
+        		$('#deleteEmp').prop('disabled', false);
+        	}else{
+        		$('#otherFeedbackMessage').html("Employment data could not be added. Error: "+d);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	checkEmpstatus(currentINDEX);
+        }
+	});
+	
+	
+}
 
 function deleteEmp(){
 	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Deleting Employment data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteEmp?&db="+db,
         dataType: "text",
-        async: false,
+        async: true,
         success: function(b) {
-        	changeStatus(currentINDEX, "employment", false);
-        	$('#deleteEmp').prop('disabled', true);
+        	if(b = "done"){
+        		$('#otherFeedbackMessage').html("Employment data was successfully removed.");
+        		changeStatus(currentINDEX, "employment", false);
+            	$('#deleteEmp').prop('disabled', true);
+        	}else{
+        		$('#otherFeedbackMessage').html("Employment data could not be removed. Error: "+b);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	
+        	
         }
 	});
 }
@@ -1094,22 +1301,82 @@ function checkEmpstatus(index){
  */
 function openCensus(index){
 	var db = dbInfo[index].toString();
-//	$.ajax({
-//        type: "GET",
-//        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/restoreCensus?&db="+db,
-//        dataType: "text",
-//        async: false,
-//        success: function(d) {
-//        	
-//        }
-//	});
-	
 	var status = dbStatus[index];
-	var b = status.Census;
-	changeStatus(index, "census", !b);
-//	if(!b){
-//		changeStatus(index, "update_process", false, true);
-//	}
+	currentINDEX = index;
+	
+	fillStates(db);
+	
+	CENSUSdialog.dialog( "open" );
+	
+//	var status = dbStatus[index];
+//	var b = status.Census;
+//	changeStatus(index, "census", !b);
+////	if(!b){
+////		changeStatus(index, "update_process", false, true);
+////	}
+}
+
+function removeCensus(state, states){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+			+'Deleting Census population data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/removeCensus?&stateid="+state+"&states="+states+"&db="+db, 
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	if(d=="done"){
+        		$('#otherFeedbackMessage').html("Census population data for the state "+state+" was successfully added");
+        	}else{
+        		$('#otherFeedbackMessage').html("Census population data could not be removed. Error: "+d);
+        	}
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	checkCensusstatus(currentINDEX);
+        	fillStates(db);
+        }
+	});
+}
+
+function fillStates(db){
+	var stateids = [];
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getImportedStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	currentImported = d.stateids;
+        	stateids = d.stateids;
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' onclick='removeCensus(\""+stateids[i]+"\",'\""+currentImported.join("$%$")+"\"')'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		
+        	});
+        	$('#importedstates').html(html);
+        }
+	});
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getAvailableStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		if(!(stateids.indexOf(d.stateids[i]) > -1)){
+        			html+="<tr><td><input type='checkbox' value='"+d.stateids[i]+"' class='stateCheckbox"+currentINDEX+"'></td><td>"+item+" ("+d.stateids[i]+")</td></tr>";
+        		}
+        		
+        	});
+        	$('#availablestates').html(html);
+        }
+	
+	});
 }
 
 function checkCensusstatus(index){
@@ -1135,6 +1402,89 @@ function checkCensusstatus(index){
         }
 	});
 }
+function addCensus(){
+	inProcess = true;
+	var db = dbInfo[currentINDEX].toString();
+	currentStates=[];
+
+	$('.stateCheckbox'+currentINDEX).each(function(){
+		if($(this).is(':checked')){
+			currentStates.push($(this).val());
+		}
+	});
+	for(var i=0; i<currentImported.length;i++){
+		currentStates.push(currentImported[i]);
+	}
+	if(currentStates.length>0){
+		var states = currentStates.join("$%$");
+		$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+				+'Importing Census population data... Please do not close or refresh the page.');
+		otherFeedbackDialog.dialog( "open" );
+		$.ajax({
+	        type: "GET",
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/importCensus?&stateid="+states+"&db="+db,
+	        dataType: "text",
+	        async: true,
+	        success: function(d) {
+	        	if(d=="done"){
+	        		$('#otherFeedbackMessage').html("Census population data was successfully added");
+	        	}else{
+	        		$('#otherFeedbackMessage').html("Census population data could not be added. Error: "+d);
+	        	}
+	        	inProcess = false;
+	        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+	        	checkCensusstatus(currentINDEX);
+	        	fillStates(db);
+	        	
+	        }
+		});
+	}
+	
+
+	/*if(currentStates.length>0){
+		$('#censusFeedbackMessage').html("Importing Census Population data... Please do not close or refresh the page." 
+//				+"This process can take several minutes."
+				);
+		var html='<tr style="font-size:bold"><th style="width:30%; text-align:center">State Name</th><th style="width:70%; text-align:center">Status</th></tr>';
+		for(var i=0; i<currentStates.length; i++){
+			html+="<tr><td style='text-align:center'>"+currentStates[i]+"</td><td id='delState_"+currentStates[i]+"' style='text-align:center'>In progress..</td></tr>";
+		}
+		$('#censusProgressTable').html( html );
+		censusFeedbackDialog.dialog( "open" );
+
+		censusIndex=0;
+		importnext(censusIndex,db);
+	}*/
+}
+
+/*function importnext(i,db){
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/importCensus?&stateid="+currentStates[i]+"&db="+db,
+        dataType: "text",
+        async: true,
+        success: function(d) {
+        	var f = d.split("%%")[0];
+        	d = d.split("%%")[1];
+        	if(d=="done"){
+        		$('#delState_'+f).html("Successfully imported").css('color','green');
+        	}else{
+        		$('#delState_'+f).html("Could not be removed. Error: "+d).css('color','red');
+        	}
+        	censusIndex++;
+        	if(censusIndex<currentStates.length){
+        		importnext(censusIndex,db);
+        	}else{
+//        		gtfsFeedbackDialog.dialog( "close" );
+        		$('#censusFeedbackMessage').html("Completed.");
+        		censusFeedbackDialog.dialog('option', 'buttons', closeButton);
+        		inProcess = false;
+        		fillStates(db);
+        		checkCensusstatus(currentINDEX);
+        	}
+        }
+	});
+}*/
 
 function copyCensus(index, section){
 //	alert(section);
@@ -1209,7 +1559,7 @@ function activeDeactive(index){
 
 function addDBSelect(index){
 	var html = "";
-	for(var i=1;i<dbInfo.length;i++){
+	for(var i=dbInfo.length-1;i>0;i--){
 		if(i==index){
 			continue;
 		}
@@ -1218,16 +1568,26 @@ function addDBSelect(index){
 	return html;
 }
 
+var inProcess = false;
 var ind;
+var gtfsIndex;
+var censusIndex;
 var currentINDEX;
 var currentFiles;
+var currentSizes;
+var currentAgencies;
+var currentStates;
+var currentImported;
 var dialog;
 var GTFSdialog;
 var PNRdialog;
 var T6dialog;
+var CENSUSdialog;
 var EMPdialog;
 var FEMPdialog;
 var FPOPdialog;
+var gtfsFeedbackDialog;
+var otherFeedbackDialog;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1238,9 +1598,23 @@ var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/da
 var folder = "../resources/admin/Development/";
 var fList;
 var aList;
+var closeButton = {
+        "Close": function () {
+            $(this).dialog("close");
+            $(this).dialog("option", "buttons", {});
+        }
+    };
 var oldName;
 var classMap = {"activate":"Activated","gtfs":"GtfsFeeds","census":"Census","emp":"Employment",
                 "pnr":"Parknride","t6":"Title6","femp":"FutureEmp","fpop":"FuturePop","update":"Updated"};
+
+window.onbeforeunload = function(event)
+{
+	if(inProcess){
+    	return confirm("Confirm refresh");
+	}
+};
+
 $(document).ready(function(){
 	
 	$.ajax({
@@ -1286,19 +1660,19 @@ $(document).ready(function(){
             					"<input type='button' class='emp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"employment\")'>" +
             					"<select class='census select-class' id='emp-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='emp'></td></tr>"+
-            			"<tr><td><input type='button' class='pnr dbButtons-class' value='Park & Ride' onclick='openPnr("+i+")'> or " +
+            			"<tr><td><input type='button' class='pnr dbButtons-class' value='Import Park & Ride' onclick='openPnr("+i+")'> or " +
             					"<input type='button' class='pnr dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"parknride\")'>" +
             					"<select class='pnr select-class' id='pnr-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='pnr'></td></tr>"+
-            			"<tr><td><input type='button' class='t6 dbButtons-class' value='Title VI' onclick='openT6("+i+")'> or " +
+            			"<tr><td><input type='button' class='t6 dbButtons-class' value='Import Title VI' onclick='openT6("+i+")'> or " +
             					"<input type='button' class='t6 dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"title6\")'>" +
             					"<select class='t6 select-class' id='t6-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='t6'></td></tr>"+
-            			"<tr><td><input type='button' class='fpop dbButtons-class single' value='Future Population' onclick='openFpop("+i+")'>" +
+            			"<tr><td><input type='button' class='fpop dbButtons-class single' value='Import Future Population' onclick='openFpop("+i+")'>" +
 //            					"<input type='button' class='fpop dbButtons-class second' value='Copy from' onclick='copyFpop("+i+")'>" +
 //            					"<select class='fpop select-class' id='fpop-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='fpop'></td></tr>"+
-            			"<tr><td><input type='button' class='femp dbButtons-class' value='Future Employment' onclick='openFemp("+i+")'> or " +
+            			"<tr><td><input type='button' class='femp dbButtons-class' value='Import Future Employment' onclick='openFemp("+i+")'> or " +
             					"<input type='button' class='femp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"femployment\")'>" +
             					"<select class='femp select-class' id='femp-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='femp'></td></tr>"+
@@ -1347,6 +1721,7 @@ $(document).ready(function(){
 	 });
 	
 	runGTFSfunctions();
+	runCENSUSfunctions();
 	runPnRfunctions();
 	runT6functions();
 	runEMPfunctions();
@@ -1355,6 +1730,23 @@ $(document).ready(function(){
 	
 	$('body').css('display','');
 	$('#dbAccordion .ui-accordion-content').css('height','100%');
+	
+	gtfsFeedbackDialog = $( "#gtfsFeedbackDialog" ).dialog({
+	      autoOpen: false,
+	      height: 630,
+	      width: 800,
+	      modal: true,	
+	      closeOnEscape: false,
+	});
+	
+	
+	otherFeedbackDialog = $( "#otherFeedbackDialog" ).dialog({
+	      autoOpen: false,
+	      height: 250,
+	      width: 600,
+	      modal: true,	
+	      closeOnEscape: false,
+	});
 	
 	
 });
@@ -1446,7 +1838,7 @@ function runPnRfunctions(){
 	
 	PNRdialog = $( "#pnr_upload" ).dialog({
 	      autoOpen: false,
-	      height: $(window).height()*0.7,
+	      height: $(window).height()*0.9,
 	      width: 900,
 	      modal: true,
 	      buttons: {
@@ -1480,7 +1872,7 @@ function runFEMPfunctions(){
 	
 	FEMPdialog = $( "#femp_upload" ).dialog({
 	      autoOpen: false,
-	      height: $(window).height()*0.7,
+	      height: $(window).height()*0.9,
 	      width: 900,
 	      modal: true,
 	      buttons: {
@@ -1496,6 +1888,19 @@ function runFEMPfunctions(){
 	 });
 }
 
+function runCENSUSfunctions(){
+	CENSUSdialog = $( "#census_upload" ).dialog({
+	      autoOpen: false,
+	      height: $(window).height()*0.9,
+	      width: 900,
+	      modal: true,
+	      buttons: {
+	        Close: function() {
+	        	CENSUSdialog.dialog( "close" );
+	        }
+	      },
+	 });
+}
 
 function runT6functions(){
 	deleteUploadedT6(); 
@@ -1515,7 +1920,7 @@ function runT6functions(){
 	
 	T6dialog = $( "#t6_upload" ).dialog({
 	      autoOpen: false,
-	      height: $(window).height()*0.7,
+	      height: $(window).height()*0.9,
 	      width: 900,
 	      modal: true,
 	      buttons: {
@@ -1549,7 +1954,7 @@ function runEMPfunctions(){
 	
 	EMPdialog = $( "#emp_upload" ).dialog({
 	      autoOpen: false,
-	      height: $(window).height()*0.7,
+	      height: $(window).height()*0.9,
 	      width: 900,
 	      modal: true,
 	      buttons: {
@@ -1583,7 +1988,7 @@ function runFPOPfunctions(){
 	
 	FPOPdialog = $( "#fpop_upload" ).dialog({
 	      autoOpen: false,
-	      height: $(window).height()*0.7,
+	      height: $(window).height()*0.9,
 	      width: 900,
 	      modal: true,
 	      buttons: {
@@ -1614,11 +2019,14 @@ function runGTFSfunctions(){
     }).bind('fileuploadalways', function (e, data){
 //    	addFeed(data.files[0].name);
     	currentFiles.push(data.files[0].name);
+    	currentSizes.push(data.files[0].size);
     }).bind('fileuploadstopped', function (e) {
 //    	alert();
-    	addFeed(currentFiles);
+    	addFeed();
+//    	callAddFeed(currentFiles);
     }).bind('fileuploadstart', function (e) {
     	currentFiles = [];
+    	currentSizes = [];
     	deleteProcessGTFS();
     });
 	$('#gtfs_upload_form > div').css('margin-right','0px');
