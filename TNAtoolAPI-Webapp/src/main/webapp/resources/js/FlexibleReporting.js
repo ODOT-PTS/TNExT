@@ -150,6 +150,11 @@ function flexRepDialog() {
 				effect : "slide",
 				duration : 300
 			},
+			position : {
+				my : "left+40 top+45",
+				at : "left top",
+				of : "#map"
+			},
 			open:function(){
 				numSelectedAgencies = 0;
 				 numSelectedAreas = 0
@@ -167,7 +172,6 @@ function flexRepDialog() {
 		});
 	});
 	$( "#flexRepDialog" ).css( "max-width", 0.85*$(window).width() );
-	$( "#flexRepDialog" ).dialog("option", "position",{ my: "center", at: "center", of: window })
 	
 	
 	//////////////// appending list of report types ////////////////
@@ -348,11 +352,13 @@ function loadAreaOptions(input){
 	numSelectedAreas = 0;
 	
 	// disable filtering on urban areas if urban area is already selected as the geographical area to report on.
-	if ($(input).val() == 5){
+/*	if ($(input).val() == 5){
 		$('#uAreaFilter').attr('disabled', true);
+		$('.urbanFilter').attr('disabled', true);
 		$('#uAreaFilter').attr('checked', false);
 	}else
 		$('#uAreaFilter').attr('disabled', false);
+		$('.urbanFilter').attr('disabled', true);*/
 	
 	
 	switch(parseInt($(input).val())) {

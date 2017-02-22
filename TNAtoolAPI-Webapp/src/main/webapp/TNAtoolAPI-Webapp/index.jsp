@@ -6,6 +6,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta charset="utf-8" />
 	<title>Transit Network Analysis Tool</title>
+	<!-- <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script> -->
 	<script type="text/javascript" src="resources/js/jquery-1.9.1.min.js"></script>	
     <script type="text/javascript" src="resources/js/jquery-ui.js"></script>	
 	<script type="text/javascript" src="resources/js/jQueryContent.js"></script>

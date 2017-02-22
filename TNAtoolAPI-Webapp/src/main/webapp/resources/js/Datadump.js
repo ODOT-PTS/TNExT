@@ -137,45 +137,45 @@ function runAjaxAreas(ind,areaType,fileName){
 			if (areaType == 4) // area names of some of the ODOT regions are null, thus they are replaced by the region ID. 
 				d.AreaName = 'Region ' + areaIDs[ind];
 			
-			csvContent += d.AreaName + ","
-				+ d.RouteMiles + ","
-				+ d.StopsPersqMile + ","
-				+ d.StopPerServiceMile + ","
-				+ d.ServiceHours + ","
-				+ d.ServiceMiles + ","
-				+ d.ServiceMilesPersqMile + ","
-				+ d.MilesofServicePerCapita + ","
-				+ d.UPopWithinX + ","
-				+ d.RPopWithinX + ","
-				+ addPercent(numberconv(d.PopServed)) + ","
-				+ addPercent(numberconv(d.PopServedAtLoService)) + ","
-				+ d.UPopServedAtLoService + ","
-				+ d.RPopServedAtLoService + ","
-				+ addPercent(numberconv(d.PopUnServed)) + ","
-				+ d.ServiceStops + ","
-				+ d.UPopServedByService + ","
-				+ d.RPopServedByService + ","
-				+ d.racWithinX + ","
-				+ addPercent(numberconv(d.racServed)) + ","
-				+ addPercent(numberconv(d.racServedAtLoService)) + ","
-				+ d.totalracServedAtLoService + ","
-				+ addPercent(numberconv(d.racUnServed)) + ","
-				+ d.racServedByService + ",";
+			csvContent += "\"" + d.AreaName + "\"," +
+				"\"" + d.RouteMiles + "\"," +
+				"\"" + d.StopsPersqMile + "\"," +
+				"\"" + d.StopPerServiceMile + "\"," +
+				"\"" + d.ServiceHours + "\"," +
+				"\"" + d.ServiceMiles + "\"," +
+				"\"" + d.ServiceMilesPersqMile + "\"," +
+				"\"" + d.MilesofServicePerCapita + "\"," +
+				"\"" + d.UPopWithinX + "\"," +
+				"\"" + d.RPopWithinX + "\"," +
+				"\"" + addPercent(numberconv(d.PopServed)) + "\"," +
+				"\"" + addPercent(numberconv(d.PopServedAtLoService)) + "\"," +
+				"\"" + d.UPopServedAtLoService + "\"," +
+				"\"" + d.RPopServedAtLoService + "\"," +
+				"\"" + addPercent(numberconv(d.PopUnServed)) + "\"," +
+				"\"" + d.ServiceStops + "\"," +
+				"\"" + d.UPopServedByService + "\"," +
+				"\"" + d.RPopServedByService + "\"," +
+				"\"" + d.racWithinX + "\"," +
+				"\"" + addPercent(numberconv(d.racServed)) + "\"," +
+				"\"" + addPercent(numberconv(d.racServedAtLoService)) + "\"," +
+				"\"" + d.totalracServedAtLoService + "\"," +
+				"\"" + addPercent(numberconv(d.racUnServed)) + "\"," +
+				"\"" + d.racServedByService + "\",";
 				if(popYear==2010){
-					csvContent += d.wacWithinX + ","
-						+ addPercent(numberconv(d.wacServed)) + ","
-						+ addPercent(numberconv(d.wacServedAtLoService)) + ","
-						+ d.totalwacServedAtLoService + ","
-						+ addPercent(numberconv(d.wacUnServed)) + ","
-						+ d.wacServedByService + ",";
+					csvContent += "\"" + d.wacWithinX + "\","  +
+						"\"" + addPercent(numberconv(d.wacServed)) + "\"," +
+						"\"" + addPercent(numberconv(d.wacServedAtLoService)) + "\"," +
+						"\"" + d.totalwacServedAtLoService + "\"," +
+						"\"" + addPercent(numberconv(d.wacUnServed)) + "\"," +
+						"\"" + d.wacServedByService + "\",";
 				}else
 					csvContetn += "N/A,N/A,N/A,N/A,N/A,N/A";
-				csvContent +=(d.ConnectedCommunities).replace(/County/g,'') + ","
-					+ d.HoursOfService + ","
-					+ d.MinFare + ","
-					+ d.AverageFare + ","
-					+ d.MedianFare + ","
-					+ d.MaxFare + "\n";
+				csvContent += "\"" + (d.ConnectedCommunities).replace(/County/g,'') +  "\","  +
+					"\"" + d.HoursOfService + "\"," +
+					"\"" + d.MinFare + "\"," +
+					"\"" + d.AverageFare + "\"," +
+					"\"" + d.MedianFare + "\"," +
+					"\"" + d.MaxFare + "\"" + "\n"; 
 				progressVal = Math.max(Math.floor((ind + 1) / areaIDs.length * 100),1);
 				ind += 1;
 				if (ind < areaIDs.length)

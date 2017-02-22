@@ -166,7 +166,8 @@ public class SpatialEventManager {
 	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
 		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
 		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
-				+ "FROM gtfs_selected_feeds WHERE username='" + username + "')  ORDER BY name";
+				+ " FROM gtfs_selected_feeds WHERE username='" + username + "') "
+				+ " AND gtfs_agencies.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY name";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);
@@ -184,46 +185,42 @@ public class SpatialEventManager {
 	
 	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, String fulldate, String day, String username, double radius, Statement stmt) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
-		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'),"
+		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
-				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID + "'"
-				+ " 	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day + "= 1 and serviceid_agencyid||serviceid_id "
-				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID + "' "
+				+ "	where startdate::int<= " + fulldate + "  and enddate::int>= " + fulldate + "  and  " + day + " = 1 and serviceid_agencyid||serviceid_id "
+				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2) "
 				+ "	union select serviceid_agencyid, serviceid_id "
-				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = '" + agencyID + "' where date='" + fulldate + "' and exceptiontype=1),"
-				+ " trips AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
-				+ "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
-				+ " a1stops AS (select stime.trip_agencyid as agencyid, gtfs_agencies.name as agencyname, stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location"
-				+ "	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
-				+ "	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid"
-				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
-				+ "	where stop.agencyid IN (SELECT aid FROM aids)"
-				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon),"
-				+ " svcids1 as (select serviceid_agencyid, serviceid_id"
-				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid"
-				+ "	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day  + "= 1 and gc.serviceid_agencyid <> '" + agencyID + "'"
-				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
-				+ " union select serviceid_agencyid, serviceid_id"
-				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='" + fulldate + "' and exceptiontype=1 and gcd.serviceid_agencyid <> '" + agencyID + "' ),"
-				+ " trips1 AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
-				+ " from svcids1 inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
-				+ " a2stops AS (select a1stops.agencyid AS a1id, a1stops.agencyname AS a1name, stime.trip_agencyid as a2id, gtfs_agencies.name as a2name,"
-				+ " stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location, ST_DISTANCE(stop.location, a1stops.location)::NUMERIC AS dist"
-				+ " from gtfs_stops stop inner join a1stops on ST_DISTANCE(stop.location, a1stops.location) < " + radius 
-				+ "	inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
-				+ "	inner join trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid"
-				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
-				+ "	where stop.agencyid IN (SELECT aid FROM aids)"
-				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon,a1stops.agencyid, a1stops.agencyname,a1stops.location),"
-				+ ""
-				+ " a1coordinates AS (SELECT a1stops.agencyid AS a1id, AVG(a1stops.lat)::TEXT||','||AVG(a1stops.lon)::TEXT AS a1coordinate FROM a1stops GROUP BY a1id),"
-				+ " a2coordinates AS (SELECT a2id, AVG(a2stops.lat)::TEXT||','||AVG(a2stops.lon)::TEXT AS a2coordinate FROM a2stops GROUP BY a2id)"
-				+ " select a1id, a1name, ARRAY_AGG(DISTINCT a1coordinate) AS a1coordinate, a2id, a2name, ARRAY_AGG(DISTINCT a2coordinate) AS a2coordinate, COUNT(dist) AS size"
-				+ "	FROM a2stops JOIN a1coordinates USING(a1id)"
-				+ "	JOIN a2coordinates USING(a2id)"
-				+ "	GROUP BY a1id, a1name, a2id, a2name";
-		System.out.println(query);
-		
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = '" + agencyID + "' where date='" + fulldate + "' and exceptiontype=1), "
+				+ " trips AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid "
+				+ "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), "
+				+ " a1stops AS (select stime.trip_agencyid as agencyid, gtfs_agencies.name as agencyname, stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location "
+				+ "	from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+				+ "	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid "
+				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id "
+				+ "	where stop.agencyid IN (SELECT aid FROM aids) "
+				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon), "
+				+ " svcids1 as (select serviceid_agencyid, serviceid_id "
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid "
+				+ "	where startdate::int<= " + fulldate + "  and enddate::int>= " + fulldate + "  and  " + day + "  = 1 and gc.serviceid_agencyid <> '" + agencyID + "' "
+				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2) "
+				+ " union select serviceid_agencyid, serviceid_id "
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='" + fulldate + "' and exceptiontype=1 and gcd.serviceid_agencyid <> '" + agencyID + "' ), "
+				+ " trips1 AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid "
+				+ "	from svcids1 inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), "
+				+ " active_stops1 AS (SELECT stop_agencyid, trip_agencyid,stop_id "
+				+ "	FROM gtfs_stop_times AS stoptimes INNER JOIN trips1 ON trip_id = tripid AND trip_agencyid = aid "
+				+ "	GROUP BY stop_agencyid, trip_agencyid,stop_id), "
+				+ " active_stops_aggregated1 AS (SELECT active_stops1.trip_agencyid AS aid, ST_Collect(stops.location) AS shape "
+				+ "	FROM active_stops1 INNER JOIN gtfs_stops AS stops "
+				+ " ON active_stops1.stop_id = stops.id AND active_stops1.stop_agencyid = stops.agencyid "
+				+ "	GROUP BY active_stops1.trip_agencyid order by aid), "
+				+ " connected_agencies AS (SELECT '" + agencyID + "'::text AS a1id, asa1.aid AS a2id FROM active_stops_aggregated1 AS asa1 "
+				+ " INNER JOIN a1stops ON ST_DWithin(asa1.shape,a1stops.location," + radius + ") GROUP BY asa1.aid) "
+				+ " select a1id, agencies1.name AS a1name, a2id, agencies2.name AS a2name "
+				+ "	FROM connected_agencies JOIN gtfs_agencies AS agencies1 ON a1id=agencies1.id "
+				+ "	JOIN gtfs_agencies AS agencies2 ON a2id=agencies2.id;";
+//		System.out.println(query);		
 		try{
 			ResultSet rs = stmt.executeQuery(query);
 			
@@ -246,11 +243,10 @@ public class SpatialEventManager {
 				instance.a1name = rs.getString("a1name");
 				instance.a2ID = rs.getString("a2id");
 				instance.a2name = rs.getString("a2name");
-				
-				// Getting the edge properties.
-				instance.connections = new TransitConnection(rs.getInt("size"));
+				instance.connections = new TransitConnection(1);
 				response.add(instance);		
 			}
+			rs.close();
 		}catch(SQLException e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -269,32 +265,33 @@ public class SpatialEventManager {
 //		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
 		String query = "SELECT name, lat, lon FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
 				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-				+ " WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";;
+				+ " WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";
+//		System.out.println(query);
 		ResultSet rs = stmt.executeQuery(query);
 		List<ConGraphCluster> clusters = new ArrayList<ConGraphCluster>();
 		List<Coordinate> points = new ArrayList<Coordinate>();
-//		System.out.println("agency:"+agencyID);
 		while (rs.next()){
 			Coordinate c = new Coordinate(rs.getDouble("lat"), rs.getDouble("lon"));
 			points.add(c);
 		}
 		
+		// handling agencies with no trips scheduled for them
+		if ( points.isEmpty())
+			return null;
+		
 		while (!points.isEmpty()){
 			Set<Coordinate> clusterPoints = new HashSet<Coordinate>();
 			Coordinate currenPoint = points.remove(0);
 			clusterPoints.add(currenPoint);
-			
 			for ( Coordinate p : points ){
 				if (ConGraphAgencyGraph.getDistance(currenPoint, p) < RADIUS){
 					clusterPoints.add(p);
 				}
 			}
-			
 			ConGraphCluster c = new ConGraphCluster( clusterPoints );
 			points.removeAll(clusterPoints);
 			clusters.add(c); 
 		}
-		
 		ConGraphAgencyGraph response = new ConGraphAgencyGraph(agencyID, clusters);
 		return response;
 	}

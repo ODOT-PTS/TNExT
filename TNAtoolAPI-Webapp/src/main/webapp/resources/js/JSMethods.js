@@ -365,7 +365,7 @@ function getMetadata() {
 	 */ 
 	output = output.concat('\r\n\r\n\r\nMetric Definitions\r\n');
 	output = output.concat('--------------------\r\n');
-	$('.metric').each(function(i,item){
+	$('#RT .metric').each(function(i,item){
 		output = output.concat($(item).text() + ': ' + item.title + '\r\n')
 		});
 	output = output.concat('\r\n');
@@ -646,9 +646,11 @@ function NewLine(config) {
 }
 
 function numberconv(x) {
+	console.log(x);
 	if (x.indexOf('E') > -1) {
 		x = Number(x).toString();
 	}
+	console.log(x);
 	var parts = x.split(".");
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	if (parts[1] > 0) {

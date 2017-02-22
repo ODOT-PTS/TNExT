@@ -1,4 +1,3 @@
-//var isConGraphDialogOpen = false;
 var day;
 var gap;
 var vertices = {}; // declared to keep track of agencies on the map and avoid
@@ -21,7 +20,6 @@ edgeStyle['hover'] = {
 	color : 'red',
 	opacity : 1,
 }
-
 var agencyStyle = {}; // The object that contains the style setting of agency
 						// elements on the graph.
 agencyStyle['normal'] = {
@@ -41,7 +39,6 @@ agencyStyle['hover'] = {
  * Loads/toggles the connectivity graph dialog box.
  */
 function toggleConGraphDialog() {
-
 	// Initializing the connectivity graph dialog box
 	$("#con-graph-dialog").empty();
 	var dialogheight = Math.round((window.innerHeight) * .6);
@@ -52,7 +49,7 @@ function toggleConGraphDialog() {
 		$("#con-graph-dialog").dialog({
 			autoOpen : false,
 			height : dialogheight,
-			width : 350,
+			width : 400,
 			minWidth : 200,
 			minHeight : 350,
 			modal : false,
@@ -60,9 +57,13 @@ function toggleConGraphDialog() {
 			resizable : true,
 			closeOnEscape : false,
 			position : {
-				my : "left top",
-				at : "right top",
-				of : "#con-graph-button"
+				my : "left+40 top+45",
+				at : "left top",
+				of : "#map"
+			},
+			show : {
+				effect : "slide",
+				duration : 300
 			},
 			buttons : {},
 			close : function() {
@@ -90,8 +91,8 @@ function toggleConGraphDialog() {
 		$("#con-graph-dialog").dialog("close");
 	else {
 		$("#con-graph-dialog").empty;
-		html = '<table style="font-size: 100%;"><td>Connectivity Gap (miles) </td><td><input id="con-graph-input" value="0.1" style="width:5em"></td></table><br>';
-		html += '<p><b>Date</b>: <input readonly type="text" class="POPcal" id="ConGraphDatepicker"></p>';
+		html = '<table style="font-size: 100%;"><td>Connectivity Gap (miles):&nbsp;</td><td><input id="con-graph-input" value="0.1" style="width:5em"></td></table><br>';
+		html += '<p>Date: <input readonly type="text" class="POPcal" id="ConGraphDatepicker"></p>';
 		html += '<button onclick="openConGraph()">Submit</button><br>';
 		$("#con-graph-dialog").append(html);
 		$("#con-graph-dialog").dialog("open");
@@ -114,52 +115,47 @@ function openConGraph() {
 	$("#ConGraphDatepicker").datepicker("setDate", day);
 	$("#con-graph-input").val(gap);
 	$("#overlay").show();
+	key = Math.random();
 	
-
 	var dbindex = getURIParameter("dbindex");
 	var agencyCentroids = {};
-	var loaderHtml = '<img id="conGraphPreLoader" src="../resources/images/287.GIF" align="middle" alt="Page Loading" style="height: 60px;position:absolute;margin:auto;top:0;bottom:0;left:0;right:0;" >';
-	loaderHtml += '<br><span id="conGraphPreLoaderText" style="margin: auto;position: relative;top: 150px;left: 80px;">This will take a few minutes...</span>'
-	$("#con-graph-dialog").append(loaderHtml);
-
+	$("#con-graph-dialog").append('<div id="progressbar" style="width:80%;margin-top:30px;margin-left:10%;">'
+			+ '<div class="progress-label" style="position:absolute;"></div></div>');
+	conGraphProgressBar();
 	// Getting agency centroids
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/agencyCentriods?&dbindex='
 				+ dbindex + '&username=' + getSession(),
-		async : true,
+		async : false,
 		success : function(d) {
 			$.each(d.list, function(index, item) {
 				agencyCentroids[item.ID] = item;
 			});
-			callBack(agencyCentroids, dbindex);
-		}
-	});
+			callBack(agencyCentroids, dbindex);				
+		}	
+	});	
 }
 
 function callBack(agencyCentroids, dbindex) {
 	var result = {};
-
 	// Getting connections
 	$
 			.ajax({
 				type : 'GET',
 				datatype : 'json',
-				url : '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x='
-						+ gap
-						* 1609.3
-						+ '&day='
-						+ day
-						+ '&dbindex='
-						+ dbindex
+				url : '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?'
+					    + '&x=' + gap * 1609.3
+						+ '&key=' + key
+						+ '&day=' + day
+						+ '&dbindex=' + dbindex
 						+ '&username=' + getSession(),
 				async : true,
 				success : function(d) {
 					localStorage.setItem('myStorage', JSON.stringify(d));
+//					var d = jQuery.parseJSON( localStorage.getItem('myStorage') );
 					result = d.set;
-					// result =
-					// JSON.parse(localStorage.getItem('myStorage')).set;
 					$
 							.each(
 									result,
@@ -208,7 +204,7 @@ function callBack(agencyCentroids, dbindex) {
 
 										// Initializing end point of the edge if
 										// exists
-										if (item.connections.size > 0) {
+										if (item.connections.size != 0) {
 
 											var vertex2;
 											if (vertices[item.a2ID] != undefined) {
@@ -265,8 +261,7 @@ function callBack(agencyCentroids, dbindex) {
 													.on(
 															'mouseover',
 															function(e) {
-																edge
-																		.openPopup();
+//																edge.openPopup();
 																toggleEdge(
 																		edgeVerticesMap,
 																		edge,
@@ -276,8 +271,7 @@ function callBack(agencyCentroids, dbindex) {
 													.on(
 															'mouseout',
 															function(e) {
-																edge
-																		.closePopup();
+//																edge.closePopup();
 																toggleEdge(
 																		edgeVerticesMap,
 																		edge,
@@ -285,13 +279,15 @@ function callBack(agencyCentroids, dbindex) {
 																		edge.status);
 															});
 
-											var popUpContent = '<table style="font-size:100%"><tr><td>From:&nbsp;</td><td nowrap>'
+											var popUpContent = '<table id="' + item.a1ID+item.a2ID + '" style="font-size:100%"><tr><td>From:&nbsp;</td><td nowrap>'
 													+ item.a1name
 													+ '</td></tr><tr><td>To:&nbsp;</td><td nowrap>'
 													+ item.a2name
-													+ '</td></tr><tr><td>Connections:&nbsp;</td><td>'
-													+ item.connections.size
-													+ '</td></tr></table>';
+													+ '</td></tr>'
+													+ '<tr><td>Connections:&nbsp</td>'
+													+  '<td id="conNum">&nbsp-'
+													+ '</td></tr>'
+													+ '<tr><td align="center" colspan="2"><input type="submit" value="Get Number of Connections" data-aids="'+item.a1ID+','+item.a2ID+'" onclick="getConnections(this)"></td></tr></table>';
 											edge.bindPopup(popUpContent, {
 												autoPan : false
 											});
@@ -301,8 +297,6 @@ function callBack(agencyCentroids, dbindex) {
 											map.addLayer(edge);
 
 											// updating mapping objects
-											// (agencyEdgesMap &
-											// agencyEdgesMap).
 											if (vertexEdgesMap[vertex1.id] === undefined)
 												vertexEdgesMap[vertex1.id] = [];
 											vertexEdgesMap[vertex1.id]
@@ -394,7 +388,6 @@ function callBack(agencyCentroids, dbindex) {
 					isConGraphDialogOpen = true;
 				}
 			});
-
 }
 
 /**
@@ -731,4 +724,76 @@ function myFunction(input) {
 					'normal', 'normal');
 		}
 	}
+}
+
+/**
+ * Sets up the progress bar and removes it once the graph is generated.
+ */
+function conGraphProgressBar() {
+	var progressLabel = $(".progress-label");
+	$("#progressbar")
+			.progressbar(
+					{
+						value : false,
+						change : function() {
+							progressLabel
+									.html('<table style="margin-top:2px;width:100%"><tr><td align="center" style="width:100%">Report in progress... '
+											+ $(this).progressbar("value") + '% '
+											+ '<img src="../resources/images/loadingGif.gif" alt="loading" style="width:12px;height:12px"></td></tr></table>');
+						}
+					});
+	var prog = false;
+	function conGraphProgress() {
+		$.ajax({
+			type : 'GET',
+			datatype : 'json',
+			url : '/TNAtoolAPI-Webapp/queries/transit/PorgVal?&key=' + key,
+			async : true,
+			success : function(item) {
+				progVal = parseInt(item.progVal);
+				if (progVal == 0) {
+					if(prog){
+						progVal=100;
+						clearTimeout(timeVar);
+					}else{
+						progVal=false;
+					}
+				} else {
+					prog = true;
+				}
+				$("#progressbar").progressbar("value", progVal);
+			}
+		});
+		if (progVal == 100) {
+			clearTimeout(timeVar);
+			$('#progressbar').fadeOut(1000);
+		}
+	}
+	timeVar = setInterval(conGraphProgress, 100);
+}
+
+/**
+ * Gets the number of connection between the two agencies on the given day
+ * @param input
+ */
+function getConnections(input){
+	var agencyIDs = input.dataset.aids.split(',');
+	console.log(agencyIDs);
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/getConnections?&dbindex='+dbindex
+		+ '&radius='+ gap*1609.3 +'&date=' 
+		+ day + '&username=' + getSession() 
+		+ '&aid1=' + agencyIDs[0] + '&aid2=' + agencyIDs[1],
+		async : true,
+		beforeSend: function(){
+			$('#conNum').empty();
+			$('#conNum').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:15px;height:15px;">');
+	    },
+		success : function(d) {
+			$('#conNum').empty();
+			$('#conNum').text(' ' + d);
+		}
+	});
 }

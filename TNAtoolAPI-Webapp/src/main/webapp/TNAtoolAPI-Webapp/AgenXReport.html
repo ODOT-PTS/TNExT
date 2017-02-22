@@ -89,12 +89,11 @@ $(document).ready(function(){
 			else{
 			html+='<tr><td class="metric" title="Total Employees (WAC)  impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Employees (WAC) served by service is calculated as service stops multiplied by the unduplicated Employees (WAC) within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Reported number is cumulative over the selected dates.">Employees (WAC) Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.wacServedByService)+'</td></tr>';
 			}
-		html+='<tr><td class="metric" title="Set of days (from the selected days) in which at least one trip is served by the selected transit agency.">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
-			+'</td></tr><tr><td class="metric" title="Earliest and latest arrival and departure times of all stops served by the transit agency.">Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService +'</td>';
+		html+='<tr><td class="metric" title="Set of days (from the selected days) in which at least one trip is served by the selected transit agency.">Service Days<span class="IOSym">(2)</span></td><td>'+ item.ServiceDays
+			+'</td></tr><tr><td class="metric" title="Earliest and latest arrival and departure times of all stops served by the transit agency.">Hours of Service<span class="IOSym">(2)</span></td><td>'+ item.HoursOfService +'</td>';
 			html +='</tr></tbody></table>';
 			$('#displayReport').append($(html));	
-			progressbar.remove();	
-			
+			progressbar.remove();
 			tableProperties.paging = false;
 			tableProperties.ordering = false;
 			table = buildDatatables();
