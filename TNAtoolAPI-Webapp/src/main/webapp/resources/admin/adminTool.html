@@ -181,7 +181,7 @@
 			  <ul>
 			  	<li>Census population data for different states can be selected to be imported into the current database from the list below.</li>
 			  	<li>The population data for the selected states is imported from the pre-built database "census_reference" which is based on Census 2010 population data.</li>
-			  	<li>If a new "census_reference" database is needed to be created (say for Census 2020), the instructions, as well as the sql queries, can be found <b><a href="../resources/admin/sampleFiles/buildCensus10.sql" download>here</a></b>.</li>
+			  	<li>If a new "census_reference" database is needed to be created (say for Census 2020), the instructions, as well as the sql queries, can be found <b><a href="../resources/admin/sampleFiles/buildCensus.sql" download>here</a></b>.</li>
 			  </ul>
 		  </div><br>
 		  <!-- <div id="census_import" class="upload_cards"> -->
@@ -209,8 +209,13 @@
 			  	<li>If data are not available for some of the columns in the CSV file to be uploaded, just leave those columns empty.</li>
 			  </ul>
 		  </div><br>
-		  <div id="pnr_delete_card" class="upload_cards">
+		  <!-- <div id="pnr_delete_card" class="upload_cards">
 			  <button type="button" id="deletePNR" class="btn btn-danger delete" onclick="deletePNR()"><span>Delete Existing Park & Ride Data</span></button>
+		  </div><br> -->
+		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "park & ride" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatespnr" style="background-color:white;"></table>
 		  </div><br>
 		  <div id="pnr_upload_feeds" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
@@ -356,8 +361,13 @@
 			  	</li>
 			  </ul>
 		  </div><br>
-		  <div id="t6_delete_card" class="upload_cards">
+		  <!-- <div id="t6_delete_card" class="upload_cards">
 			  <button type="button" id="deleteT6" class="btn btn-danger delete" onclick="deleteT6()"><span>Delete Existing Title VI Data</span></button>
+		  </div><br> -->
+		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "title VI" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatest6" style="background-color:white;"></table>
 		  </div><br>
 		  <div id="t6_upload_feeds" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
@@ -485,8 +495,18 @@
 			  	</li>
 			  </ul>
 		  </div><br>
-		  <div id="emp_delete_card" class="upload_cards">
+		  <!-- <div id="emp_delete_card" class="upload_cards">
 			  <button type="button" id="deleteEmp" class="btn btn-danger delete" onclick="deleteEmp()"><span>Delete Existing Employment Data</span></button>
+		  </div><br> -->
+		  <div style="float:left;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "rac" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesrac" style="background-color:white;"></table>
+		  </div>
+		  <div style="float:right;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "wac" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstateswac" style="background-color:white;"></table>
 		  </div><br>
 		  <div id="emp_upload_files" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
@@ -596,8 +616,13 @@
 			  	<li>The names and the order of the columns in the Employment Projection CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  </ul>
 		  </div><br>
-		  <div id="femp_delete_card" class="upload_cards">
+		  <!-- <div id="femp_delete_card" class="upload_cards">
 			  <button type="button" id="deletefEmp" class="btn btn-danger delete" onclick="deletefEmp()"><span>Delete Existing Future Employment Data</span></button>
+		  </div><br> -->
+		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "future employment" data has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesfemp" style="background-color:white;"></table>
 		  </div><br>
 		  <div id="femp_upload_files" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
@@ -707,8 +732,13 @@
 			  	<li>The names and the order of the columns in the Population Projection CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  </ul>
 		  </div><br>
-		  <div id="fpop_delete_card" class="upload_cards">
+		  <!-- <div id="fpop_delete_card" class="upload_cards">
 			  <button type="button" id="deletefPop" class="btn btn-danger delete" onclick="deletefPop()"><span>Delete Existing Population Projection Data</span></button>
+		  </div><br> -->
+		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "future population" data has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesfpop" style="background-color:white;"></table>
 		  </div><br>
 		  <div id="fpop_upload_files" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
@@ -823,6 +853,10 @@
 		
 		<div id="otherFeedbackDialog" title="Data Import/Remove Progress"><div style="width:100%">
 		  <br><p style="font-style: italic;text-align:center" id="otherFeedbackMessage"></p><br>
+		</div></div>
+		
+		<div id="stateSelectDialog" title="Please select the state you are importing the data for:"><div style="">
+		  <br>State Name: <select id="selectStateSelector"></select><br>
 		</div></div>
 		
 	</div>

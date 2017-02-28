@@ -561,7 +561,13 @@ function openGTFS(index){
 	
 }
 
-
+function fillSelectStateDialog(d){
+	var html = "";
+	for(var i=0; i<d.states.length;i++){
+		html+="<option value='"+d.stateids[i]+"'>"+d.states[i]+"</option>";
+	}
+	$('#selectStateSelector').html(html);
+}
 
 function deletenext(i,db){
 	$.ajax({
@@ -833,9 +839,10 @@ function openFpop(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
-	if(!status.FuturePop){
-		$('#deletefPop').prop('disabled', true);
-	}
+//	if(!status.FuturePop){
+//		$('#deletefPop').prop('disabled', true);
+//	}
+	checkFpopstatus(currentINDEX);
 	FPOPdialog.dialog( "open" );
 //	var b = status.FuturePop;
 //	changeStatus(index, "future_pop", !b);
@@ -843,17 +850,38 @@ function openFpop(index){
 
 function checkFpopstatus(index){
 	var db = dbInfo[index].toString();
-	
+	var stateids = [];
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getImportedStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	currentImported = d.stateids;
+        	fillSelectStateDialog(d);
+        }
+	});
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkFpopstatus?&db="+db,
-        dataType: "text",
+        dataType: "json",
         async: false,
-        success: function(b) {
-        	if(b=="true"){
-        		b = true;
-        	}else{
-        		b = false;
+        success: function(d) {
+        	var b = false;
+        	stateids = d.stateids;
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		html+="<tr><td></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
+        	});
+        	$('#importedstatesfpop').html(html);
+//        	if(b=="true"){
+//        		b = true;
+//        	}else{
+//        		b = false;
+//        	}
+        	if(stateids.sort().join(',')== currentImported.sort().join(',')){
+        	    b = true;
         	}
         	if(dbStatus[index].FuturePop!=b){
         		changeStatus(index, "future_pop", b);
@@ -864,6 +892,9 @@ function checkFpopstatus(index){
 }
 
 function addfPop(){
+	stateSelectDialog.dialog("open");
+	var stateid = stateSelector;
+	var metadata = prompt("Please add a note (e.g. Prepared by PSU, August 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -872,19 +903,19 @@ function addfPop(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
         	if(d=="done"){
         		$('#otherFeedbackMessage').html("Population Projecion data was successfully added");
-        		$('#deletefPop').prop('disabled', false);
+//        		$('#deletefPop').prop('disabled', false);
         	}else{
         		$('#otherFeedbackMessage').html("Population Projection data could not be added. Error: "+d);
         	}
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
-        	checkfEmpstatus(currentINDEX);
+        	checkFpopstatus(currentINDEX);
         }
 	});
 	
@@ -905,11 +936,12 @@ function deletefPop(){
         success: function(b) {
         	if(b = "done"){
         		$('#otherFeedbackMessage').html("Population Projection data was successfully removed.");
-        		changeStatus(currentINDEX, "future_pop", false);
-            	$('#deletefPop').prop('disabled', true);
+//        		changeStatus(currentINDEX, "future_pop", false);
+//            	$('#deletefPop').prop('disabled', true);
         	}else{
         		$('#otherFeedbackMessage').html("Population Projection data could not be removed. Error: "+b);
         	}
+        	checkFpopstatus(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	
@@ -925,12 +957,16 @@ function openFemp(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
-	if(!status.FutureEmp){
-		$('#deletefEmp').prop('disabled', true);
-	}
+//	if(!status.FutureEmp){
+//		$('#deletefEmp').prop('disabled', true);
+//	}
+	checkfEmpstatus(currentINDEX);
 	FEMPdialog.dialog( "open" );
 }
 function addfEmp(){
+	stateSelectDialog.dialog("open");
+	var stateid = stateSelector;
+	var metadata = prompt("Please add a note (e.g. Prepared by ODOT, March 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -939,13 +975,13 @@ function addfEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
         	if(d=="done"){
         		$('#otherFeedbackMessage').html("Employment Projecion data was successfully added");
-        		$('#deletefEmp').prop('disabled', false);
+//        		$('#deletefEmp').prop('disabled', false);
         	}else{
         		$('#otherFeedbackMessage').html("Future Employment data could not be added. Error: "+d);
         	}
@@ -960,18 +996,36 @@ function addfEmp(){
 
 function checkfEmpstatus(index){
 	var db = dbInfo[index].toString();
-	
+	var stateids = [];
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getImportedStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	currentImported = d.stateids;
+        	fillSelectStateDialog(d);
+        }
+	});
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkfEmpstatus?&db="+db,
         dataType: "text",
         async: false,
-        success: function(b) {
-        	if(b=="true"){
-        		b = true;
-        	}else{
-        		b = false;
+        success: function(d) {
+        	var b = false;
+        	stateids = d.stateids;
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' onclick='removeFemp(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
+        	});
+        	$('#importedstatesfemp').html(html);
+
+        	if(stateids.sort().join(',')== currentImported.sort().join(',')){
+        	    b = true;
         	}
+        	
         	if(dbStatus[index].FutureEmp!=b){
         		changeStatus(index, "future_emp", b);
         	}
@@ -980,7 +1034,8 @@ function checkfEmpstatus(index){
 	});
 }
 
-function deletefEmp(){
+//function deletefEmp(){
+function removeFemp(stateid){
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -989,17 +1044,18 @@ function deletefEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefEmp?&db="+db,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletefEmp?&stateid="+stateid+"&db="+db,
         dataType: "text",
         async: true,
         success: function(b) {
         	if(b = "done"){
         		$('#otherFeedbackMessage').html("Future Employment data was successfully removed.");
-        		changeStatus(currentINDEX, "future_emp", false);
-            	$('#deletefEmp').prop('disabled', true);
+//        		changeStatus(currentINDEX, "future_emp", false);
+//            	$('#deletefEmp').prop('disabled', true);
         	}else{
         		$('#otherFeedbackMessage').html("Future Employment data could not be removed. Error: "+b);
         	}
+        	checkfEmpstatus(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	
@@ -1012,6 +1068,9 @@ function deletefEmp(){
  * Title 6 add/remove.
  */
 function addT6(){
+	stateSelectDialog.dialog("open");
+	var stateid = stateSelector;
+	var metadata = prompt("Please add a note (e.g. 2014 5-year summary file)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1020,13 +1079,13 @@ function addT6(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
         	if(d=="done"){
         		$('#otherFeedbackMessage').html("Title VI data was successfully added");
-        		$('#deleteT6').prop('disabled', false);
+//        		$('#deleteT6').prop('disabled', false);
         	}else{
         		$('#otherFeedbackMessage').html("Title VI data could not be added. Error: "+d);
         	}
@@ -1042,9 +1101,10 @@ function openT6(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
-	if(!status.Parknride){
-		$('#deleteT6').prop('disabled', true);
-	}
+//	if(!status.Parknride){
+//		$('#deleteT6').prop('disabled', true);
+//	}
+	checkT6status(currentINDEX);
 	T6dialog.dialog( "open" );
 	
 //	var b = status.Title6;
@@ -1054,17 +1114,34 @@ function openT6(index){
 
 function checkT6status(index){
 	var db = dbInfo[index].toString();
-	
+	var stateids = [];
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getImportedStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	currentImported = d.stateids;
+        	fillSelectStateDialog(d);
+        }
+	});
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkT6status?&db="+db,
         dataType: "text",
         async: false,
-        success: function(b) {
-        	if(b=="true"){
-        		b = true;
-        	}else{
-        		b = false;
+        success: function(d) {
+        	var b = false;
+        	stateids = d.stateids;
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' onclick='removeT6(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
+        	});
+        	$('#importedstatest6').html(html);
+
+        	if(stateids.sort().join(',')== currentImported.sort().join(',')){
+        	    b = true;
         	}
         	if(dbStatus[index].Title6!=b){
         		changeStatus(index, "title6", b);
@@ -1074,7 +1151,8 @@ function checkT6status(index){
 	});
 }
 
-function deleteT6(){
+//function deleteT6(){
+function removeT6(stateid){
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1083,17 +1161,18 @@ function deleteT6(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteT6?&db="+db,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteT6?&stateid="+stateid+"&db="+db,
         dataType: "text",
         async: true,
         success: function(b) {
         	if(b = "done"){
         		$('#otherFeedbackMessage').html("Title VI data was successfully removed.");
-        		changeStatus(currentINDEX, "title6", false);
-            	$('#deleteT6').prop('disabled', true);
+//        		changeStatus(currentINDEX, "title6", false);
+//            	$('#deleteT6').prop('disabled', true);
         	}else{
         		$('#otherFeedbackMessage').html("Title VI data could not be removed. Error: "+b);
         	}
+        	checkT6status(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	
@@ -1108,9 +1187,10 @@ function openPnr(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
-	if(!status.Parknride){
-		$('#deletePNR').prop('disabled', true);
-	}
+//	if(!status.Parknride){
+//		$('#deletePNR').prop('disabled', true);
+//	}
+	checkPNRstatus(currentINDEX);
 	PNRdialog.dialog( "open" );
 	
 //	var db = dbInfo[index].toString();
@@ -1120,6 +1200,9 @@ function openPnr(index){
 }
 
 function addPnr(fileName){
+	stateSelectDialog.dialog("open");
+	var stateid = stateSelector;
+	var metadata = prompt("Please add a note (e.g. Prepared in January 2017)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1128,13 +1211,13 @@ function addPnr(fileName){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db+"&stateid="+stateid+"&metadata="+metadata,
         dataType: "text",
         async: true,
         success: function(d) {
         	if(d=="done"){
         		$('#otherFeedbackMessage').html("Park & Ride data was successfully added");
-        		$('#deletePNR').prop('disabled', false);
+//        		$('#deletePNR').prop('disabled', false);
         	}else{
         		$('#otherFeedbackMessage').html("Park & Ride data could not be added. Error: "+d);
         	}
@@ -1148,7 +1231,8 @@ function addPnr(fileName){
 }
 
 
-function deletePNR(){
+//function deletePNR(){
+function removePnr(stateid){
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1157,17 +1241,18 @@ function deletePNR(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletePNR?&db="+db,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deletePNR?&stateid="+stateid+"&db="+db,
         dataType: "text",
         async: true,
         success: function(b) {
         	if(b = "done"){
         		$('#otherFeedbackMessage').html("Park & Ride data was successfully removed.");
-        		changeStatus(currentINDEX, "parknride", false);
-            	$('#deletePNR').prop('disabled', true);
+//        		changeStatus(currentINDEX, "parknride", false);
+//            	$('#deletePNR').prop('disabled', true);
         	}else{
         		$('#otherFeedbackMessage').html("Park & Ride data could not be removed. Error: "+b);
         	}
+        	checkPNRstatus(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	
@@ -1178,17 +1263,34 @@ function deletePNR(){
 
 function checkPNRstatus(index){
 	var db = dbInfo[index].toString();
-	
+	var stateids = [];
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getImportedStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	currentImported = d.stateids;
+        	fillSelectStateDialog(d);
+        }
+	});
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkPNRstatus?&db="+db,
         dataType: "text",
         async: false,
-        success: function(b) {
-        	if(b=="true"){
-        		b = true;
-        	}else{
-        		b = false;
+        success: function(d) {
+        	var b = false;
+        	stateids = d.stateids;
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' onclick='removePnr(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
+        	});
+        	$('#importedstatespnr').html(html);
+
+        	if(stateids.sort().join(',')== currentImported.sort().join(',')){
+        	    b = true;
         	}
         	if(dbStatus[index].Parknride!=b){
         		changeStatus(index, "parknride", b);
@@ -1208,15 +1310,19 @@ function openEmp(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
-	if(!status.Employment){
-		$('#deleteEmp').prop('disabled', true);
-	}
+//	if(!status.Employment){
+//		$('#deleteEmp').prop('disabled', true);
+//	}
+	checkfEmpstatus(currentINDEX);
 	EMPdialog.dialog( "open" );
 //	var b = status.Employment;
 //	changeStatus(index, "employment", !b);
 	
 }
 function addEmp(){
+	stateSelectDialog.dialog("open");
+	var stateid = stateSelector;
+	var metadata = prompt("Please add a note (e.g. Census employment Data 2014)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1225,13 +1331,13 @@ function addEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
         	if(d=="done"){
         		$('#otherFeedbackMessage').html("Employment data was successfully added");
-        		$('#deleteEmp').prop('disabled', false);
+//        		$('#deleteEmp').prop('disabled', false);
         	}else{
         		$('#otherFeedbackMessage').html("Employment data could not be added. Error: "+d);
         	}
@@ -1244,7 +1350,8 @@ function addEmp(){
 	
 }
 
-function deleteEmp(){
+//function deleteEmp(){
+function removeWac(stateid){
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1253,17 +1360,47 @@ function deleteEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteEmp?&db="+db,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteEmpWac?&stateid="+stateid+"&db="+db,
         dataType: "text",
         async: true,
         success: function(b) {
         	if(b = "done"){
-        		$('#otherFeedbackMessage').html("Employment data was successfully removed.");
-        		changeStatus(currentINDEX, "employment", false);
-            	$('#deleteEmp').prop('disabled', true);
+        		$('#otherFeedbackMessage').html("WAC Employment data was successfully removed.");
+//        		changeStatus(currentINDEX, "employment", false);
+//            	$('#deleteEmp').prop('disabled', true);
         	}else{
-        		$('#otherFeedbackMessage').html("Employment data could not be removed. Error: "+b);
+        		$('#otherFeedbackMessage').html("WAC Employment data could not be removed. Error: "+b);
         	}
+        	checkfEmpstatus(currentINDEX);
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
+        	
+        	
+        }
+	});
+}
+
+function removeRac(stateid){
+	var db = dbInfo[currentINDEX].toString();
+	inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Deleting Employment data... Please do not close or refresh the page.');
+	otherFeedbackDialog.dialog( "open" );
+	
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/deleteEmpRac?&stateid="+stateid+"&db="+db,
+        dataType: "text",
+        async: true,
+        success: function(b) {
+        	if(b = "done"){
+        		$('#otherFeedbackMessage').html("RAC Employment data was successfully removed.");
+//        		changeStatus(currentINDEX, "employment", false);
+//            	$('#deleteEmp').prop('disabled', true);
+        	}else{
+        		$('#otherFeedbackMessage').html("RAC Employment data could not be removed. Error: "+b);
+        	}
+        	checkfEmpstatus(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	
@@ -1275,18 +1412,51 @@ function deleteEmp(){
 
 function checkEmpstatus(index){
 	var db = dbInfo[index].toString();
-	
+	var rac = false;
+	var wac = false;
+	var stateids = [];
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getImportedStates?&db="+db, 
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	currentImported = d.stateids;
+        	fillSelectStateDialog(d);
+        }
+	});
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkEmpstatus?&db="+db,
         dataType: "text",
         async: false,
-        success: function(b) {
-        	if(b=="true"){
-        		b = true;
-        	}else{
-        		b = false;
+        success: function(d) {
+        	var b = false;
+        	stateids = d.stateids;
+        	html = "";
+        	$.each(d.states, function(i,item){
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' onclick='removeWac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
+        	});
+        	$('#importedstateswac').html(html);
+
+        	if(stateids.sort().join(',')== currentImported.sort().join(',')){
+        	    wac = true;
         	}
+        	
+        	stateids = d.agencies;
+        	html = "";
+        	$.each(d.feeds, function(i,item){
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' onclick='removeRac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td></td><td>Notes: "+d.sizes[i]+"</td></tr>";
+        	});
+        	$('#importedstatesrac').html(html);
+
+        	if(stateids.sort().join(',')== currentImported.sort().join(',')){
+        	    rac = true;
+        	}   
+        	
+        	b = wac&&rac;
         	if(dbStatus[index].Employment!=b){
         		changeStatus(index, "employment", b);
         	}
@@ -1354,7 +1524,7 @@ function fillStates(db){
         	html = "";
         	$.each(d.states, function(i,item){
         		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' onclick='removeCensus(\""+stateids[i]+"\",'\""+currentImported.join("$%$")+"\"')'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
-        		
+        		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstates').html(html);
         }
@@ -1403,6 +1573,7 @@ function checkCensusstatus(index){
 	});
 }
 function addCensus(){
+	var metadata = prompt("Please add a note (e.g. Census population 2010)");
 	inProcess = true;
 	var db = dbInfo[currentINDEX].toString();
 	currentStates=[];
@@ -1422,7 +1593,7 @@ function addCensus(){
 		otherFeedbackDialog.dialog( "open" );
 		$.ajax({
 	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/importCensus?&stateid="+states+"&db="+db,
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/importCensus?&metadata="+metadata+"&stateid="+states+"&db="+db,
 	        dataType: "text",
 	        async: true,
 	        success: function(d) {
@@ -1434,6 +1605,7 @@ function addCensus(){
 	        	inProcess = false;
 	        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
 	        	checkCensusstatus(currentINDEX);
+	        	checkFpopstatus(currentINDEX);
 	        	fillStates(db);
 	        	
 	        }
@@ -1588,6 +1760,8 @@ var FEMPdialog;
 var FPOPdialog;
 var gtfsFeedbackDialog;
 var otherFeedbackDialog;
+var stateSelectDialog;
+var stateSelector;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -1748,7 +1922,20 @@ $(document).ready(function(){
 	      closeOnEscape: false,
 	});
 	
-	
+	stateSelectDialog = $( "#stateSelectDialog" ).dialog({
+	      autoOpen: false,
+	      height: 250,
+	      width: 400,
+	      modal: true,	
+	      closeOnEscape: false,
+	      buttons: {
+		        
+		        "Done": function() {
+		        	stateSelector = $('#selectStateSelector').val();
+		        	stateSelectDialog.dialog( "close" );
+		        }
+		      }
+	});
 });
 
 function deleteUploadedT6(){

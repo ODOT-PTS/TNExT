@@ -113,6 +113,7 @@ public class DbUpdate {
 		List<String> selectedAgencies = new ArrayList<String>();
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
@@ -120,7 +121,7 @@ public class DbUpdate {
 					+ "JOIN gtfs_selected_feeds "
 					+ "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
 					+ "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
-			ResultSet rs = statement.executeQuery("SELECT agency_id FROM gtfs_selected_feeds "
+			rs = statement.executeQuery("SELECT agency_id FROM gtfs_selected_feeds "
 					+ "WHERE username = '"+username+"';");
 			while(rs.next()){
 				selectedAgencies.add(rs.getString("agency_id"));
@@ -128,6 +129,7 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -301,10 +303,11 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		int count=0;
 		error.DBError = "true";
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
-			ResultSet rs = statement.executeQuery("select * from gtfs_pg_users;");
+			rs = statement.executeQuery("select * from gtfs_pg_users;");
 			rs.last();
 			count = rs.getRow();
 			if ( count>=USER_COUNT ) {
@@ -316,6 +319,7 @@ public class DbUpdate {
 			//e.printStackTrace();
 			error.DBError = "error";
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -334,10 +338,11 @@ public class DbUpdate {
         String passkey = "";
         Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
+			rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
 			if ( rs.next() ) {
 				passkey = rs.getString("key");
 			}
@@ -370,7 +375,7 @@ public class DbUpdate {
 			try {
 				statement = c.createStatement();
 				statement.executeUpdate("UPDATE gtfs_pg_users SET active=true WHERE username='"+username+"';");
-				ResultSet rs = statement.executeQuery("select email,lastname,firstname from gtfs_pg_users where username='"+username+"';");
+				rs = statement.executeQuery("select email,lastname,firstname from gtfs_pg_users where username='"+username+"';");
 				if(rs.next()){
 					email = rs.getString("email");
 					lastname = rs.getString("lastname");
@@ -380,6 +385,7 @@ public class DbUpdate {
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 			} finally {
+				if (rs != null) try { rs.close(); } catch (SQLException e) {}
 				if (statement != null) try { statement.close(); } catch (SQLException e) {}
 				if (c != null) try { c.close(); } catch (SQLException e) {}
 			}
@@ -463,10 +469,11 @@ public class DbUpdate {
 		Connection c = null;
 		Statement statement = null;
 		UserInfo userInfo = new UserInfo();
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("select * from gtfs_pg_users where username='"+user+"' or email='"+user+"';");
+			rs = statement.executeQuery("select * from gtfs_pg_users where username='"+user+"' or email='"+user+"';");
 			if ( rs.next() ) {
 				userInfo.Firstname = rs.getString("firstname");
 				userInfo.Lastname = rs.getString("lastname");
@@ -478,6 +485,7 @@ public class DbUpdate {
 			System.out.println(e.getMessage());
 			//e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -491,6 +499,7 @@ public class DbUpdate {
     public Object checkUser(@QueryParam("user") String user){
 		Connection c = null;
 		PreparedStatement statement = null;
+		ResultSet rs = null;
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
@@ -498,7 +507,7 @@ public class DbUpdate {
 			statement = c.prepareStatement("select * from gtfs_pg_users where username=? or email=?;");
 			statement.setString(1, user);
 			statement.setString(2, user);
-			ResultSet rs = statement.executeQuery();
+			rs = statement.executeQuery();
 			if ( rs.next() ) {
 				error.DBError = "true";
 			}else{
@@ -509,6 +518,7 @@ public class DbUpdate {
 			//e.printStackTrace();
 			error.DBError = "error";
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -547,12 +557,13 @@ public class DbUpdate {
     public Object isActive(@QueryParam("user") String username){
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
 			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_pg_users WHERE username = '"+username+"';");
+			rs = statement.executeQuery("SELECT * FROM gtfs_pg_users WHERE username = '"+username+"';");
 			if(rs.next()){
 				error.DBError = rs.getString("active");
 			}
@@ -561,6 +572,7 @@ public class DbUpdate {
 			//e.printStackTrace();
 			error.DBError = "error";
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -633,6 +645,7 @@ public class DbUpdate {
 		
 		Connection c = null;
 		PreparedStatement statement = null;
+		ResultSet rs = null;
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
@@ -641,7 +654,7 @@ public class DbUpdate {
 			statement.setString(1, user);
 			statement.setString(2, user);
 			statement.setString(3, pass);
-			ResultSet rs = statement.executeQuery();
+			rs = statement.executeQuery();
 			
 			if(rs.next()){
 				error.DBError = rs.getString("username");
@@ -652,6 +665,7 @@ public class DbUpdate {
 			//e.printStackTrace();
 			error.DBError = e.getMessage();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -802,10 +816,11 @@ public class DbUpdate {
 		}
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(url, elems[5], elems[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='"+element[element.length-1]+"'");
+			rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='"+element[element.length-1]+"'");
 			
 			statement.executeUpdate("DROP DATABASE "+element[element.length-1]);
 			b.DBError = "Database was successfully deleted";
@@ -813,6 +828,7 @@ public class DbUpdate {
 			System.out.println(e.getMessage());
 			b.DBError = e.getMessage();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -831,11 +847,12 @@ public class DbUpdate {
 		String b = "false";
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		String[] dbInfo = db.split(",");
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT activated FROM database_status");
+			rs = statement.executeQuery("SELECT activated FROM database_status");
 			rs.next();
 			boolean bb = rs.getBoolean("activated");
 			if(!bb){
@@ -844,6 +861,7 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -858,11 +876,12 @@ public class DbUpdate {
 		DatabaseStatus dbstat = new DatabaseStatus();
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		String[] dbInfo = db.split(",");
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM database_status");
+			rs = statement.executeQuery("SELECT * FROM database_status");
 			rs.next();
 			dbstat.Activated = rs.getBoolean("activated");
 			dbstat.Census = rs.getBoolean("census");
@@ -879,6 +898,7 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -907,12 +927,13 @@ public class DbUpdate {
 		}
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		PDBerror error = new PDBerror();
 		error.DBError = "";
 		try {
 			c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='"+oldName+"'");
+			rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='"+oldName+"'");
 			statement.executeUpdate("ALTER DATABASE "+oldName+" RENAME TO "+name);
 			error.DBError = "Database was successfully updated";
 			
@@ -963,6 +984,7 @@ public class DbUpdate {
 			e.printStackTrace();
 			error.DBError = e.getMessage();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -1021,7 +1043,15 @@ public class DbUpdate {
 			statement.executeUpdate("INSERT INTO database_status "
 					+ "VALUES ('"+name+"', '2015-10-15', '2015-10-15', "
 							+ "false, false, false, false, false, false, false, false, false)");
-			
+			statement.executeUpdate("CREATE TABLE database_metadata ("
+					+ "stateid character varying(2),"
+					+ "census text,"
+					+ "employment text,"
+					+ "parknride text,"
+					+ "title6 text,"
+					+ "future_emp text,"
+					+ "future_pop text,"
+					+ "CONSTRAINT database_metadata_pkey PRIMARY KEY (stateid));");
 			UpdateEventManager.createTables(c, dbInfo);
 			
 			statement.executeUpdate("insert into gtfs_pg_users (username,email,firstname,lastname,quota,usedspace,password,active,key) "
@@ -1087,10 +1117,11 @@ public class DbUpdate {
 		}
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT 1 AS result FROM pg_database WHERE datname='"+name+"';");
+			rs = statement.executeQuery("SELECT 1 AS result FROM pg_database WHERE datname='"+name+"';");
 			
 			if(rs.next()){
 				if(rs.getInt("result")==1){
@@ -1130,6 +1161,7 @@ public class DbUpdate {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -1146,10 +1178,11 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_feed_info limit 1;");
+			rs = statement.executeQuery("SELECT * FROM gtfs_feed_info limit 1;");
 			
 			if(rs.next()){
 				response = "true";
@@ -1158,6 +1191,7 @@ public class DbUpdate {
 			System.out.println(e.getMessage()+", from: checkGTFSstatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -1174,10 +1208,11 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where updated=False limit 1;");
+			rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where updated=FALSE limit 1;");
 			
 			if(!rs.next()){
 				response = "true";
@@ -1186,6 +1221,7 @@ public class DbUpdate {
 			System.out.println(e.getMessage()+", from: checkUpdatestatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -1197,23 +1233,36 @@ public class DbUpdate {
     @Path("/checkT6status")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkT6status(@QueryParam("db") String db){
-		String response = "false";
+//		String response = "false";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
+		PDBerror response = new PDBerror();
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM title_vi_blocks_float limit 1;");
+			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid from title_vi_blocks_float WHERE with_disability IS NOT NULL order by stateid;");
 			
-			if(rs.next()){
-				response = "true";
+			while(rs.next()){
+				response.stateids.add(rs.getString("stateid"));
+			}
+			for(String id:response.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.states.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT title6 FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.metadata.add(rs.getString("title6"));
+				}
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: checkT6status method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -1225,23 +1274,36 @@ public class DbUpdate {
     @Path("/checkPNRstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkPNRstatus(@QueryParam("db") String db){
-		String response = "false";
+//		String response = "false";
 		
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
+		PDBerror response = new PDBerror();
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT * FROM parknride limit 1;");
+			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM parknride order by stateid;");
 			
-			if(rs.next()){
-				response = "true";
+			while(rs.next()){
+				response.stateids.add(rs.getString("stateid"));
+			}
+			for(String id:response.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.states.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT parknride FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.metadata.add(rs.getString("parknride"));
+				}
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: checkPNRstatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -1252,7 +1314,7 @@ public class DbUpdate {
 	@GET
     @Path("/deletePNR")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object deletePNR(@QueryParam("db") String db){
+    public Object deletePNR(@QueryParam("db") String db, @QueryParam("stateid") String stateid){
 		String message = "done";
 		
 		String[] dbInfo = db.split(",");
@@ -1261,8 +1323,8 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
-			
+			statement.executeUpdate("DELETE FROM parknride WHERE left(countyid,2)='"+stateid+"';");
+			statement.executeUpdate("VACUUM");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletePNR method");
 			message = e.getMessage();
@@ -1277,7 +1339,7 @@ public class DbUpdate {
 	@GET
     @Path("/deleteT6")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object deleteT6(@QueryParam("db") String db){
+    public Object deleteT6(@QueryParam("db") String db, @QueryParam("stateid") String stateid){
 		String message = "done";
 		
 		String[] dbInfo = db.split(",");
@@ -1286,8 +1348,8 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			statement.executeUpdate("DROP TABLE IF EXISTS title_vi_blocks_float;");
-			
+			statement.executeUpdate("DELETE FROM title_vi_blocks_float WHERE left(blockid,2)='"+stateid+"';");
+			statement.executeUpdate("VACUUM");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deleteT6 method");
 			message = e.getMessage();
@@ -1301,9 +1363,9 @@ public class DbUpdate {
 	}
 	
 	@GET
-    @Path("/deleteEmp")
+    @Path("/deleteEmpWac")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object deleteEmp(@QueryParam("db") String db){
+    public Object deleteEmpWac(@QueryParam("db") String db, @QueryParam("stateid") String stateid){
 		String message = "done";
 		
 		String[] dbInfo = db.split(",");
@@ -1312,11 +1374,39 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
-			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_wac;");
+//			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
+			statement.executeUpdate("DELETE FROM lodes_blocks_wac WHERE left(blockid,2)='"+stateid+"';");
+			statement.executeUpdate("VACUUM");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: deleteEmpWac method");
+			message = e.getMessage();
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return message;
+	}
+	
+	@GET
+    @Path("/deleteEmpRac")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteEmpRac(@QueryParam("db") String db, @QueryParam("stateid") String stateid){
+		String message = "done";
+		
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+//			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
+			statement.executeUpdate("DELETE FROM lodes_blocks_rac WHERE left(blockid,2)='"+stateid+"';");
+			statement.executeUpdate("VACUUM");
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage()+", from: deleteEmp method");
+			System.out.println(e.getMessage()+", from: deleteEmpRac method");
 			message = e.getMessage();
 //			e.printStackTrace();
 		} finally {
@@ -1330,7 +1420,7 @@ public class DbUpdate {
 	@GET
     @Path("/deletefEmp")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object deletefEmp(@QueryParam("db") String db){
+    public Object deletefEmp(@QueryParam("db") String db, @QueryParam("stateid") String stateid){
 		String message = "done";
 		
 		String[] dbInfo = db.split(",");
@@ -1339,9 +1429,9 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			statement.executeUpdate("DROP TABLE IF EXISTS lodes_rac_projection_block;");
-			statement.executeUpdate("DROP TABLE IF EXISTS lodes_rac_projection_county;");
-			
+			statement.executeUpdate("DELETE FROM lodes_rac_projection_block WHERE left(blockid,2)='"+stateid+"';");
+			statement.executeUpdate("DELETE FROM lodes_rac_projection_county WHERE left(countyid,2)='"+stateid+"';");
+			statement.executeUpdate("VACUUM");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: deletefEmp method");
 			message = e.getMessage();
@@ -1401,35 +1491,57 @@ public class DbUpdate {
     @Path("/checkEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkEmpstatus(@QueryParam("db") String db){
-		String response = "false";
+//		String response = "false";
 		boolean rac = false;
 		boolean wac = false;
-		ResultSet rs;
+		ResultSet rs = null;
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		PDBerror response = new PDBerror();
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT * FROM lodes_blocks_wac limit 1;");
-			if(rs.next()){
-				wac = true;
+			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_blocks_wac order by stateid;");
+			while(rs.next()){
+				response.stateids.add(rs.getString("stateid"));
 			}
-			rs = statement.executeQuery("SELECT * FROM lodes_blocks_rac limit 1;");
-			if(rs.next()){
-				rac = true;
+			for(String id:response.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.states.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT employment FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.metadata.add(rs.getString("employment"));
+				}
+			}
+			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_blocks_rac order by stateid;");
+			while(rs.next()){
+				response.agencies.add(rs.getString("stateid"));
+			}
+			for(String id:response.agencies){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.feeds.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT employment FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.sizes.add(rs.getString("employment"));
+				}
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: checkEmpstatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		if(wac && rac){
-			response = "true";
-		}
+//		if(wac && rac){
+//			response = "true";
+//		}
 		
 		return response;
 	}
@@ -1438,35 +1550,47 @@ public class DbUpdate {
     @Path("/checkfEmpstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkfEmpstatus(@QueryParam("db") String db){
-		String response = "false";
+//		String response = "false";
 		boolean rac = false;
 		boolean wac = false;
-		ResultSet rs;
+		ResultSet rs = null;
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		PDBerror response = new PDBerror();
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT * FROM lodes_rac_projection_block limit 1;");
-			if(rs.next()){
-				wac = true;
+			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_rac_projection_block order by stateid;");
+			while(rs.next()){
+				response.stateids.add(rs.getString("stateid"));
 			}
-			rs = statement.executeQuery("SELECT * FROM lodes_rac_projection_county limit 1;");
-			if(rs.next()){
-				rac = true;
+			for(String id:response.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.states.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT future_emp FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.metadata.add(rs.getString("future_emp"));
+				}
 			}
+//			rs = statement.executeQuery("SELECT * FROM lodes_rac_projection_county limit 1;");
+//			if(rs.next()){
+//				rac = true;
+//			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: checkfEmpstatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		if(wac && rac){
-			response = "true";
-		}
+//		if(wac && rac){
+//			response = "true";
+//		}
 		
 		return response;
 	}
@@ -1475,74 +1599,80 @@ public class DbUpdate {
     @Path("/checkFpopstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkFpopstatus(@QueryParam("db") String db){
-		String response = "false";
+//		String response = "false";
 		boolean census_blocks = false;
 		boolean census_congdists = false;
 		boolean census_counties = false;
 		boolean census_places = false;
 		boolean census_tracts = false;
 		boolean census_urbans = false;
+		boolean census_states = false;
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
-		ResultSet rs;
+		ResultSet rs = null;
 		Integer value;
+		PDBerror response = new PDBerror();
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
 			
-			rs = statement.executeQuery("SELECT population2040 FROM census_blocks limit 1;");
-			while(rs.next()){
-				value = rs.getInt("population2040");
-				if(value!=null)
-				census_blocks = true;
-			}
+//			rs = statement.executeQuery("SELECT population2040 FROM census_blocks where population2040 is null limit 1;");
+//			if(!rs.next()){
+//				census_blocks = true;
+//			}
+//			
+//			rs = statement.executeQuery("SELECT population2040 FROM census_states where population2040 is null limit 1;");
+//			if(!rs.next()){
+//				census_states = true;
+//			}
+//			
+//			rs = statement.executeQuery("SELECT population2040 FROM census_congdists where population2040 is null limit 1;");
+//			if(!rs.next()){
+//				census_congdists = true;
+//			}
+//			
+//			rs = statement.executeQuery("SELECT population2040 FROM census_counties where population2040 is null limit 1;");
+//			if(!rs.next()){
+//				census_counties = true;
+//			}
+//			
+//			rs = statement.executeQuery("SELECT population2040 FROM census_places where population2040 is null limit 1;");
+//			if(!rs.next()){
+//				census_places = true;
+//			}
+//			
+//			rs = statement.executeQuery("SELECT population2040 FROM census_tracts where population2040 is null limit 1;");
+//			if(!rs.next()){
+//				census_tracts = true;
+//			}
 			
-			rs = statement.executeQuery("SELECT population2040 FROM census_congdists limit 1;");
+			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM census_urbans where population2040 is not null order by stateid;");
 			while(rs.next()){
-				value = rs.getInt("population2040");
-				if(value!=null)
-				census_congdists = true;
+				response.stateids.add(rs.getString("stateid"));
 			}
-			
-			rs = statement.executeQuery("SELECT population2040 FROM census_counties limit 1;");
-			while(rs.next()){
-				value = rs.getInt("population2040");
-				if(value!=null)
-				census_counties  = true;
-			}
-			
-			rs = statement.executeQuery("SELECT population2040 FROM census_places limit 1;");
-			while(rs.next()){
-				value = rs.getInt("population2040");
-				if(value!=null)
-				census_places = true;
-			}
-			
-			rs = statement.executeQuery("SELECT population2040 FROM census_tracts limit 1;");
-			while(rs.next()){
-				value = rs.getInt("population2040");
-				if(value!=null)
-				census_tracts = true;
-			}
-			
-			rs = statement.executeQuery("SELECT population2040 FROM census_urbans limit 1;");
-			while(rs.next()){
-				value = rs.getInt("population2040");
-				if(value!=null)
-				census_urbans = true;
+			for(String id:response.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.states.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT future_pop FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.metadata.add(rs.getString("future_pop"));
+				}
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage()+", from: checkFpopstatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		if(census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
-			response = "true";
-		}
+//		if(census_states && census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
+//			response = "true";
+//		}
 		
 		return response;
 	}
@@ -1558,10 +1688,11 @@ public class DbUpdate {
 		boolean census_places = false;
 		boolean census_tracts = false;
 		boolean census_urbans = false;
+		boolean census_states = false;
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
-		ResultSet rs;
+		ResultSet rs  = null;
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
@@ -1569,6 +1700,11 @@ public class DbUpdate {
 			rs = statement.executeQuery("SELECT * FROM census_blocks limit 1;");
 			if(rs.next()){
 				census_blocks = true;
+			}
+			
+			rs = statement.executeQuery("SELECT * FROM census_states limit 1;");
+			if(rs.next()){
+				census_states = true;
 			}
 			
 			rs = statement.executeQuery("SELECT * FROM census_congdists limit 1;");
@@ -1599,11 +1735,12 @@ public class DbUpdate {
 			System.out.println(e.getMessage()+", from: checkCensusstatus method");
 //			e.printStackTrace();
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
-		if(census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
+		if(census_states && census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
 			response = "true";
 		}
 		
@@ -1616,7 +1753,7 @@ public class DbUpdate {
     public Object copyCensus(@QueryParam("dbFrom") String dbFrom, @QueryParam("dbTo") String dbTo, @QueryParam("section") String section){
 		String tables;
 		switch (section) {
-	        case "census": tables = "-t census_blocks -t "+"census_blocks_reference "+"-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
+	        case "census": tables = "-t census_blocks "+"-t census_states "+"-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
 	                break;
 	        case "employment": tables = "-t lodes_blocks_rac -t lodes_blocks_wac";
 	                break;
@@ -1724,10 +1861,20 @@ public class DbUpdate {
 		return message;
 	}
 	
+	public void addMetadata(String stateid, String metadata, Connection c, String field) throws SQLException{
+		Statement statement = c.createStatement();
+		ResultSet rs = statement.executeQuery("SELECT * FROM database_metadata WHERE stateid='"+stateid+"';");
+		if(rs.next()){
+			statement.executeUpdate("UPDATE database_metadata SET "+field+"='"+metadata+"' WHERE stateid='"+stateid+"';");
+		}else{
+			statement.executeUpdate("INSERT INTO database_metadata (stateid,"+field+") VALUES('"+stateid+"','"+metadata+"');");
+		}
+	}
+	
 	@GET
     @Path("/importCensus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object importCensus(@QueryParam("stateid") String stateid, @QueryParam("db") String db) throws IOException{
+    public Object importCensus(@QueryParam("stateid") String stateid, @QueryParam("db") String db, @QueryParam("metadata") String metadata) throws IOException{
 		String[] dbInfo = db.split(",");
 		String[] states = stateid.split("$%$");
 		Connection c = null;
@@ -1786,6 +1933,10 @@ public class DbUpdate {
 			statement.executeUpdate("DROP TABLE IF EXISTS census_places;");
 			statement.executeUpdate("DROP TABLE IF EXISTS census_urbans;");
 			statement.executeUpdate("DROP TABLE IF EXISTS census_blocks;");
+			statement.executeUpdate("UPDATE gtfs_uploaded_feeds SET updated = FALSE;");
+			for(String state:states){
+				addMetadata(state, metadata, c, "census");
+			}
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -2329,7 +2480,7 @@ public class DbUpdate {
 	@GET
     @Path("/addPnr")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object addPnr(@QueryParam("fileName") String fileName, @QueryParam("db") String db) throws IOException, SQLException{
+    public Object addPnr(@QueryParam("fileName") String fileName, @QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws IOException, SQLException{
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -2339,7 +2490,7 @@ public class DbUpdate {
     	String message = "done";
 		Connection c = null;
 		Statement statement = null;
-		ResultSet rs = null;
+//		ResultSet rs = null;
 		c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 		try {			
 			statement = c.createStatement();
@@ -2387,6 +2538,17 @@ public class DbUpdate {
 			System.out.println(e.getMessage());
 		}
 		
+		try {			
+			statement = c.createStatement();
+			statement.executeUpdate("ALTER TABLE parknride DROP COLUMN IF EXISTS geom;");
+			statement.executeUpdate("DROP TABLE IF EXISTS temp_01;");
+			statement.executeUpdate("CREATE TABLE temp_01 as (SELECT * FROM parknride LIMIT 1);");
+
+			statement.executeUpdate("TRUNCATE TABLE temp_01;");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		
 		String[] p;
 		p = dbInfo[4].split("/");
 		String name = p[p.length-1];
@@ -2402,7 +2564,7 @@ public class DbUpdate {
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
 				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
-				   		+ " -c \"\\copy parknride (pnrid,lat,lon,lotName,location,city,zipcode,countyID,county,spaces,accessibleSpaces,"
+				   		+ " -c \"\\copy temp_01 (pnrid,lat,lon,lotName,location,city,zipcode,countyID,county,spaces,accessibleSpaces,"
 				   		+ "bikeRackSpaces,bikeLockerSpaces,electricVehicleSpaces,carSharing,transitService,availability,timeLimit,"
 				   		+ "restroom,benches,shelter,indoorWaitingArea,trashCan,lighting,securityCameras,sidewalks,pnrSignage,lotSurface,propertyOwner,localExpert) "
 				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
@@ -2416,16 +2578,21 @@ public class DbUpdate {
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
-			if (rs != null) try { rs.close(); } catch (SQLException e) {}
-			if (statement != null) try { statement.close(); } catch (SQLException e) {}
-			if (c != null) try { c.close(); } catch (SQLException e) {}
 			source.delete();
 			return message;
 		}
 		try{			
 			statement = c.createStatement();
+			statement.executeUpdate("INSERT INTO parknride SELECT * FROM temp_01 ON CONFLICT DO UPDATE;");
+			statement.executeUpdate("DROP TABLE temp_01;");
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		try{			
+			statement = c.createStatement();
 			statement.executeUpdate("ALTER TABLE parknride "
-					+ "ADD geom geometry(Point, 2993);");
+					+ "ADD COLUMN IF NOT EXISTS geom geometry(Point, 2993);");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
@@ -2465,10 +2632,18 @@ public class DbUpdate {
 			System.out.println(e.getMessage());
 			message = e.getMessage();
 		} finally {
-			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			source.delete();
+		}
+		
+		try{
+			statement = c.createStatement();
+			addMetadata(stateid, metadata, c, "parknride");
+			statement.executeUpdate("VACUUM");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
-			source.delete();
 		}
 		
 		return message;
@@ -2477,7 +2652,7 @@ public class DbUpdate {
 	@GET
     @Path("/addT6")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object addT6(@QueryParam("db") String db) throws SQLException{
+    public Object addT6(@QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws SQLException{
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -2590,13 +2765,27 @@ public class DbUpdate {
 			message = "done";
 		}
 		
+		Connection c = null;
+		Statement statement = null;
+		try{
+			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
+			statement = c.createStatement();
+			addMetadata(stateid, metadata, c, "title6");
+			statement.executeUpdate("VACUUM");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
 		return message;
 	}
 	
 	@GET
     @Path("/addEmp")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object addEmp(@QueryParam("db") String db) throws SQLException{
+    public Object addEmp(@QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws SQLException{
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -2654,6 +2843,20 @@ public class DbUpdate {
 			message += e.toString()+",";
 		}
 		
+		Connection c = null;
+		Statement statement = null;
+		try{
+			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
+			statement = c.createStatement();
+			addMetadata(stateid, metadata, c, "employment");
+			statement.executeUpdate("VACUUM");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
 		if(message.equals("")){
 			message = "done";
 		}
@@ -2664,7 +2867,7 @@ public class DbUpdate {
 	@GET
     @Path("/addfEmp")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object addfEmp(@QueryParam("db") String db) throws SQLException{
+    public Object addfEmp(@QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws SQLException{
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -2722,6 +2925,20 @@ public class DbUpdate {
 			message += e.toString()+",";
 		}
 		
+		Connection c = null;
+		Statement statement = null;
+		try{
+			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
+			statement = c.createStatement();
+			addMetadata(stateid, metadata, c, "future_emp");
+			statement.executeUpdate("VACUUM");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
 		if(message.equals("")){
 			message = "done";
 		}
@@ -2732,7 +2949,7 @@ public class DbUpdate {
 	@GET
     @Path("/addfPop")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Object addfPop(@QueryParam("db") String db) throws SQLException{
+    public Object addfPop(@QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws SQLException{
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -2769,6 +2986,20 @@ public class DbUpdate {
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
+		}
+		
+		Connection c = null;
+		Statement statement = null;
+		try{
+			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
+			statement = c.createStatement();
+			addMetadata(stateid, metadata, c, "future_pop");
+			statement.executeUpdate("VACUUM");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
 		
 		return message;
@@ -2846,6 +3077,7 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		Connection c = null;
 		Statement statement = null;
+		ResultSet rs = null;
 //		List<String> agencies = new ArrayList<String>();
 //		List<String> feeds = new ArrayList<String>();
 		PDBerror lists = new PDBerror();
@@ -2853,7 +3085,7 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT gfi.defaultid agency, guf.feedname feed, guf.feedsize size FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
+			rs = statement.executeQuery("SELECT gfi.defaultid agency, guf.feedname feed, guf.feedsize size FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
 					+ "ON gfi.feedname=guf.feedname WHERE guf.username = '"+username+"' AND guf.updated=False;");
 			while(rs.next()){
 				lists.agencies.add(rs.getString("agency"));
@@ -2873,6 +3105,7 @@ public class DbUpdate {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
 		}
@@ -3093,6 +3326,10 @@ public class DbUpdate {
 				if(rs.next()){
 					results.states.add(rs.getString("sname"));
 				}
+				rs = statement.executeQuery("SELECT census FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					results.metadata.add(rs.getString("census"));
+				}
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -3127,12 +3364,12 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks order by stateid;");
+			rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks_ref order by stateid;");
 			while ( rs.next() ) {
 				results.stateids.add(rs.getString("stateids"));
 			}
 			for(String id:results.stateids){
-				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				rs = statement.executeQuery("SELECT sname FROM census_states_ref WHERE stateid='"+id+"';");
 				if(rs.next()){
 					results.states.add(rs.getString("sname"));
 				}

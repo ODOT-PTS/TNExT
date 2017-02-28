@@ -1,5 +1,5 @@
-﻿DROP TABLE IF EXISTS lodes_blocks_rac;
-CREATE TABLE lodes_blocks_rac(
+--﻿DROP TABLE IF EXISTS lodes_blocks_rac;
+CREATE TABLE IF NOT EXISTS lodes_blocks_rac(
 blockid character varying(15),
 C000 int,
 CA01 int,
@@ -45,20 +45,36 @@ CS02 int,
 createdate character varying(8),
 PRIMARY KEY(blockid)
 );
+ALTER TABLE lodes_blocks_rac DROP COLUMN IF EXISTS location;
 
-COPY lodes_blocks_rac 
+DROP TABLE IF EXISTS temp_01;
+CREATE TABLE temp_01 as
+(SELECT * FROM lodes_blocks_rac LIMIT 1);
+
+TRUNCATE TABLE temp_01;
+
+COPY temp_01 
 FROM '../../../../webapp/resources/admin/uploads/emp/rac.csv' DELIMITER ',' CSV HEADER;
 
+INSERT INTO lodes_blocks_rac SELECT *
+FROM temp_01
+ON CONFLICT DO UPDATE; 
+
+DROP TABLE temp_01;
+
 ALTER TABLE lodes_blocks_rac
-ADD location geometry(Point,2993);
+ADD COLUMN IF NOT EXISTS location geometry(Point,2993);
 
 UPDATE lodes_blocks_rac
 SET location = (SELECT location FROM census_blocks WHERE lodes_blocks_rac.blockid = census_blocks.blockid);
 
-CREATE INDEX rac_location
+CREATE INDEX IF NOT EXISTS rac_blockid
+  ON lodes_blocks_rac
+  USING btree
+  (blockid COLLATE pg_catalog."default");
+
+CREATE INDEX IF NOT EXISTS rac_location
   ON lodes_blocks_rac
   USING gist
   (location);
 ALTER TABLE lodes_blocks_rac CLUSTER ON rac_location;
-
-VACUUM ANALYZE lodes_blocks_rac;

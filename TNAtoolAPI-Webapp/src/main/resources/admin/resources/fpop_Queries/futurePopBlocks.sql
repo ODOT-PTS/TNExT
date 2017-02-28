@@ -28,6 +28,12 @@ INSERT INTO blocks_future_pop
 SELECT blockid,left(blockid,5),population
 FROM census_blocks;
 
+CREATE INDEX IF NOT EXISTS blocks_future_pop_id
+  ON blocks_future_pop
+  USING btree
+  (blockid COLLATE pg_catalog."default");
+
+
 WITH blocks_future_pop_temp AS
      (SELECT countyid AS id,
              Sum(population2010) as pop 
@@ -63,6 +69,11 @@ ALTER TABLE counties_future_pop
 copy counties_future_pop(countyid,population2015,population2020,population2025, 
 population2030, population2035,population2040,population2045,population2050) 
 FROM '../../../../webapp/resources/admin/uploads/fpop/future_population.csv' DELIMITER ',' CSV HEADER;
+
+CREATE INDEX IF NOT EXISTS counties_future_pop_id
+  ON counties_future_pop
+  USING btree
+  (countyid COLLATE pg_catalog."default");
 
 -------------------------------------------------------------
 ALTER TABLE census_counties add COLUMN IF NOT EXISTS population2010 integer;
@@ -113,6 +124,31 @@ UPDATE census_blocks
    FROM blocks_future_pop futurepop
    WHERE census_blocks.blockid=futurepop.blockid; 
 
+-------------------------------------------------------------
+
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2010 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2015 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2020 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2025 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2030 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2035 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2040 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2045 integer;
+ALTER TABLE census_states add COLUMN IF NOT EXISTS population2050 integer;
+
+update census_states set population2010 = population;
+
+WITH census_blocks_temp AS
+     (SELECT stateid AS id,
+             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
+             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
+      FROM census_blocks group by stateid
+     ) 
+UPDATE census_states 
+   SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
+       population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
+   FROM census_blocks_temp futurepop
+   WHERE census_states.stateid=futurepop.id; 
 -------------------------------------------------------------
 
 ALTER TABLE census_congdists add COLUMN IF NOT EXISTS population2010 integer;

@@ -47,4 +47,7 @@ public class PDBerror {
 	
 	@XmlElement(name = "stateids")
 	public Collection<String> stateids = new ArrayList<String>();
+	
+	@XmlElement(name = "metadata")
+	public Collection<String> metadata = new ArrayList<String>();
 }

@@ -123,6 +123,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 
@@ -155,6 +157,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -186,7 +190,9 @@ public class UpdateEventManager {
 		    stmt.close();
 		  } catch ( Exception e ) {
 			  e.printStackTrace();
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 	}
 	
 	public static void create_census_tracts_trip_map(Connection connection){
@@ -217,6 +223,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -249,6 +257,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -280,6 +290,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -304,7 +316,9 @@ public class UpdateEventManager {
 	        stmt.close();
 	    } catch ( Exception e ) {
 	    	e.printStackTrace();
-	    }
+	    }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 	}
 	
 	public static void create_gtfs_stop_service_map(Connection connection){
@@ -327,6 +341,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -357,6 +373,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -406,7 +424,9 @@ public class UpdateEventManager {
 					+ "PRIMARY KEY( agencyID ));");
 		}catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		
 		try{
 			stmt = connection.createStatement();
@@ -419,14 +439,18 @@ public class UpdateEventManager {
 					+ "SELECT id1,ca FROM tempy;");
 		}catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		
 		try{
 			stmt = connection.createStatement();
 			stmt.executeUpdate("ALTER TABLE agencymapping ADD COLUMN centralized boolean;");
 		}catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		
 		try{
 			stmt = connection.createStatement();
@@ -436,7 +460,9 @@ public class UpdateEventManager {
 					+ "WHERE agencyid=id)");
 		}catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 
 		
 	}
@@ -448,7 +474,9 @@ public class UpdateEventManager {
 			stmt.executeUpdate("ALTER TABLE gtfs_agencies ADD centralized BOOLEAN;");
 		}catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		try{
 			stmt = connection.createStatement();
 			stmt.executeUpdate("WITH criteriaTable AS (WITH stops AS (SELECT stops.location, stops.id, map.agencyid "
@@ -463,7 +491,9 @@ public class UpdateEventManager {
 					+ "SET centralized = (SELECT criteria FROM criteriaTable WHERE agencyid=id);");
 		}catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 
 		
 	}
@@ -481,7 +511,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 //			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		  create_gtfs_trip_stops(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -500,6 +532,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 
@@ -535,7 +569,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		  create_gtfs_stop_service_map(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -553,6 +589,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -573,6 +611,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	      
 	      try{
@@ -585,6 +625,8 @@ public class UpdateEventManager {
 	    	  stmt.close();
 	      }catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	      
 	}
@@ -674,13 +716,17 @@ public class UpdateEventManager {
 			ResultSet rs = stmt.executeQuery("SELECT AddGeometryColumn( 'public', 'gtfs_trips', 'shape', 4326, 'linestring', 2 );");
 		}catch ( Exception e ) {
 			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		try{
 			stmt = connection.createStatement();
 			stmt.executeUpdate("ALTER TABLE gtfs_trips ALTER COLUMN uid TYPE varchar(1000);");
 		}catch ( Exception e ) {
 			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		}
+		}finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		try{
 			stmt = connection.createStatement();
 			stmt.executeUpdate("DROP INDEX IF EXISTS trips_shapeids");
@@ -690,7 +736,9 @@ public class UpdateEventManager {
 			
 		  }catch ( Exception e ) {
 			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		
 	      try{
 	    	  stmt = connection.createStatement();
@@ -722,6 +770,8 @@ public class UpdateEventManager {
 	    	  stmt.close();
 	      }catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	      
 	}
@@ -739,7 +789,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		create_gtfs_stop_route_map(connection);
 		  
 		  try {
@@ -757,7 +809,9 @@ public class UpdateEventManager {
 		    stmt.close();
 		  } catch ( Exception e ) {
 			  e.printStackTrace();
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 	}
 	
 	/**
@@ -770,7 +824,7 @@ public class UpdateEventManager {
 	        stmt.executeUpdate("ALTER TABLE gtfs_stops DISABLE TRIGGER ALL;");
 	        
 //	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;");
-//	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.shape)=true ;");
+	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.blockid from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set placeid=shape.placeid from census_places shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set congdistid=shape.congdistid from census_congdists shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true;");
 	        stmt.executeUpdate("update gtfs_stops stop set regionid = county.odotregionid from census_counties county where stop.agencyid='"+agencyId+"' and left(stop.blockid,5)= county.countyid::varchar(5);");
@@ -780,11 +834,13 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	      
-	      try{
+	      /*try{
 	        stmt = connection.createStatement();
-        	stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
+        	stmt.executeUpdate("update gtfs_stops stop set blockid=shape.blockid from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        
 	      }catch (Exception e){
 	    	  try{
@@ -792,7 +848,7 @@ public class UpdateEventManager {
 		        }catch(Exception ex){
 		        	ex.printStackTrace();
 		        }
-	      }
+	      }*/
 	}
 	
 	/**
@@ -808,7 +864,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 //			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		create_census_congdists_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -854,6 +912,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -870,7 +930,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 //			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		create_census_counties_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -914,6 +976,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -930,7 +994,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 //			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		create_census_tracts_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -974,6 +1040,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -990,7 +1058,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 //			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		create_census_places_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -1034,6 +1104,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 	
@@ -1050,7 +1122,9 @@ public class UpdateEventManager {
 			}
 		  }catch ( Exception e ) {
 //			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
-		  }
+		  }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
 		create_census_urbans_trip_map(connection);
 	      try {
 	        stmt = connection.createStatement();
@@ -1094,6 +1168,8 @@ public class UpdateEventManager {
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
 	}
 }

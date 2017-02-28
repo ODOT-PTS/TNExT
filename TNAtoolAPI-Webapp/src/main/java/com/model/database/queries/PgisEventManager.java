@@ -133,7 +133,8 @@ public class PgisEventManager {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	      
+		}	
+	    dropConnection(connection);
 		return results;
 	}
 	
@@ -2484,6 +2485,7 @@ public class PgisEventManager {
 		while (rs.next()) {
 			output = rs.getString("defaultid");
 		}
+		dropConnection(connection);
 		return output;
 	}
 	
@@ -3820,6 +3822,7 @@ public class PgisEventManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		dropConnection(connection);
 		return result;
 	}
 	
