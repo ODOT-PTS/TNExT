@@ -664,7 +664,7 @@ public class UpdateEventManager {
 		path = path.substring(1, path.length());
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
-//		host = "localhost"; //to be deleted
+		host = "localhost"; //to be deleted
 
 		String[] p;
 		p = dbInfo[4].split("/");

@@ -1790,22 +1790,23 @@ public class DbUpdate {
 		toHost = toHost.substring(2);
 		String toUser = dbInfoTo[5];
 		String toPass = dbInfoTo[6];
-//		fromHost = "localhost"; //to be deleted
-//		toHost = "localhost"; //to be deleted
+		fromHost = "localhost"; //to be deleted
+		toHost = "localhost"; //to be deleted
 //		batFile = batFile.substring(1, batFile.length());
 		
 //		test();
 		try{
-			String[] cmdArray = new String[5];
+			String[] cmdArray = new String[6];
 		   cmdArray[0] = "cmd";
 		   cmdArray[1] = "/c";
-		   cmdArray[2] = "cmd";
-		   cmdArray[3] = "/k";
-		   cmdArray[4] = "set PGPASSWORD="+fromPass+"& "
+		   cmdArray[3] = "cmd";
+		   cmdArray[4] = "/k";
+		   cmdArray[2] = "start";
+		   cmdArray[5] = "set PGPASSWORD="+fromPass+"& "
 		   		+ "pg_dump -U "+fromUser+" -h "+fromHost+" "+tables+" "+nameFrom+" > dump & "
 		   		+ "set PGPASSWORD="+toPass+"& "
 		   		+ "psql -U "+toUser+" -h "+toHost+" "+nameTo+" < dump & "
-		   		+ "exit";
+		   		+ "";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   pr.waitFor(5,TimeUnit.MINUTES);
@@ -1966,8 +1967,8 @@ public class DbUpdate {
 		String toHost = fromHost;
 		String toUser = fromUser;
 		String toPass = fromPass;
-//		fromHost = "localhost"; //to be deleted
-//		toHost = "localhost"; //to be deleted
+		fromHost = "localhost"; //to be deleted
+		toHost = "localhost"; //to be deleted
 		
 		String tables = "-t census_blocks "+"-t census_states "+"-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
 		try{
@@ -2554,7 +2555,7 @@ public class DbUpdate {
 		String name = p[p.length-1];
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
-//		host = "localhost"; //to be deleted
+		host = "localhost"; //to be deleted
 		Process pr;
 		try{	
 			String[] cmdArray = new String[5];
@@ -2664,7 +2665,7 @@ public class DbUpdate {
 		
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
-//		host = "localhost"; //to be deleted
+		host = "localhost"; //to be deleted
 		String[] p;
 		p = dbInfo[4].split("/");
 		String name = p[p.length-1];
@@ -2797,7 +2798,7 @@ public class DbUpdate {
 		
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
-//		host = "localhost"; //to be deleted
+		host = "localhost"; //to be deleted
 		String[] p;
 		p = dbInfo[4].split("/");
 		String name = p[p.length-1];
@@ -2879,7 +2880,7 @@ public class DbUpdate {
 		
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
-//		host = "localhost"; //to be deleted
+		host = "localhost"; //to be deleted
 		String[] p;
 		p = dbInfo[4].split("/");
 		String name = p[p.length-1];
@@ -2961,7 +2962,7 @@ public class DbUpdate {
 		
 		String host = dbInfo[4].split(":")[2];
 		host = host.substring(2);
-//		host = "localhost"; //to be deleted
+		host = "localhost"; //to be deleted
 		String[] p;
 		p = dbInfo[4].split("/");
 		String name = p[p.length-1];
