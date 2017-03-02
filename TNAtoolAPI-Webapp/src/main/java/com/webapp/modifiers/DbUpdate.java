@@ -1836,7 +1836,7 @@ public class DbUpdate {
 	        	for(String state: stateids){
 	        		addMetadata(state, "Copied from "+nameFrom, c, "census");
 	        		addMetadata(state, "Copied from "+nameFrom, c, "future_pop");
-	        		addMetadata(state, "Copied from "+nameFrom, c, "future_region");
+	        		addMetadata(state, "Copied from "+nameFrom, c, "region");
 	        	}
 	        	
 	            break;
