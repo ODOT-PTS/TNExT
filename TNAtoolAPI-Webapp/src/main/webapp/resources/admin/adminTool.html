@@ -204,9 +204,9 @@
 		  <div id="pnr_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Park & Ride data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
-			  	<li>A sample of a Park & Ride CSV file properly formatted to be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/oregon_pnr_data.csv" download>here</a></b>.</li>
+			  	<li>A sample of a Park & Ride CSV file properly formatted to be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/pnr_data.csv" download>here</a></b>.</li>
 			  	<li>The names and the order of the columns in the CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the sample CSV file.</li>
-			  	<li>If data are not available for some of the columns in the CSV file to be uploaded, just leave those columns empty.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
 		  </div><br>
 		  <!-- <div id="pnr_delete_card" class="upload_cards">
@@ -321,7 +321,7 @@
 		  <div id="t6_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Title VI data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
-			  	<li>Five different CSV files must be uploaded (as shown in the list below). The names and the order of the columns in the CSV files to be uploaded must be <b>exactly</b> the same as those shown in the example CSV files accessible via their corresponding hyperlink.</li>
+			  	<li>Five different CSV files must be uploaded (as shown in the list below). The name of the files, as well as the names and the order of the columns in the CSV files to be uploaded, must be <b>exactly</b> the same as those shown in the example CSV files accessible via their corresponding hyperlink.</li>
 			  	<table id="t6Table">
 			  		<tr><td></td><td><b>File Name</b></td><td><b>Description</b></td></tr>
 			  		<tr><td>1.</td><td><a href="../resources/admin/sampleFiles/b03002.csv" download>b03002.csv</a></td><td>Hispanic or Latino Origin by Race</td></tr>
@@ -358,6 +358,7 @@
 				  	<li>Click on the hyperlink labeled "tables" to download a ZIP file containing the Title VI data for the selected table (e.g., B03002).</li>
 <!-- 				  	<li>For each table downloaded, there will be two CSV and two TXT files (the TXT files are the metadata files for the csv files). The CSV file whose name ends with an "E" (which stands for estimates) is the one needed by the TNA Software Tool.</li>
  -->				  	<li>The column names of the CSV files are coded. You can use the metadata TXT file to identify the columns you need.</li>
+ 					<li>Rename the CSV file according to the ones specified in the table above (e.g. b03002.csv or b16004.csv).</li>
 			  	</li>
 			  </ul>
 		  </div><br>
@@ -474,10 +475,10 @@
 			  <ul>
 			  	<li>Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>Two files with employment data must be uploaded.</li>
-			  	<li>The names and the order of the columns in the CSV file to be uploaded must be exactly the same as those shown in the following sample CSV files:
+			  	<li>The name of the files, as well as the names and the order of the columns in the CSV file to be uploaded, must be exactly the same as those shown in the following sample CSV files:
 			  	<ol style="font-size:80%">
-				  	<li><b><a href="../resources/admin/sampleFiles/or_rac_S000_JT00.csv" download>or_rac_S000_JT00.csv</a></b></li> 
-				  	<li><b><a href="../resources/admin/sampleFiles/or_wac_S000_JT00.csv" download>or_wac_S000_JT00.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/rac.csv" download>rac.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/wac.csv" download>wac.csv</a></b></li> 
 			  	</ol></li>
 			  	<li>Employment data to create the required files can be downloaded from <a href="https://lehd.ces.census.gov/data/" target="_blank">lehd.ces.census.gov/data/</a> by following these steps:
 			  	<ol style="font-size:80%">
@@ -486,11 +487,11 @@
 				  	<li>Select the desired state from the dropdown list labeled "State".</li>
 				  	<li>Select <b>Residence Area Characteristics (RAC)</b> from the dropdown list labeled "Type".</li>
 				  	<li>Click on the button labeled "View Files".</li>
-				  	<li>From the list, find the file called "or_rac_S000_JT00_[desired year].csv.gz".</li>
+				  	<li>From the list, find the file called "[desired state]_rac_S000_JT00_[desired year].csv.gz".</li>
 				  	<li>Right click on the hyperlinked file name and save the file to a desired location.</li>
-				  	<li>Decompress the file to get the "or_rac_S000_JT00_[desired year].csv" file.</li>
-				  	<li>Rename the file as "or_rac_S000_JT00.csv".</li>
-				  	<li>Repeat steps 4 to 9 to download WAC data.</li>
+				  	<li>Decompress the file to get the "[desired state]_rac_S000_JT00_[desired year].csv" file.</li>
+				  	<li>Repeat steps 4 to 8 to download WAC data.</li>
+				  	<li>Rename the files as "rac.csv" and "wac.csv".</li>
 			  	</ol>
 			  	</li>
 			  </ul>
@@ -613,7 +614,8 @@
 			  <ul>
 			  	<li>Future Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>An example of a properly formatted Employment Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_employment.csv" download>here</a></b>.</li>
-			  	<li>The names and the order of the columns in the Employment Projection CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>The name of the file, as well as the names and the order of the columns in the Employment Projection CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
 		  </div><br>
 		  <!-- <div id="femp_delete_card" class="upload_cards">
@@ -723,13 +725,14 @@
 		</div>
 		</div>	
 
-<div id="fpop_upload" title="Population Projection Add/Remove">
+	<div id="fpop_upload" title="Population Projection Add/Remove">
 		 
 		  <div id="fpop_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Population Projection data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>An example of a properly formatted Population Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_population.csv" download>here</a></b>.</li>
-			  	<li>The names and the order of the columns in the Population Projection CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>The name of the file, as well as the names and the order of the columns in the Population Projection CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
 		  </div><br>
 		  <!-- <div id="fpop_delete_card" class="upload_cards">
@@ -743,6 +746,123 @@
 		  <div id="fpop_upload_files" class="upload_cards">
 		    <!-- <fieldset id="gtfsDialog"> -->
 		      	<form id="fpop_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]">
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>	
+		
+		<div id="region_upload" title="Regions Add/Remove">
+		 
+		  <div id="region_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Regions data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>An example of a properly formatted Regions CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/regions.csv" download>here</a></b>.</li>
+			  	<li>The name of the file, as well as the names and the order of the columns in the Regions CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
+			  </ul>
+		  </div><br>
+		  <!-- <div id="fpop_delete_card" class="upload_cards">
+			  <button type="button" id="deletefPop" class="btn btn-danger delete" onclick="deletefPop()"><span>Delete Existing Population Projection Data</span></button>
+		  </div><br> -->
+		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "Regions" data has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesregion" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="region_upload_files" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="region_upload_form" method="POST" enctype="multipart/form-data">
 			        <div class="row fileupload-buttonbar">
 			            <div class="col-lg-7">
 			                <span class="btn btn-success fileinput-button">

@@ -885,8 +885,6 @@ public class DbUpdate {
 			rs.next();
 			dbstat.Activated = rs.getBoolean("activated");
 			dbstat.Census = rs.getBoolean("census");
-			dbstat.CreateDate = rs.getString("create_date");
-			dbstat.ModifyDate = rs.getString("modify_date");
 			dbstat.Employment = rs.getBoolean("employment");
 			dbstat.FutureEmp = rs.getBoolean("future_emp");
 			dbstat.FuturePop = rs.getBoolean("future_pop");
@@ -894,7 +892,7 @@ public class DbUpdate {
 			dbstat.Parknride = rs.getBoolean("parknride");
 			dbstat.Title6 = rs.getBoolean("title6");
 			dbstat.Updated = rs.getBoolean("update_process");
-			
+			dbstat.Region = rs.getBoolean("region");
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
@@ -1028,8 +1026,6 @@ public class DbUpdate {
 			statement.executeUpdate("DROP TABLE IF EXISTS database_status;");
 			statement.executeUpdate("CREATE TABLE database_status ("
 					+ "name character varying(255) NOT NULL,"
-					+ "create_date date,"
-					+ "modify_date date,"
 					+ "activated boolean,"
 					+ "gtfs_feeds boolean,"
 					+ "census boolean,"
@@ -1038,11 +1034,11 @@ public class DbUpdate {
 					+ "title6 boolean,"
 					+ "future_emp boolean,"
 					+ "future_pop boolean,"
+					+ "region boolean,"
 					+ "update_process boolean,"
-					+ "CONSTRAINT database_status_pkey PRIMARY KEY (name))");
+					+ "CONSTRAINT database_status_pkey PRIMARY KEY (name));");
 			statement.executeUpdate("INSERT INTO database_status "
-					+ "VALUES ('"+name+"', '2015-10-15', '2015-10-15', "
-							+ "false, false, false, false, false, false, false, false, false)");
+					+ "VALUES ('"+name+"', false, false, false, false, false, false, false, false, false, false);");
 			statement.executeUpdate("CREATE TABLE database_metadata ("
 					+ "stateid character varying(2),"
 					+ "census text,"
@@ -1051,6 +1047,7 @@ public class DbUpdate {
 					+ "title6 text,"
 					+ "future_emp text,"
 					+ "future_pop text,"
+					+ "region text,"
 					+ "CONSTRAINT database_metadata_pkey PRIMARY KEY (stateid));");
 			UpdateEventManager.createTables(c, dbInfo);
 			
@@ -1678,6 +1675,49 @@ public class DbUpdate {
 	}
 	
 	@GET
+    @Path("/checkRegionstatus")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object checkRegionstatus(@QueryParam("db") String db){
+		String[] dbInfo = db.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		PDBerror response = new PDBerror();
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			
+			rs = statement.executeQuery("SELECT stateid FROM census_block WHERE odotregionid is not null order by stateid;");
+			while(rs.next()){
+				response.stateids.add(rs.getString("stateid"));
+			}
+			for(String id:response.stateids){
+				rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.states.add(rs.getString("sname"));
+				}
+				rs = statement.executeQuery("SELECT region FROM database_metadata WHERE stateid='"+id+"';");
+				if(rs.next()){
+					response.metadata.add(rs.getString("region"));
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: checkRegionstatus method");
+//			e.printStackTrace();
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+//		if(census_states && census_blocks && census_congdists && census_counties && census_places && census_tracts && census_urbans){
+//			response = "true";
+//		}
+		
+		return response;
+	}
+	
+	@GET
     @Path("/checkCensusstatus")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object checkCensusstatus(@QueryParam("db") String db){
@@ -1752,6 +1792,90 @@ public class DbUpdate {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object copyCensus(@QueryParam("dbFrom") String dbFrom, @QueryParam("dbTo") String dbTo, @QueryParam("section") String section){
 		String tables;
+		String[] dbInfoFrom = dbFrom.split(",");
+		String[] p;
+		p = dbInfoFrom[4].split("/");
+		String nameFrom = p[p.length-1];
+		
+		String[] dbInfoTo = dbTo.split(",");
+		p = dbInfoTo[4].split("/");
+		String nameTo = p[p.length-1];
+		
+		String[] dbInfo = dbFrom.split(",");
+		Connection c = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		ArrayList<String> stateids = new ArrayList<String>();
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			rs = statement.executeQuery("SELECT DISTINCT(stateid) states FROM census_states;");
+			while(rs.next()){
+				stateids.add(rs.getString("states"));
+			}
+		}catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: copyCensus method 1");
+		} finally {
+			if (rs != null) try { rs.close(); } catch (SQLException e) {}
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		dbInfo = dbTo.split(",");
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			switch (section) {
+	        case "census": 
+	        	statement.executeUpdate("DROP TABLE census_blocks;");
+	        	statement.executeUpdate("DROP TABLE census_states;");
+	        	statement.executeUpdate("DROP TABLE census_congdists;");
+	        	statement.executeUpdate("DROP TABLE census_counties;");
+	        	statement.executeUpdate("DROP TABLE census_places;");
+	        	statement.executeUpdate("DROP TABLE census_tracts;");
+	        	statement.executeUpdate("DROP TABLE census_urbans;");
+	        	for(String state: stateids){
+	        		addMetadata(state, "Copied from "+nameFrom, c, "census");
+	        		addMetadata(state, "Copied from "+nameFrom, c, "future_pop");
+	        		addMetadata(state, "Copied from "+nameFrom, c, "future_region");
+	        	}
+	        	
+	            break;
+	        case "employment":
+	        	statement.executeUpdate("DROP TABLE lodes_blocks_rac;");
+	        	statement.executeUpdate("DROP TABLE lodes_blocks_wac;");
+	        	for(String state: stateids){
+	        		addMetadata(state, "Copied from "+nameFrom, c, "employment");
+	        	}
+	            break;
+	        case "parknride":
+	        	statement.executeUpdate("DROP TABLE parknride;");
+	        	for(String state: stateids){
+	        		addMetadata(state, "Copied from "+nameFrom, c, "parknride");
+	        	}
+			    break;
+	        case "title6":
+	        	statement.executeUpdate("DROP TABLE title_vi_blocks_float;");
+	        	for(String state: stateids){
+	        		addMetadata(state, "Copied from "+nameFrom, c, "title6");
+	        	}
+	        	break;
+	        case "femployment":
+	        	statement.executeUpdate("DROP TABLE lodes_rac_projection_block;");
+	        	statement.executeUpdate("DROP TABLE lodes_rac_projection_county;");
+	        	for(String state: stateids){
+	        		addMetadata(state, "Copied from "+nameFrom, c, "future_emp");
+	        	}
+	        	break;
+			default:
+				break;
+			} 
+			
+		}catch (SQLException e) {
+			System.out.println(e.getMessage()+", from: copyCensus method 2");
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
 		switch (section) {
 	        case "census": tables = "-t census_blocks "+"-t census_states "+"-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
 	                break;
@@ -1766,15 +1890,6 @@ public class DbUpdate {
 			default: tables = "";
 					break;
 		} 
-		
-		String[] dbInfoFrom = dbFrom.split(",");
-		String[] p;
-		p = dbInfoFrom[4].split("/");
-		String nameFrom = p[p.length-1];
-		
-		String[] dbInfoTo = dbTo.split(",");
-		p = dbInfoTo[4].split("/");
-		String nameTo = p[p.length-1];
 		
 //		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 //		String batFile = path+"../../src/main/resources/admin/resources/copyPnr.bat";
@@ -1813,6 +1928,17 @@ public class DbUpdate {
 			e.printStackTrace();
 		}
 		
+		try {
+			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+			statement = c.createStatement();
+			statement.executeUpdate("VACUUM");
+		} catch (SQLException e) {
+			
+//			e.printStackTrace();
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
 		
 		return "done";
 	}
@@ -2275,6 +2401,23 @@ public class DbUpdate {
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		
 		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/fpop");
+		File[] files = gtfsFolder.listFiles();
+//		System.out.println(files.length);
+	    if(files!=null) { 
+	        for(File f: files) {
+	        	f.delete();
+	        }
+	    }
+		return "done";
+	}
+	
+	@GET
+    @Path("/deleteUploadedRegion")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object deleteUploadedRegion() throws IOException{
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
+		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/region");
 		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
 	    if(files!=null) { 
@@ -2994,6 +3137,65 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
 			statement = c.createStatement();
 			addMetadata(stateid, metadata, c, "future_pop");
+			statement.executeUpdate("VACUUM");
+		}catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			if (statement != null) try { statement.close(); } catch (SQLException e) {}
+			if (c != null) try { c.close(); } catch (SQLException e) {}
+		}
+		
+		return message;
+	}
+	
+	@GET
+    @Path("/addRegion")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    public Object addRegion(@QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws SQLException{
+		String[] dbInfo = db.split(",");
+		
+		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path.substring(1, path.length());
+		File source = new File(path);*/
+    	String message = "done";
+//		System.out.println(message);
+		
+		String host = dbInfo[4].split(":")[2];
+		host = host.substring(2);
+		host = "localhost"; //to be deleted
+		String[] p;
+		p = dbInfo[4].split("/");
+		String name = p[p.length-1];
+		Process pr;
+		String sqlPath;
+    	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/region_Queries/region.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		Connection c = null;
+		Statement statement = null;
+		try{
+			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
+			statement = c.createStatement();
+			addMetadata(stateid, metadata, c, "region");
 			statement.executeUpdate("VACUUM");
 		}catch (SQLException e) {
 			System.out.println(e.getMessage());
