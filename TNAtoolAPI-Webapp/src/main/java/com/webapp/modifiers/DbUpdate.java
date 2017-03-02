@@ -1644,7 +1644,7 @@ public class DbUpdate {
 //				census_tracts = true;
 //			}
 			
-			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM census_urbans where population2040 is not null order by stateid;");
+			rs = statement.executeQuery("SELECT stateid FROM census_tracts where population2040 is not null order by stateid;");
 			while(rs.next()){
 				response.stateids.add(rs.getString("stateid"));
 			}
@@ -1687,7 +1687,7 @@ public class DbUpdate {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
 			
-			rs = statement.executeQuery("SELECT stateid FROM census_block WHERE odotregionid is not null order by stateid;");
+			rs = statement.executeQuery("SELECT stateid FROM census_blocks WHERE regionid is not null order by stateid;");
 			while(rs.next()){
 				response.stateids.add(rs.getString("stateid"));
 			}
