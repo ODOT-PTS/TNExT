@@ -1826,13 +1826,13 @@ public class DbUpdate {
 			statement = c.createStatement();
 			switch (section) {
 	        case "census": 
-	        	statement.executeUpdate("DROP TABLE census_blocks;");
-	        	statement.executeUpdate("DROP TABLE census_states;");
-	        	statement.executeUpdate("DROP TABLE census_congdists;");
-	        	statement.executeUpdate("DROP TABLE census_counties;");
-	        	statement.executeUpdate("DROP TABLE census_places;");
-	        	statement.executeUpdate("DROP TABLE census_tracts;");
-	        	statement.executeUpdate("DROP TABLE census_urbans;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_blocks;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_states;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_congdists;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_counties;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_places;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_tracts;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS census_urbans;");
 	        	for(String state: stateids){
 	        		addMetadata(state, "Copied from "+nameFrom, c, "census");
 	        		addMetadata(state, "Copied from "+nameFrom, c, "future_pop");
@@ -1841,27 +1841,27 @@ public class DbUpdate {
 	        	
 	            break;
 	        case "employment":
-	        	statement.executeUpdate("DROP TABLE lodes_blocks_rac;");
-	        	statement.executeUpdate("DROP TABLE lodes_blocks_wac;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_wac;");
 	        	for(String state: stateids){
 	        		addMetadata(state, "Copied from "+nameFrom, c, "employment");
 	        	}
 	            break;
 	        case "parknride":
-	        	statement.executeUpdate("DROP TABLE parknride;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS parknride;");
 	        	for(String state: stateids){
 	        		addMetadata(state, "Copied from "+nameFrom, c, "parknride");
 	        	}
 			    break;
 	        case "title6":
-	        	statement.executeUpdate("DROP TABLE title_vi_blocks_float;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS title_vi_blocks_float;");
 	        	for(String state: stateids){
 	        		addMetadata(state, "Copied from "+nameFrom, c, "title6");
 	        	}
 	        	break;
 	        case "femployment":
-	        	statement.executeUpdate("DROP TABLE lodes_rac_projection_block;");
-	        	statement.executeUpdate("DROP TABLE lodes_rac_projection_county;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS lodes_rac_projection_block;");
+	        	statement.executeUpdate("DROP TABLE IF EXISTS lodes_rac_projection_county;");
 	        	for(String state: stateids){
 	        		addMetadata(state, "Copied from "+nameFrom, c, "future_emp");
 	        	}
@@ -2727,7 +2727,7 @@ public class DbUpdate {
 		try{			
 			statement = c.createStatement();
 			statement.executeUpdate("INSERT INTO parknride SELECT * FROM temp_01 ON CONFLICT DO UPDATE;");
-			statement.executeUpdate("DROP TABLE temp_01;");
+			statement.executeUpdate("DROP TABLE IF EXISTS temp_01;");
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
