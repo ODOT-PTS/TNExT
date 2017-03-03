@@ -1950,7 +1950,7 @@ public class DbUpdate {
 		String message = "done";
 		StateInits st = new StateInits();
 
-		String[] stateids = states.split("$#$");
+		String[] stateids = states.split("$$$");
 		String sql ="";
 		for(String str:stateids){
 			if(!str.equals(stateid)){
@@ -2002,7 +2002,7 @@ public class DbUpdate {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object importCensus(@QueryParam("stateid") String stateid, @QueryParam("db") String db, @QueryParam("metadata") String metadata) throws IOException{
 		String[] dbInfo = db.split(",");
-		String[] states = stateid.split("$#$");
+		String[] states = stateid.split("$$$");
 		Connection c = null;
 		Statement statement = null;
 		ResultSet rs = null;
