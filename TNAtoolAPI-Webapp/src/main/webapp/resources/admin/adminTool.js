@@ -1654,7 +1654,7 @@ function fillStates(db){
         	stateids = d.stateids;
         	html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' value='X' onclick='removeCensus(\""+stateids[i]+"\",\""+currentImported.join("$$$")+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' value='X' onclick='removeCensus(\""+stateids[i]+"\",\""+currentImported.join(",")+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstates').html(html);
@@ -1718,7 +1718,7 @@ function addCensus(){
 		currentStates.push(currentImported[i]);
 	}
 	if(currentStates.length>0){
-		var states = currentStates.join("$$$");
+		var states = currentStates.join(",");
 		$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 				+'Importing Census population data... Please do not close or refresh the page.');
 		otherFeedbackDialog.dialog( "open" );
