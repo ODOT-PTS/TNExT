@@ -1631,6 +1631,12 @@ function removeCensus(state, states){
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	checkCensusstatus(currentINDEX);
+        	checkFpopstatus(currentINDEX);
+        	checkRegionstatus(currentINDEX);
+        	checkfEempstatus(currentINDEX);
+        	checkEmpstatus(currentINDEX);
+        	checkT6status(currentINDEX);
+        	checkPNRstatus(currentINDEX);
         	fillStates(db);
         }
 	});
@@ -1648,7 +1654,7 @@ function fillStates(db){
         	stateids = d.stateids;
         	html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' value='X' onclick='removeCensus(\""+stateids[i]+"\",\""+currentImported.join("$%$")+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' value='X' onclick='removeCensus(\""+stateids[i]+"\",\""+currentImported.join("$#$")+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstates').html(html);
@@ -1712,7 +1718,7 @@ function addCensus(){
 		currentStates.push(currentImported[i]);
 	}
 	if(currentStates.length>0){
-		var states = currentStates.join("$%$");
+		var states = currentStates.join("$#$");
 		$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 				+'Importing Census population data... Please do not close or refresh the page.');
 		otherFeedbackDialog.dialog( "open" );
@@ -1732,6 +1738,10 @@ function addCensus(){
 	        	checkCensusstatus(currentINDEX);
 	        	checkFpopstatus(currentINDEX);
 	        	checkRegionstatus(currentINDEX);
+	        	checkfEempstatus(currentINDEX);
+	        	checkEmpstatus(currentINDEX);
+	        	checkT6status(currentINDEX);
+	        	checkPNRstatus(currentINDEX);
 	        	fillStates(db);
 	        	
 	        }
@@ -1804,6 +1814,10 @@ function copyCensus(index, section, classs){
         			checkCensusstatus(index);
         			checkFpopstatus(index);
         			checkRegionstatus(index);
+    	        	checkfEempstatus(currentINDEX);
+    	        	checkEmpstatus(currentINDEX);
+    	        	checkT6status(currentINDEX);
+    	        	checkPNRstatus(currentINDEX);
             		break;
 		    case "employment": 
 		    		checkEmpstatus(index);
