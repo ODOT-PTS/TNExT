@@ -1436,7 +1436,7 @@ function removeWac(stateid){
         	}else{
         		$('#otherFeedbackMessage').html("WAC Employment data could not be removed. Error: "+b);
         	}
-        	checkfEmpstatus(currentINDEX);
+        	checkEmpstatus(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	
@@ -1465,7 +1465,7 @@ function removeRac(stateid){
         	}else{
         		$('#otherFeedbackMessage').html("RAC Employment data could not be removed. Error: "+b);
         	}
-        	checkfEmpstatus(currentINDEX);
+        	checkEmpstatus(currentINDEX);
         	inProcess = false;
         	otherFeedbackDialog.dialog('option', 'buttons', closeButton);
         	

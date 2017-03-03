@@ -2232,6 +2232,7 @@ public class DbUpdate {
 		String message = "done";
 		
 		String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},
+									{"census_states_trip_map","agencyid_def"},
 									{"census_places_trip_map","agencyid_def"},
 									{"census_urbans_trip_map","agencyid_def"},
 									{"census_counties_trip_map","agencyid_def"},
