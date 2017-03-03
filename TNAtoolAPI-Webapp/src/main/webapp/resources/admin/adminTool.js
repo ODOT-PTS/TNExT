@@ -1633,7 +1633,7 @@ function removeCensus(state, states){
         	checkCensusstatus(currentINDEX);
         	checkFpopstatus(currentINDEX);
         	checkRegionstatus(currentINDEX);
-        	checkfEempstatus(currentINDEX);
+        	checkfEmpstatus(currentINDEX);
         	checkEmpstatus(currentINDEX);
         	checkT6status(currentINDEX);
         	checkPNRstatus(currentINDEX);
@@ -1738,7 +1738,7 @@ function addCensus(){
 	        	checkCensusstatus(currentINDEX);
 	        	checkFpopstatus(currentINDEX);
 	        	checkRegionstatus(currentINDEX);
-	        	checkfEempstatus(currentINDEX);
+	        	checkfEmpstatus(currentINDEX);
 	        	checkEmpstatus(currentINDEX);
 	        	checkT6status(currentINDEX);
 	        	checkPNRstatus(currentINDEX);
@@ -1814,7 +1814,7 @@ function copyCensus(index, section, classs){
         			checkCensusstatus(index);
         			checkFpopstatus(index);
         			checkRegionstatus(index);
-    	        	checkfEempstatus(currentINDEX);
+        			checkfEmpstatus(currentINDEX);
     	        	checkEmpstatus(currentINDEX);
     	        	checkT6status(currentINDEX);
     	        	checkPNRstatus(currentINDEX);
