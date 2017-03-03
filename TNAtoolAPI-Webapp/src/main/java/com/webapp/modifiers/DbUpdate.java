@@ -1281,7 +1281,7 @@ public class DbUpdate {
 		try {
 			c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM parknride order by stateid;");
+			rs = statement.executeQuery("SELECT distinct(Left(countyid,2)) stateid FROM parknride order by stateid;");
 			
 			while(rs.next()){
 				response.stateids.add(rs.getString("stateid"));
