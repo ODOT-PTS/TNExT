@@ -570,7 +570,11 @@ function openGTFS(index){
 	
 	currentINDEX = index;
 	
-	
+	$( "#gtfsNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#gtfsNotes .ui-accordion-content').css('height','100%');
 	$( "#gtfs_current_feeds" ).accordion({
 	      collapsible: true,
 	      active : false,
@@ -865,6 +869,11 @@ function openFpop(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
+	$( "#fpopNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#fpopNotes .ui-accordion-content').css('height','100%');
 //	if(!status.FuturePop){
 //		$('#deletefPop').prop('disabled', true);
 //	}
@@ -986,6 +995,11 @@ function openFemp(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
+	$( "#fempNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#fempNotes .ui-accordion-content').css('height','100%');
 //	if(!status.FutureEmp){
 //		$('#deletefEmp').prop('disabled', true);
 //	}
@@ -1133,6 +1147,11 @@ function openT6(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
+	$( "#t6Notes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#t6Notes .ui-accordion-content').css('height','100%');
 //	if(!status.Parknride){
 //		$('#deleteT6').prop('disabled', true);
 //	}
@@ -1221,6 +1240,11 @@ function openPnr(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
+	$( "#pnrNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#pnrNotes .ui-accordion-content').css('height','100%');
 //	if(!status.Parknride){
 //		$('#deletePNR').prop('disabled', true);
 //	}
@@ -1346,6 +1370,11 @@ function openEmp(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
+	$( "#empNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#empNotes .ui-accordion-content').css('height','100%');
 //	if(!status.Employment){
 //		$('#deleteEmp').prop('disabled', true);
 //	}
@@ -1513,6 +1542,11 @@ function openRegion(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
+	$( "#regionNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#regionNotes .ui-accordion-content').css('height','100%');
 
 	checkRegionstatus(currentINDEX);
 	REGIONdialog.dialog( "open" );
@@ -1598,7 +1632,11 @@ function openCensus(index){
 	var db = dbInfo[index].toString();
 	var status = dbStatus[index];
 	currentINDEX = index;
-	
+	$( "#censusNotes" ).accordion({
+	      collapsible: true,
+	      active : false
+	    });
+	$('#censusNotes .ui-accordion-content').css('height','100%');
 	fillStates(db);
 	
 	CENSUSdialog.dialog( "open" );

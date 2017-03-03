@@ -1954,7 +1954,7 @@ public class DbUpdate {
 		String sql ="";
 		for(String str:stateids){
 			if(!str.equals(stateid)){
-				sql += " AND uname NOT LIKE '%"+st.stateInitials.get(str);
+				sql += " AND uname NOT LIKE '%"+st.stateInitials.get(str)+"%'";
 			}
 		}
 		

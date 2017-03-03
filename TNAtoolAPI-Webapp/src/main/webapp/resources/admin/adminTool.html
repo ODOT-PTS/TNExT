@@ -62,8 +62,9 @@
 		</div>
 		
 		<div id="gtfs_upload" title="GTFS Add/Remove">
-		 
-		  <div id="gtfs_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="gtfsNotes">
+		 <h3>Notes:</h3>
+		  <div id="gtfs_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>GTFS feeds to be uploaded must be provided as separate <b>ZIP</b> files.</li>
 			  	<li>Multiple ZIP files can be uploaded at the same time.</li>
@@ -72,7 +73,7 @@
 			  	<li>GTFS feed files that have been successfully uploaded are displayed in the <b>"Uploaded GTFS Feeds"</b> drop-down list.</li>
 			  	<li>If there is a conflict between the Agency ID of a new GTFS feed being uploaded and the Agency ID of a GTFS feed already present in the database, the new GTFS feed will not be uploaded</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <div id="gtfs_current_feeds" class="upload_cards"><h3>Uploaded GTFS Feeds</h3>
 		  	<div id="agencyList"></div>
 		  </div><br>
@@ -176,23 +177,24 @@
 		</div>
 		
 		<div id="census_upload" title="Census Population Add/Remove">
-		 
-		  <div id="census_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="censusNotes">
+		 <h3>Notes:</h3>
+		  <div id="census_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Census population data for different states can be selected to be imported into the current database from the list below.</li>
 			  	<li>The population data for the selected states is imported from the pre-built database "census_reference" which is based on Census 2010 population data.</li>
 			  	<li>If a new "census_reference" database is needed to be created (say for Census 2020), the instructions, as well as the sql queries, can be found <b><a href="../resources/admin/sampleFiles/buildCensus.sql" download>here</a></b>.</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="census_import" class="upload_cards"> -->
 		  	<div style="float:left;width:35%;height:350px;margin-left:8%;overflow:auto;font-size:85%" class="upload_cards">
-		  	<p>States available to be imported into the current database:</p><br>
+		  	<p>States available to be imported:</p><br>
 		  	<table id="availablestates" style="background-color:white"></table>
 		  	<br>
 		  	<input type="button" value="Import" onclick="addCensus()"; style="width: 60%;">
 		  	</div>
 		  	<div style="float:right;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
-		  	<p>States already imported into the current database:</p><br>
+		  	<p>States already imported:</p><br>
 		  	<table id="importedstates" style="background-color:white;"></table>
 		  	</div>
 		  <!-- </div> --><br>
@@ -200,19 +202,20 @@
 		</div>
 	
 		<div id="pnr_upload" title="Park & Ride Add/Remove">
-		 
-		  <div id="pnr_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="pnrNotes">
+		 <h3>Notes:</h3>
+		  <div id="pnr_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Park & Ride data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>A sample of a Park & Ride CSV file properly formatted to be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/pnr_data.csv" download>here</a></b>.</li>
 			  	<li>The names and the order of the columns in the CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the sample CSV file.</li>
 			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="pnr_delete_card" class="upload_cards">
 			  <button type="button" id="deletePNR" class="btn btn-danger delete" onclick="deletePNR()"><span>Delete Existing Park & Ride Data</span></button>
 		  </div><br> -->
-		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:60%;overflow:auto;font-size:85%" class="upload_cards">
 		  	<p>States for which the "park & ride" dataset has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstatespnr" style="background-color:white;"></table>
@@ -317,8 +320,9 @@
 		</div>
 	
 	<div id="t6_upload" title="Title VI Add/Remove">
-		 
-		  <div id="t6_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="t6Notes">
+		 <h3>Notes:</h3>
+		  <div id="t6_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Title VI data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>Five different CSV files must be uploaded (as shown in the list below). The name of the files, as well as the names and the order of the columns in the CSV files to be uploaded, must be <b>exactly</b> the same as those shown in the example CSV files accessible via their corresponding hyperlink.</li>
@@ -361,11 +365,11 @@
  					<li>Rename the CSV file according to the ones specified in the table above (e.g. b03002.csv or b16004.csv).</li>
 			  	</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="t6_delete_card" class="upload_cards">
 			  <button type="button" id="deleteT6" class="btn btn-danger delete" onclick="deleteT6()"><span>Delete Existing Title VI Data</span></button>
 		  </div><br> -->
-		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:60%;overflow:auto;font-size:85%" class="upload_cards">
 		  	<p>States for which the "title VI" dataset has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstatest6" style="background-color:white;"></table>
@@ -470,8 +474,9 @@
 		</div>
 		
 	<div id="emp_upload" title="Employment Add/Remove">
-		 
-		  <div id="emp_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="empNotes">
+		 <h3>Notes:</h3>
+		  <div id="emp_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>Two files with employment data must be uploaded.</li>
@@ -495,17 +500,17 @@
 			  	</ol>
 			  	</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="emp_delete_card" class="upload_cards">
 			  <button type="button" id="deleteEmp" class="btn btn-danger delete" onclick="deleteEmp()"><span>Delete Existing Employment Data</span></button>
 		  </div><br> -->
-		  <div style="float:left;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
-		  	<p>States for which the "rac" dataset has already been imported into the current database:</p>
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:35%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "RAC" dataset has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstatesrac" style="background-color:white;"></table>
 		  </div>
-		  <div style="float:right;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
-		  	<p>States for which the "wac" dataset has already been imported into the current database:</p>
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:35%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "WAC" dataset has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstateswac" style="background-color:white;"></table>
 		  </div><br>
@@ -609,19 +614,20 @@
 		</div>	
 		
 	<div id="femp_upload" title="Employment Projection Add/Remove">
-		 
-		  <div id="femp_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="fempNotes">
+		 <h3>Notes:</h3>
+		  <div id="femp_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Future Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>An example of a properly formatted Employment Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_employment.csv" download>here</a></b>.</li>
 			  	<li>The name of the file, as well as the names and the order of the columns in the Employment Projection CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="femp_delete_card" class="upload_cards">
 			  <button type="button" id="deletefEmp" class="btn btn-danger delete" onclick="deletefEmp()"><span>Delete Existing Future Employment Data</span></button>
 		  </div><br> -->
-		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:60%;overflow:auto;font-size:85%" class="upload_cards">
 		  	<p>States for which the "future employment" data has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstatesfemp" style="background-color:white;"></table>
@@ -726,19 +732,20 @@
 		</div>	
 
 	<div id="fpop_upload" title="Population Projection Add/Remove">
-		 
-		  <div id="fpop_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="fpopNotes">
+		 <h3>Notes:</h3>
+		  <div id="fpop_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Population Projection data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>An example of a properly formatted Population Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_population.csv" download>here</a></b>.</li>
 			  	<li>The name of the file, as well as the names and the order of the columns in the Population Projection CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="fpop_delete_card" class="upload_cards">
 			  <button type="button" id="deletefPop" class="btn btn-danger delete" onclick="deletefPop()"><span>Delete Existing Population Projection Data</span></button>
 		  </div><br> -->
-		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:60%;overflow:auto;font-size:85%" class="upload_cards">
 		  	<p>States for which the "future population" data has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstatesfpop" style="background-color:white;"></table>
@@ -843,19 +850,20 @@
 		</div>	
 		
 		<div id="region_upload" title="Regions Add/Remove">
-		 
-		  <div id="region_notes" class="upload_cards"><h3 style="margin-top: .1em;">Notes:</h3><br>
+		 <div id="regionNotes">
+		 <h3>Notes:</h3>
+		  <div id="region_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
 			  <ul>
 			  	<li>Regions data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
 			  	<li>An example of a properly formatted Regions CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/regions.csv" download>here</a></b>.</li>
 			  	<li>The name of the file, as well as the names and the order of the columns in the Regions CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
 			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
 			  </ul>
-		  </div><br>
+		  </div></div><br>
 		  <!-- <div id="fpop_delete_card" class="upload_cards">
 			  <button type="button" id="deletefPop" class="btn btn-danger delete" onclick="deletefPop()"><span>Delete Existing Population Projection Data</span></button>
 		  </div><br> -->
-		  <div style="width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:60%;overflow:auto;font-size:85%" class="upload_cards">
 		  	<p>States for which the "Regions" data has already been imported into the current database:</p>
 		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
 		  	<table id="importedstatesregion" style="background-color:white;"></table>
