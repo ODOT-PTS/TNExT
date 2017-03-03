@@ -895,7 +895,7 @@ function checkFpopstatus(index){
         success: function(d) {
         	var b = false;
         	stateids = d.stateids;
-        	html = "";
+        	var html = "";
         	$.each(d.states, function(i,item){
         		html+="<tr><td></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
@@ -1039,13 +1039,13 @@ function checkfEmpstatus(index){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkfEmpstatus?&db="+db,
-        dataType: "text",
+        dataType: "json",
         async: false,
         success: function(d) {
         	var b = false;
         	stateids = d.stateids;
         	
-        	html = "";
+        	var html = "";
         	$.each(d.states, function(i,item){
         		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeFemp(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
@@ -1160,12 +1160,12 @@ function checkT6status(index){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkT6status?&db="+db,
-        dataType: "text",
+        dataType: "json",
         async: false,
         success: function(d) {
         	var b = false;
         	stateids = d.stateids;
-        	html = "";
+        	var html = "";
         	$.each(d.states, function(i,item){
         		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeT6(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
@@ -1311,12 +1311,12 @@ function checkPNRstatus(index){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkPNRstatus?&db="+db,
-        dataType: "text",
+        dataType: "json",
         async: false,
         success: function(d) {
         	var b = false;
         	stateids = d.stateids;
-        	html = "";
+        	var html = "";
         	$.each(d.states, function(i,item){
         		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removePnr(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
@@ -1464,12 +1464,12 @@ function checkEmpstatus(index){
 	$.ajax({
         type: "GET",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkEmpstatus?&db="+db,
-        dataType: "text",
+        dataType: "json",
         async: false,
         success: function(d) {
         	var b = false;
         	stateids = d.stateids;
-        	html = "";
+        	var html = "";
         	$.each(d.states, function(i,item){
         		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeWac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
@@ -1784,10 +1784,10 @@ function addCensus(){
 	});
 }*/
 
-function copyCensus(index, section){
+function copyCensus(index, section, classs){
 //	alert(section);
 	var dbTo = dbInfo[index].toString();
-	var dbFrom = dbInfo[$("#pnr-select"+index).val()].toString();
+	var dbFrom = dbInfo[$("#"+classs+"-select"+index).val()].toString();
 	nProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Copying data... Please do not close or refresh the page.');
@@ -1971,19 +1971,19 @@ $(document).ready(function(){
             			"<tr><td><input type='button' class='gtfs dbButtons-class single' value='Import GTFS Feeds' onclick='openGTFS("+i+")'></td>" +
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='gtfs'></td></tr>"+
             			"<tr><td><input type='button' class='census dbButtons-class' value='Import Census' onclick='openCensus("+i+")'> or " +
-            					"<input type='button' class='census dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"census\")'>" +
+            					"<input type='button' class='census dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"census\", \"census\")'>" +
             					"<select class='census select-class' id='census-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='census'></td></tr>"+
             			"<tr><td><input type='button' class='emp dbButtons-class' value='Import Employment' onclick='openEmp("+i+")'> or " +
-            					"<input type='button' class='emp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"employment\")'>" +
+            					"<input type='button' class='emp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"employment\", \"emp\")'>" +
             					"<select class='census select-class' id='emp-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='emp'></td></tr>"+
             			"<tr><td><input type='button' class='pnr dbButtons-class' value='Import Park & Ride' onclick='openPnr("+i+")'> or " +
-            					"<input type='button' class='pnr dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"parknride\")'>" +
+            					"<input type='button' class='pnr dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"parknride\", \"pnr\")'>" +
             					"<select class='pnr select-class' id='pnr-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='pnr'></td></tr>"+
             			"<tr><td><input type='button' class='t6 dbButtons-class' value='Import Title VI' onclick='openT6("+i+")'> or " +
-            					"<input type='button' class='t6 dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"title6\")'>" +
+            					"<input type='button' class='t6 dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"title6\", \"t6\")'>" +
             					"<select class='t6 select-class' id='t6-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='t6'></td></tr>"+
             			"<tr><td><input type='button' class='fpop dbButtons-class single' value='Import Future Population' onclick='openFpop("+i+")'>" +
@@ -1991,7 +1991,7 @@ $(document).ready(function(){
             			"<tr><td><input type='button' class='region dbButtons-class single' value='Import Regions' onclick='openRegion("+i+")'>" +
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='region'></td></tr>"+
             			"<tr><td><input type='button' class='femp dbButtons-class' value='Import Future Employment' onclick='openFemp("+i+")'> or " +
-            					"<input type='button' class='femp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"femployment\")'>" +
+            					"<input type='button' class='femp dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"femployment\", \"femp\")'>" +
             					"<select class='femp select-class' id='femp-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='femp'></td></tr>"+
             			"<tr><td><input type='button' class='update dbButtons-class no_css single' value='Run Update Queries' style='background-color: rgba(0, 111, 128, 0.21);' onclick='runUpdates("+i+")'></td>"+
