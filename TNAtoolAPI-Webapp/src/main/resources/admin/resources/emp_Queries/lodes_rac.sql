@@ -1,4 +1,4 @@
---﻿DROP TABLE IF EXISTS lodes_blocks_rac;
+--DROP TABLE IF EXISTS lodes_blocks_rac;
 CREATE TABLE IF NOT EXISTS lodes_blocks_rac(
 blockid character varying(15),
 C000 int,
@@ -58,7 +58,7 @@ FROM '../../../../webapp/resources/admin/uploads/emp/rac.csv' DELIMITER ',' CSV 
 
 INSERT INTO lodes_blocks_rac SELECT *
 FROM temp_01
-ON CONFLICT DO UPDATE; 
+ON CONFLICT DO NOTHING; 
 
 DROP TABLE temp_01;
 

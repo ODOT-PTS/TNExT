@@ -18,7 +18,6 @@ BEGIN
   np = ST_NPoints(g);
 
   IF np > 3 THEN
-    g = ST_SimplifyPreserveTopology(g, 0.00001);
     np = ST_NPoints(g);
   END IF;
 

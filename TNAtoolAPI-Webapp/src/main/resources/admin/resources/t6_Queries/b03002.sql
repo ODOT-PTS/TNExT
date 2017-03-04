@@ -1,5 +1,4 @@
-﻿drop table IF EXISTS blkGrp_b03002;
-
+DROP TABLE IF EXISTS blkGrp_b03002;
 CREATE TABLE blkGrp_b03002 
 (GISJOIN varchar(21), gbid varchar(21), STATEA varchar(11), COUNTYA varchar(11), TRACTA varchar(11), BLKGRPA varchar(11), 
 not_hispanic_or_latino_white_alone int, not_hispanic_or_latino_black_or_african_american_alone int, 

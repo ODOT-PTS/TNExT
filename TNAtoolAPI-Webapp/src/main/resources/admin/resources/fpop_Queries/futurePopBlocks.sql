@@ -1,5 +1,4 @@
-﻿DROP TABLE if exists blocks_future_pop;
-
+DROP TABLE IF EXISTS blocks_future_pop;
 CREATE TABLE blocks_future_pop
 (
   blockid character varying(15) NOT NULL,
@@ -249,6 +248,5 @@ UPDATE census_urbans
    WHERE census_urbans.urbanid=futurepop.id; 
    
    
-﻿DROP TABLE if exists blocks_future_pop;
-﻿DROP TABLE if exists counties_future_pop;
-
+DROP TABLE IF EXISTS blocks_future_pop;
+DROP TABLE IF EXISTS counties_future_pop;

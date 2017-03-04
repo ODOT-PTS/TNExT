@@ -1,5 +1,4 @@
-﻿DROP TABLE IF EXISTS t_b_dist;
-
+DROP TABLE IF EXISTS t_b_dist;
 CREATE TABLE t_b_dist
 (
   blockid character varying(15) NOT NULL,

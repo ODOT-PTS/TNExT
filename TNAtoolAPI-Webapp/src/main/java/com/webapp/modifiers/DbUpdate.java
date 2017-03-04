@@ -2727,7 +2727,7 @@ public class DbUpdate {
 		}
 		try{			
 			statement = c.createStatement();
-			statement.executeUpdate("INSERT INTO parknride SELECT * FROM temp_01 ON CONFLICT DO UPDATE;");
+			statement.executeUpdate("INSERT INTO parknride SELECT * FROM temp_01 ON CONFLICT DO NOTHING;");
 			statement.executeUpdate("DROP TABLE IF EXISTS temp_01;");
 			
 		} catch (SQLException e) {

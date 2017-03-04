@@ -1,5 +1,4 @@
-﻿drop table IF EXISTS tract_b18101;
-
+DROP TABLE IF EXISTS tract_b18101;
 CREATE TABLE tract_b18101 
 (GISJOIN varchar(21), tid varchar(21), STATEA varchar(11), COUNTYA varchar(11), TRACTA varchar(11), 
 male_under_5_with_disability int, male_under_5_no_disability int, male_5_to_17_with_disability int, male_5_to_17_no_disability int, 

@@ -13,6 +13,6 @@ COPY temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045
 	
 INSERT INTO lodes_rac_projection_county SELECT *
 FROM temp_01
-ON CONFLICT DO UPDATE; 
+ON CONFLICT DO NOTHING; 
 
 DROP TABLE temp_01;

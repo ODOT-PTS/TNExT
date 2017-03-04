@@ -38,5 +38,5 @@ UPDATE census_blocks
    WHERE census_blocks.countyid=counties_regions.countyid; 
 
    
-﻿DROP TABLE if exists counties_regions;
 
+DROP TABLE IF EXISTS counties_regions;

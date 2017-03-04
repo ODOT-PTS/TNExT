@@ -848,8 +848,8 @@ public class UpdateEventManager {
 	      try {
 	        stmt = connection.createStatement();
 	        stmt.executeUpdate("ALTER TABLE gtfs_stops DISABLE TRIGGER ALL;");
-	        
-//	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.geoid10 from census_blocks_reference shape where stop.agencyid='"+agencyId+"' and st_within(ST_MakePoint(stop.lon, stop.lat),shape.geom)=true ;");
+	        stmt.executeUpdate("ALTER TABLE gtfs_stops ADD COLUMN IF NOT EXISTS stateid character varying(2);");
+	        stmt.executeUpdate("update gtfs_stops stop set stateid=shape.stateid from census_states shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set blockid=shape.blockid from census_blocks shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set placeid=shape.placeid from census_places shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true ;");
 	        stmt.executeUpdate("update gtfs_stops stop set congdistid=shape.congdistid from census_congdists shape where stop.agencyid='"+agencyId+"' and st_within(ST_SetSRID(ST_MakePoint(stop.lon, stop.lat),4326),shape.shape)=true;");
@@ -1048,15 +1048,15 @@ public class UpdateEventManager {
 	        		+ "insert into census_states_trip_map(tripid, agencyid, agencyid_def, serviceid, routeid,  stateid, shape, length, uid) "
 	        		+ "SELECT * FROM output1 UNION SELECT * FROM output2");
 	        stmt.executeUpdate("update census_states_trip_map set stopscount = res.cnt+0 from "
-	        		+ "(select count(stop.id) as cnt, substring(stop.blockid,1,5) as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
+	        		+ "(select count(stop.id) as cnt, substring(stop.blockid,1,2) as cid, stime.trip_agencyid as aid, stime.trip_id as tid "
 	        		+ "from gtfs_stops stop inner join gtfs_stop_times stime "
-	        		+ "on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id where stop.agencyid='"+agencyId+"' group by stime.trip_agencyid, stime.trip_id, substring(stop.blockid,1,5)) as res "
+	        		+ "on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id where stop.agencyid='"+agencyId+"' group by stime.trip_agencyid, stime.trip_id, substring(stop.blockid,1,2)) as res "
 	        		+ "where stateid =  res.cid and agencyid = res.aid and tripid=res.tid;");
 	        stmt.executeUpdate("update census_states_trip_map set stopscount=0 where stopscount IS NULL;");
 	        stmt.executeUpdate("update census_states_trip_map map set tlength=res.ttime from ("
 	        		+ "select max(stimes.departuretime)-min(stimes.arrivaltime) as ttime,"
 	        		+ "stimes.agencyid, stimes.tripid, stimes.geoid from ("
-	        		+ "select stime.arrivaltime, stime.departuretime, stime.trip_agencyid as agencyid, stime.trip_id as tripid, substring(stop.blockid,1,5) as geoid "
+	        		+ "select stime.arrivaltime, stime.departuretime, stime.trip_agencyid as agencyid, stime.trip_id as tripid, substring(stop.blockid,1,2) as geoid "
 	        		+ "from gtfs_stop_times stime inner join gtfs_stops stop on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id where stop.agencyid='"+agencyId+"') as stimes "
 	        		+ "where stimes.arrivaltime>0 and stimes.departuretime>0 group by stimes.agencyid, stimes.tripid, stimes.geoid) as res "
 	        		+ "where res.agencyid = map.agencyid and res.tripid=map.tripid and res.geoid=map.stateid;");

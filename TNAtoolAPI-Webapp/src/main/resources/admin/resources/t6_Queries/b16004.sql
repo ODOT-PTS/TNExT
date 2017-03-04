@@ -1,5 +1,4 @@
-﻿drop table IF EXISTS blkGrp_b16004;
-
+DROP TABLE IF EXISTS blkGrp_b16004;
 CREATE TABLE blkGrp_b16004 
 (GISJOIN varchar(21), gbid varchar(21), STATEA varchar(11), COUNTYA varchar(11), TRACTA varchar(11), BLKGRPA varchar(11), 
 from_5_to_17_years int, 

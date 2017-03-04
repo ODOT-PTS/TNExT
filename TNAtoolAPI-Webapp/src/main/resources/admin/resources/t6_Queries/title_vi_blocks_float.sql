@@ -1,5 +1,4 @@
-﻿--DROP TABLE IF EXISTS title_vi_blocks_float;
-
+--DROP TABLE IF EXISTS title_vi_blocks_float;
 CREATE TABLE IF NOT EXISTS title_vi_blocks_float
 (
   blockid character varying(15) NOT NULL,
