@@ -930,8 +930,8 @@ function checkFpopstatus(index){
 }
 
 function addfPop(){
-	stateSelectDialog.dialog("open");
-	var stateid = stateSelector;
+	
+//	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. Prepared by PSU, August 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
@@ -941,7 +941,7 @@ function addfPop(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1007,8 +1007,7 @@ function openFemp(index){
 	FEMPdialog.dialog( "open" );
 }
 function addfEmp(){
-	stateSelectDialog.dialog("open");
-	var stateid = stateSelector;
+//	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. Prepared by ODOT, March 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
@@ -1018,7 +1017,7 @@ function addfEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1114,8 +1113,7 @@ function removeFemp(stateid){
  * Title 6 add/remove.
  */
 function addT6(){
-	stateSelectDialog.dialog("open");
-	var stateid = stateSelector;
+//	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. 2014 5-year summary file)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
@@ -1125,7 +1123,7 @@ function addT6(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1258,8 +1256,7 @@ function openPnr(index){
 }
 
 function addPnr(fileName){
-	stateSelectDialog.dialog("open");
-	var stateid = stateSelector;
+//	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. Prepared in January 2017)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
@@ -1269,7 +1266,7 @@ function addPnr(fileName){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db+"&stateid="+stateid+"&metadata="+metadata,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db+"&stateid="+stateSelector+"&metadata="+metadata,
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1385,8 +1382,7 @@ function openEmp(index){
 	
 }
 function addEmp(){
-	stateSelectDialog.dialog("open");
-	var stateid = stateSelector;
+//	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. Census employment Data 2014)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
@@ -1396,7 +1392,7 @@ function addEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1594,8 +1590,7 @@ function checkRegionstatus(index){
 }
 
 function addRegion(){
-	stateSelectDialog.dialog("open");
-	var stateid = stateSelector;
+//	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. Prepared by ODOT August 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
@@ -1605,7 +1600,7 @@ function addRegion(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addRegion?&db="+db+"&stateid="+stateid+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addRegion?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1951,6 +1946,8 @@ var gtfsFeedbackDialog;
 var otherFeedbackDialog;
 var stateSelectDialog;
 var stateSelector;
+var pnrFile;
+var currentFunction;
 var dbInfo = [[]];
 var dbStatus = [{}]; //the first object is empty 
 var defaultInfo = ["","","com/model/database/connections/spatial/","com/model/database/connections/transit/",
@@ -2125,15 +2122,21 @@ $(document).ready(function(){
 	      width: 400,
 	      modal: true,	
 	      closeOnEscape: false,
+	      close: function( event, ui ) {
+	    	  stateSelector = $('#selectStateSelector').val();
+//	    	  alert(stateSelector);
+	    	  currentFunction();
+	      },
 	      buttons: {
 		        
 		        "Done": function() {
-		        	stateSelector = $('#selectStateSelector').val();
 		        	stateSelectDialog.dialog( "close" );
+		        	
 		        }
 		      }
 	});
 });
+
 
 function deleteUploadedT6(){
 	$.ajax({
@@ -2222,7 +2225,9 @@ function runPnRfunctions(){
 //    	addFeed(data.files[0].name);
 //    	currentFiles.push(data.files[0].name);
 //    	console.log(data);
-    	addPnr(data.files[0].name);
+    	pnrFile = data.files[0].name;
+    	currentFunction = addPnr;
+    	stateSelectDialog.dialog( "open" );
     });/*.bind('fileuploadstopped', function (e) {
 //    	alert();
     	addFeed(currentFiles);
@@ -2262,7 +2267,9 @@ function runFEMPfunctions(){
         sequentialUploads: true,
         maxFileSize: 50000000,
     }).bind('fileuploadalways', function (e, data){
-    	addfEmp(data.files[0].name);
+//    	addfEmp(data.files[0].name);
+    	currentFunction = addfEmp;
+    	stateSelectDialog.dialog( "open" );
     });
 	$('#femp_upload_form > div').css('margin-right','0px');
 	
@@ -2310,7 +2317,9 @@ function runT6functions(){
         sequentialUploads: true,
         maxFileSize: 50000000,
     }).bind('fileuploadstopped', function (e) {
-    	addT6();
+//    	addT6();
+    	currentFunction = addT6;
+    	stateSelectDialog.dialog( "open" );
     });
 	$('#t6_upload_form > div').css('margin-right','0px');
 	
@@ -2344,7 +2353,9 @@ function runEMPfunctions(){
         sequentialUploads: true,
         maxFileSize: 50000000,
     }).bind('fileuploadstopped', function (e) {
-    	addEmp();
+//    	addEmp();
+    	currentFunction = addEmp;
+    	stateSelectDialog.dialog( "open" );
     });
 	$('#emp_upload_form > div').css('margin-right','0px');
 	
@@ -2378,7 +2389,8 @@ function runFPOPfunctions(){
         sequentialUploads: true,
         maxFileSize: 50000000,
     }).bind('fileuploadalways', function (e, data){
-    	addfPop(data.files[0].name);
+    	currentFunction = addfPop;
+    	stateSelectDialog.dialog( "open" );
     });
 	$('#fpop_upload_form > div').css('margin-right','0px');
 	
@@ -2412,7 +2424,9 @@ function runREGIONfunctions(){
         sequentialUploads: true,
         maxFileSize: 50000000,
     }).bind('fileuploadalways', function (e, data){
-    	addRegion(data.files[0].name);
+//    	addRegion(data.files[0].name);
+    	currentFunction = addRegion;
+    	stateSelectDialog.dialog( "open" );
     });
 	$('#region_upload_form > div').css('margin-right','0px');
 	

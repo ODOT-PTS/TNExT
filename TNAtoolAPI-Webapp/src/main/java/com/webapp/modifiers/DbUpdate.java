@@ -2799,10 +2799,7 @@ public class DbUpdate {
     public Object addT6(@QueryParam("db") String db, @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws SQLException{
 		String[] dbInfo = db.split(",");
 		
-		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
-		path = path.substring(1, path.length());
-		File source = new File(path);*/
+		
     	String message = "";
 		System.out.println(message);
 		
@@ -2854,18 +2851,105 @@ public class DbUpdate {
 			message += e.toString()+",";
 		}
 		
-		String[] fileNames = {"b03002.sql","b16004.sql","b17021.sql","b18101.sql","b19037.sql"};
-		for(String fname:fileNames){
-			path = path+"../../src/main/webapp/resources/admin/uploads/t6/"+fname;
+		String[] fileNames = {"b03002","b16004","b17021","b18101","b19037"};
+		String[] copyColumn = new String[5];
+		copyColumn[0] = "blkGrp_b03002(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,"
+				+ "not_hispanic_or_latino_white_alone,not_hispanic_or_latino_black_or_african_american_alone,"
+				+ "not_hispanic_or_latino_american_indian_and_alaska_native_alone,not_hispanic_or_latino_asian_alone,"
+				+ "not_hispanic_or_latino_native_hawaiian_and_other_pacific_islander_alone,not_hispanic_or_latino_some_other_race_alone, "
+				+ "not_hispanic_or_latino_two_or_more_races,hispanic__or__latino)";
+		copyColumn[1] = "blkGrp_b16004(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,"
+				+ "from_5_to_17_years, "
+				+ "from_5_to_17_years_speak_only_english, "
+				+ "from_5_to_17_years_speak_spanish, from_5_to_17_years_speak_spanish_very_well, "
+				+ "from_5_to_17_years_speak_spanish_well, from_5_to_17_years_speak_spanish_not_well, from_5_to_17_years_speak_spanish_not_at_all,"
+				+ "from_5_to_17_years_speak_indo_european, from_5_to_17_years_speak_indo_european_very_well, "
+				+ "from_5_to_17_years_speak_indo_european_well, from_5_to_17_years_speak_indo_european_not_well, from_5_to_17_years_speak_indo_european_not_at_all, "
+				+ "from_5_to_17_years_speak_asian_and_pacific_island, from_5_to_17_years_speak_asian_and_pacific_island_very_well, "
+				+ "from_5_to_17_years_speak_asian_and_pacific_island_well, from_5_to_17_years_speak_asian_and_pacific_island_not_well, from_5_to_17_years_speak_asian_and_pacific_island_not_at_all,"
+				+ "from_5_to_17_years_speak_other , from_5_to_17_years_speak_other_very_well , "
+				+ "from_5_to_17_years_speak_other_well, from_5_to_17_years_speak_other_not_well, from_5_to_17_years_speak_other_not_at_all,"
+				+ ""
+				+ "from_18_to_64_years, "
+				+ "from_18_to_64_years_speak_only_english, "
+				+ "from_18_to_64_years_speak_spanish, from_18_to_64_years_speak_spanish_very_well, "
+				+ "from_18_to_64_years_speak_spanish_well, from_18_to_64_years_speak_spanish_not_well, from_18_to_64_years_speak_spanish_not_at_all,"
+				+ "from_18_to_64_years_speak_indo_european, from_18_to_64_years_speak_indo_european_very_well, "
+				+ "from_18_to_64_years_speak_indo_european_well, from_18_to_64_years_speak_indo_european_not_well, from_18_to_64_years_speak_indo_european_not_at_all, "
+				+ "from_18_to_64_years_speak_asian_and_pacific_island, from_18_to_64_years_speak_asian_and_pacific_island_very_well, "
+				+ "from_18_to_64_years_speak_asian_and_pacific_island_well, from_18_to_64_years_speak_asian_and_pacific_island_not_well, from_18_to_64_years_speak_asian_and_pacific_island_not_at_all,"
+				+ "from_18_to_64_years_speak_other , from_18_to_64_years_speak_other_very_well , "
+				+ "from_18_to_64_years_speak_other_well, from_18_to_64_years_speak_other_not_well, from_18_to_64_years_speak_other_not_at_all,"
+				+ ""
+				+ "from_64_to_over, "
+				+ "from_64_to_over_speak_only_english, "
+				+ "from_64_to_over_speak_spanish, from_64_to_over_speak_spanish_very_well, "
+				+ "from_64_to_over_speak_spanish_well, from_64_to_over_speak_spanish_not_well, from_64_to_over_speak_spanish_not_at_all,"
+				+ "from_64_to_over_speak_indo_european, from_64_to_over_speak_indo_european_very_well, "
+				+ "from_64_to_over_speak_indo_european_well, from_64_to_over_speak_indo_european_not_well, from_64_to_over_speak_indo_european_not_at_all, "
+				+ "from_64_to_over_speak_asian_and_pacific_island, from_64_to_over_speak_asian_and_pacific_island_very_well, "
+				+ "from_64_to_over_speak_asian_and_pacific_island_well, from_64_to_over_speak_asian_and_pacific_island_not_well, from_64_to_over_speak_asian_and_pacific_island_not_at_all, "
+				+ "from_64_to_over_speak_other , from_64_to_over_speak_other_very_well , "
+				+ "from_64_to_over_speak_other_well, from_64_to_over_speak_other_not_well, from_64_to_over_speak_other_not_at_all)";
+		copyColumn[2] = "blkGrp_b17021(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,below_poverty_total,above_poverty_total)";
+		copyColumn[3] = "tract_b18101(GISJOIN,STATEA,COUNTYA, TRACTA,"
+				+ "male_under_5_with_disability,male_under_5_no_disability,male_5_to_17_with_disability,male_5_to_17_no_disability,male_18_to_34_with_disability,male_18_to_34_no_disability,"
+				+ "male_35_to_64_with_disability,male_35_to_64_no_disability,male_65_to_74_with_disability,male_65_to_74_no_disability,male_over_75_with_disability,male_over_75_no_disability,"
+				+ "female_under_5_with_disability,female_under_5_no_disability,female_5_to_17_with_disability,female_5_to_17_no_disability,female_18_to_34_with_disability,female_18_to_34_no_disability,"
+				+ "female_35_to_64_with_disability,female_35_to_64_no_disability,female_65_to_74_with_disability,female_65_to_74_no_disability,female_over_75_with_disability,female_over_75_no_disability)";
+		copyColumn[4] = "blkGrp_b19037(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,under_25,from_25_to_44,from_45_to_64,above_65)";
+				
+		for(int i=0;i<fileNames.length;i++){
+			String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			path = path+"../../src/main/webapp/resources/admin/uploads/t6/"+fileNames[i]+".csv";
 			path = path.substring(1, path.length());
+			File source = new File(path);
+			
+			sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/"+fileNames[i]+"_1.sql";
+	    	sqlPath = sqlPath.substring(1, sqlPath.length());
 			try{
-				File file = new File(path);
-			}catch(NullPointerException e){
-				message += e.toString();
-				continue;
+				String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+			   		+ "exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+			}catch(Exception e) {
+				e.printStackTrace();
+				message += e.toString()+",";
 			}
 			
-			sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/"+fname;
+			////
+			try{	
+				String[] cmdArray = new String[5];
+				   cmdArray[0] = "cmd";
+				   cmdArray[1] = "/c";
+				   cmdArray[2] = "cmd";
+				   cmdArray[3] = "/k";
+				   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+					   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+					   		+ " -c \"\\copy "+copyColumn[i]+" "
+					   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+					   		+ " & exit";
+				   
+				   pr = Runtime.getRuntime().exec(cmdArray,null);
+				   pr.waitFor(5,TimeUnit.MINUTES);
+			} catch (InterruptedException ex) {
+				System.out.println(ex.getMessage());
+				message = ex.getMessage();
+				source.delete();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			///
+			
+			sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/"+fileNames[i]+"_2.sql";
 	    	sqlPath = sqlPath.substring(1, sqlPath.length());
 			try{
 				String[] cmdArray = new String[5];
@@ -2933,9 +3017,9 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path+"../../src/main/webapp/resources/admin/uploads/emp/rac.csv";
 		path = path.substring(1, path.length());
-		File source = new File(path);*/
+		File source = new File(path);
     	String message = "";
 //		System.out.println(message);
 		
@@ -2949,7 +3033,49 @@ public class DbUpdate {
 		String sqlPath;
     	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	
-    	sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_rac.sql";
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+","; 
+		}
+		////
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy temp_01 "
+				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " & exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+		} catch (InterruptedException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			source.delete();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		///
+		sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -2968,7 +3094,53 @@ public class DbUpdate {
 			message += e.toString()+","; 
 		}
 		
-		sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_wac.sql";
+		path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		path = path+"../../src/main/webapp/resources/admin/uploads/emp/wac.csv";
+		path = path.substring(1, path.length());
+		source = new File(path);
+		sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+",";
+		}
+		////
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy temp_01 "
+				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " & exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+		} catch (InterruptedException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			source.delete();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		///
+		sqlPath = s_path+"../../src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -3015,9 +3187,9 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path+"../../src/main/webapp/resources/admin/uploads/femp/future_employment.csv";
 		path = path.substring(1, path.length());
-		File source = new File(path);*/
+		File source = new File(path);
     	String message = "";
 //		System.out.println(message);
 		
@@ -3031,7 +3203,51 @@ public class DbUpdate {
 		String sqlPath;
     	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	
-    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county.sql";
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+","; 
+		}
+		
+		////
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)  "
+				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " & exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+		} catch (InterruptedException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			source.delete();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		///
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -3097,9 +3313,9 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path+"../../src/main/webapp/resources/admin/uploads/fpop/future_population.csv";
 		path = path.substring(1, path.length());
-		File source = new File(path);*/
+		File source = new File(path);
     	String message = "done";
 //		System.out.println(message);
 		
@@ -3113,7 +3329,52 @@ public class DbUpdate {
 		String sqlPath;
     	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	
-    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/futurePopBlocks.sql";
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/futurePopBlocks1.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		////
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy counties_future_pop(countyid,population2015,population2020,population2025, "
+				   		+ "population2030, population2035,population2040,population2045,population2050)  "
+				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " & exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+		} catch (InterruptedException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			source.delete();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		///
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/futurePopBlocks2.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -3156,9 +3417,9 @@ public class DbUpdate {
 		String[] dbInfo = db.split(",");
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		/*path = path+"../../src/main/webapp/resources/admin/uploads/pnr/"+fileName;
+		path = path+"../../src/main/webapp/resources/admin/uploads/region/regions.csv";
 		path = path.substring(1, path.length());
-		File source = new File(path);*/
+		File source = new File(path);
     	String message = "done";
 //		System.out.println(message);
 		
@@ -3172,7 +3433,7 @@ public class DbUpdate {
 		String sqlPath;
     	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	
-    	sqlPath = s_path+"../../src/main/resources/admin/resources/region_Queries/region.sql";
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/region_Queries/region1.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -3191,6 +3452,49 @@ public class DbUpdate {
 			message = e.toString()+","; 
 		}
 		
+		////
+		try{	
+			String[] cmdArray = new String[5];
+			   cmdArray[0] = "cmd";
+			   cmdArray[1] = "/c";
+			   cmdArray[2] = "cmd";
+			   cmdArray[3] = "/k";
+			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+				   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
+				   		+ " -c \"\\copy counties_regions(countyid,regionid,regionname)  "
+				   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
+				   		+ " & exit";
+			   
+			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   pr.waitFor(5,TimeUnit.MINUTES);
+		} catch (InterruptedException ex) {
+			System.out.println(ex.getMessage());
+			message = ex.getMessage();
+			source.delete();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		///
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/region_Queries/region2.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
 		Connection c = null;
 		Statement statement = null;
 		try{
