@@ -1255,7 +1255,7 @@ function openPnr(index){
 //	changeStatus(index, "parknride", !b);
 }
 
-function addPnr(fileName){
+function addPnr(){
 //	var stateid = stateSelector;
 	var metadata = prompt("Please add a note (e.g. Prepared in January 2017)");
 	var db = dbInfo[currentINDEX].toString();
@@ -1266,7 +1266,7 @@ function addPnr(fileName){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+fileName+"&db="+db+"&stateid="+stateSelector+"&metadata="+metadata,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+pnrFile+"&db="+db+"&stateid="+stateSelector+"&metadata="+metadata,
         dataType: "text",
         async: true,
         success: function(d) {

@@ -3329,7 +3329,7 @@ public class DbUpdate {
 		String sqlPath;
     	String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	
-    	sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/futurePopBlocks1.sql";
+    	sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -3374,7 +3374,7 @@ public class DbUpdate {
 		}
 		///
 		
-		sqlPath = s_path+"../../src/main/resources/admin/resources/femp_Queries/futurePopBlocks2.sql";
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
