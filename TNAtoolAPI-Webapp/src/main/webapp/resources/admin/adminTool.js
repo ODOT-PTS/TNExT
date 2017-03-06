@@ -2136,7 +2136,7 @@ $(document).ready(function(){
 //	    	  alert(stateSelector);
 	    	  currentFunction();
 	      },
-	      close: function( event, ui ) {
+	      open: function( event, ui ) {
 	    	  stateMetaData = $('#selectStateText').html("");
 	      },
 	      buttons: {
