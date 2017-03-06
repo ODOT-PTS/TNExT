@@ -2136,6 +2136,9 @@ $(document).ready(function(){
 //	    	  alert(stateSelector);
 	    	  currentFunction();
 	      },
+	      close: function( event, ui ) {
+	    	  stateMetaData = $('#selectStateText').html("");
+	      },
 	      buttons: {
 		        
 		        "Done": function() {
