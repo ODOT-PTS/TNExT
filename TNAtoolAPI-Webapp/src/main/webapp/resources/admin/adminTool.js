@@ -932,7 +932,7 @@ function checkFpopstatus(index){
 function addfPop(){
 	
 //	var stateid = stateSelector;
-	var metadata = prompt("Please add a note (e.g. Prepared by PSU, August 2016)");
+//	var metadata = prompt("Please add a note (e.g. Prepared by PSU, August 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -941,7 +941,7 @@ function addfPop(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfPop?&db="+db+"&stateid="+stateSelector+"&metadata="+stateMetaData, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1008,7 +1008,7 @@ function openFemp(index){
 }
 function addfEmp(){
 //	var stateid = stateSelector;
-	var metadata = prompt("Please add a note (e.g. Prepared by ODOT, March 2016)");
+//	var metadata = prompt("Please add a note (e.g. Prepared by ODOT, March 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1017,7 +1017,7 @@ function addfEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addfEmp?&db="+db+"&stateid="+stateSelector+"&metadata="+stateMetaData, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1114,7 +1114,7 @@ function removeFemp(stateid){
  */
 function addT6(){
 //	var stateid = stateSelector;
-	var metadata = prompt("Please add a note (e.g. 2014 5-year summary file)");
+//	var metadata = prompt("Please add a note (e.g. 2014 5-year summary file)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1123,7 +1123,7 @@ function addT6(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addT6?&db="+db+"&stateid="+stateSelector+"&metadata="+stateMetaData, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1257,7 +1257,7 @@ function openPnr(index){
 
 function addPnr(){
 //	var stateid = stateSelector;
-	var metadata = prompt("Please add a note (e.g. Prepared in January 2017)");
+//	var metadata = prompt("Please add a note (e.g. Prepared in January 2017)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1266,7 +1266,7 @@ function addPnr(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+pnrFile+"&db="+db+"&stateid="+stateSelector+"&metadata="+metadata,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addPnr?&fileName="+pnrFile+"&db="+db+"&stateid="+stateSelector+"&metadata="+stateMetaData,
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1383,7 +1383,7 @@ function openEmp(index){
 }
 function addEmp(){
 //	var stateid = stateSelector;
-	var metadata = prompt("Please add a note (e.g. Census employment Data 2014)");
+//	var metadata = prompt("Please add a note (e.g. Census employment Data 2014)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1392,7 +1392,7 @@ function addEmp(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addEmp?&db="+db+"&stateid="+stateSelector+"&metadata="+stateMetaData, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1591,7 +1591,7 @@ function checkRegionstatus(index){
 
 function addRegion(){
 //	var stateid = stateSelector;
-	var metadata = prompt("Please add a note (e.g. Prepared by ODOT August 2016)");
+	var metadata = prompt("Please addstateMetaData a note (e.g. Prepared by ODOT August 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -1600,7 +1600,7 @@ function addRegion(){
 	
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addRegion?&db="+db+"&stateid="+stateSelector+"&metadata="+metadata, 
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addRegion?&db="+db+"&stateid="+stateSelector+"&metadata="+stateMetaData, 
         dataType: "text",
         async: true,
         success: function(d) {
@@ -1736,8 +1736,14 @@ function checkCensusstatus(index){
         }
 	});
 }
+function openCensusState(){
+	$('#stateSelectSpan').hide();
+	currentFunction = addCensus;
+	stateSelectDialog.dialog( "open" );
+	
+}
 function addCensus(){
-	var metadata = prompt("Please add a note (e.g. Census population 2010)");
+//	var metadata = prompt("Please add a note (e.g. Census population 2010)");
 	inProcess = true;
 	var db = dbInfo[currentINDEX].toString();
 	currentStates=[];
@@ -1757,7 +1763,7 @@ function addCensus(){
 		otherFeedbackDialog.dialog( "open" );
 		$.ajax({
 	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/importCensus?&metadata="+metadata+"&stateid="+states+"&db="+db,
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/importCensus?&metadata="+stateMetaData+"&stateid="+states+"&db="+db,
 	        dataType: "text",
 	        async: true,
 	        success: function(d) {
@@ -1946,6 +1952,7 @@ var gtfsFeedbackDialog;
 var otherFeedbackDialog;
 var stateSelectDialog;
 var stateSelector;
+var stateMetaData;
 var pnrFile;
 var currentFunction;
 var dbInfo = [[]];
@@ -2124,6 +2131,8 @@ $(document).ready(function(){
 	      closeOnEscape: false,
 	      close: function( event, ui ) {
 	    	  stateSelector = $('#selectStateSelector').val();
+	    	  stateMetaData = $('#selectStateText').val();
+	    	  $('#stateSelectSpan').show();
 //	    	  alert(stateSelector);
 	    	  currentFunction();
 	      },

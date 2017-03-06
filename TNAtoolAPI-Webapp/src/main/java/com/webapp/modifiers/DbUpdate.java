@@ -1923,7 +1923,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -2109,7 +2109,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(10, TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -2715,7 +2715,7 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 //			statement = c.createStatement();
 //			statement.executeUpdate("COPY parknride "
 //					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
@@ -2826,7 +2826,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -2845,7 +2845,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -2918,7 +2918,7 @@ public class DbUpdate {
 			   		+ "exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 			}catch(Exception e) {
 				e.printStackTrace();
 				message += e.toString()+",";
@@ -2938,7 +2938,7 @@ public class DbUpdate {
 					   		+ " & exit";
 				   
 				   pr = Runtime.getRuntime().exec(cmdArray,null);
-				   pr.waitFor(5,TimeUnit.MINUTES);
+				   pr.waitFor();
 			} catch (InterruptedException ex) {
 				System.out.println(ex.getMessage());
 				message = ex.getMessage();
@@ -2962,7 +2962,7 @@ public class DbUpdate {
 			   		+ "exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 			}catch(Exception e) {
 				e.printStackTrace();
 				message += e.toString()+",";
@@ -2982,7 +2982,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		   
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3046,7 +3046,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3065,7 +3065,7 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3088,7 +3088,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3111,7 +3111,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -3130,7 +3130,7 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3153,7 +3153,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -3216,7 +3216,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3236,7 +3236,7 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3260,7 +3260,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3279,7 +3279,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -3342,7 +3342,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
@@ -3363,7 +3363,7 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3387,7 +3387,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
@@ -3446,7 +3446,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
@@ -3466,7 +3466,7 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   pr.waitFor(5,TimeUnit.MINUTES);
+			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3490,7 +3490,7 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor(5,TimeUnit.MINUTES);
+		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 

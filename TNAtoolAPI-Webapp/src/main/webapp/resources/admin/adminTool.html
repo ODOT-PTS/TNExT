@@ -191,7 +191,7 @@
 		  	<p>States available to be imported:</p><br>
 		  	<table id="availablestates" style="background-color:white"></table>
 		  	<br>
-		  	<input type="button" value="Import" onclick="addCensus()"; style="width: 60%;">
+		  	<input type="button" value="Import" onclick="openCensusState()"; style="width: 60%;">
 		  	</div>
 		  	<div style="float:right;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
 		  	<p>States already imported:</p><br>
@@ -983,8 +983,9 @@
 		  <br><p style="font-style: italic;text-align:center" id="otherFeedbackMessage"></p><br>
 		</div></div>
 		
-		<div id="stateSelectDialog" title="Please select the state you are importing the data for:"><div style="">
-		  <br>State Name: <select id="selectStateSelector"></select><br>
+		<div id="stateSelectDialog" title="Metadata Information:"><div style="">
+		  <span id="stateSelectSpan"><br>State Name: <select id="selectStateSelector"></select></span><br><br>Add a note (e.g. 2014 5-year summary file):<br>
+		  <input type="text" id="selectStateText" style="width:100%"><br>
 		</div></div>
 		
 	</div>
