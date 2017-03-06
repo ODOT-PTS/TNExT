@@ -1591,7 +1591,7 @@ function checkRegionstatus(index){
 
 function addRegion(){
 //	var stateid = stateSelector;
-	var metadata = prompt("Please addstateMetaData a note (e.g. Prepared by ODOT August 2016)");
+//	var metadata = prompt("Please addstateMetaData a note (e.g. Prepared by ODOT August 2016)");
 	var db = dbInfo[currentINDEX].toString();
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
@@ -2137,7 +2137,7 @@ $(document).ready(function(){
 	    	  currentFunction();
 	      },
 	      open: function( event, ui ) {
-	    	  stateMetaData = $('#selectStateText').html("");
+	    	  $('#selectStateText').val("");
 	      },
 	      buttons: {
 		        

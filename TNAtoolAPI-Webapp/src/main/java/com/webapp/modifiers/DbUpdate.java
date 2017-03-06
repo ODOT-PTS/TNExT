@@ -2981,8 +2981,8 @@ public class DbUpdate {
 		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
 		   		+ "exit";
 		   
-		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   pr.waitFor();
+//		   pr = Runtime.getRuntime().exec(cmdArray,null);
+//		   pr.waitFor();
 		   
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -2993,7 +2993,7 @@ public class DbUpdate {
 			message = "done";
 		}
 		
-		Connection c = null;
+		/*Connection c = null;
 		Statement statement = null;
 		try{
 			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
@@ -3005,7 +3005,7 @@ public class DbUpdate {
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
-		}
+		}*/
 		
 		return message;
 	}
