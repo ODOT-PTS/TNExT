@@ -30,15 +30,13 @@ ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS HH_from25to44 double 
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS HH_from45to64 double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS HH_above65 double precision;
 
-with b19037 as(
-	select * from blkGrp_b19037
-)
 UPDATE title_vi_blocks_float 
-SET HH_under25 = ((SELECT under25 FROM b19037 WHERE gbid=left(blockid,12))*ratio),
-	HH_from25to44 = ((SELECT from25to44 FROM b19037 WHERE gbid=left(blockid,12))*ratio),
-	HH_from45to64 = ((SELECT from45to64 FROM b19037 WHERE gbid=left(blockid,12))*ratio),
-	HH_above65 = ((SELECT above65 FROM b19037 WHERE gbid=left(blockid,12))*ratio);
-
+SET HH_under25 = blkGrp_b19037.under25*ratio,
+	HH_from25to44 = blkGrp_b19037.from25to44*ratio,
+	HH_from45to64 = blkGrp_b19037.from45to64*ratio,
+	HH_above65 = blkGrp_b19037.above65*ratio
+FROM blkGrp_b19037 
+WHERE left(blockid,12) = blkGrp_b19037.gbid;
 
 -------------------
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS black_or_african_american double precision;
@@ -50,20 +48,18 @@ ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS two_or_more double pr
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS white double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS hispanic_or_latino double precision;
 
-with b03002 as(
-	select * from blkgrp_b03002
-)
 UPDATE title_vi_blocks_float 
-   SET black_or_african_american = ((SELECT black_or_african_american FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	american_indian_and_alaska_native = ((SELECT american_indian_and_alaska_native FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	asian = ((SELECT asian FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	native_hawaiian_and_other_pacific_islander = ((SELECT native_hawaiian_and_other_pacific_islander FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	other_races = ((SELECT other FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	two_or_more = ((SELECT two_or_more FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	white = ((SELECT white FROM b03002 WHERE gbid=left(blockid,12))*ratio),
-	hispanic_or_latino = ((SELECT hispanic_or_latino FROM b03002 WHERE gbid=left(blockid,12))*ratio);
+SET	black_or_african_american = blkgrp_b03002.black_or_african_american*ratio,
+  	american_indian_and_alaska_native = blkgrp_b03002.american_indian_and_alaska_native*ratio,
+	asian = blkgrp_b03002.asian*ratio,
+	native_hawaiian_and_other_pacific_islander = blkgrp_b03002.native_hawaiian_and_other_pacific_islander*ratio,
+	other_races = blkgrp_b03002.other*ratio,
+	two_or_more = blkgrp_b03002.two_or_more*ratio,
+	white = blkgrp_b03002.white*ratio,
+	hispanic_or_latino = blkgrp_b03002.hispanic_or_latino*ratio
+FROM blkgrp_b03002 
+WHERE left(blockid,12) = blkgrp_b03002.gbid;
 -------------------
-
 
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS english double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS spanish double precision;
@@ -95,77 +91,74 @@ ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS othernotwell double p
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS othernotatall double precision;
 
 
-with b16004 as(
-	select * from blkGrp_b16004
-)
 UPDATE title_vi_blocks_float 
-   SET english = ((SELECT english FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	spanish = ((SELECT spanish FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	spanishverywell = ((SELECT spanishverywell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	spanishwell = ((SELECT spanishwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	spanishnotwell = ((SELECT spanishnotwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	spanishnotatall = ((SELECT spanishnotatall FROM b16004 WHERE gbid=left(blockid,12))*ratio),
+SET english = blkGrp_b16004.english*ratio,
+	spanish = blkGrp_b16004.spanish*ratio,
+	spanishverywell = blkGrp_b16004.spanishverywell*ratio,
+	spanishwell = blkGrp_b16004.spanishwell*ratio,
+	spanishnotwell = blkGrp_b16004.spanishnotwell*ratio,
+	spanishnotatall = blkGrp_b16004.spanishnotatall*ratio,
 	
-	indo_european = ((SELECT indo_european FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	indo_europeanverywell = ((SELECT indo_europeanverywell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	indo_europeanwell = ((SELECT indo_europeanwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	indo_europeannotwell = ((SELECT indo_europeannotwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	indo_europeannotatall = ((SELECT indo_europeannotatall FROM b16004 WHERE gbid=left(blockid,12))*ratio),
+	indo_european = blkGrp_b16004.indo_european*ratio,
+	indo_europeanverywell = blkGrp_b16004.indo_europeanverywell*ratio,
+	indo_europeanwell = blkGrp_b16004.indo_europeanwell*ratio,
+	indo_europeannotwell = blkGrp_b16004.indo_europeannotwell*ratio,
+	indo_europeannotatall = blkGrp_b16004.indo_europeannotatall*ratio,
 
-	asian_and_pacific_island = ((SELECT asian_and_pacific_island FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	asian_and_pacific_islandverywell = ((SELECT asian_and_pacific_islandverywell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	asian_and_pacific_islandwell = ((SELECT asian_and_pacific_islandwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	asian_and_pacific_islandnotwell = ((SELECT asian_and_pacific_islandnotwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	asian_and_pacific_islandnotatall = ((SELECT asian_and_pacific_islandnotatall FROM b16004 WHERE gbid=left(blockid,12))*ratio),
+	asian_and_pacific_island = blkGrp_b16004.asian_and_pacific_island*ratio,
+	asian_and_pacific_islandverywell = blkGrp_b16004.asian_and_pacific_islandverywell*ratio,
+	asian_and_pacific_islandwell = blkGrp_b16004.asian_and_pacific_islandwell*ratio,
+	asian_and_pacific_islandnotwell = blkGrp_b16004.asian_and_pacific_islandnotwell*ratio,
+	asian_and_pacific_islandnotatall = blkGrp_b16004.asian_and_pacific_islandnotatall*ratio,
 
-	other_languages = ((SELECT other FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	otherverywell = ((SELECT otherverywell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	otherwell = ((SELECT otherwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	othernotwell = ((SELECT othernotwell FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	othernotatall = ((SELECT othernotatall FROM b16004 WHERE gbid=left(blockid,12))*ratio),
+	other_languages = blkGrp_b16004.other*ratio,
+	otherverywell = blkGrp_b16004.otherverywell*ratio,
+	otherwell = blkGrp_b16004.otherwell*ratio,
+	othernotwell = blkGrp_b16004.othernotwell*ratio,
+	othernotatall = blkGrp_b16004.othernotatall*ratio,
 
-	from5to17 = ((SELECT from5to17 FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	from18to64 = ((SELECT from18to64 FROM b16004 WHERE gbid=left(blockid,12))*ratio),
-	above65 = ((SELECT above65 FROM b16004 WHERE gbid=left(blockid,12))*ratio);
-
+	from5to17 = blkGrp_b16004.from5to17*ratio,
+	from18to64 = blkGrp_b16004.from18to64*ratio,
+	above65 = blkGrp_b16004.above65*ratio
+FROM blkGrp_b16004 
+WHERE left(blockid,12) = blkGrp_b16004.gbid;
 ----------------------------------------------
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS below_poverty double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS above_poverty double precision;
 
-with b17021 as(
-	select * from blkGrp_b17021
-)
+
 UPDATE title_vi_blocks_float 
-   SET below_poverty = ((SELECT below_poverty FROM b17021 WHERE gbid=left(blockid,12))*ratio),
-	above_poverty = ((SELECT above_poverty FROM b17021 WHERE gbid=left(blockid,12))*ratio);
+SET below_poverty = blkGrp_b17021.below_poverty*ratio,
+	above_poverty = blkGrp_b17021.above_poverty*ratio
+FROM blkGrp_b17021 
+WHERE left(blockid,12) = blkGrp_b17021.gbid;
 
 --------------------
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS tract_ratio double precision;
 
-with tractRatio as(
-	select blockid as id, ratio as r from t_b_dist 
-)
 UPDATE title_vi_blocks_float 
-   SET tract_ratio = (select r from tractRatio where id=blockid);
-
+SET tract_ratio = t_b_dist.ratio
+From t_b_dist
+WHERE title_vi_blocks_float.blockid = t_b_dist.blockid;
 
 
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS with_disability double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS without_disability double precision;
 
-with b18101 as(
-	select * from tract_b18101
-)
 UPDATE title_vi_blocks_float 
-   SET with_disability = ((SELECT with_disability FROM b18101 WHERE tid=left(blockid,11))*tract_ratio),
-	without_disability = ((SELECT without_disability FROM b18101 WHERE tid=left(blockid,11))*tract_ratio);
+SET with_disability = tract_b18101.with_disability*tract_ratio,
+	without_disability = tract_b18101.without_disability*tract_ratio
+FROM tract_b18101
+WHERE left(blockid,11) = tract_b18101.tid;
 
 ------------------------------
 ALTER TABLE title_vi_blocks_float 
 ADD COLUMN IF NOT EXISTS location geometry(Point,2993);
 
 UPDATE title_vi_blocks_float
-SET location = (SELECT location FROM census_blocks WHERE title_vi_blocks_float.blockid = census_blocks.blockid);
+SET location = census_blocks.location
+FROM census_blocks
+WHERE title_vi_blocks_float.blockid = census_blocks.blockid;
 
 CREATE INDEX IF NOT EXISTS t6_location
   ON title_vi_blocks_float

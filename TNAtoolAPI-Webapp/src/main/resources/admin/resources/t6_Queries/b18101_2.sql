@@ -1,5 +1,4 @@
 
-Delete from tract_b18101 where STATEA <> '41';
 
 update tract_b18101 set tid = lpad(STATEA, 2, '00') || lpad(COUNTYA, 3, '000') || lpad(TRACTA, 6, '000000');
 

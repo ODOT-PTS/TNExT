@@ -33,15 +33,13 @@ CREATE INDEX IF NOT EXISTS blocks_future_pop_id
   (blockid COLLATE pg_catalog."default");
 
 
-WITH blocks_future_pop_temp AS
-     (SELECT countyid AS id,
-             Sum(population2010) as pop 
-      FROM blocks_future_pop group by countyid
-     ) 
 UPDATE blocks_future_pop 
-   SET countypop = (SELECT pop FROM blocks_future_pop_temp WHERE id=countyid) ; 
+SET countypop = t2.pop
+FROM (SELECT countyid AS id, Sum(population2010) as pop FROM blocks_future_pop group by countyid) t2
+WHERE id=  countyid;
 
-update blocks_future_pop set ratio = population2010/countypop;
+update blocks_future_pop set ratio = population2010/countypop where countypop<>0;
+UPDATE blocks_future_pop SET ratio = 0 where countypop=0;
 
 -------------------------------------------------------------
 DROP TABLE if exists counties_future_pop;

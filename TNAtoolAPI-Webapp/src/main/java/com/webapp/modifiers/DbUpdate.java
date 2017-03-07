@@ -2856,7 +2856,7 @@ public class DbUpdate {
 		copyColumn[0] = "blkGrp_b03002(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,"
 				+ "not_hispanic_or_latino_white_alone,not_hispanic_or_latino_black_or_african_american_alone,"
 				+ "not_hispanic_or_latino_american_indian_and_alaska_native_alone,not_hispanic_or_latino_asian_alone,"
-				+ "not_hispanic_or_latino_native_hawaiian_and_other_pacific_islander_alone,not_hispanic_or_latino_some_other_race_alone, "
+				+ "not_hispanic_or_latino_native_hawaiian_and_other_pacific,not_hispanic_or_latino_some_other_race_alone, "
 				+ "not_hispanic_or_latino_two_or_more_races,hispanic__or__latino)";
 		copyColumn[1] = "blkGrp_b16004(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,"
 				+ "from_5_to_17_years, "
@@ -2981,8 +2981,8 @@ public class DbUpdate {
 		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
 		   		+ "exit";
 		   
-//		   pr = Runtime.getRuntime().exec(cmdArray,null);
-//		   pr.waitFor();
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   pr.waitFor();
 		   
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -2993,7 +2993,7 @@ public class DbUpdate {
 			message = "done";
 		}
 		
-		/*Connection c = null;
+		Connection c = null;
 		Statement statement = null;
 		try{
 			c = DriverManager.getConnection(dbInfo[4],dbInfo[5],dbInfo[6]);
@@ -3005,7 +3005,7 @@ public class DbUpdate {
 		} finally {
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
-		}*/
+		}
 		
 		return message;
 	}

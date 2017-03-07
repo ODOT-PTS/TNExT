@@ -18,14 +18,13 @@ INSERT INTO t_b_dist
 SELECT blockid,population
 FROM census_blocks;
 
-WITH t_b_dist_temp AS
-     (SELECT left(blockid,11) AS id,
+UPDATE t_b_dist SET agg_population = t2.pop from 
+	(SELECT left(blockid,11) AS id,
              Sum(population) as pop 
       FROM t_b_dist group by left(blockid,11) 
-     ) 
-UPDATE t_b_dist 
-   SET agg_population = (SELECT pop FROM t_b_dist_temp WHERE id=left(blockid,11)) ; 
-
+     ) t2
+where id=left(blockid,11);
+     
 ALTER TABLE t_b_dist
 ADD ratio double precision;
 

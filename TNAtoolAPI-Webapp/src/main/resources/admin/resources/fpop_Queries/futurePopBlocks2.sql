@@ -66,16 +66,14 @@ ALTER TABLE census_states add COLUMN IF NOT EXISTS population2050 integer;
 
 update census_states set population2010 = population;
 
-WITH census_blocks_temp AS
-     (SELECT stateid AS id,
-             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
-             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
-      FROM census_blocks group by stateid
-     ) 
 UPDATE census_states 
    SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
        population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
-   FROM census_blocks_temp futurepop
+   FROM (SELECT stateid AS id,
+             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
+             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
+      FROM census_blocks group by stateid
+     ) futurepop
    WHERE census_states.stateid=futurepop.id; 
 -------------------------------------------------------------
 
@@ -91,17 +89,15 @@ ALTER TABLE census_congdists add COLUMN IF NOT EXISTS population2050 integer;
 
 update census_congdists set population2010 = population;
 
-WITH census_blocks_temp AS
-     (SELECT congdistid AS id,
+UPDATE census_congdists 
+SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
+    population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
+FROM (SELECT congdistid AS id,
              Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
              Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
       FROM census_blocks group by congdistid
-     ) 
-UPDATE census_congdists 
-   SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
-       population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
-   FROM census_blocks_temp futurepop
-   WHERE census_congdists.congdistid=futurepop.id; 
+      ) futurepop
+WHERE census_congdists.congdistid=futurepop.id; 
 
 -------------------------------------------------------------
 ALTER TABLE census_places add COLUMN IF NOT EXISTS population2010 integer;
@@ -116,16 +112,14 @@ ALTER TABLE census_places add COLUMN IF NOT EXISTS population2050 integer;
 
 update census_places set population2010 = population;
 
-WITH census_blocks_temp AS
-     (SELECT placeid AS id,
-             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
-             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
-      FROM census_blocks group by placeid
-     ) 
 UPDATE census_places 
    SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
        population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
-   FROM census_blocks_temp futurepop
+   FROM (SELECT placeid AS id,
+             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
+             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
+      FROM census_blocks group by placeid
+     ) futurepop
    WHERE census_places.placeid=futurepop.id; 
 -------------------------------------------------------------
 ALTER TABLE census_tracts add COLUMN IF NOT EXISTS population2010 integer;
@@ -140,16 +134,14 @@ ALTER TABLE census_tracts add COLUMN IF NOT EXISTS population2050 integer;
 
 update census_tracts set population2010 = population;
 
-WITH census_blocks_temp AS
-     (SELECT left(blockid,11) AS id,
-             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
-             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
-      FROM census_blocks group by left(blockid,11)
-     ) 
 UPDATE census_tracts 
    SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
        population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
-   FROM census_blocks_temp futurepop
+   FROM (SELECT tractid AS id,
+             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
+             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
+      FROM census_blocks group by tractid
+     ) futurepop
    WHERE census_tracts.tractid=futurepop.id; 
 -------------------------------------------------------------
 ALTER TABLE census_urbans add COLUMN IF NOT EXISTS population2010 integer;
@@ -164,16 +156,14 @@ ALTER TABLE census_urbans add COLUMN IF NOT EXISTS population2050 integer;
 
 update census_urbans set population2010 = population;
 
-WITH census_blocks_temp AS
-     (SELECT urbanid AS id,
-             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
-             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
-      FROM census_blocks group by urbanid
-     ) 
 UPDATE census_urbans 
    SET population2015=futurepop.pop15,population2020=futurepop.pop20,population2025=futurepop.pop25,population2030=futurepop.pop30,
        population2035=futurepop.pop35,population2040=futurepop.pop40,population2045=futurepop.pop45,population2050=futurepop.pop50
-   FROM census_blocks_temp futurepop
+   FROM (SELECT urbanid AS id,
+             Sum(population2015) as pop15, Sum(population2020) as pop20, Sum(population2025) as pop25, Sum(population2030) as pop30,
+             Sum(population2035) as pop35, Sum(population2040) as pop40, Sum(population2045) as pop45, Sum(population2050) as pop50
+      FROM census_blocks group by urbanid
+     ) futurepop
    WHERE census_urbans.urbanid=futurepop.id; 
    
    

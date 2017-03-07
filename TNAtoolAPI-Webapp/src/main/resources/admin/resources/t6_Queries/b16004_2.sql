@@ -1,5 +1,4 @@
 
-Delete from blkGrp_b16004 where STATEA <> '41';
 
 update blkGrp_b16004 set gbid = lpad(STATEA, 2, '00') || lpad(COUNTYA, 3, '000') || lpad(TRACTA, 6, '000000') || lpad(BLKGRPA, 1, '0') ;
 
