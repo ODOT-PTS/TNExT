@@ -829,7 +829,7 @@ function runUpdates(index){
 	    			html+="<br><br>One (or more) of the selected feeds is larger than 5MB.<br>This process can take up to a few hours.";
 	    		}
 	    		$('#gtfsFeedbackMessage').html(html);
-	    		html='<tr style="font-size:bold"><th style="width:30%; text-align:center">Agency Name</th><th style="width:70%; text-align:center">Status</th></tr>';
+	    		html='<tr style="font-size:bold"><th style="width:30%; text-align:center">Agency ID</th><th style="width:70%; text-align:center">Status</th></tr>';
 	    		for(var i=0; i<currentAgencies.length; i++){
 	    			html+="<tr><td style='text-align:center'>"+currentAgencies[i]+"</td><td id='"+currentAgencies[i]+"' style='text-align:center'>In progress..</td></tr>";
 	    		}

@@ -923,8 +923,6 @@ public class UpdateEventManager {
 	        		+ "on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id where stop.agencyid='"+agencyId+"' group by stime.trip_agencyid, stime.trip_id, stop.congdistid) as res "
 	        		+ "where congdistid =  res.cid and agencyid = res.aid and tripid=res.tid;");
 	        stmt.executeUpdate("update census_congdists_trip_map set stopscount=0 where stopscount IS NULL;");
-	        stmt.executeUpdate("update census_congdists_trip_map map set tlength=res.time from (select max(departuretime)-min(arrivaltime) as time, trip_agencyid as agencyid, trip_id as id from gtfs_stop_times where stop_agencyid='"+agencyId+"' and arrivaltime>0 and departuretime>0 group by trip_agencyid, trip_id) as res "
-	        		+ "where res.agencyid = map.agencyid and res.id=map.tripid;");
 	        stmt.executeUpdate("update census_congdists_trip_map map set tlength=res.ttime from ("
 	        		+ "select max(stimes.departuretime)-min(stimes.arrivaltime) as ttime, "
 	        		+ "stimes.agencyid, stimes.tripid, stimes.geoid from ("
