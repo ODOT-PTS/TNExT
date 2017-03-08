@@ -1066,7 +1066,7 @@ function checkfEmpstatus(index){
         	
         	var html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeFemp(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='Delete' onclick='removeFemp(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstatesfemp').html(html);
@@ -1192,7 +1192,7 @@ function checkT6status(index){
         	stateids = d.stateids;
         	var html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeT6(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='Delete' onclick='removeT6(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstatest6').html(html);
@@ -1350,7 +1350,7 @@ function checkPNRstatus(index){
         	stateids = d.stateids;
         	var html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removePnr(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='Delete' onclick='removePnr(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstatespnr').html(html);
@@ -1510,7 +1510,7 @@ function checkEmpstatus(index){
         	stateids = d.stateids;
         	var html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeWac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='Delete' onclick='removeWac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstateswac').html(html);
@@ -1524,7 +1524,7 @@ function checkEmpstatus(index){
         	stateids = d.agencies;
         	html = "";
         	$.each(d.feeds, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='X' onclick='removeRac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' value='Delete' onclick='removeRac(\""+stateids[i]+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.sizes[i]+"</td></tr>";
         	});
         	$('#importedstatesrac').html(html);
@@ -1703,7 +1703,7 @@ function fillStates(db){
         	stateids = d.stateids;
         	html = "";
         	$.each(d.states, function(i,item){
-        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' value='X' onclick='removeCensus(\""+stateids[i]+"\",\""+currentImported.join(",")+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
+        		html+="<tr><td><input type='button' class='btn btn-danger delete' id='"+stateids[i]+"stateRemove' value='Delete' onclick='removeCensus(\""+stateids[i]+"\",\""+currentImported.join(",")+"\")'></td><td>"+item+" ("+stateids[i]+")</td></tr>";
         		html+="<tr><td></td><td>Notes: "+d.metadata[i]+"</td></tr>";
         	});
         	$('#importedstates').html(html);
@@ -2044,7 +2044,7 @@ $(document).ready(function(){
             	html += "<td><div id='dbButtons"+i+"' style='font-size:85%'><table>" +
             			"<tr><td><input type='button' class='gtfs dbButtons-class single' value='Import GTFS Feeds' onclick='openGTFS("+i+")'></td>" +
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='gtfs'></td></tr>"+
-            			"<tr><td><input type='button' class='census dbButtons-class' value='Import Census' onclick='openCensus("+i+")'> or " +
+            			"<tr><td><input type='button' class='census dbButtons-class' value='Import Population' onclick='openCensus("+i+")'> or " +
             					"<input type='button' class='census dbButtons-class second' value='Copy from' onclick='copyCensus("+i+", \"census\", \"census\")'>" +
             					"<select class='census select-class' id='census-select"+i+"'>"+addDBSelect(i)+"</select></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='census'></td></tr>"+

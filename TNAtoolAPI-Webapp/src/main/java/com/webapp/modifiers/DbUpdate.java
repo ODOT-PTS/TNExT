@@ -2719,7 +2719,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 //			statement = c.createStatement();
 //			statement.executeUpdate("COPY parknride "
 //					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
@@ -2832,7 +2832,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -2853,7 +2853,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -2928,7 +2928,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 			}catch(Exception e) {
 				e.printStackTrace();
 				message += e.toString()+",";
@@ -2951,7 +2951,7 @@ public class DbUpdate {
 				   String str;
 				   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 				   while ((str = reader.readLine()) != null) {}
-				   pr.waitFor();
+				   pr.waitFor(5,TimeUnit.MINUTES);
 			} catch (InterruptedException ex) {
 				System.out.println(ex.getMessage());
 				message = ex.getMessage();
@@ -2978,7 +2978,7 @@ public class DbUpdate {
 			   String str;
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   while ((str = reader.readLine()) != null) {}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 			}catch(Exception e) {
 				e.printStackTrace();
 				message += e.toString()+",";
@@ -3001,7 +3001,7 @@ public class DbUpdate {
 		   String str;
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   while ((str = reader.readLine()) != null) {}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		   
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3067,7 +3067,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3088,7 +3088,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3113,7 +3113,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3138,7 +3138,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -3159,7 +3159,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3184,7 +3184,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -3249,7 +3249,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3271,7 +3271,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3297,7 +3297,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+","; 
@@ -3318,7 +3318,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message += e.toString()+",";
@@ -3383,7 +3383,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
@@ -3406,7 +3406,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3432,7 +3432,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
@@ -3493,7 +3493,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
@@ -3515,7 +3515,7 @@ public class DbUpdate {
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-			   pr.waitFor();
+			   pr.waitFor(5,TimeUnit.MINUTES);
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
 			message = ex.getMessage();
@@ -3541,7 +3541,7 @@ public class DbUpdate {
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
-		   pr.waitFor();
+		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();
 			message = e.toString()+","; 
