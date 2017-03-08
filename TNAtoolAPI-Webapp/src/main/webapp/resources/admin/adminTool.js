@@ -641,7 +641,8 @@ function deleteFeed(index){
 	});
 	
 	if(currentFiles.length>0){
-		$('#gtfsFeedbackMessage').html("Deleting GTFS Feeds... Please do not close or refresh the page.");
+		$('#gtfsFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+				+"Deleting GTFS Feeds... Please do not close or refresh the page.");
 		var html='<tr style="font-size:bold"><th style="width:30%; text-align:center">GTFS Feed Name</th><th style="width:70%; text-align:center">Status</th></tr>';
 		for(var i=0; i<currentFiles.length; i++){
 			html+="<tr><td style='text-align:center'>"+currentFiles[i]+"</td><td id='del_"+currentFiles[i]+"' style='text-align:center'>In progress..</td></tr>";
@@ -699,7 +700,8 @@ function addFeed(){
 	}
 	if(currentFiles.length>0){
 		inProcess = true;
-		var html = "Uploading GTFS Feeds... Please do not close or refresh the page.";
+		var html = '<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+			+"Uploading GTFS Feeds... Please do not close or refresh the page.";
 		if(largeFeed){
 			html+="<br><br>One (or more) of the selected feeds is larger than 5MB.<br>This process can take up to an hour.";
 		}
@@ -775,7 +777,7 @@ function updateFeed(index){
 function updatenext(i,db){
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateNext?&feed="+currentFiles[i]+"&db="+db+"&agency="+currentAgencies[i]+"&username="+username,
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateNext?&feed="+currentFiles[i]+"&db="+db+"&agency="+currentAgencies[i]+"&username="+"admin",
         dataType: "text",
         async: true,
         success: function(d) {
@@ -821,7 +823,8 @@ function runUpdates(index){
 	    	}
 	    	if(currentAgencies.length>0){
 	    		inProcess = true;
-	    		var html = "Updating GTFS Feeds... Please do not close or refresh the page.";
+	    		var html = '<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+	    			+"Updating GTFS Feeds... Please do not close or refresh the page.";
 	    		if(largeFeed){
 	    			html+="<br><br>One (or more) of the selected feeds is larger than 5MB.<br>This process can take up to a few hours.";
 	    		}
