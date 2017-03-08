@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -708,6 +709,8 @@ public class UpdateEventManager {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor(5,TimeUnit.MINUTES);
 		}catch(Exception e) {
 			e.printStackTrace();

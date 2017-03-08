@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -1923,6 +1924,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -2109,6 +2112,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -2715,6 +2720,8 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 //			statement = c.createStatement();
 //			statement.executeUpdate("COPY parknride "
@@ -2822,11 +2829,12 @@ public class DbUpdate {
 		   cmdArray[2] = "cmd";
 		   cmdArray[3] = "/k";
 		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
-		   		/*+" & "
-		   		+ "exit"*/;
-		   System.out.println(cmdArray[4]);
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -2842,11 +2850,12 @@ public class DbUpdate {
 		   cmdArray[2] = "cmd";
 		   cmdArray[3] = "/k";
 		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
-		   		/*+" & "
-		   		+ "exit"*/;
-		   System.out.println(cmdArray[4]);
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -2916,11 +2925,12 @@ public class DbUpdate {
 			   cmdArray[2] = "cmd";
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
-			   		/*+" & "
-			   		+ "exit"*/;
-			   System.out.println(cmdArray[4]);
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+			   		+ "exit";
+			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 			}catch(Exception e) {
 				e.printStackTrace();
@@ -2938,9 +2948,12 @@ public class DbUpdate {
 					   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
 					   		+ " -c \"\\copy "+copyColumn[i]+" "
 					   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
-					   		/*+ " & exit"*/;
-				   System.out.println(cmdArray[4]);
+					   		+ " & exit";
+				   
 				   pr = Runtime.getRuntime().exec(cmdArray,null);
+				   String str;
+				   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+				   while ((str = reader.readLine()) != null) {}
 				   pr.waitFor();
 			} catch (InterruptedException ex) {
 				System.out.println(ex.getMessage());
@@ -2961,11 +2974,13 @@ public class DbUpdate {
 			   cmdArray[2] = "cmd";
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
-			   		/*+" & "
-			   		+ "exit"*/;
-			   System.out.println(cmdArray[4]);
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+			   		+ "exit";
+			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   String str;
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((str = reader.readLine()) != null) {}
 			   pr.waitFor();
 			}catch(Exception e) {
 				e.printStackTrace();
@@ -2982,11 +2997,13 @@ public class DbUpdate {
 		   cmdArray[2] = "cmd";
 		   cmdArray[3] = "/k";
 		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
-		   		/*+" & "
-		   		+ "exit"*/;
-		   System.out.println(cmdArray[4]);
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   String str;
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((str = reader.readLine()) != null) {}
 		   pr.waitFor();
 		   
 		}catch(Exception e) {
@@ -3051,6 +3068,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3070,6 +3089,8 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
@@ -3093,6 +3114,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3116,6 +3139,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3135,6 +3160,8 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
@@ -3158,6 +3185,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3221,6 +3250,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3241,6 +3272,8 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
@@ -3265,6 +3298,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3284,6 +3319,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3347,6 +3384,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3368,6 +3407,8 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
@@ -3392,6 +3433,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3451,6 +3494,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -3471,6 +3516,8 @@ public class DbUpdate {
 				   		+ " & exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			   while ((reader.readLine()) != null) {}
 			   pr.waitFor();
 		} catch (InterruptedException ex) {
 			System.out.println(ex.getMessage());
@@ -3495,6 +3542,8 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   while ((reader.readLine()) != null) {}
 		   pr.waitFor();
 		}catch(Exception e) {
 			e.printStackTrace();
