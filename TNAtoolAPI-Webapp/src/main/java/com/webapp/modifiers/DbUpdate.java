@@ -2822,9 +2822,10 @@ public class DbUpdate {
 		   cmdArray[2] = "cmd";
 		   cmdArray[3] = "/k";
 		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
-		   		+ "exit";
-		   
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
+		   		/*+" & "
+		   		+ "exit"*/;
+		   System.out.println(cmdArray[4]);
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   pr.waitFor();
 		}catch(Exception e) {
@@ -2841,9 +2842,10 @@ public class DbUpdate {
 		   cmdArray[2] = "cmd";
 		   cmdArray[3] = "/k";
 		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
-		   		+ "exit";
-		   
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
+		   		/*+" & "
+		   		+ "exit"*/;
+		   System.out.println(cmdArray[4]);
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   pr.waitFor();
 		}catch(Exception e) {
@@ -2914,9 +2916,10 @@ public class DbUpdate {
 			   cmdArray[2] = "cmd";
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
-			   		+ "exit";
-			   
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
+			   		/*+" & "
+			   		+ "exit"*/;
+			   System.out.println(cmdArray[4]);
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   pr.waitFor();
 			}catch(Exception e) {
@@ -2935,8 +2938,8 @@ public class DbUpdate {
 					   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name
 					   		+ " -c \"\\copy "+copyColumn[i]+" "
 					   		+ "FROM '"+path+"' DELIMITER ',' CSV HEADER\""
-					   		+ " & exit";
-				   
+					   		/*+ " & exit"*/;
+				   System.out.println(cmdArray[4]);
 				   pr = Runtime.getRuntime().exec(cmdArray,null);
 				   pr.waitFor();
 			} catch (InterruptedException ex) {
@@ -2958,9 +2961,10 @@ public class DbUpdate {
 			   cmdArray[2] = "cmd";
 			   cmdArray[3] = "/k";
 			   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
-			   		+ "exit";
-			   
+			   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
+			   		/*+" & "
+			   		+ "exit"*/;
+			   System.out.println(cmdArray[4]);
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
 			   pr.waitFor();
 			}catch(Exception e) {
@@ -2978,9 +2982,10 @@ public class DbUpdate {
 		   cmdArray[2] = "cmd";
 		   cmdArray[3] = "/k";
 		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
-		   		+ "exit";
-		   
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath
+		   		/*+" & "
+		   		+ "exit"*/;
+		   System.out.println(cmdArray[4]);
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
 		   pr.waitFor();
 		   
