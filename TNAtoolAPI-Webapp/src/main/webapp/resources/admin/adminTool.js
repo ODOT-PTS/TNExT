@@ -940,7 +940,7 @@ function addfPop(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Uploading Population Projection data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -968,7 +968,7 @@ function deletefPop(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Deleting Population Projection data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1018,7 +1018,7 @@ function addfEmp(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Uploading Future Employment data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1091,7 +1091,7 @@ function removeFemp(stateid){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Deleting Future Employment data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1126,7 +1126,7 @@ function addT6(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Uploading Title VI data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1216,7 +1216,7 @@ function removeT6(stateid){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Deleting Title VI data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1271,7 +1271,7 @@ function addPnr(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Uploading Park & Ride data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1302,7 +1302,7 @@ function removePnr(stateid){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Deleting Park & Ride data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1399,7 +1399,7 @@ function addEmp(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Uploading Employment data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1429,7 +1429,7 @@ function removeWac(stateid){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Deleting Employment data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1459,7 +1459,7 @@ function removeRac(stateid){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Deleting Employment data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1610,7 +1610,7 @@ function addRegion(){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Uploading Region data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -1664,7 +1664,7 @@ function removeCensus(state, states){
 	inProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 			+'Deleting Census population data... Please do not close or refresh the page.'
-			+'<br>This process takes a few minutes.');
+			+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	$.ajax({
         type: "GET",
@@ -1776,7 +1776,7 @@ function addCensus(){
 		var states = currentStates.join(",");
 		$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 				+'Importing Census population data... Please do not close or refresh the page.'
-				+'<br>This process takes a few minutes.');
+				+'<br>This process takes up to a few minutes.');
 		otherFeedbackDialog.dialog( "open" );
 		$.ajax({
 	        type: "GET",
@@ -1857,7 +1857,7 @@ function copyCensus(index, section, classs){
 	nProcess = true;
 	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
 									+'Copying data... Please do not close or refresh the page.'
-									+'<br>This process takes a few minutes.');
+									+'<br>This process takes up to a few minutes.');
 	otherFeedbackDialog.dialog( "open" );
 	
 	$.ajax({
@@ -2136,7 +2136,7 @@ $(document).ready(function(){
 	otherFeedbackDialog = $( "#otherFeedbackDialog" ).dialog({
 	      autoOpen: false,
 	      height: 250,
-	      width: 600,
+	      width: 700,
 	      modal: true,	
 	      closeOnEscape: false,
 	});
