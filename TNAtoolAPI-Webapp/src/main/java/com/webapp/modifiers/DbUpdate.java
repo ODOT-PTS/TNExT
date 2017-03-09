@@ -2948,9 +2948,8 @@ public class DbUpdate {
 					   		+ " & exit";
 				   
 				   pr = Runtime.getRuntime().exec(cmdArray,null);
-				   String str;
 				   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-				   while ((str = reader.readLine()) != null) {}
+				   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
 				   pr.waitFor(5,TimeUnit.MINUTES);
 			} catch (InterruptedException ex) {
 				System.out.println(ex.getMessage());
@@ -2975,9 +2974,8 @@ public class DbUpdate {
 			   		+ "exit";
 			   
 			   pr = Runtime.getRuntime().exec(cmdArray,null);
-			   String str;
 			   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			   while ((str = reader.readLine()) != null) {}
+			   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
 			   pr.waitFor(5,TimeUnit.MINUTES);
 			}catch(Exception e) {
 				e.printStackTrace();
@@ -2985,7 +2983,7 @@ public class DbUpdate {
 			}
 		}
 		
-		sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float.sql";
+		sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
@@ -2998,9 +2996,30 @@ public class DbUpdate {
 		   		+ "exit";
 		   
 		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   String str;
 		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-		   while ((str = reader.readLine()) != null) {}
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		   
+		}catch(Exception e) {
+			e.printStackTrace();
+			message += e.toString()+",";
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
 		   pr.waitFor(5,TimeUnit.MINUTES);
 		   
 		}catch(Exception e) {
@@ -3418,6 +3437,48 @@ public class DbUpdate {
 		///
 		
 		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
