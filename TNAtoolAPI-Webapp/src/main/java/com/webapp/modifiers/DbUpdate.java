@@ -3478,7 +3478,91 @@ public class DbUpdate {
 			message = e.toString()+","; 
 		}
 		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
 		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
+    	sqlPath = sqlPath.substring(1, sqlPath.length());
+		try{
+			String[] cmdArray = new String[5];
+		   cmdArray[0] = "cmd";
+		   cmdArray[1] = "/c";
+		   cmdArray[2] = "cmd";
+		   cmdArray[3] = "/k";
+		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
+		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+sqlPath+" & "
+		   		+ "exit";
+		   
+		   pr = Runtime.getRuntime().exec(cmdArray,null);
+		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		   String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+		   pr.waitFor(5,TimeUnit.MINUTES);
+		}catch(Exception e) {
+			e.printStackTrace();
+			message = e.toString()+","; 
+		}
+		
+		sqlPath = s_path+"../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
     	sqlPath = sqlPath.substring(1, sqlPath.length());
 		try{
 			String[] cmdArray = new String[5];
