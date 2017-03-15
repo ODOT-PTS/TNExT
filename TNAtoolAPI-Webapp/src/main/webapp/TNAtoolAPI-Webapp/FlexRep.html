@@ -60,7 +60,7 @@ $(document).ready(function(){
 	reportType = window.opener.reportType;
 	metrics = window.opener.metrics;
 	los =  $("#LoS", window.opener.document).val();
-	sradius = $("#Sradius", window.opener.document).val();
+	sradius = $("#flexSradius", window.opener.document).val();
 	year = $("#yearSel", window.opener.document).val();
 	filterOnUrban =$("#uAreaFilter", window.opener.document).is(':checked');
 	urbanFilterYear = $("#uAreaYear", window.opener.document).val();
@@ -152,7 +152,6 @@ $(document).ready(function(){
 			}
 		});
 	}else if (reportType == 1){  // Population
-		
 		// generating metadata table
 		metadata = '<table style="font-size:15" class="tg">'
 			  + '<tr>'
@@ -165,11 +164,11 @@ $(document).ready(function(){
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-031e"> Min. Level of Service (times):</td>'
-			  + '<td class="tg-031e input" data-label="Minimum Level of Service (times)">' + sradius + '</td>'
+			  + '<td class="tg-031e input" data-label="Minimum Level of Service (times)">' + los + '</td>'
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-031e">Pop. search radius (mi.):</td>'
-			  + '<td class="tg-031e input" data-label="Population Search Radius">' + los + '</td>'
+			  + '<td class="tg-031e input" data-label="Population Search Radius">' + sradius + '</td>'
 			  + '</tr>';
 	  	if (filterOnUrban){
 	  		metadata += '<tr>'
@@ -188,7 +187,6 @@ $(document).ready(function(){
 	  	}			 
 		metadata += '</table>';
 		$('.headerBR').append(metadata);
-		
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',

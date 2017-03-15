@@ -4480,7 +4480,6 @@ public class Queries {
 			@QueryParam("key") Double key) throws SQLException {
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
-		String[] fulldates = fulldate(dates);
 		String[] sdates = datedays[0];
 		String[] days = datedays[1];
 		return FlexibleReportEventManager.getFlexRepSrv(dbindex, agencies,
@@ -4507,7 +4506,6 @@ public class Queries {
 			@QueryParam("key") Double key) throws SQLException {
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
-		String[] fulldates = fulldate(dates);
 		String[] sdates = datedays[0];
 		String[] days = datedays[1];
 		return FlexibleReportEventManager.getFlexRepPop(dbindex, agencies,

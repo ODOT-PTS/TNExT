@@ -123,7 +123,7 @@ var T6Metrics = [
                         	  text:"Language"},
                   {value:["below_poverty",
                           "above_poverty"],
-                          name:["Above Paverty Line",
+                          name:["Above Poverty Line",
                                 "Below Poverty Line"],
                           text:"Poverty"}
                   ];
@@ -242,7 +242,7 @@ function flexRepDialog() {
 	html = html.concat(
 		'<tr>'
     	+ '<td>&nbsp;Search Radius (mi.):</td>'
-    	+ '<td><input type="text" id="Sradius" class="FlexRepParamInput" value="0.25" onkeypress="return isNumber(event)" disabled></td>'
+    	+ '<td><input type="text" id="flexSradius" class="FlexRepParamInput" value="0.25" onkeypress="return isNumber(event)" disabled></td>'
     	+ '</tr>'
     	+ '<tr>'
     	+ '<td>&nbsp;Min. Level of Service (times): </td>'
