@@ -3147,10 +3147,8 @@ public class PgisEventManager {
       	    + "group by trips.aid, stime.stop_id, stop.location),"
     		+ "undupblocks as (select block.population"+popYear+" as population,block.blockid, block.poptype, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+
     		String.valueOf(x)+") group by blockid), "
-			//+"employment as (select sum(c000_"+popYear+") as employment,service from undupblocks left join lodes_rac_projection_block using(blockid) group by left( undupblocks.blockid,5), service),"
-	    	//+"employees as (select sum(c000) as employees,service from undupblocks left join lodes_blocks_wac using(blockid) group by left( undupblocks.blockid,5), service),"
-	    	+ "racserved as (coalesce(sum(c000_"+popYear+"*visits),0) AS srac from undupblocks inner join lodes_rac_projection_block using(blockid)), "
-	    	+ "wacserved as (coalesce(sum(c000*visits),0) AS swac from undupblocks inner join lodes_blocks_wac using(blockid)), "
+			+ "racserved as (select coalesce(sum(c000_"+popYear+"*visits),0) AS srac from undupblocks inner join lodes_rac_projection_block using(blockid)), "
+	    	+ "wacserved as (select coalesce(sum(c000*visits),0) AS swac from undupblocks inner join lodes_blocks_wac using(blockid)), "
     		+ "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops_with_arrivals), upopserved as "
     		+ "(select COALESCE(sum(population*service),0) as uspop from undupblocks where poptype='U'), rpopserved as (select COALESCE(sum(population*service),0) as rspop from "
     		+ "undupblocks where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
@@ -3411,9 +3409,6 @@ public class PgisEventManager {
     	    	  +"rpopserved as (select COALESCE(sum(population*service),0) as rspop from undupblocks where poptype='R'), "
     	    	  +"svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
     	    	  +"select svcmiles, svchours, svcstops, uspop, rspop,swac,srac,svdays, fromtime, totime from service inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join racserved on true inner join svchrs on true inner join wacserved on true";
-    	    
-
-
 }
       else if (type==5){//congressional districts 
     	  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops,trip.stopscount as  ss from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join census_congdists_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid where trip.agencyid ='"+agencyId+"' and map.congdistid='"+areaid+"' ),"
