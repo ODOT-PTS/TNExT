@@ -133,7 +133,8 @@ public class PgisEventManager {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	      
+		}	
+	    dropConnection(connection);
 		return results;
 	}
 	
@@ -2484,6 +2485,7 @@ public class PgisEventManager {
 		while (rs.next()) {
 			output = rs.getString("defaultid");
 		}
+		dropConnection(connection);
 		return output;
 	}
 	
@@ -3911,6 +3913,7 @@ public class PgisEventManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		dropConnection(connection);
 		return result;
 	}
 	
@@ -4890,6 +4893,7 @@ GeoArea response = new GeoArea();
        
       } else if (type==4) { //ODOT Regions
     	  query="with temp as (Select sum(waterarea) as waterarea,sum(landarea) as landarea,odotregionname,odotregionid,sum(population"+popYear+") as population"+popYear+" from census_counties where odotregionid="+id1+" group by odotregionid,odotregionname),"
+
 		   	 +"temp1 as (select blockid ,odotregionid  from temp left join census_blocks  on census_blocks.regionid=temp.odotregionid),"
 		   	 +" employment as (select sum(C000_"+popYear+") as employment,odotregionid from temp1 left join lodes_rac_projection_block  using(blockid) group by  odotregionid),"
 		     	+"employees as (select sum(c000) as employees,odotregionid from temp1 left join lodes_blocks_wac using(blockid) group by odotregionid )"

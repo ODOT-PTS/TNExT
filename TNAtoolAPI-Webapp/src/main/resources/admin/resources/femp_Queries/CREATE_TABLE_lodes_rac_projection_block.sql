@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS lodes_rac_projection_block;
-CREATE TABLE lodes_rac_projection_block AS (WITH ratiotable AS (SELECT countyid, 
+CREATE TABLE IF NOT EXISTS lodes_rac_projection_block AS (WITH ratiotable AS (SELECT countyid, 
  	e2010/ecurrent::float AS ratio_2010,
  	e2015/ecurrent::float AS ratio_2015,
  	e2020/ecurrent::float AS ratio_2020,
@@ -392,6 +392,11 @@ SELECT blockid,location,
 
 ALTER TABLE lodes_rac_projection_block
 ADD PRIMARY KEY (blockid);
+
+CREATE INDEX lodes_rac_projection_block_id
+  ON lodes_rac_projection_block
+  USING btree
+  (blockid COLLATE pg_catalog."default");
 
 CREATE INDEX rac_projection_location
   ON lodes_rac_projection_block

@@ -13,6 +13,7 @@ body{
 	padding: 2em;
 	margin-top: 4em;
 	width:60%;
+	min-width: 960px;
 	border-radius: 2px;
 	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3); 
 	font-size:90%
@@ -21,6 +22,19 @@ body{
 table{
 	border-collapse: inherit;
     border-spacing: 5px;
+}
+
+#t6Table td{
+	border:1px solid;
+}
+
+#t6Table{
+	border-collapse: collapse;
+    font-size: 80%;
+}
+
+.ui-dialog-titlebar-close {
+    visibility: hidden;
 }
 
 .upload_cards{
@@ -76,7 +90,7 @@ table{
  -webkit-border-radius: 3px 3px 3px 3px;
  -moz-border-radius: 3px 3px 3px 3px;
  font-family: Verdana;
- width: 40%;
+ width: 44%;
  font-size: 16px;
  padding: 10px 40px;
  box-shadow: inset 0 1px 0 0 #fff6ce,inset 0 -1px 0 0 #e3c852,inset 0 0 0 1px #fce88d,0 2px 4px 0 #D4D4D4;
@@ -92,7 +106,7 @@ table{
 	width:100%
 }
 .second{
-	width:24%;
+	width:22%;
 }
 .dbButtons-class:hover, .btn-class:active{
  border:1px solid #967d09;
@@ -108,8 +122,11 @@ table{
 }
 
 .select-class{
-	width:27%;
-	height:80%
+	
+	width: 23%;
+    margin-left: 2%;
+    -webkit-appearance: menulist-button;
+    height: 36px;
 }
 .no_css{
 	text-shadow: none !important;

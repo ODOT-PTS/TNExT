@@ -87,6 +87,10 @@ public class Admin extends HttpServlet {
 			                }
 			                File uploadedFile = new File(loc + "/" + fileName);
 			                item.write(uploadedFile);
+			                String str = fileName.split("\\.")[0];
+			                if(item.getSize()>5000000){
+			                	DbUpdate.shapeSimplifier(uploadedFile, loc+ "/" + fileName.split("\\.")[0]);
+			                }
 			                
 			                JSONObject jsono = new JSONObject();
 	                        jsono.put("name", fileName);
@@ -202,6 +206,30 @@ public class Admin extends HttpServlet {
 			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			                File loc = new File(path
 			        				+ "../../src/main/webapp/resources/admin/uploads/fpop");
+			                if (!loc.exists()) {
+			                	boolean status = loc.mkdirs();
+			                }
+			                File uploadedFile = new File(loc + "/" + fileName);
+			                item.write(uploadedFile);
+			                
+			                JSONObject jsono = new JSONObject();
+	                        jsono.put("name", fileName);
+	                        jsono.put("size", item.getSize());
+	                        jsono.put("url", "upload?getfile=" + fileName);
+	                        jsono.put("thumbnail_url", "upload?getthumb=" + fileName);
+	                        jsono.put("delete_url", "upload?delfile=" + fileName);
+	                        jsono.put("delete_type", "GET");
+	                        json.put(jsono);
+	                        
+			            }
+			        }
+		        }else if(data.equals("region")){
+		        	for(FileItem item: items){
+			            if (!item.isFormField()) {
+			                String fileName = item.getName();
+			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File(path
+			        				+ "../../src/main/webapp/resources/admin/uploads/region");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }

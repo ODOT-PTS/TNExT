@@ -377,7 +377,9 @@ public class Queries {
 							+ "' ORDER BY stop_id LIMIT " + THRESHOLD + " OFFSET " + counter);
 						counter += THRESHOLD;
 					}
-				}				
+				}	
+				connection.close();
+				rs.close();
 			}
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name
@@ -803,6 +805,8 @@ public class Queries {
 			e.lon = rs.getString("lon");
 			response.stops.add(e);
 		}
+		connection.close();
+		rs.close();
 		return response;
 	}
 
@@ -981,6 +985,8 @@ public class Queries {
 			e.tripShape2 = rs.getString("shape2");
 			response.add(e);
 		}
+		connection.close();
+		rs.close();
 		return response;
 	}
 
@@ -1017,6 +1023,8 @@ public class Queries {
 			e.lon = rs.getString("lon");
 			response.stops.add(e);
 		}
+		connection.close();
+		rs.close();
 		return response;
 	}
 
@@ -1703,6 +1711,8 @@ public class Queries {
 			t.end_sec = (int) rs.getDouble("departure_second");
 			response.add(t);
 		}
+		connection.close();
+		rs.close();
 		return response;
 	}
 

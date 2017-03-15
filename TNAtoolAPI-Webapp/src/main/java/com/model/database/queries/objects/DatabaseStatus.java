@@ -23,13 +23,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement(name = "DatabaseStatus")
 public class DatabaseStatus {
-	@XmlAttribute
-	@JsonSerialize
-	public String CreateDate;
-	
-	@XmlAttribute
-	@JsonSerialize
-	public String ModifyDate;
 	
 	@XmlAttribute
 	@JsonSerialize
@@ -66,4 +59,8 @@ public class DatabaseStatus {
 	@XmlAttribute
 	@JsonSerialize
 	public boolean Updated;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public boolean Region;
 }

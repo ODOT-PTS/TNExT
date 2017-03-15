@@ -1,5 +1,4 @@
-﻿DROP TABLE IF EXISTS lodes_blocks_wac;
-CREATE TABLE lodes_blocks_wac(
+CREATE TABLE IF NOT EXISTS lodes_blocks_wac(
 blockid character varying(15),
 C000 int,
 CA01 int,
@@ -55,19 +54,10 @@ CFS05 int,
 createdate character varying(8),
 PRIMARY KEY(blockid)
 );
-COPY lodes_blocks_wac 
-FROM '../../../../webapp/resources/admin/uploads/emp/wac.csv' DELIMITER ',' CSV HEADER;
+ALTER TABLE lodes_blocks_wac DROP COLUMN IF EXISTS location;
 
-ALTER TABLE lodes_blocks_wac
-ADD location geometry(Point,2993);
+DROP TABLE IF EXISTS temp_01;
+CREATE TABLE temp_01 as
+(SELECT * FROM lodes_blocks_wac LIMIT 1);
 
-UPDATE lodes_blocks_wac
-SET location = (SELECT location FROM census_blocks WHERE lodes_blocks_wac.blockid = census_blocks.blockid);
-
-CREATE INDEX wac_location
-  ON lodes_blocks_wac
-  USING gist
-  (location);
-ALTER TABLE lodes_blocks_wac CLUSTER ON wac_location;
-
-VACUUM ANALYZE lodes_blocks_wac;
+TRUNCATE TABLE temp_01;
