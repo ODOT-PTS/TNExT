@@ -121,7 +121,7 @@ public class FlexibleReportEventManager {
 				}
 			}
 		}catch ( SQLException e ){
-			System.out.println(e);
+			e.printStackTrace();
 		}finally{
 			if (stmt != null)try{stmt.close();}catch(SQLException e){};
 			if (connection != null)try{connection.close();}catch(SQLException e){};
@@ -146,11 +146,8 @@ public class FlexibleReportEventManager {
 			String areaId = "";
 			String Id = "";
 			String table = "";
-			String tableName = "";
 			String areaTypeName = "";
 			String stopsUrbanFilter = "";
-			String tripsUrbanFilter = "";
-//			String areas_urbans_intersections = "";
 			String mapTable = "";
 			String tripIntersections = "";
 			String urbanStopsFilter = "";
@@ -159,35 +156,30 @@ public class FlexibleReportEventManager {
 				areaId = "LEFT(blockid,5)";
 				Id = "countyid";
 				table = "census_counties";
-				tableName = table;
 				areaTypeName = "cname";
 				mapTable = "census_counties_trip_map"; 
 			} else if (areaType.equals("urban")) {
 				areaId = "urbanid";
 				Id = "urbanid";
 				table = "census_urbans";
-				tableName = table;
 				areaTypeName = "uname";
 				mapTable = "census_urbans_trip_map";
 			} else if (areaType.equals("congDist")) {
 				areaId = "congdistid";
 				Id = "congdistid";
 				table = "census_congdists";
-				tableName = table;
 				areaTypeName = "cname";
 				mapTable = "census_congdists_trip_map";
 			} else if (areaType.equals("place")) {
 				areaId = "placeid";
 				Id = "placeid";
 				table = "census_places";
-				tableName = table;
 				areaTypeName = "pname";
 				mapTable = "census_places_trip_map";
 			} else if (areaType.equals("odotRegion")) {
 				areaId = "regionid";
 				Id = "regionid";
 				table = "(SELECT odotregionid AS regionid, ST_UNION(shape) AS shape FROM census_counties GROUP BY odotregionid) AS census_regions ";
-				tableName = "census_regions";
 				areaTypeName = "'Region '||regionid";
 				mapTable = "census_counties_trip_map"; 
 			}
@@ -275,7 +267,7 @@ public class FlexibleReportEventManager {
 						+ "		LEFT JOIN route_miles USING (areaid,agencyid) "
 						+ "		LEFT JOIN svc_hours USING (areaid,agencyid) "
 						+ "		LEFT JOIN svc_stops USING (areaid,agencyid)";
-				System.out.println(query);
+//				System.out.println(query);
 				ResultSet rs = stmt.executeQuery(query);
 				
 				// get the size of the result set
@@ -315,7 +307,7 @@ public class FlexibleReportEventManager {
 			}
 			Queries.progVal.remove(key);
 		}catch(SQLException e){
-			System.out.println(e);
+			e.printStackTrace();
 		}finally{
 			if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 			if (connection != null) try { connection.close(); } catch (SQLException e) {}
@@ -350,7 +342,6 @@ public class FlexibleReportEventManager {
 				Id = "countyid";
 				mapTable = "census_counties_trip_map";
 				table = "census_counties";
-//				tableName = table;
 				areaTypeName = "cname";
 			} else if (areaType.equals("urban")) {
 				areaId = "block.urbanid";
@@ -463,7 +454,6 @@ public class FlexibleReportEventManager {
 
 			ResultSet rs = stmt.executeQuery(query);
 			
-
 			// get the size of the result set
 			rs.last();
 			int rsSize = rs.getRow(); 
@@ -484,7 +474,7 @@ public class FlexibleReportEventManager {
 			}
 			Queries.progVal.remove(key);
 		}catch(SQLException e){
-			System.out.println(e);
+			e.printStackTrace();
 		}finally{
 			if (stmt != null)try{stmt.close();}catch(SQLException e){};
 			if (connection != null)try{connection.close();}catch(SQLException e){};
@@ -726,7 +716,7 @@ public class FlexibleReportEventManager {
 						+ "	LEFT JOIN emp_served_cumulated_rac USING (areaid,agencyid) "
 						+ "	LEFT JOIN emp_los_cumulated_rac USING (areaid,agencyid) ";
 			}
-			System.out.println(query);
+//			System.out.println(query);
 			ResultSet rs = stmt.executeQuery(query);
 			
 			// get the size of the result set
@@ -775,7 +765,7 @@ public class FlexibleReportEventManager {
 			}
 			Queries.progVal.remove(key);
 		}catch(SQLException e) {
-			System.out.println(e.getStackTrace());
+			e.printStackTrace();
 		}finally{
 			if (stmt != null)try{stmt.close();}catch(SQLException e){};
 			if (connection != null)try{connection.close();}catch(SQLException e){};
@@ -966,7 +956,7 @@ public class FlexibleReportEventManager {
 			}
 			Queries.progVal.remove(key);
 		}catch(SQLException e ){
-			System.out.println(e);
+			e.printStackTrace();
 		}finally{
 			if (stmt != null)try{stmt.close();}catch(SQLException e){};
 			if (connection != null)try{connection.close();}catch(SQLException e){};
