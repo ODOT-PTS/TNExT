@@ -30,11 +30,7 @@ path.link {
     </style>
   </head>
   <body>
-    <div id="body">
-      <div id="footer">
-        d3.layout.tree
-        <div class="hint">click or option-click to expand or collapse</div>
-      </div>
+    <div id="body">      
     </div>
     <script type="text/javascript">
 
@@ -57,8 +53,8 @@ var vis = d3.select("#body").append("svg:svg")
     .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
 d3.json("flare.json", function(json) {
-  root = JSON.parse(metricsJson);
-  console.log(JSON.parse(metricsJson));
+  root = JSON.parse(reportsJson);
+  console.log(JSON.parse(reportsJson));
   root.x0 = h / 2;
   root.y0 = 0;
 

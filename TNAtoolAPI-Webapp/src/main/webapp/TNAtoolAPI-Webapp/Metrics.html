@@ -9,6 +9,7 @@
 	  crossorigin="anonymous">
     </script>
     <script type="text/javascript" src="../resources/js/metrics-definition.js"></script>
+    <script src="../resources/js/JSMethods.js"></script>
     <style type="text/css">
 
 .node rect {
@@ -36,7 +37,8 @@ path.link {
     <div id="chart"></div>
 
 <script type="text/javascript">
-
+var flag = getURIParameter("flag");
+console.log('#' + flag );
 var w = 960,
     h = 800,
     i = 0,
@@ -66,11 +68,12 @@ function moveChildren(node) {
 }
 
 d3.json("flare.json", function(json) {
-	json = JSON.parse(metricsJson)
+	json = JSON.parse(window[flag]);
   json.x0 = 0;
   json.y0 = 0;
   moveChildren(json);
   update(root = json);
+  click(root);
 });
 
 function update(source) {
