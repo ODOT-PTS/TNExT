@@ -3147,8 +3147,8 @@ public class PgisEventManager {
       	    + "group by trips.aid, stime.stop_id, stop.location),"
     		+ "undupblocks as (select block.population"+popYear+" as population,block.blockid, block.poptype, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+
     		String.valueOf(x)+") group by blockid), "
-			+ "racserved as (select coalesce(sum(c000_"+popYear+"*visits),0) AS srac from undupblocks inner join lodes_rac_projection_block using(blockid)), "
-	    	+ "wacserved as (select coalesce(sum(c000*visits),0) AS swac from undupblocks inner join lodes_blocks_wac using(blockid)), "
+			+ "racserved as (select coalesce(sum(c000_"+popYear+"*service),0) AS srac from undupblocks inner join lodes_rac_projection_block using(blockid)), "
+	    	+ "wacserved as (select coalesce(sum(c000*service),0) AS swac from undupblocks inner join lodes_blocks_wac using(blockid)), "
     		+ "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops_with_arrivals), upopserved as "
     		+ "(select COALESCE(sum(population*service),0) as uspop from undupblocks where poptype='U'), rpopserved as (select COALESCE(sum(population*service),0) as rspop from "
     		+ "undupblocks where poptype='R'), svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
