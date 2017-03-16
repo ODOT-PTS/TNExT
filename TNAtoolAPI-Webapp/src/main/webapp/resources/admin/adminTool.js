@@ -1871,10 +1871,10 @@ function copyCensus(index, section, classs){
         			checkCensusstatus(index);
         			checkFpopstatus(index);
         			checkRegionstatus(index);
-        			checkfEmpstatus(currentINDEX);
-    	        	checkEmpstatus(currentINDEX);
-    	        	checkT6status(currentINDEX);
-    	        	checkPNRstatus(currentINDEX);
+        			checkfEmpstatus(index);
+    	        	checkEmpstatus(index);
+    	        	checkT6status(index);
+    	        	checkPNRstatus(index);
             		break;
 		    case "employment": 
 		    		checkEmpstatus(index);
