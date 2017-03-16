@@ -2313,7 +2313,7 @@ public class DbUpdate {
 				agencyId = rs.getString("defaultid");
 			}
 			
-			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname = '"+feedname+"';");
+			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname IS NULL;");
 			if ( rs.next() ) {
 				agencyIds = rs.getString("agencyids");
 			}
