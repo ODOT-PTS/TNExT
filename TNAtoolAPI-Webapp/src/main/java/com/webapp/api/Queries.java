@@ -155,6 +155,7 @@ public class Queries {
 	public static void updateDefaultDBindex() {
 		default_dbindex = Databases.dbsize - 1;
 		dbsize = Databases.dbsize;
+		menuResponse = new AgencyRouteList[Databases.dbsize];
 	}
 
 	/**
@@ -765,7 +766,7 @@ public class Queries {
 					.getSelectedAgencies(username);
 			Collection<Agency> allagencies = GtfsHibernateReaderExampleMain
 					.QueryAllAgencies(selectedAgencies, dbindex);
-			if (dbindex>=menuResponse.length || menuResponse[dbindex] == null
+			if (menuResponse[dbindex] == null
 					|| menuResponse[dbindex].data.size() != allagencies.size()) {
 				menuResponse[dbindex] = new AgencyRouteList();
 				menuResponse[dbindex] = PgisEventManager.agencyMenu(null, null,

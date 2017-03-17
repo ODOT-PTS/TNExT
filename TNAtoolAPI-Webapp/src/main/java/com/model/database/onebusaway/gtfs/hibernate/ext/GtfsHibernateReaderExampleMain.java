@@ -72,6 +72,9 @@ public class GtfsHibernateReaderExampleMain {
   }
   
   public static void updateSessions(){
+	  for (SessionFactory s: sessions){
+		  s.close();
+	  }
 	  factory = new HibernateGtfsFactory[Databases.dbsize];
 	  sessions = new SessionFactory[Databases.dbsize];
 	  for (int k=0; k<Databases.dbsize; k++){
