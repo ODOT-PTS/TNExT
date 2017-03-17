@@ -765,7 +765,7 @@ public class Queries {
 					.getSelectedAgencies(username);
 			Collection<Agency> allagencies = GtfsHibernateReaderExampleMain
 					.QueryAllAgencies(selectedAgencies, dbindex);
-			if (menuResponse[dbindex] == null
+			if (dbindex>=menuResponse.length || menuResponse[dbindex] == null
 					|| menuResponse[dbindex].data.size() != allagencies.size()) {
 				menuResponse[dbindex] = new AgencyRouteList();
 				menuResponse[dbindex] = PgisEventManager.agencyMenu(null, null,
