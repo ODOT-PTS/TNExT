@@ -18,6 +18,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -34,18 +35,18 @@ var gap = parseFloat(getURIParameter("gap"));
 qstringx = '0.1';
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr title="Identification number reported in the transit agency GTFS feed."><th id="aid">Agency ID</th>'+
-'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Name</th>'+
-'<th class="metric" title="Number of transit stops that have at least one stop within the specified distance of the specified transit agency stops">Number of Connections<span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Smallest distance in ft between the transit stops of the specified transit agency with the current transit agency">Min Connection distance (ft.)</th>'+
-'<th class="metric" title="Largest distance in ft between the transit stops of the specified transit agency with the current transit agency">Max Connection distance (ft.)</th>'+
-'<th class="metric" title="Average distance in ft between the transit stops of the specified transit agency with the current transit agency">Average Connection distance (ft.)</th>'+
-'<th class="metric" title="List of transit stops within the specified distance of the specified transit agency stops and the distance between them in ft">Connections<span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="List of the specified transit agency stop names within the specified distance of other transit agency stops">SourceStopNames</th>'+
-'<th class="metric" title="List of other transit agency stop names within the specified distance of the specified transit agency stops">DestStopNames</th>'+
-'<th class="metric" title="List of the specified transit agency stop coordinates within the specified distance of other transit agency stops">SourceStopCoordinates</th>'+
-'<th class="metric" title="List of other transit agency stop coordiates within the specified distance of the specified transit agency stops">DestStopCoordinatess</th>'+
-'<th class="metric" title="List of distances between stops of the specified transit agency and other transit agencies in ft">Min Gaps</th></tr>';	
+tmp = '<tr class="metric"><th id="aid">Agency ID</th>'+
+'<th id="an">Name</th>'+
+'<th class="metric">Number of Connections<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Min Connection distance (ft.)</th>'+
+'<th class="metric">Max Connection distance (ft.)</th>'+
+'<th class="metric">Average Connection distance (ft.)</th>'+
+'<th class="metric">Connections<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Source. Stop Names</th>'+
+'<th class="metric">Dest. Stop Names</th>'+
+'<th class="metric">Source Stop Coordinates</th>'+
+'<th class="metric">Dest. Stop Coordinatess</th>'+
+'<th class="metric">Min Gaps</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -119,6 +120,14 @@ $(document).ready(function(){
 		        subTable+='</table>';
 		        	return subTable;
 		    }
+		    
+		 // append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
     	}
 	});	
 });

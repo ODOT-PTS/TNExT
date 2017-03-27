@@ -19,6 +19,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -45,25 +46,25 @@ var ipop=popYear;
 type = (isNaN(type))?0:type;
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th title="Agency identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
-'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
-'<th class="metric" title="Unique stop identification number reported in the transit agency GTFS feed.">Stop ID</th>'+
-'<th class="metric" title="Name of a stop reported in the transit agency GTFS feed." id="sn">Stop Name</th>'+
-'<th class="metric" title="The County in which the stop is located.">County</th>' +
-'<th class="metric" title="The Urban Area in which the stop is located.">Urban Area</th>' +
-'<th class="metric" title = "The ODOT Transit Region in which the stop is located.">ODOT Transit Region</th>' +
-'<th class="metric" title = "The Congressional District in which the stop is located.">Congressional District</th>' +
-'<th class="metric" title = "The Census Place in which the stop is located.">Census Place</th>' + 
-'<th class="metric" title="Unique route ID (or IDs) that the stop belongs to.">Routes Stop Belongs To</th>'+
-'<th class="metric" title="Number of times the stops is visited during the selected dates.">Visits <span class="IOSym">(2)</span></th>'+
-'<th class="metric" title="Population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Population <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Employment(RAC) count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Employment(RAC) <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Employees(WAC) count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Employees(WAC) <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Urban population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Urban Population <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Rural population count within an X-mile radius of a stop. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Rural Population <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="The population of the urban area with population over 50,000 in which the stop is located. If the value is 0, it means that the stop is either not located in an urban area, or the population of the area is less than 50,000.">Urban area with over 50k population </th>'+
-'<th>Latitude title="Latitude of the stop"</th>' +
-'<th>Longitude title="Longitude of the stops"</th></tr>';	
+tmp = '<tr><th id="aid">Agency ID</th>'+
+'<th class="metric" id="an">Agency Name</th>'+
+'<th class="metric">Stop ID</th>'+
+'<th class="metric" id="sn">Stop Name</th>'+
+'<th class="metric">County</th>' +
+'<th class="metric">Urban Area</th>' +
+'<th class="metric">ODOT Transit Region</th>' +
+'<th class="metric">Congressional District</th>' +
+'<th class="metric">Census Place</th>' + 
+'<th class="metric">Routes Stop Belongs To</th>'+
+'<th class="metric">Visits <span class="IOSym">(2)</span></th>'+
+'<th class="metric">Population Served<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Urban Population Served<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Rural Population Served<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Employment Served (RAC)<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Employees Served (WAC)<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Urban area with over 50k population </th>'+
+'<th class="metric">Latitude </th>' +
+'<th class="metric">Longitude</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -100,42 +101,46 @@ $(document).ready(function(){
 				}
 			}
 			appendNavigation(namestring);
-			//$('h2').append(namestring+'<br><hr>');
+			
 			$.each(d.StopR, function(i,item){
 			html += '<tr class="tablerow"><td>' + item.AgencyId + '</td><td>' + item.AgencyName + '</td><td>' + item.StopId + '</td>'; 
-			if (item.URL !== null){
-				html = html + '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
-			} else {
-			html = html + '<td>'+item.StopName+'</td>';
-			};
-			var totalPop = parseInt(item.UPopWithinX) + parseInt(item.RPopWithinX);
-			totalPop = totalPop.toString();
-			html += 
-			'<td>'+item.CountyName
-			+ '</td><td>'+item.UrbanName
-			+ '</td><td>'+item.RegionName
-			+ '</td><td>'+item.CongDistName
-			+ '</td><td>'+item.PlaceName
-			+ '</td><td>'+item.Routes
-			+ '</td><td>'+numberconv(item.visits)
-			+ '</td><td>'+numberconv(totalPop)
-			+ '</td><td>'+numberconv(item.racWithinX)+'</td>';
-			if(popYear==2010){
-			html+= '<td>'+numberconv(item.wacWithinX)+'</td>';}
-			else{
+			if (item.URL !== null)
+				html += '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
+			else 
+				html += '<td>'+item.StopName+'</td>'
+				+ '<td>'+item.CountyName
+				+ '</td><td>'+item.UrbanName
+				+ '</td><td>'+item.RegionName
+				+ '</td><td>'+item.CongDistName
+				+ '</td><td>'+item.PlaceName
+				+ '</td><td>'+item.Routes
+				+ '</td><td>'+numberconv(item.visits)
+				+ '</td><td>'+numberconv(parseInt(item.UPopWithinX) + parseInt(item.RPopWithinX))
+				+ '</td><td>'+numberconv(item.UPopWithinX)
+				+ '</td><td>'+numberconv(item.RPopWithinX)
+				+ '</td><td>'+numberconv(item.racWithinX)+'</td>';
+			console.log(item.URL);
+			if(popYear == 2010)
+				html+= '<td>'+numberconv(item.wacWithinX)+'</td>';
+			else
 				html+='<td> N/A </td>';
-			}
-			html+='</td><td>'+numberconv(item.UPopWithinX)
-			+ '</td><td>'+numberconv(item.RPopWithinX)
-			+ '</td><td>'+numberconv(item.OverFiftyPop.toString())
-			+ '</td><td>'+trimLat(item.lat)
-			+ '</td><td>'+trimLon(item.lon) + '</tr>';					   			
+			
+			html += '</td><td>'+numberconv(item.OverFiftyPop.toString())
+				 + '</td><td>'+trimLat(item.lat)
+				 + '</td><td>'+trimLon(item.lon) + '</td></tr>';					   			
 			});					
-			html = html + '</tbody></table>';
+			html += '</tbody></table>';
 			$('#displayReport').append($(html));	
 			progressbar.remove();	
-			 
 			table = buildDatatables();
+			
+			// append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
 		}
     });	
 });	

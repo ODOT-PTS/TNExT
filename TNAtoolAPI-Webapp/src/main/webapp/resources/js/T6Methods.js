@@ -28,7 +28,7 @@ function toggleCheckbox(checkbox){
 			nodesList.forEach (function (item, index, array){
 			 y += '<th class="metric" title="Total number of individuals of that belong to the selected category and are living in the area.">'+ tree.get_text(item) +'</th>'
 				+' <th class="metric" title="Number of Individuals Served: Unduplicated summation of individuals of the selected category who are living within X distance of any stop. This metric is date/service independent.">'+ tree.get_text(item) +'-S<span class="IOSym">(1)</span></th>'
-				+' <th class="metric" title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service.">'+ tree.get_text(item) +'-SLOS<span class="IOSym">(1)(2)(3)</span>></th>'
+				+' <th class="metric" title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service.">'+ tree.get_text(item) +'-SLOS<span class="IOSym">(1)(2)(3)</span></th>'
 				+' <th class="metric" title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'+ tree.get_text(item) +'-SS<span class="IOSym">(1)(3)</span></th>';
 			});
 		}

@@ -19,6 +19,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -50,30 +51,30 @@ var feedPubUrl = new Array();
 var agencyIds = new Array();
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
-'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
-'<th class="metric" title="Phone number to contact the transit agency.">Phone #</th>'+
-'<th class="metric" title="Total number of routes operated by the transit agency.">Total Routes</th>'+
-'<th class="metric" title="Total number of stops operated by the transit agency.">Total Stops</th>'+
-'<th class="metric" title="Count of geographic areas that the transit agency operates within.">Geographic Areas</th>'+
-'<th class="metric" title="Count of counties that the transit agency operates within.">Total Counties</th>'+
-'<th class="metric" title="Count of census places that the transit agency operates within.">Total Census Places</th>'+
-'<th class="metric" title="Count of urban areas that the transit agency operates within.">Total Urban Areas</th>'+
-'<th class="metric" title="Count of congressional districts that the transit agency operates within.">Total Congressional Districts</th>'+
-'<th class="metric" title="Count of ODOT transit regions that the transit agency operates within.">Total ODOT Transit Regions</th>'+
-'<th class="metric" title="If available, this field points to the fare information published by the transit agency on its web site.">Fare</th>'+
-'<th class="metric" title="If available, this field points to the minimum fare price published by the transit agency on its web site.">Minimum Fare</th>'+
-'<th class="metric" title="If available, this field points to the average fare price published by the transit agency on its web site.">Average Fare</th>'+
-'<th class="metric" title="If available, this field points to the median fare price published by the transit agency on its web site.">Median Fare</th>'+
-'<th class="metric" title="If available, this field points to the maximum fare price published by the transit agency on its web site.">Maximum Fare</th>'+
-'<th class="metric" title="If available, this field points to the URL where fare information is published by the transit agency.">Fare URL</th>'+
-'<th class="metric" title="The earliest service date specified in the transit agency feed in YYYYMMDD format.">Service Start Date</th>'+
-'<th class="metric" title="The latest service date specified in the transit agency feed in YYYYMMDD format.">Service End Date</th>'+
-'<th class="metric" title="If available, this field points to the feed information such as name, version, publisher name and publisher URL.">Feed Information</th>'+
-'<th class="metric" title="Name of the GTFS feed file.">Feed Name</th>'+
-'<th class="metric" title="Version of the GTFS feed file.">Feed Version</th>'+
-'<th class="metric" title="Name of the GTFS feed file publisher.">Feed Publisher Name</th>'+
-'<th class="metric" title="URL of the GTFS feed file publisher.">Feed Publisher URL</th>';	
+tmp = '<tr><th class="metric" id="aid">Agency ID</th>'+
+'<th class="metric" id="an">Agency Name</th>'+
+'<th class="metric" >Phone #</th>'+
+'<th class="metric" >Total Routes</th>'+
+'<th class="metric" >Total Stops</th>'+
+'<th class="metric" >Geographic Areas</th>'+
+'<th class="metric" >Total Counties</th>'+
+'<th class="metric" >Total Census Places</th>'+
+'<th class="metric" >Total Urban Areas</th>'+
+'<th class="metric" >Total Congressional Districts</th>'+
+'<th class="metric" >Total ODOT Transit Regions</th>'+
+'<th class="metric" >Fare</th>'+
+'<th class="metric" >Minimum Fare</th>'+
+'<th class="metric" >Average Fare</th>'+
+'<th class="metric" >Median Fare</th>'+
+'<th class="metric" >Maximum Fare</th>'+
+'<th class="metric" >Fare URL</th>'+
+'<th class="metric" >Service Start Date</th>'+
+'<th class="metric" >Service End Date</th>'+
+'<th class="metric" >Feed Information</th>'+
+'<th class="metric" >Feed Name</th>'+
+'<th class="metric" >Feed Version</th>'+
+'<th class="metric" >Feed Publisher Name</th>'+
+'<th class="metric" >Feed Publisher URL</th>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -87,8 +88,6 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
 		async: true,
 		success: function(d){
-			console.log(d);
-			//$('h2').append('Transit Agencies Summary Report <br><hr>');
 			appendNavigation();
 			$.each(d.agencySR, function(i,item){
 				docMetadata = d.metadata;
@@ -200,8 +199,9 @@ $(document).ready(function(){
 		    	var html;
 		    	switch(type){		    	
 			    	case "GA":
-			    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+'<tr><td>Total Counties: </td><td><a href="#" type="CSA" id="'+agencyIds[p]
-			    		+'">'+counties[p]+'</a></td></tr>'+'<tr><td>Total Census Places: </td><td><a href="#" type="CPSA" id="'+agencyIds[p]+'">'+cplaces[p]+'</a></td></tr>'
+			    		html='<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'
+			    		+'<tr><td>Total Counties: </td><td><a href="#" type="CSA" id="'+agencyIds[p] +'">'+counties[p]+'</a></td></tr>'
+			    		+'<tr><td>Total Census Places: </td><td><a href="#" type="CPSA" id="'+agencyIds[p]+'">'+cplaces[p]+'</a></td></tr>'
 			    		+'<tr><td>Total Urban Areas: </td><td><a href="#" type="UASA" id="'+agencyIds[p]+'">'+uareas[p]+'</a></td></tr>'
 			    		+'<tr><td>Total Congressional Districts: </td><td><a href="#" type="CDSA" id="'+agencyIds[p]+'">'+cdistricts[p]+'</a></td></tr>'
 			    		+'<tr><td>Total ODOT Transit Regions: </td><td><a href="#" type="OTSA" id="'+agencyIds[p]+'">'+ODOTregions[p]+'</a></td></table>';
@@ -227,6 +227,14 @@ $(document).ready(function(){
 	        tr.addClass('shown');
 	        SetEvents();
 		    }	   
+		    
+		    // append tooltips
+		   var tooltips = populateMetricDefs();
+		    var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
     	}
 	});
 });

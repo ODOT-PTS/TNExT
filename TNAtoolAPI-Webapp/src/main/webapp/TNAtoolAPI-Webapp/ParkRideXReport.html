@@ -18,6 +18,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -31,22 +32,22 @@
 var countyId = getURIParameter("countyid");
 maxRadius = 1;
 html = '<table id="RT" class="display" align="center">';
-tmp = 	'<tr><th>P&R ID</th>'+
-			'<th>Lot Name</th>'+
-			'<th>City</th>'+
-			'<th>Location</th>'+
-			'<th>Zipcode</th>'+
-			'<th class="metric" title="Number of parking spaces in the lot.">Spaces</th>'+
-			'<th class="metric" title="Number of handicap parking spaces.">Accessible Spaces</th>'+
-			'<th class="metric" title="Transit routes accessible from the lot.">Transit Services <span class="IOSym">(1)</span></th>'+
-			'<th class="metric" title="Amenities available in the park and ride lot.">Amenities</th>'+
-			'<th class="metric" title="Transit agencies that have a stop within the X miles of the park and ride lot.">Connected Agencies</th>'+
-			'<th>Connected Stops IDs</th>'+
-			'<th>Connected Stops</th>'+
-			'<th>Connected Routes IDs</th>'+
-			'<th>Connected Routes</th>'+
-			'<th>Latitude</th>'+
-			'<th>Longitude</th>'+
+tmp = 	'<tr><th class="metric">ID</th>'+
+			'<th class="metric">Lot Name</th>'+
+			'<th class="metric">City</th>'+
+			'<th class="metric">Location</th>'+
+			'<th class="metric">Zipcode</th>'+
+			'<th class="metric">Spaces</th>'+
+			'<th class="metric">Accessible Spaces</th>'+
+			'<th class="metric">Transit Services <span class="IOSym">(1)</span></th>'+
+			'<th class="metric">Amenities</th>'+
+			'<th class="metric">Connected Agencies</th>'+
+			'<th class="metric">Connected Stops IDs</th>'+
+			'<th class="metric">Connected Stops</th>'+
+			'<th class="metric">Connected Routes IDs</th>'+
+			'<th class="metric">Connected Routes</th>'+
+			'<th class="metric">Latitude</th>'+
+			'<th class="metric">Longitude</th>'+
 			'<th>Bike Rack Spaces</th>'+
 			'<th>Bike Locker Spaces </th>'+
 			'<th>Electric Vehicle Spaces</th>'+

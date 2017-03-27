@@ -19,6 +19,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
@@ -54,23 +55,23 @@ var agencyIds = new Array();
 
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID </th>'+
-'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
-'<th class="theader metric" title="Phone number to contact the transit agency.">Phone #</th>'+
-'<th class="theader metric" title="Total number of routes operated by the transit agency.">Total Routes</th>'+
-'<th class="theader metric" title="Total number of stops operated by the transit agency.">Total Stops </th>'+
-'<th class="metric" title="If available, this field points to the fare information published by the transit agency on its web site.">Fare</th>'+
-'<th class="metric" title="If available, this field points to the minimum fare price published by the transit agency on its web site.">Minimum Fare</th>'+
-'<th class="metric" title="If available, this field points to the average fare price published by the transit agency on its web site.">Average Fare</th>'+
-'<th class="metric" title="If available, this field points to the median fare price published by the transit agency on its web site.">Median Fare</th>'+
-'<th class="metric" title="If available, this field points to the maximum fare price published by the transit agency on its web site.">Maximum Fare</th>'+
-'<th class="metric" title="If available, this field points to the URL where fare information is published by the transit agency.">Fare URL</th>'+
-'<th class="metric" title="The earliest service date specified in the transit agency feed in YYYYMMDD format.">Service Start Date</th>'+
-'<th class="metric" title="The latest service date specified in the transit agency feed in YYYYMMDD format.">Service End Date</th>'+
-'<th class="metric" title="If available, this field points to the feed information such as name, version, publisher name and publisher URL.">Feed Information</th>'+
-'<th class="metric" title="Name of the GTFS feed file.">Feed Name</th>'+
-'<th class="metric" title="Version of the GTFS feed file.">Feed Version</th>'+
-'<th class="metric" title="Name of the GTFS feed file publisher.">Feed Publisher Name</th>'+
-'<th class="metric" title="URL of the GTFS feed file publisher.">Feed Publisher URL</th></tr>';	
+'<th class="metric" id="an">Agency Name</th>'+
+'<th class="theader metric">Phone #</th>'+
+'<th class="theader metric">Total Routes</th>'+
+'<th class="theader metric">Total Stops </th>'+
+'<th class="metric">Fare</th>'+
+'<th class="metric">Minimum Fare</th>'+
+'<th class="metric">Average Fare</th>'+
+'<th class="metric">Median Fare</th>'+
+'<th class="metric">Maximum Fare</th>'+
+'<th class="metric">Fare URL</th>'+
+'<th class="metric">Service Start Date</th>'+
+'<th class="metric">Service End Date</th>'+
+'<th class="metric">Feed Information</th>'+
+'<th class="metric">Feed Name</th>'+
+'<th class="metric">Feed Version</th>'+
+'<th class="metric">Feed Publisher Name</th>'+
+'<th class="metric">Feed Publisher URL</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -81,7 +82,9 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid,
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId
+				+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear
+				+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid,
 		async: true,
 		success: function(d){
 			console.log(d);
@@ -202,9 +205,16 @@ $(document).ready(function(){
 		    row.child().attr('type',type);		    
 	        tr.addClass('shown');	        
 		    } 
-		}
-	});
-	
+		    
+		 // append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
+		}	
+	});	
 });
 </script>
 

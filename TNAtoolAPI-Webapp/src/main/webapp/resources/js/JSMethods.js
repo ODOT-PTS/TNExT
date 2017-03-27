@@ -12,19 +12,14 @@ var nameString = '';
 var agencyId = getURIParameter("agency");
 var w_qstringx = parseFloat(getURIParameter("x"));
 var w_qstringl = parseInt(getURIParameter("l"));
-var w_qstringd;
-var w_qstring;
 var keyName = getURIParameter("n");
 var gap = parseFloat(getURIParameter("gap"));
 var dbindex = parseInt(getURIParameter("dbindex"));
 var popYear = parseInt(getURIParameter("popYear"));
-var ajaxURL;
 var progVal = 0;
 var d = new Date();
-var html, temp;
-var table;
+var w_qstring, w_qstringd, ajaxURL, html, temp, table,nav, metricsDefForToolips;
 var docMetadata = '';
-var nav;
 var tableProperties = {
 	ordering : true,
 	hiddenCols : [],
@@ -295,6 +290,26 @@ function reloadPage() {
 	}
 }
 
+/**
+ * returns a dictionary with array of report name and metric name
+ * as key and metric definition as value.
+ * @returns Object{[report,metric]}
+ */
+function populateMetricDefs(){
+	var output = {};
+	// metricDef is located in src>main>webapp>resources>data>metricDefinitions.js
+	$.each(metricDef, function(index,item){
+		output[[item.report.trim(), item.metric.trim()]] = item.definition;
+	});
+	return output;
+}
+
+String.prototype.strip = function () {
+	var str = this;
+	for ( var i = 1; i < 10 ; i++)
+		str = str.replace('('+i+')', '');
+	return str;
+}
 /*
  * This method is implemented to be used for gathering the metadata of the
  * report in a text file to be exported.
@@ -646,11 +661,10 @@ function NewLine(config) {
 }
 
 function numberconv(x) {
-	console.log(x);
-	if (x.indexOf('E') > -1) {
+	x = x + '';
+	if (x.indexOf('E') > -1) 
 		x = Number(x).toString();
-	}
-	console.log(x);
+	
 	var parts = x.split(".");
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	if (parts[1] > 0) {

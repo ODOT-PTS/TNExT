@@ -18,6 +18,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -30,11 +31,11 @@
 <script type="text/javascript">
 
 html = '<table id="RT" class="display" align="center">';
-tmp = 	'<tr><th class="metric" title="County ID conforming to the census data." id="an">County ID</th>'+
-			'<th class="metric" title="County name.">County Name</th>'+
-			'<th class="metric" title="Total number of park and ride lots in the county.">Total number of P&R lots</th>'+
-			'<th class="metric" title="Total number of parking spaces in the county.">Total parking spaces</th>'+
-			'<th class="metric" title="Total number of handicap parking spaces in the county.">Total accessible parking spaces</th></tr>';
+tmp = 	'<tr><th class="metric" id="an">County ID</th>'+
+			'<th class="metric">County Name</th>'+
+			'<th class="metric">Total number of P&R lots</th>'+
+			'<th class="metric">Total parking spaces</th>'+
+			'<th class="metric">Total accessible parking spaces</th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -67,6 +68,14 @@ $(document).ready(function(){
 			
 			tableProperties.iDisplayLength = 20;
 			table = buildDatatables();
+			
+			// append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
     	}
 	});
 });

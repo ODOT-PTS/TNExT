@@ -7,4 +7,4 @@ Group features by metrics name <select onchange="$('iframe').attr('src', '../../
 	<option value="reportsJson">Reports</option>	
 	</select>
 
-<iframe src="../../TNAtoolAPI-Webapp/Metrics.html?&flag=metricsJson" width="1000" height="1000" frameborder="0" scrolling="no"  style="margin:0 auto;display:block;float:left;"></iframe> 
+<iframe src="../../TNAtoolAPI-Webapp/Metrics.html?&flag=metricsJson" class="noScrolling" width="1000" height="500" frameborder="0" scrolling="auto"  style="margin:0 auto;display:block;float:left;" ></iframe>

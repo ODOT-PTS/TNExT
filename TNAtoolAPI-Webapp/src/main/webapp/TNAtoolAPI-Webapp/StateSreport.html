@@ -19,6 +19,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -33,22 +34,21 @@
 var ipop=popYear;
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th class="metric" title="Name of the state" id="aid">State</th>'+
-'<th class="metric" title="Total Land area of the state in square miles." id="an">Land Area</th>'+
-'<th class="metric" title="Total population of the state." id="an">Total Population</th>'+
-'<th class="metric" title="Total population of the state living in urbanized areas." id="an">Urban Population</th>'+
-'<th class="metric" title="Total population of the state living in non-urban areas." id="an">Rural Population</th>'+
-'<th  class="metric" title="Total Employment (RAC) of the geographic area.">Employment (RAC)</th>'+
-'<th id="emp1" class="metric" title="Total Employees (WAC) of the geographic area.">Employees (WAC)</th>'+
-'<th class="metric" title="Count of transit agencies operating in the state." id="an">Transit Agencies Count</th>'+
-'<th class="metric" title="Total number of routes operated by the transit agency.">Routes Count</th>'+
-'<th class="metric" title="Total number of stops operated by the transit agency.">Stops Count</th>'+
-'<th class="metric" title="Count of urbanized areas within the state.">Urbanized Areas Count</th>'+
-'<th class="metric" title="Count of congressional districts within the state.">Congressional Districts Count</th>'+
-'<th class="metric" title="Count of ODOT transit regions within the state.">ODOT Transit Regions Count</th>'+
-'<th class="metric" title="Count of census designated places within the state.">Census Places Count</th>'+
-'<th class="metric" title="Count of Counties within the state.">Counties Count</th>'+
-'<th class="metric" title="Count of census tracts within the state.">Census Tracts Count</th></tr>';	
+tmp = '<tr><th class="metric" id="aid">State</th>'+
+'<th class="metric" id="an">Land Area</th>'+
+'<th class="metric" id="an">Total Population</th>'+
+'<th class="metric" id="an">Urban Population</th>'+
+'<th class="metric" id="an">Rural Population</th>'+'<th  class="metric" title="Total Employment (RAC) of the geographic area.">Employment (RAC)</th>'+
+'<th id="emp1" class="metric">Employees (WAC)</th>'+
+'<th class="metric" id="an">Transit Agencies Count</th>'+
+'<th class="metric">Routes Count</th>'+
+'<th class="metric">Stops Count</th>'+
+'<th class="metric">Urbanized Areas Count</th>'+
+'<th class="metric">Congressional Districts Count</th>'+
+'<th class="metric">ODOT Transit Regions Count</th>'+
+'<th class="metric">Census Places Count</th>'+
+'<th class="metric">Counties Count</th>'+
+'<th class="metric">Census Tracts Count</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -65,7 +65,6 @@ $(document).ready(function(){
 		success: function(d){	
 			docMetadata = d.metadata;
 			appendNavigation();
-			//$('h2').append('Statewide Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html +='<tr><td>' + '<a href="#" type="SXR" id="'+item.Name+'">'+item.Name+'</a></td>'+ '<td>' + numberconv(item.landArea) +'</td>'+
 				'<td>' + numberconv(item.population) +'</td>'+ '<td>' + numberconv(item.urbanpop) +'</td>'+ '<td>' + numberconv(item.ruralpop) +'</td><td>' +numberconv(item.employment) +	'</td>';
@@ -147,8 +146,15 @@ $(document).ready(function(){
 		            '</tr>'+
 		        '</table>';
 		    }
-		    
-    }});
+		// append toopltips
+		var tooltips = populateMetricDefs();
+		var tempKey = [];
+		$('.metric').each(function(index, item) {
+			tempKey = [$('title').text(),$(item).text().strip().trim() ];
+			$(item).attr('title',tooltips[tempKey]);
+			});  
+    	}
+	});
 });
 
 </script>
