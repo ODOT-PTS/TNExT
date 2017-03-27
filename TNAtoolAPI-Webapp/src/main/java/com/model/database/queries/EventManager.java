@@ -18,6 +18,7 @@ package com.model.database.queries;
 
 import org.hibernate.Session;
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.type.Type;
 import org.hibernatespatial.GeometryUserType;
 import org.opengis.referencing.FactoryException;
@@ -55,6 +56,9 @@ static{
 };
 
 public static void updateSessions(){
+	for (Session s: session){
+		  s.close();
+	}
 	session = new Session[Hutil.getSessionFactory().length];
 	for (int scnt=0; scnt< session.length; scnt++){
 		session[scnt] = Hutil.getSessionFactory()[scnt].openSession();

@@ -2271,7 +2271,11 @@ public class DbUpdate {
 			statement = c.createStatement();
 			
 			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname IS NULL;");
+
 			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedname+"';");
+			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname IS NULL;");
+
 			
 			
 			rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname = '"+feedname+"';");
@@ -2301,6 +2305,40 @@ public class DbUpdate {
 					System.out.println(e.getMessage());
 				}
 			}
+			
+			agencyId = "";
+			agencyIds = "";
+			rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info where feedname IS NULL;");
+			if ( rs.next() ) {
+				agencyId = rs.getString("defaultid");
+			}
+			
+			rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info where feedname IS NULL;");
+			if ( rs.next() ) {
+				agencyIds = rs.getString("agencyids");
+			}
+			
+			if(!agencyIds.equals("")){
+				agencyIdList = agencyIds.split(",");
+//				
+				for(int i=0;i<defAgencyIds.length;i++){
+					System.out.println(defAgencyIds[i][0]);
+					try{
+						if(defAgencyIds[i][0].startsWith("temp")){
+							statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+sqlString(agencyIdList,defAgencyIds[i][1])+"';");
+							
+						}else{
+							statement.executeUpdate("ALTER TABLE "+defAgencyIds[i][0]+" DISABLE TRIGGER ALL;");
+							statement.executeUpdate("DELETE FROM "+defAgencyIds[i][0]+" WHERE "+defAgencyIds[i][1]+"='"+agencyId+"';");
+							statement.executeUpdate("ALTER TABLE "+defAgencyIds[i][0]+" ENABLE TRIGGER ALL;");
+						}
+						
+					}catch (SQLException e) {
+						System.out.println(e.getMessage());
+					}
+				}
+			}
+			
 			System.out.println("vacuum start");
 			statement.executeUpdate("VACUUM");
 			System.out.println("vacuum finish");

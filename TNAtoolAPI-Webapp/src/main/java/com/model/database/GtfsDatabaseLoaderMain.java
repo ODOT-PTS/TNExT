@@ -100,6 +100,7 @@ public class GtfsDatabaseLoaderMain {
     	DbUpdate.gtfsUpload=true;
     }finally{
     	reader.close();
+    	sessionFactory.close();
     }
   }
 

@@ -1871,10 +1871,10 @@ function copyCensus(index, section, classs){
         			checkCensusstatus(index);
         			checkFpopstatus(index);
         			checkRegionstatus(index);
-        			checkfEmpstatus(currentINDEX);
-    	        	checkEmpstatus(currentINDEX);
-    	        	checkT6status(currentINDEX);
-    	        	checkPNRstatus(currentINDEX);
+        			checkfEmpstatus(index);
+    	        	checkEmpstatus(index);
+    	        	checkT6status(index);
+    	        	checkPNRstatus(index);
             		break;
 		    case "employment": 
 		    		checkEmpstatus(index);
@@ -2072,8 +2072,8 @@ $(document).ready(function(){
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='update'></td></tr>"+
             			"<tr><td><input type='button' class='activate dbButtons-class no_css single' value='Activate Database' style='background-color: rgba(4, 128, 0, 0.48);' onclick='activeDeactive("+i+")'></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='activate'></td></tr>"+
-            			/*"<tr><td><input type='button' class='modify dbButtons-class no_css single' value='Modify Database Information' style='background-color:rgba(128, 87, 0, 0.46)' onclick='addModifyDB("+i+", "+dbInfo[i][0]+")'></td>"+
-            			"<td></td></tr>"+*/
+            			"<tr><td><input type='button' class='modify dbButtons-class no_css single' value='Modify Database Information' style='background-color:rgba(128, 87, 0, 0.46)' onclick='addModifyDB("+i+", "+dbInfo[i][0]+")'></td>"+
+            			"<td></td></tr>"+
             			"<tr><td><input type='button' class='delete dbButtons-class no_css single' value='Delete Database' style='background-color:rgba(205, 10, 10, 0.65)' onclick='deleteDb("+dbInfo[i][0]+")'></td>"+
             			"<td></td></tr>"+
             			"</table></div></td>";
