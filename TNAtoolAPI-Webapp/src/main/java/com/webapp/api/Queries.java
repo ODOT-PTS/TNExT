@@ -155,6 +155,7 @@ public class Queries {
 	public static void updateDefaultDBindex() {
 		default_dbindex = Databases.dbsize - 1;
 		dbsize = Databases.dbsize;
+		menuResponse = new AgencyRouteList[Databases.dbsize];
 	}
 
 	/**
@@ -3873,7 +3874,6 @@ public class Queries {
 
 			}
 		}
-		System.out.println(h.size());
 		response = getClusterData(h, fulldates, days, dbindex, x2, x3,
 				username, key, popYear);
 		return response;
@@ -4136,7 +4136,7 @@ public class Queries {
 									"pnrnames").getArray();
 							response.pnrNames = Arrays.asList(tempPnrNames);
 							String[] tempPnrCities = (String[]) rs.getArray(
-									"pnrnames").getArray();
+									"pnrcities").getArray();
 							response.pnrCities = Arrays.asList(tempPnrCities);
 							Integer[] tempPnrSpaces = (Integer[]) rs.getArray(
 									"pnrspaces").getArray();
