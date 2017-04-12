@@ -1138,6 +1138,7 @@ public class Queries {
 			@QueryParam("day") String date,
 			@QueryParam("popYear") String popYear, @QueryParam("x") double x,
 			@QueryParam("key") double key,
+			@QueryParam("l") Integer LOS,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("areaId") String areaid, @QueryParam("type") int type,
 			@QueryParam("username") String username,
@@ -1166,22 +1167,8 @@ public class Queries {
 		double[] StopsPopMiles;
 
 		AgencyXR response = new AgencyXR();
-		response.metadata = "Report Type:Transit Agency Extended Report;Report Date:"
-				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar
-						.getInstance().getTime())
-				+ ";"
-				+ "Selected Database:"
-				+ Databases.dbnames[dbindex]
-				+ ";Selected Date(s):"
-				+ date
-				+ "Population Search Radius(miles):"
-				+ String.valueOf(x)
-				+ ";Selected Transit Agency:" + agency + ";" + DbUpdate.VERSION;
 		x = x * 1609.34;
 		response.AgencyId = agency;
-		// response.AgencyName =
-		// GtfsHibernateReaderExampleMain.QueryAgencybyid(agency,
-		// dbindex).getName();
 		HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
 		allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
 		response.AgencyName = allAgencies.get(agency).name;
@@ -1205,27 +1192,28 @@ public class Queries {
 			index += 2;
 		}
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
-		long StopCount = Math.round(StopsPopMiles[0]);
-		response.StopCount = String.valueOf(StopCount);
-		response.UPopWithinX = String.valueOf(Math.round(StopsPopMiles[1]));
-		response.RPopWithinX = String.valueOf(Math.round(StopsPopMiles[2]));
-		response.racWithinX = String.valueOf(Math.round(StopsPopMiles[4]));
-		response.wacWithinX = String.valueOf(Math.round(StopsPopMiles[5]));
+		response.UrbanStopCount = String.valueOf(Math.round(StopsPopMiles[0]));
+		response.RuralStopCount = String.valueOf(Math.round(StopsPopMiles[1]));
+		response.StopCount = String.valueOf(Math.round(StopsPopMiles[0] + StopsPopMiles[1]));
+		response.UPopWithinX = String.valueOf(Math.round(StopsPopMiles[2]));
+		response.RPopWithinX = String.valueOf(Math.round(StopsPopMiles[3]));
+		response.racWithinX = String.valueOf(Math.round(StopsPopMiles[5]));
+		response.wacWithinX = String.valueOf(Math.round(StopsPopMiles[6]));
 
 		double RouteMiles = StopsPopMiles[3];
 		response.RouteMiles = String.valueOf(RouteMiles);
 		if (RouteMiles > 0)
 			response.StopPerRouteMile = String.valueOf(Math
-					.round((StopCount * 10000.0) / (RouteMiles)) / 10000.0);
+					.round((Integer.parseInt(response.StopCount) * 10000.0) / (RouteMiles)) / 10000.0);
 		else
 			response.StopPerRouteMile = "NA";
 		if (geotype != -1) {
 			ServiceMetrics = PgisEventManager.AgencyServiceMetrics(sdates,
-					days, fulldates, agency, x, dbindex, popYear, areaid, type,
+					days, fulldates, agency, x, LOS, dbindex, popYear, areaid, type,
 					geotype, geoid);
 		} else {
 			ServiceMetrics = PgisEventManager.AgencyServiceMetrics(sdates,
-					days, fulldates, agency, x, dbindex, popYear, areaid, type,
+					days, fulldates, agency, x, LOS, dbindex, popYear, areaid, type,
 					-1, null);
 		}
 
@@ -1233,9 +1221,12 @@ public class Queries {
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		response.ServiceMiles = ServiceMetrics.get("svcmiles");
 		response.ServiceHours = ServiceMetrics.get("svchours");
-		response.ServiceStops = ServiceMetrics.get("svcstops");
+		response.UrbanServiceStops = ServiceMetrics.get("svcstops_urban");
+		response.RuralServiceStops = ServiceMetrics.get("svcstops_rural");
 		response.UPopServedByService = ServiceMetrics.get("uspop");
 		response.RPopServedByService = ServiceMetrics.get("rspop");
+		response.UPopLos = ServiceMetrics.get("upop_los");
+		response.RPopLos = ServiceMetrics.get("rpop_los");
 		response.racServedByService = ServiceMetrics.get("srac");
 		response.wacServedByService = ServiceMetrics.get("swac");
 		String serviceDays = ServiceMetrics.get("svcdays");
@@ -2660,13 +2651,10 @@ public class Queries {
 				* 25899752356.00 / LandArea) / 10000.00);
 		response.PopWithinX = String.valueOf(stopspop[1] + stopspop[2]);
 		response.UPopWithinX = String.valueOf(stopspop[1]);
-		// response.RPopWithinX = String.valueOf(stopspop[2]);
 		response.PopServed = String.valueOf(Math
 				.round((10000.00 * (stopspop[1]) / population)) / 100.00);
 		response.UPopServed = String.valueOf(Math
 				.round((10000.00 * (stopspop[1]) / population)) / 100.00);
-		// response.RPopServed =
-		// String.valueOf(Math.round((10000.00*(stopspop[2])/population))/100.00);
 		response.PopUnServed = String
 				.valueOf(Math
 						.round(1E4 - ((10000.00 * (stopspop[1]) / population))) / 100.0);
@@ -3265,7 +3253,7 @@ public class Queries {
 	}
 
 	/**
-	 * Generates The Summary Statewide report
+	 * Generates The Summary State-wide report
 	 */
 
 	@GET
@@ -3283,41 +3271,32 @@ public class Queries {
 		if (popYear == null || popYear.equals("null")) {
 			popYear = "2010";
 		}
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
 		int totalLoad = 2;
 		int index = 0;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
-		GeoRList response = new GeoRList();
-		response.metadata = "Report Type:Statewide Summary Report;Report Date:"
-				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar
-						.getInstance().getTime()) + ";" + "Selected Database:"
-				+ Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+		GeoRList response = new GeoRList();		
 		response.type = "StatewideReport";
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
-		geocounts = PgisEventManager.getGeoCounts(dbindex, username, popYear);
+		geocounts = PgisEventManager.getStateInfo(dbindex, username, popYear);
 		GeoR each = new GeoR();
 		each.Name = "Oregon";
 		each.CountiesCount = String.valueOf(geocounts.get("county"));
 		each.TractsCount = String.valueOf(geocounts.get("tract"));
 		each.PlacesCount = String.valueOf(geocounts.get("place"));
-		each.UrbansCount = String.valueOf(geocounts.get("urban"));
+		each.UrbanizedAreasCount = String.valueOf(geocounts.get("urbanized_area"));
+		each.UrbanClustersCount= String.valueOf(geocounts.get("urban_cluster"));
 		each.RegionsCount = String.valueOf(geocounts.get("region"));
 		each.CongDistsCount = String.valueOf(geocounts.get("congdist"));
 		each.population = String.valueOf(geocounts.get("pop"));
-		each.landArea = String
-				.valueOf(Math.round(geocounts.get("landarea") / 2.58999e4) / 100.0);
+		each.landArea = String.valueOf(Math.round(geocounts.get("landarea") / 2.58999e4) / 100.0);
 		each.urbanpop = String.valueOf(geocounts.get("urbanpop"));
 		each.ruralpop = String.valueOf(geocounts.get("ruralpop"));
 		each.employment = String.valueOf(geocounts.get("rac"));
 		each.employees = String.valueOf(geocounts.get("wac"));
-		index++;
-		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
-		HashMap<String, Integer> transcounts = new HashMap<String, Integer>();
-		transcounts = GtfsHibernateReaderExampleMain.QueryCounts(dbindex,
-				selectedAgencies);
-		each.StopsCount = String.valueOf(transcounts.get("stop"));
-		each.RoutesCount = String.valueOf(transcounts.get("route"));
-		each.AgenciesCount = String.valueOf(transcounts.get("agency"));
+		each.StopsCount = String.valueOf(geocounts.get("stop"));
+		each.RoutesCount = String.valueOf(geocounts.get("route"));
+		each.AgenciesCount = String.valueOf(geocounts.get("agency"));
+		index++;		
 		response.GeoR.add(each);
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -3328,7 +3307,6 @@ public class Queries {
 		}
 		progVal.remove(key);
 		return response;
-
 	}
 
 	/**
@@ -3411,7 +3389,7 @@ public class Queries {
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
-		geocounts = PgisEventManager.getGeoCounts(dbindex, username, popYear);
+		geocounts = PgisEventManager.getStateInfo(dbindex, username, popYear);
 		response.StopsPersqMile = String.valueOf(Math.round(StopsCount
 				* 25899752356.00 / geocounts.get("landarea")) / 10000.00);
 		index += 5;
@@ -4017,9 +3995,7 @@ public class Queries {
 								+ "counties AS (SELECT counties.countyid, counties.cname FROM census_counties AS counties INNER JOIN stops ON LEFT(stops.blockid,5) = counties.countyid), "
 								+ "countiesarray AS (SELECT COALESCE(array_agg(distinct countyid),'{N/A}') AS countiesids, COALESCE(array_agg(distinct cname),'{N/A}') AS countiesnames FROM counties), "
 								+ "countiescount AS (SELECT count(distinct counties.countyid) AS countiescount FROM counties), "
-								+ "urbanarray AS (SELECT COALESCE(sum(distinct population"
-								+ popYear
-								+ ")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
+								+ "urbanarray AS (SELECT COALESCE(sum(distinct population" + popYear + ")::text, 'N/A') AS urbanareaspop, COALESCE(array_agg(distinct stops.urbanid),'{N/A}') AS urbanids, COALESCE(array_agg(distinct uname),'{N/A}') AS urbannames FROM census_urbans INNER JOIN stops ON census_urbans.urbanid = stops.urbanid),"
 								+ "regionsarray  AS (SELECT  COALESCE(array_agg(distinct ' Region '||regionid),'{N/A}') AS regionids FROM stops),"
 								+ "pop0 AS (SELECT distinct census_blocks.blockid, population"
 								+ popYear
@@ -4240,7 +4216,7 @@ public class Queries {
 
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
-		int totalLoad = agencies.size();
+		int totalLoad = agencies.size(); // this is for computing the progress 
 		int counter = 1;
 		for (Entry<String, ConGraphAgency> i : agencies.entrySet()) {
 			e = SpatialEventManager.getConGraphObj(i.getKey(),

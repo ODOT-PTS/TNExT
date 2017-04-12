@@ -175,6 +175,10 @@ function toggleCheckbox(checkbox) {
 	}
 }
 
+/**
+ * returns the html for table headers based on user selection.
+ * @returns {String}
+ */
 function getTableHeaders() {
 	var nodesList = [];
 	var tree = $('#jstree').jstree(true);
@@ -195,114 +199,98 @@ function getTableHeaders() {
 	var y = "";
 	if (racBool && wacBool) {
 		if ($('#reportType').val() == 'Agencies') {
-			y += '<th class="metric" title="Number of employees residing in the area and served by agnecy">Number of employees served (RAC)<span class="IOSym">(1)</span></th>'
-					+ '<th class="metric" title="Number of employees working in the area and served by agnecy">Number of employees served (WAC)<span class="IOSym">(1)</span></th>';
+			y += '<th class="metric" title="Total number of employed people residing in the geographic area and served by the agency on selected date(s).">Employment Served (RAC)<span class="IOSym">(1)</span></th>'
+					+ '<th class="metric" title="Total number of employed people working in the geographic area and served by the agency on selected date(s).">Employees served (WAC)<span class="IOSym">(1)</span></th>';
 		} else {
-			y += '<th class="metric" title="Number of employees residing in the area">Number of employees (RAC)</th>'
-					+ '<th class="metric" title="Number of employees working in the area">Number of employees (WAC)</th>';
+			y += '<th class="metric" title="Total number of employed people residing in the geographic area.">Employment (RAC)</th>'
+					+ '<th class="metric" title="Total number of employed people working in the geographic area.">Employees (WAC)</th>';
 		}
 
-		nodesList
-				.forEach(function(item, index, array) {
+		nodesList.forEach(function(item, index, array) {
 					var node = tree.get_node(item.attr('id'));
 					if ($('#reportType').val() != 'Agencies')
-						y += '<th class="metric" title="Total ' + node.data.title + ' employees living in the area.">'
-								+ node.data.title
-								+ ' (RAC)</th>';
-					y += '<th class="metric" title="Employees Served - Unduplicated summation of '
-						+ node.data.title
-						+ ' employees living within X distance of any stop. This metric is date independent.">'
-							+ node.data.title
-							+ ' EMPS (RAC)<span class="IOSym">(1)</span></th>'
-							+ '<th class="metric" title="Employees Served at Level of Service - Unduplicated summation of '
-							+ node.data.title
-							+ ' employees that receive the specified minimum level of service. This metric is date dependent.">'
-							+ node.data.title + ' EMPSLOS (RAC)<span class="IOSym">(1)(2)(3)</span></th>'
-							+ '<th class="metric" title="Employees Served by Service - Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
-							+ node.data.title
-							+ ' EMPSS (RAC)<span class="IOSym">(1)(3)</span></th>';
+						y += '<th class="metric" title="Total number of employed people, belonging to the category, residing in the geographic area.">'
+								+ node.data.title + ' (RAC)</th>';
+					y += '<th class="metric" title="[Category] Served: Total number of unduplicated employed people, belonging to the category, residing in '
+						+ 'census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. '
+						+ 'Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).">'
+						+ node.data.title + ' - S (RAC)<span class="IOSym">(1)</span></th>'
+						+ '<th class="metric" title="[Category] Served at Level of Service: Total unduplicated employed people,'
+						+ 'belonging to the category, residing in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and '
+						+ 'served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user.">'
+						+ node.data.title + ' - SLOS (RAC)<span class="IOSym">(1)(2)(3)</span></th>'
+						+ '<th class="metric" title="[Category] Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within '
+						+ 'X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of '
+						+ 'employed people, belonging to the category, residing in that block multiplied by the times that block is served on the selected date(s). '
+						+ 'Reported number is cumulative over the selected dates.">'
+						+ node.data.title + ' - SS (RAC)<span class="IOSym">(1)(3)</span></th>';
 					if ($('#reportType').val() != 'Agencies')
-						y += '<th class="metric" title="Total ' + node.data.title + ' employees working in the area.">'
-								+ node.data.title
-								+ ' (WAC)</th>';
-					y += '<th class="metric" title="Employees Served - Unduplicated summation of ' + node.data.title + ' employees working within X distance of any stop. This metric is date/service independent.">'
-							+ node.data.title
-							+ ' EMPS (WAC)<span class="IOSym">(1)</span></th>'
-							+ '<th class="metric" title="Employees Served at Level of Service - Unduplicated summation of '
-							+ node.data.title
-							+ ' employees that receive the specified minimum level of service. This metric is date dependent.">'
-							+ node.data.title
-							+ ' EMPSLOS (WAC)<span class="IOSym">(1)(2)(3)</span></th>'
-							+ '<th class="metric" title="Employees Served by Service -  Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
-							+ node.data.title
-							+ ' EMPSS (WAC)<span class="IOSym">(1)(3)</span></th>';
+						y += '<th class="metric" title="Total number of employed people, belonging to the category, working in the geographic area.">'
+						+ node.data.title + ' (WAC)</th>';
+					y += '<th class="metric" title="[Category] Served: Total number of unduplicated employed people, belonging to the category, working in '
+						+ 'census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. '
+						+ 'Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).">'
+						+ node.data.title + ' - S (WAC)<span class="IOSym">(1)</span></th>'
+						+ '<th class="metric" title="[Category] Served at Level of Service: Total unduplicated employed people,'
+						+ 'belonging to the category, working in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and '
+						+ 'served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user.">'
+						+ node.data.title + ' - SLOS (WAC)<span class="IOSym">(1)(2)(3)</span></th>'
+						+ '<th class="metric" title="[Category] Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within '
+						+ 'X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of '
+						+ 'employed people, belonging to the category, working in that block multiplied by the times that block is served on the selected date(s). '
+						+ 'Reported number is cumulative over the selected dates.">'
+						+ node.data.title + ' - SS (WAC)<span class="IOSym">(1)(3)</span></th>';
 				});
 	} else if (racBool) {
 		if ($('#reportType').val() == 'Agencies') {
-			y += '<th class="metric" title="Number of employees residing in the area and served by agnecy">Number of employees served (RAC)<span class="IOSym">(1)</span></th>';
+			y += '<th class="metric" title="Total number of employed people residing in the geographic area and served by the agency on selected date(s).">Employment Served (RAC)<span class="IOSym">(1)</span></th>'
 		} else {
-			y += '<th class="metric" title="Number of employees residing in the area">Number of employees (RAC)</th>';
+			y += '<th class="metric" title="Total number of employed people residing in the geographic area.">Employment (RAC)</th>'
 		}
 
-		nodesList
-				.forEach(function(item, index, array) {
-					var node = tree.get_node(item.attr('id'));
-					if ($('#reportType').val() != 'Agencies')
-						y += '<th class="metric" title="Total '
-							+ node.data.title
-							+ ' employees living in the area.">'
-								+ node.data.title
-								+ ' (RAC)</th>';
-					y += '<th class="metric" title="Employees Served: Unduplicated summation of '
-						+ node.data.title
-						+ ' employees living within X distance of any stop.  This metric is date/service independent.">'
-							+ node.data.title
-							+ ' EMPS (RAC)<span class="IOSym">(1)</span></th>'
-							+ '<th class="metric" title="Employees Served at Level of Service -: Unduplicated summation of '
-							+ node.data.title
-							+ ' employees that receive the specified minimum level of service.">'
-							+ node.data.title
-							+ ' EMPSLOS (RAC)<span class="IOSym">(1)(2)(3)</span></th>'
-							+ '<th class="metric" title="Employees Served by Service - Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
-							+ node.data.title
-							+ ' EMPSS (RAC)<span class="IOSym">(1)(3)</span></th>';
-				});
+		nodesList.forEach(function(item, index, array) {
+			var node = tree.get_node(item.attr('id'));
+			if ($('#reportType').val() != 'Agencies')
+				y += '<th class="metric" title="Total number of employed people, belonging to the category, residing in the geographic area.">'
+						+ node.data.title + ' (RAC)</th>';
+			y += '<th class="metric" title="[Category] Served: Total number of unduplicated employed people, belonging to the category, residing in '
+				+ 'census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. '
+				+ 'Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).">'
+				+ node.data.title + ' - S (RAC)<span class="IOSym">(1)</span></th>'
+				+ '<th class="metric" title="[Category] Served at Level of Service: Total unduplicated employed people,'
+				+ 'belonging to the category, residing in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and '
+				+ 'served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user.">'
+				+ node.data.title + ' - SLOS (RAC)<span class="IOSym">(1)(2)(3)</span></th>'
+				+ '<th class="metric" title="[Category] Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within '
+				+ 'X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of '
+				+ 'employed people, belonging to the category, residing in that block multiplied by the times that block is served on the selected date(s). '
+				+ 'Reported number is cumulative over the selected dates.">'
+				+ node.data.title + ' - SS (RAC)<span class="IOSym">(1)(3)</span></th>';
+			});
 	} else {
 		if ($('#reportType').val() == 'Agencies') {
-			y += '<th class="metric" title="Number of employees working in the area and served by agnecy">Number of employees served (WAC)<span class="IOSym">(1)</span></th>';
+			y += '<th class="metric" title="Total number of employed people working in the geographic area and served by the agency on selected date(s).">Employees served (WAC)<span class="IOSym">(1)</span></th>';
 		} else {
-			y += '<th class="metric" title="Number of employees working in the area">Number of employees (WAC)<span class="IOSym">(3)</span></th>';
+			y += '<th class="metric" title="Total number of employed people working in the geographic area.">Employees (WAC)</th>';
 		}
-		nodesList
-				.forEach(function(item, index, array) {
-					var node = tree.get_node(item.attr('id'));
-					if ($('#reportType').val() != 'Agencies')
-						y += '<th class="metric" title="Total '
-							+ node.data.title
-							+ ' employees working in the area.">'
-								+ node.data.title
-								+ ' (WAC)<span class="IOSym">(3)</span></th>';
-					y += '<th class="metric" title="Employees Served - Unduplicated summation of '
-						+ node.data.title
-						+ ' employees working within X distance of any stop. This metric is date/service independent.">'
-							+ node.data.title
-							+ ' EMPS (WAC)<span class="IOSym">(1)</span></th>'
-							+ '<th class="metric" title="Employees Served at Level of Service - Unduplicated summation of '
-							+ node.data.title
-							+ ' employees that receive the specified minimum level of service.">'
-							+ node.data.title
-							+ ' EMPSLOS (WAC)<span class="IOSym">(1)(2)(3)</span></th>'
-							+ '<th class="metric" title="Employees Served by Service - Unduplicated summation of '
-							+ node.data.title
-							+ ' employees served by service is calculated as service stops multiplied by the unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'
-							+ node.data.title
-							+ ' EMPSS (WAC)<span class="IOSym">(1)(3)</span></th>';
+		nodesList.forEach(function(item, index, array) {
+				var node = tree.get_node(item.attr('id'));
+				if ($('#reportType').val() != 'Agencies')
+					y += '<th class="metric" title="Total number of employed people, belonging to the category, working in the geographic area.">'
+					+ node.data.title + ' (WAC)</th>';
+				y += '<th class="metric" title="[Category] Served: Total number of unduplicated employed people, belonging to the category, working in '
+					+ 'census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. '
+					+ 'Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).">'
+					+ node.data.title + ' - S (WAC)<span class="IOSym">(1)</span></th>'
+					+ '<th class="metric" title="[Category] Served at Level of Service: Total unduplicated employed people,'
+					+ 'belonging to the category, working in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and '
+					+ 'served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user.">'
+					+ node.data.title + ' - SLOS (WAC)<span class="IOSym">(1)(2)(3)</span></th>'
+					+ '<th class="metric" title="[Category] Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within '
+					+ 'X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of '
+					+ 'employed people, belonging to the category, working in that block multiplied by the times that block is served on the seleceted date(s). '
+					+ 'Reported number is cumulative over the selected dates.">'
+					+ node.data.title + ' - SS (WAC)<span class="IOSym">(1)(3)</span></th>';
 				});
 	}
 	return y;
@@ -312,6 +300,7 @@ function clearReport() {
 	document.getElementById('displayReport').innerHTML = "";
 	$('#initialText').show();
 }
+
 
 function datasetChange(e) {
 	if (e.value == 'lodes_blocks_wac') {
@@ -326,6 +315,9 @@ function datasetChange(e) {
 	}
 }
 
+/**
+ * updates reportType value based on the selected report.
+ */
 function selectFunction() {
 	$('#reportTitle').html($('#reportType').val());
 }
@@ -726,6 +718,6 @@ function openReport2() {
 	$('#displayReport').append($(html));
 	$('#dialogPreLoader').hide();
 	
-	tableProperties.hiddenCols =  [$('#RT thead th').length - 1];
+	//tableProperties.hiddenCols =  [$('#RT thead th').length - 1];
 	table = buildDatatables();
 }

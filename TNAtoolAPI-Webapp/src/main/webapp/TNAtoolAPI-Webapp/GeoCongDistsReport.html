@@ -190,14 +190,15 @@ $(document).ready(function(){
 		            '</tr>'+
 		        '</table>';
 		    }
-		}
-	// append toopltips
-	var tooltips = populateMetricDefs();
-	var tempKey = [];
-	$('.metric').each(function(index, item) {
-		tempKey = [$('title').text(),$(item).text().strip().trim() ];
-		$(item).attr('title',tooltips[tempKey]);
-		});
+		    
+		 	// append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});	
+		}		
 	});
 });
 </script>

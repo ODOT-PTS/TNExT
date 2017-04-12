@@ -63,6 +63,14 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String UPopLos;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopLos;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String racWithinX;
 	
 	@XmlAttribute
@@ -75,11 +83,24 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String StopPerRouteMile;
+    public String UrbanStopCount;
 	
 	@XmlAttribute
     @JsonSerialize
-    public String ServiceStops;
+    public String RuralStopCount;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String StopPerRouteMile;
+	
+
+	@XmlAttribute
+    @JsonSerialize
+    public String RuralServiceStops;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UrbanServiceStops;
 	
 	@XmlAttribute
     @JsonSerialize

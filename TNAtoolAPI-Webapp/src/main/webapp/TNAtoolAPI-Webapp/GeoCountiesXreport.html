@@ -70,7 +70,7 @@ $(document).ready(function(){
 			html += '<tr><td class="metric">Geo ID<td>'+ item.AreaId 
 			+'</td></tr><tr><td class="metric">Name</td><td>' + item.AreaName 
 			+'</td></tr><tr><td class="metric">Route Miles </td><td>'+ numberconv(item.RouteMiles) 
-			+'</td></tr><tr><td class="metric">Stops Per Square Mile<span class="IOSym">(3)</span></td><td>'+ numberconv(item.StopsPersqMile) 
+			+'</td></tr><tr><td class="metric">Stops Per Square Mile</span></td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td></tr><tr><td class="metric">Stops Per Service Mile<span class="IOSym">(3)</span></td><td>' + numberconv(item.StopPerServiceMile) 
 			+'</td></tr><tr><td class="metric">Service Hours<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceHours)
 			+'</td></tr><tr><td class="metric">Service Miles<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceMiles)
@@ -91,8 +91,8 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Percent of Employment Served (RAC)<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.racServed))
 			+'</td></tr><tr><td class="metric">Percent of Employment Served at Level of Service (RAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.racServedAtLoService))
 			+'</td></tr><tr><td class="metric"> Employment Served at Level of Service (RAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalracServedAtLoService)		
-			+'</td></tr><tr><td class="metric">Percent of Employment (RAC) Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.racUnServed))
-			+'</td></tr><tr><td class="metric">Employment Served By Service  (RAC)<span class="IOSym">(1)(3)</span></td><td>' +numberconv(item.racServedByService)+'</td></tr>';
+			+'</td></tr><tr><td class="metric">Percent of Employment Unserved (RAC)<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.racUnServed))
+			+'</td></tr><tr><td class="metric">Employment Served By Service (RAC)<span class="IOSym">(1)(3)</span></td><td>' +numberconv(item.racServedByService)+'</td></tr>';
            //RAC		
            //WAC
            if(popYear==2010){ html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."> Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
@@ -116,10 +116,10 @@ $(document).ready(function(){
 	html+='<tr><td class="metric">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
 			+'</td></tr><tr><td class="metric">Connected Communities</td><td>'+(item.ConnectedCommunities).replace(/County/g,'')   
 			+'</td></tr><tr><td class="metric">Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService
-			+'</td></tr><tr><td class="metric">Minimum Fare</td><td>'+showDollarSign(item.MinFare)
-			+'</td></tr><tr><td class="metric">Average Fare</td><td>'+showDollarSign(item.AverageFare)
-			+'</td></tr><tr><td class="metric">Median Fare</td><td>'+showDollarSign(item.MedianFare)
-			+'</td></tr><tr><td class="metric">Maximum Fare</td><td>'+showDollarSign(item.MaxFare)+'</td>';
+			+'</td></tr><tr><td class="metric">Minimum Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MinFare)
+			+'</td></tr><tr><td class="metric">Average Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.AverageFare)
+			+'</td></tr><tr><td class="metric">Median Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MedianFare)
+			+'</td></tr><tr><td class="metric">Maximum Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MaxFare)+'</td>';
 			html +='</tr></tbody></table>';
 			
 	

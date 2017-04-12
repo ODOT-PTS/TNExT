@@ -7,6 +7,10 @@ function toggleCheckbox(checkbox){
 		}	
 	}
 	
+/**
+ * builds the html for table headers based on the user selection of Title VI selection
+ * @returns {String}
+ */
 	function getTableHeaders(){
 		var nodesList = [];
 		var tree = $('#jstree').jstree(true);
@@ -20,16 +24,16 @@ function toggleCheckbox(checkbox){
 		var y = "";
 		if ($('#reportType').val() == 'Agencies'){
 			nodesList.forEach (function (item, index, array){
-				 y += '<th class="metric" title="Number of Individuals Served: Unduplicated summation of individuals of the selected category who are living within X distance of any stop. This metric is date/service independent.">'+ tree.get_text(item) +'-S<span class="IOSym">(1)</span></th>'
-					+ '<th class="metric" title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service.">'+ tree.get_text(item) +'-SLOS<span class="IOSym">(1)(2)(3)</span></th>'
-					+ '<th class="metric" title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'+ tree.get_text(item) +'-SS<span class="IOSym">(1)(3)</span></th>';
+				 y += '<th class="metric" title="Number of Individuals Served: Total number of unduplicated individuals, belonging to the category, in census blocks with their centroid within X-mile radius (i.e., stop distance) of any stop served by the agency. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).">'+ tree.get_text(item) +' - S<span class="IOSym">(1)</span></th>'
+					+ '<th class="metric" title="Number of Individuals Served at Level of Service: Total unduplicated inividuals, belonging to the category, in census blocks with their centroids located within X-miles radius of any stop served at least N-times by the agency on the selected date(s). X is the population search radius and N is the minimum level of service set by the user.">'+ tree.get_text(item) +' - SLOS<span class="IOSym">(1)(2)(3)</span></th>'
+					+ '<th class="metric" title="Number of Individuals Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop served by the agency. [Category] Served by Service for a block is calculated as the number of individuals, belonging to the category, in that block multiplied by the times that block is served on the seleceted date(s). Reported number is cumulative over the selected dates.">'+ tree.get_text(item) +' - SS<span class="IOSym">(1)(3)</span></th>';
 				});
 		}else{
 			nodesList.forEach (function (item, index, array){
-			 y += '<th class="metric" title="Total number of individuals of that belong to the selected category and are living in the area.">'+ tree.get_text(item) +'</th>'
-				+' <th class="metric" title="Number of Individuals Served: Unduplicated summation of individuals of the selected category who are living within X distance of any stop. This metric is date/service independent.">'+ tree.get_text(item) +'-S<span class="IOSym">(1)</span></th>'
-				+' <th class="metric" title="Number of Individuals Served at Level of Service: Unduplicated summation of individuals of the selected category who receive the specified minimum level of service.">'+ tree.get_text(item) +'-SLOS<span class="IOSym">(1)(2)(3)</span></th>'
-				+' <th class="metric" title="Number of Individuals Served by Service: Unduplicated summation of individuals of the selected category who are served by service is calculated as service stops multiplied by the unduplicated individuals living within an X-mile radius (i.e., stop distance) of all stops. Reported number is cumulative over the selected dates.">'+ tree.get_text(item) +'-SS<span class="IOSym">(1)(3)</span></th>';
+			 y += '<th class="metric" title="Total number of individuals belonging to the category and living in the geographic area.">'+ tree.get_text(item) +'</th>'
+				+' <th class="metric" title="Number of Individuals Served: Total number of unduplicated individuals, belonging to the category, in census blocks with their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).">'+ tree.get_text(item) +' - S<span class="IOSym">(1)</span></th>'
+				+' <th class="metric" title="Number of Individuals Served at Level of Service: Total unduplicated inividuals, belonging to the category, in census blocks with their centroids located within X-miles radius of any stop in the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user.">'+ tree.get_text(item) +' - SLOS<span class="IOSym">(1)(2)(3)</span></th>'
+				+' <th class="metric" title="Number of Individuals Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. [Category Served] by Service for a block is calculated as the number of individuals, belonging to the category, in that block multiplied by the times that block is served on the seleceted date(s). Reported number is cumulative over the selected dates.">'+ tree.get_text(item) +' - SS<span class="IOSym">(1)(3)</span></th>';
 			});
 		}
 		return y;
@@ -117,7 +121,7 @@ function toggleCheckbox(checkbox){
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?emp?&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
 			async: true,
-			success: function(d){// making a hashmap of the query results.\
+			success: function(d){// making a hashmap of the query results.
 				docMetadata = d.metadata;
 				var temp = d.TitleVIDataList;
 				t6.TitleVIDataList = [];
@@ -129,7 +133,7 @@ function toggleCheckbox(checkbox){
 						'<td>' + t6.TitleVIDataList[i].name + '</td>';
 					var resultSet= {};
 					$('.jstree-leaf').each(function(){
-						if ($('#reportType').val() != 'Agencies') resultSet[$(this).attr('id')] = t6.TitleVIDataList[i][$(this).attr('id')];//console.log($(this).attr('id'));
+						if ($('#reportType').val() != 'Agencies') resultSet[$(this).attr('id')] = t6.TitleVIDataList[i][$(this).attr('id')];
 						resultSet[$(this).attr('id')+'_atlos'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_atlos'];
 						resultSet[$(this).attr('id')+'_withinx'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_withinx'];
 						resultSet[$(this).attr('id')+'_served'] = t6.TitleVIDataList[i][($(this).attr('id')).toLowerCase()+'_served'];
@@ -160,7 +164,7 @@ function toggleCheckbox(checkbox){
 				$('#displayReport').append($(html));
 				$('#dialogPreLoader').hide();
 				
-				tableProperties.hiddenCols =  [$('#RT thead th').length - 1];
+//				tableProperties.hiddenCols =  [$('#RT thead th').length - 1];
 				table = buildDatatables();				
 			}
 		});		

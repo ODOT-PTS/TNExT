@@ -48,10 +48,11 @@
 <script type="text/javascript">
 	var type = getURIParameter("type");
 	var x = getURIParameter("x");
+	var los = getURIParameter("l");
 	var geoid = getURIParameter("geoid");
 	var geotype = parseInt(getURIParameter("geotype"));
 	var areaId = getURIParameter("areaId");
-	var dateIOnumber = 2; // the number is used to map selected date(s) to the metrics affected by the date(s).
+	var dateIOnumber = 3; // the number is used to map selected date(s) to the metrics affected by the date(s).
 	var w_qstringa = getURIParameter("agency");
 	var fAverage = new Array();
 	var fMedian = new Array();	
@@ -63,6 +64,7 @@
 			.ready(
 					function() {
 						$("#Sradius").val(w_qstringx);
+						$("#LoS").val(los);
 						setPopOptions();
 						loadDBList();
 						updateToolTips();
@@ -73,7 +75,7 @@
 							datatype : 'json',
 							url : '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
 									+ w_qstringa + '&day=' + w_qstringd + '&key=' + key + '&dbindex=' + dbindex
-									+ '&popYear=' + popYear + '&areaId=' + areaId + '&type=' + type 
+									+ '&popYear=' + popYear + '&areaId=' + areaId + '&type=' + type  + '&l=' + los
 									+ '&username=' + getSession() + '&x=' + w_qstringx + '&geotype=' + geotype
 									+ '&geoid=' + geoid,
 							async : true,
@@ -84,25 +86,30 @@
 										+ '</td></tr><tr><td class="metric">Agency Name</td><td>' + item.AgencyName
 										+ '</td></tr><tr><td class="metric">Route Miles</td><td>' + numberconv(item.RouteMiles)
 										+ '</td></tr><tr><td class="metric">Route Stops</td><td>' + numberconv(item.StopCount)
+										+ '</td></tr><tr><td class="metric">Urban Stops</td><td>' + numberconv(item.UrbanStopCount)
+										+ '</td></tr><tr><td class="metric">Rural Stops</td><td>' + numberconv(item.RuralStopCount)
 										+ '</td></tr><tr><td class="metric">Stops Per Route Mile</td><td>' + numberconv(item.StopPerRouteMile)
-										+ '</td></tr><tr><td class="metric">Service Hours <span class="IOSym">(2)</span></td><td>'+ numberconv(item.ServiceHours)
-										+ '</td></tr><tr><td class="metric">Service Miles<span class="IOSym">(2)</span></td><td>'+ numberconv(item.ServiceMiles)
+										+ '</td></tr><tr><td class="metric">Service Hours <span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceHours)
+										+ '</td></tr><tr><td class="metric">Service Miles<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceMiles)
 										+ '</td></tr><tr><td class="metric">Urban Population Served<span class="IOSym">(1)</span></td><td>'+ numberconv(item.UPopWithinX)
 										+ '</td></tr><tr><td class="metric">Rural Population Served<span class="IOSym">(1)</span></td><td>'+ numberconv(item.RPopWithinX)
+										+ '</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.UPopLos)
+										+ '</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.RPopLos)
 										+ '</td></tr><tr><td class="metric">Employment Served (RAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.racWithinX) + '</td></tr>';
 								if (popYear > 2010) {
 									html += '<td class="metric">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>N/A</td></tr>';
 								} else {
 									html += '<td class="metric">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX) + '</td></tr>';
 								}
-								html += '<tr><td class="metric">Service Stops<span class="IOSym">(2)</span></td><td>' + numberconv(item.ServiceStops)
-										+ '</td></tr><tr><td class="metric">Urban Population Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.UPopServedByService)
-										+ '</td></tr><tr><td class="metric">Rural Population Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.RPopServedByService)
-										+ '</td></tr><tr><td class="metric">Employment Served By Service (RAC)<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.racServedByService) + '</td></tr>';
-								if (popYear > 2010) html += '<tr><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(2)</span></td><td>'+ 'N/A' + '</td></tr>';
-								else html += '<tr><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(2)</span></td><td>'+ numberconv(item.wacServedByService) + '</td></tr>';
-								html += '<tr><td class="metric">Service Days<span class="IOSym">(2)</span></td><td>'+ item.ServiceDays
-										+ '</td></tr><tr><td class="metric" >Hours of Service<span class="IOSym">(2)</span></td><td>'+ item.HoursOfService + '</td>';
+								html += '<tr><td class="metric">Urban Service Stops<span class="IOSym">(3)</span></td><td>' + numberconv(item.UrbanServiceStops)
+										+ '</td></tr><tr><td class="metric">Rural Service Stops<span class="IOSym">(3)</span></td><td>' + numberconv(item.RuralServiceStops)
+										+ '</td></tr><tr><td class="metric">Urban Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.UPopServedByService)
+										+ '</td></tr><tr><td class="metric">Rural Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.RPopServedByService)
+										+ '</td></tr><tr><td class="metric">Employment Served By Service (RAC)<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.racServedByService) + '</td></tr>';
+								if (popYear > 2010) html += '<tr><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>'+ 'N/A' + '</td></tr>';
+								else html += '<tr><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>'+ numberconv(item.wacServedByService) + '</td></tr>';
+								html += '<tr><td class="metric">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
+										+ '</td></tr><tr><td class="metric" >Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService + '</td>';
 								html += '</tr></tbody></table>';
 								$('#displayReport').append($(html));
 								progressbar.remove();
@@ -171,13 +178,34 @@
 			</td>
 			<td id="td3">
 				<div class="headerBR">
-					Population Search Radius (miles) <span class="IOSym">(1) </span><input
-						type="text" name="x" id="Sradius" data-iomap="1"
-						data-label='Population Search Radius (miles)'
-						class="input radius tbox" onkeypress="return isNumber(event)" />
-					<input id="submit" type="button" onclick="reloadPage()"
-						title="Click submit to refresh the report" value="Submit"
-						class="button" />
+					<table>
+						<tr>
+							<td>
+								Population Search Radius (miles) <span class="IOSym">(1) </span>
+							</td>
+							<td>
+								<input type="text" name="x" id="Sradius" data-iomap="1"
+								data-label='Population Search Radius (miles)'
+								class="input radius tbox" onkeypress="return isNumber(event)" />
+							</td>
+							<td>
+								<input id="submit" type="button" onclick="reloadPage()"
+								title="Click submit to refresh the report" value="Submit"
+								class="button" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Minimum Level of Service (times)<span class="IOSym">(2) </span>
+							</td>
+							<td>
+								<input type="text" id="LoS" data-iomap="2" data-label="Minimum Level of Service (times)" 
+								class="input tbox" name="l" value="2" onkeypress="return isWholeNumber(event)"/>
+							</td>
+							<td>
+							</td>
+						</tr>
+					</table>
 				</div>
 			</td>
 		</tr>

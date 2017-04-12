@@ -269,11 +269,6 @@ public class GtfsHibernateReaderExampleMain {
 	  return dao.getStopsForTripUrbans(trip,urbans);
   }
   
-  public static HashMap<String, Integer> QueryCounts (int dbindex, List<String> selectedAgencies){
-	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
-	  return dao.getCounts(selectedAgencies);
-  }
-  
   public static List<Stop> QueryStopsbyTripCongdist (AgencyAndId trip, String congdist, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
 	  return dao.getStopsForTripCongdist(trip,congdist);

@@ -148,9 +148,10 @@ $(document).ready(function(){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+			    		w_qstringl = '2';
 			    		keyName = setDates(qstringd);
 
-			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaId='+areaId+'&type='+type+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid+'&nav='+nav);	    		
+			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&l='+w_qstringl+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaId='+areaId+'&type='+type+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid+'&nav='+nav);	    		
 				    
 
 				    };

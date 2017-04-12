@@ -65,7 +65,7 @@ $(document).ready(function(){
 			html += '<tr><td class="metric">Geo ID<td>'+ item.AreaId 
 			+'</td></tr><tr><td class="metric">Name</td><td>' + item.AreaName 
 			+'</td></tr><tr><td class="metric">Route Miles </td><td>'+ numberconv(item.RouteMiles) 
-			+'</td></tr><tr><td class="metric">Stops Per Square Mile<span class="IOSym">(3)</span></td><td>'+ numberconv(item.StopsPersqMile) 
+			+'</td></tr><tr><td class="metric">Stops Per Square Mile</span></td><td>'+ numberconv(item.StopsPersqMile) 
 			+'</td></tr><tr><td class="metric">Stops Per Service Mile<span class="IOSym">(3)</span></td><td>' + numberconv(item.StopPerServiceMile) 
 			+'</td></tr><tr><td class="metric">Service Hours<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceHours)
 			+'</td></tr><tr><td class="metric">Service Miles<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceMiles)
@@ -90,29 +90,29 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric"> Employment Served By Service (RAC)<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.racServedByService)+'</td></tr>';
            //RAC		
            //WAC
-           if(popYear==2010){ html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
-			+'</td></tr><tr id="wac3"><td  class="metric">Percent of Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.wacServed))
-			+'</td></tr><tr id="wac4"><td  class="metric">Percent of Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.wacServedAtLoService))
-			+'</td></tr><tr id="wac5"><td  class="metric">Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalwacServedAtLoService)			
-			+'</td></tr><tr id="wac7"><td  class="metric">Percent of Employee Unserved (WAC)<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.wacUnServed))
-		    +'</td></tr><tr id="wac8"><td  class="metric"> Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.wacServedByService)+'</td></tr>';
+           if(popYear==2010){ html+='<tr id="wac1"><td class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
+			+'</td></tr><tr id="wac3"><td class="metric">Percent of Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.wacServed))
+			+'</td></tr><tr id="wac4"><td class="metric">Percent of Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.wacServedAtLoService))
+			+'</td></tr><tr id="wac5"><td class="metric">Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalwacServedAtLoService)			
+			+'</td></tr><tr id="wac7"><td class="metric">Percent of Employee Unserved (WAC)<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.wacUnServed))
+		    +'</td></tr><tr id="wac8"><td class="metric"> Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.wacServedByService)+'</td></tr>';
        }
            else{        	   
-	        html+='<tr id="wac1"><td  class="metric"> Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + 'N/A'
-			+'</td></tr><tr id="wac3"><td  class="metric">Percent of Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + 'N/A'
-			+'</td></tr><tr id="wac4"><td  class="metric">Percent of Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + 'N/A'
-            +'</td></tr><tr id="wac5"><td  class="metric">Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + 'N/A'
-			+'</td></tr><tr id="wac7"><td  class="metric">Percent of Employee Unserved (WAC)<span class="IOSym">(1)</span></td><td>'+ 'N/A'
-		    +'</td></tr><tr id="wac8"><td  class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>' + 'N/A'+'</td></tr>';
+	        html+='<tr id="wac1"><td class="metric"> Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + 'N/A'
+			+'</td></tr><tr id="wac3"><td class="metric">Percent of Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + 'N/A'
+			+'</td></tr><tr id="wac4"><td class="metric">Percent of Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + 'N/A'
+            +'</td></tr><tr id="wac5"><td class="metric">Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + 'N/A'
+			+'</td></tr><tr id="wac7"><td class="metric">Percent of Employee Unserved (WAC)<span class="IOSym">(1)</span></td><td>'+ 'N/A'
+		    +'</td></tr><tr id="wac8"><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>' + 'N/A'+'</td></tr>';
           }
             //WAC		
 
 	html+='<tr><td class="metric" title="Set of days (from the selected days) in which at least one trip within the given geographic area is served.">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays +'</td></tr><tr><td class="metric" title="List of geographic areas of the same type that are connected to the area of interest through routes.">Connected Communities</td><td>'+(item.ConnectedCommunities).replace(/County/g,'')   
 			+'</td></tr><tr><td class="metric">Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService
-			+'</td></tr><tr><td class="metric">Minimum Fare</td><td>'+showDollarSign(item.MinFare)
-			+'</td></tr><tr><td class="metric">Average Fare</td><td>'+showDollarSign(item.AverageFare)
-			+'</td></tr><tr><td class="metric">Median Fare</td><td>'+showDollarSign(item.MedianFare)
-			+'</td></tr><tr><td class="metric">Maximum Fare</td><td>'+showDollarSign(item.MaxFare)+'</td>';
+			+'</td></tr><tr><td class="metric">Minimum Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MinFare)
+			+'</td></tr><tr><td class="metric">Average Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.AverageFare)
+			+'</td></tr><tr><td class="metric">Median Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MedianFare)
+			+'</td></tr><tr><td class="metric">Maximum Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MaxFare)+'</td>';
 			html +='</tr></tbody></table>';
 			
 			fAverage.push(item.AverageFare);
@@ -167,7 +167,6 @@ $(document).ready(function(){
         		tempKey = [$('title').text(),$(item).text().strip().trim() ];
         		$(item).attr('title',tooltips[tempKey]);
         		});
-//        	});
     	}
 	});	    	
 });

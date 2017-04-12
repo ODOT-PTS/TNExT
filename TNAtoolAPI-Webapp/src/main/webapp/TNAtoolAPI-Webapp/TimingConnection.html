@@ -26,6 +26,7 @@
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
 	<script src="../resources/js/TimingConnection.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -63,21 +64,29 @@ $(document).ready(function(){
 	getAgencies($("#dbselect").val());
 	$("#submit").prop("disabled", true);
 	html = '<table id="RT" class="display" align="center">';
-	tmp = '<tr><th class="metric" title="Randomly assigned row number.">#</th>'+
-	'<th class="metric" title="Stop belonging to the selected trip." >From - Stop ID</th>'+
-	'<th class="metric" title="Stop belonging to the selected trip.">From - Stop Name</th>'+
-	'<th class="metric" title="Stop belonging to the connected trip.">To - Stop ID</th>'+
-	'<th class="metric" title="Stop belonging to the connected trip.">To - Stop Name</th>'+
-	'<th class="metric" title="The agency that is connected to the selected agency by having a stop and route accessable within the specified radius and time window.">To - Agency</th>'+
-	'<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route ID</th>'+
-	'<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route Name</th>'+
-	'<th class="metric" title="Time of arrival at stop 1.">Arrival at Stop 1</th>'+
-	'<th class="metric" title="Time of departure from stop 2.">Departure from Stop 2</th>'+
-	'<th class="metric" title="The difference between arriving at stop1 and departing from stop2.">Time Difference </th></tr>';
+	tmp = '<tr><th class="metric">#</th>'+
+	'<th class="metric">Stop1 ID</th>'+
+	'<th class="metric">Stop1 Name</th>'+
+	'<th class="metric">Stop2 ID</th>'+
+	'<th class="metric">Stop2 Name</th>'+
+	'<th class="metric">Stop2 Agency </th>'+
+	'<th class="metric">Stop2 Route ID</th>'+
+	'<th class="metric">Stop2 Route Name</th>'+
+	'<th class="metric">Stop1 Arrival</th>'+
+	'<th class="metric">Stop2 Departure</th>'+
+	'<th class="metric">Time Difference </th></tr>';
 	html += '<thead>'+tmp+'</thead><tbody>';
 	$('#displayReport').append($(html));
 	tableProperties.iDisplayLength = 10;
 	buildDatatables();
+	
+	// append toopltips
+	var tooltips = populateMetricDefs();
+	var tempKey = [];
+	$('.metric').each(function(index, item) {
+		tempKey = [$('title').text(),$(item).text().strip().trim() ];
+		$(item).attr('title',tooltips[tempKey]);
+		});
 	
 });
 </script>

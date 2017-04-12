@@ -18,6 +18,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -39,27 +40,27 @@ w_qstringd = getDates(keyName);
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 tmp = '<tr><th  title="Identification number associated with the geographic area." id="aid">Geo ID </th>'+
-'<th class="metric" title="Name of the geographic area." id="an">Name </th>'+
-'<th class="metric" title="If available, this field points to the fare information published by the transit agencies in their GTFS data.">Fare</th>'+
-'<th class="metric" title="List of geographic areas of the same type that are connected to the area of interest through routes.">Connected Communities <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Summation of the lengths of the longest trips within the given geographic area.">Route Miles <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Stop count in the given geographic area divided by the area of the geographic area.">Stops Per Square Mile <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Stop count in the given geographic area divided by service miles.">Stops Per Service Mile <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Total hours a transit agency spends on serving all round trips of routes within the given geographic area. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates.">Service Hours <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Total miles driven over all round trips of routes within the given geographic area. Service miles may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates.">Service Miles <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Service miles divided by the area of the geographic area.">Service Miles Per Square Mile <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Service miles divided by the population of the geographic area.">Miles of Service Per Capita <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">Population Served<span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric" title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by total population of the given geographic area.">Percent of Population Served <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric" title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receives a specified minimum level of service divided by total population of the given geographic area.">Percent of Population Served at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
-'<th class="metric" title="100 minus percent of population served.">Percent of Population Unserved <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric" title="Total stops within the given geographic area multiplied by the number of times each stop is being served for the given date(s). Reported number is cumulative over the selected dates.">Service Stops <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. Population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops within the given geographic area for every trip. Reported number is cumulative over the selected dates.">Population Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
-'<th class="metric" title="Set of days (from the selected days) in which at least one trip within the given geographic area is served.">Service Days <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="Earliest and latest arrival and departure times of all transit stops within the given geographic area.">Hours of Service <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric" title="If available, this field points to the fare average for the given geographic area.">Average Fare <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="If available, this field points to the fare median for the given geographic area.">Median Fare <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="List of geographic areas of the same type that are connected to the area of interest through routes.">Connected Communities <span class="IOSym">(1)</span></th></tr>';
+'<th class="metric" id="an">Name </th>'+
+'<th class="metric">Fare <span class="IOSym">(4)</th>'+
+'<th class="metric">Connected Communities <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Route Miles <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Stops Per Square Mile <span class="IOSym">(1)</span></th>'+
+'<th class="metric">Stops Per Service Mile <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Service Hours <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Service Miles <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Service Miles Per Square Mile <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Miles of Service Per Capita <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Population Served<span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Percent of Population Served <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Percent of Population Served at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
+'<th class="metric">Percent of Population Unserved <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Service Stops <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Population Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
+'<th class="metric">Service Days <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Hours of Service <span class="IOSym">(1)(4)</span></th>'+
+'<th class="metric">Average Fare <span class="IOSym">(1)</span></th>'+
+'<th class="metric">Median Fare <span class="IOSym">(1)</span></th>'+
+'<th class="metric">Connected Communities <span class="IOSym">(1)</span></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -80,12 +81,28 @@ $(document).ready(function(){
 		success: function(item){
 			docMetadata = item.metadata;
 			$('h2').append('Aggregated Urban Area Extended Report <br><hr>');	
-			html = html + '<tr><td>' + item.AreaId +'</td><td>' + item.AreaName +'</td><td class="details-control"></td><td class="details-control-cc"></td><td>' + numberconv(item.RouteMiles) +'</td><td>'+ numberconv(item.StopsPersqMile) 
-			+'</td><td>' + numberconv(item.StopPerServiceMile) +'</td><td>'+ numberconv(item.ServiceHours) +'</td><td>'+ numberconv(item.ServiceMiles)+'</td><td >'
-			+ numberconv(item.ServiceMilesPersqMile) +'</td><td >'+numberconv(item.MilesofServicePerCapita)+'</td><td>' + numberconv(item.PopWithinX) 
-			+'</td><td>' + addPercent(numberconv(item.PopServed))+'</td><td>' + addPercent(numberconv(item.PopServedAtLoService))+'</td><td>' + addPercent(numberconv(item.PopUnServed))+'</td><td>'+
-			numberconv(item.ServiceStops)+'</td><td>' + numberconv(item.PopServedByService)+'</td><td>'+ item.ServiceDays+'</td><td>'
-			+ item.HoursOfService+'</td><td>'+showDollarSign(item.AverageFare)+'</td><td>'+showDollarSign(item.MedianFare)+'</td><td>'+item.ConnectedCommunities+'</td>';
+			html = html + '<tr><td>' + item.AreaId
+			+'</td><td>' + item.AreaName 
+			+'</td><td class="details-control">'
+			+'</td><td class="details-control">'
+			+'</td><td>' + numberconv(item.RouteMiles) 
+			+'</td><td>' + numberconv(item.StopsPersqMile) 
+			+'</td><td>' + numberconv(item.StopPerServiceMile) 
+			+'</td><td>' + numberconv(item.ServiceHours) 
+			+'</td><td>' + numberconv(item.ServiceMiles)
+			+'</td><td>' + numberconv(item.ServiceMilesPersqMile) 
+			+'</td><td>' + numberconv(item.MilesofServicePerCapita)
+			+'</td><td>' + numberconv(item.PopWithinX) 
+			+'</td><td>' + addPercent(numberconv(item.PopServed))
+			+'</td><td>' + addPercent(numberconv(item.PopServedAtLoService))
+			+'</td><td>' + addPercent(numberconv(item.PopUnServed))
+			+'</td><td>' + numberconv(item.ServiceStops)
+			+'</td><td>' + numberconv(item.PopServedByService)
+			+'</td><td>' + item.ServiceDays
+			+'</td><td>' + item.HoursOfService
+			+'</td><td>' + showDollarSign(item.AverageFare)
+			+'</td><td>' + showDollarSign(item.MedianFare)
+			+'</td><td>' + item.ConnectedCommunities+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			connectedcommunities = item.ConnectedCommunities;
@@ -96,17 +113,21 @@ $(document).ready(function(){
 			tableProperties.hiddenCols = [19,20,21];
 			table = buildDatatables();
 			
-			$('#RT tbody').on('click', 'td.details-control-cc', function () {
+			$('#RT tbody').on('click', 'td.details-control', function () {
 				var td = $(this).parents('td');
 		        var tr = $(this).parents('tr');
 		        var row = table.row( tr );
-		        var pos = row.index();
+		        var pos = $(this).index();
 		        if ( row.child.isShown() ) {
 		            row.child.hide("slow");
 		            td.removeClass('shown');
 		        }
-		        else {
-		            row.child(formatcc(pos)).show();
+		        else if ( pos == 3 ) {
+		            row.child(formatcc(row.index())).show();
+		            td.addClass('shown');
+		        }
+		        else if ( pos == 2 ){
+		        	row.child(format(row.index())).show();
 		            td.addClass('shown');
 		        }
 		    } );
@@ -130,6 +151,14 @@ $(document).ready(function(){
 		            '</tr>'+		                       
 		        '</table>';
 		    }
+			
+			// append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
 		}
 	});	    	
 });
@@ -179,8 +208,8 @@ $(document).ready(function(){
 			  <td id="td3">
 			   <div class="RHScontrols">			  	
 			  	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br> 
-			    <input type="text" name="Sradius" id="Sradius" data-iomap="2" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/><br>			    	
-			    <input type="text" name="LoS" id="LoS" data-iomap="3" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/>
+			    <input type="text" name="x" id="Sradius" data-iomap="2" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/><br>			    	
+			    <input type="text" name="l" id="LoS" data-iomap="3" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/>
 			  	</div>
 			  	<div class="LHScontrols">
 			  	Urban Population Filter  <span class="IOSym">(1) </span><input type="text" name="pop" id="Upop" data-iomap="1" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/><br>

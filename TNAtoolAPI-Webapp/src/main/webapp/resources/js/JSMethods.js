@@ -270,6 +270,7 @@ function reloadPage() {
 	if (!exit){
 		var output = document.URL;
 		$(".input").each(function(index, object) {
+			console.log(output, object.name, object.value);
 			output = setURIParameter(output, object.name, object.value, null)
 		});
 		try {
@@ -286,6 +287,7 @@ function reloadPage() {
 		} catch (err) {
 			console.log("error: " + err.message);
 		}
+		console.log(output);
 		window.location.href = output;
 	}
 }

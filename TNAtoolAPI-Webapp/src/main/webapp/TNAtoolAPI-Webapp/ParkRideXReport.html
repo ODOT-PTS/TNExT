@@ -124,6 +124,15 @@ $(document).ready(function(){
 			tableProperties.hiddenCols = [9,10,11,12,13,21,22,23,24,25,26,27,28,29];
 			table = buildDatatables();
 			
+			// append toopltips
+        	var tooltips = populateMetricDefs();
+        	var tempKey = [];
+        	$('.metric').each(function(index, item) {
+        		tempKey = [$('title').text(),$(item).text().strip().trim() ];
+        		$(item).attr('title',tooltips[tempKey]);
+        		});
+        	
+        	// filling in details control tables
 		    $('#RT tbody').on('click', 'td.details-control', function () {
 		    		var tr = $(this).parents('tr');
 			        var row = table.row( tr );
