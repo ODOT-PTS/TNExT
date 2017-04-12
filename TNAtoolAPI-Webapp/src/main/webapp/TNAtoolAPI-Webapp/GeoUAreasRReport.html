@@ -32,6 +32,8 @@
 var fAverage = new Array();
 var fMedian = new Array();
 var upop = parseInt(getURIParameter("pop"));
+var popMax = getURIParameter("popMax");
+var popMin = getURIParameter("popMin");
 
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
@@ -45,6 +47,8 @@ tmp = '<tr><th class="metric" title="Identification number associated with the g
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
+	$('#popMax').val(popMax);
+	$('#popMin').val(popMin);
 	$('#Upop').val(upop);
 	setPopOptions();
 	loadDBList();
@@ -54,7 +58,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&pop='+upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop='+ upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
 		success: function(d){	
 			docMetadata = d.metadata;
@@ -77,11 +81,12 @@ $(document).ready(function(){
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 			    		//var keyName = Math.random();
 			    		///localStorage.setItem(keyName, qstringd);
-						var keyName = setDates(qstringd);			    		
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&pop='+upop+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
+						var keyName = setDates(qstringd);		
+					
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&popMin='+popMin+'&popMax='+popMax+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/* +'&username='+getSession() */);    		
 			    } else if ($(this).attr('type')=="SR"){
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop='+upop+'&dbindex='+dbindex+'&popYear='+popYear);
-			    };
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&popMin='+popMin+'&uc=3'+'&agency='+null+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear);
+						    		 	    };
 			});
 			
 			table = buildDatatables();
@@ -148,13 +153,15 @@ $(document).ready(function(){
 				</div>
 			  </td>
 			  
-			  <td id="td3">
+			 
+			  <td id="td4" >
 			  	<div class="headerBR" > 
-			    	Urban Population Filter <span class="IOSym">(1) </span><input type="text" name="pop" id="Upop" data-iomap="1" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/>
-			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />			    			    	    	
-		    	</div>
-			  </td>
-			</tr>
+			       Minimum Urban Population   <span class="IOSym">(1)</span><input type="text" id="popMin" name="popMin" data-iomap="2" data-label="Minimum Urban Population" class="input tbox" onkeypress="return isWholeNumber(event)" style="width: 65px;" />	
+			   <input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br>
+			    	    Maximum Urban Population<span class="IOSym">(2)</span><input type="text" id="popMax" name="popMax" data-iomap="1" data-label="Maximum Urban Population" class="input tbox" onkeypress="return isNumber(event)" style="width: 65px; "/>	<br>		    		
+			    		
+			    	</div>
+			  </td>	    
 		</table>		
 		
 		

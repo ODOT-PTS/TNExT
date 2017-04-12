@@ -39,6 +39,7 @@ var areaId = getURIParameter("areaid");
 var geoid = getURIParameter("geoid");
 var route = getURIParameter("route");
 var agency = getURIParameter("agency");
+var rc= getURIParameter("rc");
 var table;
 var xhr='';
 var ipop=popYear;
@@ -77,7 +78,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username=admin'+'&geotype='+geotype+'&geoid='+geoid,
+		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username=admin'+'&geotype='+geotype+'&geoid='+geoid+'&rc='+rc,
 		async: true,
 		success: function(d){
 			docMetadata = d.metadata;

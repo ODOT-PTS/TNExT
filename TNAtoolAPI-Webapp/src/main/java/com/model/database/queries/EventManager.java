@@ -383,6 +383,20 @@ static{
         return results;
     }
 
+	/**
+	 * returns list of urban areas with population between than popmin and popmax
+	 */
+		public static List<Urban> geturbansbypopbet(int popmin,int popmax, int sessionindex, String popYear) throws FactoryException, TransformException {			
+			session[sessionindex].beginTransaction();
+			//Query q = session[sessionindex].getNamedQuery("URBANS_BYPOP");
+			//q.setParameter("pop", (long)pop);
+			//@SuppressWarnings("unchecked")
+			String hql = "from Urban where population"+popYear+" between '"+popmin+"' AND '"+popmax+"'";
+			Query q = session[sessionindex].createQuery(hql);
+			List<Urban> results = (List<Urban>) q.list();
+	        Hutil.getSessionFactory()[sessionindex].close();
+	        return results;
+	    }
 /**
  * returns list of urban areas
  */

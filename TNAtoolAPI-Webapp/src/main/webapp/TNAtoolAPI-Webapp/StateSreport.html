@@ -44,6 +44,7 @@ tmp = '<tr><th class="metric" title="Name of the state" id="aid">State</th>'+
 '<th class="metric" title="Total number of routes operated by the transit agency.">Routes Count</th>'+
 '<th class="metric" title="Total number of stops operated by the transit agency.">Stops Count</th>'+
 '<th class="metric" title="Count of urbanized areas within the state.">Urbanized Areas Count</th>'+
+'<th class="metric" title="Count of urban clusters within the state.">Urban Clusters Count</th>'+
 '<th class="metric" title="Count of congressional districts within the state.">Congressional Districts Count</th>'+
 '<th class="metric" title="Count of ODOT transit regions within the state.">ODOT Transit Regions Count</th>'+
 '<th class="metric" title="Count of census designated places within the state.">Census Places Count</th>'+
@@ -78,7 +79,7 @@ $(document).ready(function(){
 				
 				
 				html+='<td><a href="#" type="ASR">' + item.AgenciesCount +'</a></td>'+ '<td>' + numberconv(item.RoutesCount) +'</td>'+ '<td>'+ numberconv(item.StopsCount) +'</td>'+
-				'<td><a href="#" type="USR">' + item.UrbansCount +'</a></td>'+'<td><a href="#" type="CDSR">' + item.CongDistsCount +'</a></td>'+
+				'<td><a href="#" type="USR">' + item.UrbanizedAreasCount +'</a></td>'+ '<td> <a href="#" type="PSR">'+ item.UrbanClustersCount +'</a></td>'+'<td><a href="#" type="CDSR">' + item.CongDistsCount +'</a></td>'+
 				'<td><a href="#" type="OSR">' + item.RegionsCount +'</a></td>'+'<td><a href="#" type="CPSR">' + item.PlacesCount +'</a></td>'+
 				'<td><a href="#" type="CSR">' + item.CountiesCount +'</a></td>'+'<td>' + item.TractsCount +'</td></tr>';				   			
 			});		
@@ -96,8 +97,16 @@ $(document).ready(function(){
 		    		qstringx = '0.25';
 		    		window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
 			    }else if($(this).attr('type')=="USR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
-			    }else if($(this).attr('type')=="CDSR"){
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&type=3'+'&popMin='+popMin+'&popMax='+popMax+'&uc=0'+'&nav='+nav);	    		
+			    }
+			    else if($(this).attr('type')=="PSR"){
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&type=3'+'&popMin='+popMin+'&popMax='+popMax+'&uc=1'+'&nav='+nav);	    		
+			    }
+			    else if($(this).attr('type')=="CDSR"){
 		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
 			    }else if($(this).attr('type')=="OSR"){
 		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		

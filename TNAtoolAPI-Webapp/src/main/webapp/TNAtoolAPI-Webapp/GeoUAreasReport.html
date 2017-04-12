@@ -39,9 +39,9 @@ var geotype=getURIParameter("type");
 var fAverage = new Array();
 var fMedian = new Array();
 var ipop=popYear;
-
+var uc=getURIParameter("uc");
 html = '<table id="RT" class="display" align="center">';
-if (areaid!="null"){
+if (areaid!="null" && areaid!=null){
 	
 tmp ='<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
 '<th class="metric"   title="Name of the geographic area." id="an">Name</th>'+
@@ -79,9 +79,9 @@ $(document).ready(function(){
 	updateToolTips();
 	progressBar();
 	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&agency='+agencyId+'&type=3'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	}
 	$.ajax({
 		type: 'GET',
@@ -98,7 +98,7 @@ $(document).ready(function(){
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' +numberconv(item.population) +'</td>';
-				if (areaid!="null"){
+				if (areaid!="null" && areaid!=null){
 									html+='<td>'+numberconv(item.Totalupop) +'</td>';
 				}
 				
