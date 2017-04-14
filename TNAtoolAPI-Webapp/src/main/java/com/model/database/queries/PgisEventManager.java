@@ -5515,49 +5515,6 @@ public class PgisEventManager {
 		all.hispanic_or_latino += single.hispanic_or_latino;
 	}
 
-	public static HashMap<String, Long> getGeoCounts(int dbindex, String username, String popYear){			
-		Connection connection = makeConnection(dbindex);
-		String query="";
-		Statement stmt = null;
-		HashMap<String, Long> response = new HashMap<String, Long>();
-		query = "select (select count(countyId) from census_counties) as county, "
-				+"(select count(tractId) from census_tracts) as tract, "
-				+"(select count(placeId) from census_places) as place, (select count(urbanId) from census_urbans where population"+popYear+" > 50000) as urbanizedarea,(select count(urbanId) from census_urbans where population"+popYear+" between 2500 AND 49999) as urbancluster, "
-				+"(select count(congdistId) from census_congdists) as congdist, (select count(distinct regionId) from census_counties) as region, "
-				+"sum(population"+popYear+")as pop, sum(landarea) as landarea, (select sum(population"+popYear+") from census_blocks where poptype='U') as urbanpop, "
-				+"(select sum(population"+popYear+") from census_blocks where poptype='R')as ruralpop, (select sum(C000_"+popYear+") from lodes_rac_projection_block )as rac,"
-				+"(select sum(C000) from lodes_blocks_wac )as wac from census_counties";
-		
-		System.out.println(query);
-		try {
-	        stmt = connection.createStatement();
-	        ResultSet rs = stmt.executeQuery(query); 
-	        while ( rs.next() ) {
-
-		    response = new HashMap<String, Long>();
-			response.put("county",  rs.getLong("county"));
-			response.put("tract",  rs.getLong("tract"));
-			response.put("place",  rs.getLong("place"));
-			response.put("urbanizedarea", rs.getLong("urbanizedarea"));
-			response.put("urbancluster", rs.getLong("urbancluster"));
-			response.put("congdist", rs.getLong("congdist"));
-			response.put("region", rs.getLong("region"));
-			response.put("pop", rs.getLong("pop"));
-			response.put("landarea", rs.getLong("landarea"));
-			response.put("urbanpop", rs.getLong("urbanpop"));
-			response.put("ruralpop", rs.getLong("ruralpop"));
-			response.put("rac", rs.getLong("rac"));
-			response.put("wac", rs.getLong("wac"));
-		        }	  
-		    rs.close();
-		    stmt.close();  
-			}
-			 catch ( Exception e ) {
-			        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-			dropConnection(connection);
-			 }
-		return response;	}
-
 public static HashMap<String, Long> getStateInfo(int dbindex, String username, String popYear){			
 	Connection connection = makeConnection(dbindex);
 	String query="";
@@ -5602,10 +5559,7 @@ public static HashMap<String, Long> getStateInfo(int dbindex, String username, S
 			+ "		INNER JOIN emp_wac USING (stateid) "
 			+ "		INNER JOIN stops USING (stateid) "
 			+ "		INNER JOIN agencies USING(stateid) "
-			+ "		INNER JOIN routes USING(stateid)";
-
-
-		
+			+ "		INNER JOIN routes USING(stateid)";		
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(query); 

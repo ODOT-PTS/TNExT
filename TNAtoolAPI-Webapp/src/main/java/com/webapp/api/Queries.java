@@ -148,9 +148,15 @@ public class Queries {
 	
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
-	private static final int default_dbindex = Databases.dbsize-1;
+	private static int default_dbindex = Databases.dbsize-1;
 	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
 	static int dbsize = Databases.dbsize;	
+	
+	public static void updateDefaultDBindex() {
+		default_dbindex = Databases.dbsize - 1;
+		dbsize = Databases.dbsize;
+		menuResponse = new AgencyRouteList[Databases.dbsize];
+	}
 	
 	/**
 	 * returns the name-list and id-list of databases.
