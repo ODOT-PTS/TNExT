@@ -401,7 +401,7 @@ public static void updateSessions(){
 			//Query q = session[sessionindex].getNamedQuery("URBANS_BYPOP");
 			//q.setParameter("pop", (long)pop);
 			//@SuppressWarnings("unchecked")
-			String hql = "from Urban where population"+popYear+" between '"+popmin+"' AND '"+popmax+"'";
+			String hql = "from Urban where population"+popYear+" BETWEEN '"+popmin+"' AND '"+popmax+"'";
 			Query q = session[sessionindex].createQuery(hql);
 			List<Urban> results = (List<Urban>) q.list();
 	        Hutil.getSessionFactory()[sessionindex].close();

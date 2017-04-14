@@ -33,7 +33,6 @@
 <script type="text/javascript">
 
 var areaid=getURIParameter("areaid");
-var upop = getURIParameter("pop");
 var popMax = getURIParameter("popMax");
 var popMin = getURIParameter("popMin");
 var geotype=getURIParameter("type");
@@ -76,11 +75,12 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
-	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
+	console.log( agencyId==null);
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key='+ key+'&agency=null&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop='+ upop+'&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	}
+	console.log(url);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',

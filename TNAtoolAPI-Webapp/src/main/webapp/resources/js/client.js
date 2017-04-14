@@ -1525,9 +1525,9 @@ $mylist
 			    }else if(casestring=="AUASR"){
 			    	var popMax='2000000';
 			    	var popMin='0'	;
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'&popMin='+popMin+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&popMin='+popMin+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="PNRR"){
 			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if(casestring=="CNGPH"){
