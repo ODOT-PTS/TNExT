@@ -72,11 +72,9 @@ $(document).ready(function(){
 		async: true,
 		success: function(d){
 			docMetadata = d.metadata;
-			if (agencyId!=null){
+			if (agencyId!=null)
 				nameString ='For '+d.agencyName;
-			}
 			appendNavigation(nameString);
-			//$('h2').append('Congressional Districts Summary Report '+nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html = html + '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' +numberconv(item.population)+'<td>' +numberconv(item.employment) +	'</td>';

@@ -19,6 +19,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -40,28 +41,28 @@ var w_qstringd = getDates(keyName);
 var description = new Array();
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr class="metric" title="Identification number reported in the transit agency GTFS feed."><th>Agency ID</th>'+
-'<th  title="Agency name reported in the transit agency GTFS feed."id="an">Agency Name</th>'+
-'<th class="metric" title="Unique route identification number reported in the transit agency GTFS feed.">Route ID</th>'+
-'<th class="metric" title="Route short name as reported in the transit agency GTFS feed." id="rn">Route Name</th>'+
-'<th class="metric" title="Route long name as reported in the transit agency GTFS feed.">Route Long Name</th>'+
-'<th class="metric" title="Type of transportation used on a route: 0-Tram, Streetcar & Light rail 1-Subway & Metro 2-Rail 3-Bus 4-Ferry 5-Cable car 6-Gondola & Suspended cable car 7-Funicular">Route Type</th>'+
-'<th class="metric" title="Length of the longest route variant for the given route.">Route Length</th>'+
-'<th class="metric" title="Total number of stops on the route.">Total Stops</th>'+
-'<th class="metric" title="Counties in which the route operates.">Counties</th>'+
-'<th class="metric" title="Urban Areas in which the route operates.">Urban Areas</th>'+
-'<th class="metric" title="Census Places in which the route operates.">Census Places</th>'+
-'<th class="metric" title="Congressional Districts in which the route operates.">Congressional Districts</th>'+
-'<th class="metric" title="ODOT Transit Regions in which the route operates.">ODOT Transit Regions</th>'+
-'<th class="metric" title="Summation of the unduplicated urban population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Unduplicated Urban Population <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Summation of the unduplicated rural population count within an X radius (i.e., stop distance) of each stop on a route. The default value for X is 0.25 miles. However, the value of the radius can be changed by the user on the text box shown on the upper right corner of the report and then pressing the <Submit> button.">Unduplicated Rural Population <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Number of stops scheduled on all trips in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop.">Service Stops <span class="IOSym">(2)</span></th>'+
-'<th class="metric" title="Total unduplicated urban population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips.">Urban Population   Served by Route <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Total unduplicated rural population impacted within an X-mile radius (i.e., stop distance) of all stops on all trips. The Population Served by Route for a route is calculated as route service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) of all stops on all trips.">Rural Population   Served by Route <span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar.">Service Miles <span class="IOSym">(2)</span></th>'+
-'<th class="metric" title="Total hours a transit agency spends on serving all round trips of a route. Service hours may be calculated for a specific date or a set of dates specified using the calendar.">Service Hours <span class="IOSym">(2)</span></th>'+
-'<th class="metric" title="If available, this field contains a description of the route (the value is null otherwise).">More..</th>'+
-'<th class="metric" title="If available, this field contains a description of the route (the value is null otherwise).">Route Description</th></tr>';	
+tmp = '<tr class="metric"><th>Agency ID</th>'+
+'<th class="metric" id="an">Agency Name</th>'+
+'<th class="metric">Route ID</th>'+
+'<th class="metric"id="rn">Route Name</th>'+
+'<th class="metric">Route Long Name</th>'+
+'<th class="metric">Route Type</th>'+
+'<th class="metric">Route Length</th>'+
+'<th class="metric">Total Stops</th>'+
+'<th class="metric">Counties</th>'+
+'<th class="metric">Urban Areas</th>'+
+'<th class="metric">Census Places</th>'+
+'<th class="metric">Congressional Districts</th>'+
+'<th class="metric">ODOT Transit Regions</th>'+
+'<th class="metric">Urban Population Served<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Rural Population Served<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Service Stops<span class="IOSym">(2)</span></th>'+
+'<th class="metric">Urban Population Served By Service<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Rural Population Served By Service<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Service Miles<span class="IOSym">(2)</span></th>'+
+'<th class="metric">Service Hours<span class="IOSym">(2)</span></th>'+
+'<th class="metric">More..</th>'+
+'<th class="metric">Route Description</th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -89,7 +90,6 @@ $(document).ready(function(){
 			var namestring = (d.AgencyName!=null)? d.AgencyName:'';
 				namestring+= ' Routes Report'+((d.AreaName!=null)?' for '+d.AreaName:'');
 			appendNavigation(namestring);
-			//$('h2').append(namestring+'<br><hr>');
 			$.each(d.RouteR, function(i,item){
 				html += '<tr><td>'+ item.AgencyId+'</td><td>'+item.AgencyName+'</td><td><a href="#" class="schedulereport" aid="'+item.AgencyId+'" id="'+ item.RouteId+'">'+item.RouteId+'</a></td>'; 
 				if (item.RouteURL!=null){
@@ -174,6 +174,14 @@ $(document).ready(function(){
 		            
 		        '</table>';
 		    }
+		    
+		 // append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
 		}
     });
 });

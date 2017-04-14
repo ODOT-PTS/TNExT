@@ -24,7 +24,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.RouteExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.RouteExt;
+import org.onebusaway.gtfs.model.Route;
 
 @XmlRootElement(name = "route")
 public class RouteType {
@@ -32,7 +33,7 @@ public class RouteType {
     public RouteType() {
     }
 
-    public RouteType(RouteExt route) {
+    public RouteType(Route route) {
         this.id = route.getId();
         this.routeShortName = route.getShortName();
         this.routeLongName = route.getLongName();
@@ -44,7 +45,7 @@ public class RouteType {
         this.routeBikesAllowed = route.getBikesAllowed();
     }
 
-    public RouteType(RouteExt route, Boolean extended) {
+    public RouteType(Route route, Boolean extended) {
         this.id = route.getId();
         this.routeShortName = route.getShortName();
         this.routeType = route.getType();

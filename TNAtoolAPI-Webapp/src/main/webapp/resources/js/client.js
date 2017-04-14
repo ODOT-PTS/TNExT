@@ -61,10 +61,8 @@ var selectedAgencies=Array();
 var polylines = Array();
 var stopsCluster;
 var text='';
-
 map.addLayer(connectionMarkers);
 map.addLayer(connectionPolylines);
-
 
 ///*********Beginning of on-Map connected agencies report*******///
 var dialog2=$("#connectedAgencies-form").dialog({
@@ -1128,8 +1126,8 @@ var overlayMaps = {
 		"Tracts": tract,
 		"ODOT Transit Regions": odot,
 		"Congressional Districts": congdist,
-		"Urbanized Areas 50k+": urban50k,
-		"Urbanized Areas 25k+": urban25k
+		"Urbanized Areas": urban50k,
+		"Urban Clusters 25k+": urban25k
 	};
 
 map.addControl(new L.Control.Layers(baseMaps,overlayMaps));
@@ -1398,30 +1396,41 @@ $mylist
 
 		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
 		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Reports</b></a>'+
-		    		'<ul>'+
-		    		'<li role="presentation"><a id="ASR" href="#"><b>Transit Agency Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Geographical Reports</a>'+
-		    		'<ul>'+
-		    		'<li role="presentation"><a id="CSR" href="#"><b>Counties Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="CPSR" href="#"><b>Census Places Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="CDSR" href="#"><b>Congressional Districts Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="UASR" href="#"><b>Urban Areas Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="AUASR" href="#"><b>Aggregated Urban Areas Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
-		    		'</ul></li>'+
-		    		'</ul></li>'+
+			    		'<ul>'+
+			    		'<li role="presentation"><a id="ASR" href="#"><b>Transit Agency Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="" href="#" style="cursor:default">Geographical Reports</a>'+
+			    			'<ul>'+
+				    		'<li role="presentation"><a id="CSR" href="#"><b>Counties Reports</b></a></li>'+
+				    		'<li role="presentation"><a id="CPSR" href="#"><b>Census Places Reports</b></a></li>'+
+				    		'<li role="presentation"><a id="CDSR" href="#"><b>Congressional Districts Reports</b></a></li>'+
+				    		'<li role="presentation"><a id="UASR" href="#"><b>Urban Areas Reports</b></a></li>'+
+				    		'<li role="presentation"><a id="AUASR" href="#"><b>Aggregated Urban Areas Reports</b></a></li>'+
+				    		'<li role="presentation"><a id="ORSR" href="#"><b>ODOT Transit Regions Reports</b></a></li>'+
+				    		'</ul>'+
+			    		'</li>'+
+			    		'</ul>'+
+		    		'</li>'+
 		    		'<li role="presentation"><a id="" href="#" style="cursor:default">Connectivity Reports</a>'+
-		    		'<ul>'+
-		    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="KTHR" href="#"><b>Key Transit Hubs Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Transit Networks Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Transit Agencies Reports</b></a></li>'+
-		    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
-		    		'</ul></li>'+
-		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#" style="cursor:default"><b>Employment Reports</b></a>'+
-		    		'<li role="presentation" onclick="return;"><a id="T6" href="#" style="cursor:default"><b>Title VI Reports</b></a></ul>');
+		    			'<ul>'+
+			    		'<li role="presentation"><a id="THR" href="#"><b>Transit Hubs Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="KTHR" href="#"><b>Key Transit Hubs Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="TCR" href="#"><b>Timing Connections Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="CNSR" href="#"><b>Connected Transit Networks Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="CASR" href="#"><b>Connected Transit Agencies Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="PNRR" href="#"><b>Park & Ride Reports</b></a></li>'+
+			    		'<li role="presentation"><a id="CNGPH" href="#"><b>Connectivity Graph</b></a></li>'+
+			    		'</ul>'+
+		    		'</li>'+
+		    		'<li role="presentation" onclick="return;"><a id="Emp" href="#"><b>Employment Reports</b></a></li>'+
+		    		'<li role="presentation" onclick="return;"><a id="T6" href="#"><b>Title VI Reports</b></a></li>'+
+					'<li role="presentation"><a id="" href="#" style="cursor:default;"><b>Other</b></a>'+
+		    			'<ul>'+
+		    			'<li role="presentation"><a id="DDRPT" href="#"><b>Data Dump Report</b></a></li>'+
+		    			'<li role="presentation"><a id="FLXRPT" href="#"><b>Flexible Reporting Wizard</b></a></li>'+
+		    			'<li role="presentation"><a id="SHPFL" href="#"><b>Shapefile Generator</b></a></li>'+
+		    			'</ul>'+
+	    			'</li>');
 		    		
-		    	
 		 
 			div.appendTo(titlebar);
 			$( "#rmenu" ).menu();
@@ -1490,24 +1499,25 @@ $mylist
 					var qstringx3 = '2.0'  // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear);
+			    }else if (casestring=="TCR") {
+			    	window.open('/TNAtoolAPI-Webapp/TimingConnection.html?&dbindex=' + dbindex);
 			    }else if (casestring=="ASR"){
-			    	//var qstringx = '0.25';
-			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if (casestring=="CASR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConAgenSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if (casestring=="CNSR"){
 			    	var qstringx = '0.1';
-			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/ConNetSReport.html?&gap='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if(casestring=="CSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="CPSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="CDSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="UASR"){
 			    	var popMax='2000000';
 			    	var popMin='0'	;
@@ -1520,6 +1530,14 @@ $mylist
 			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
 			    }else if(casestring=="PNRR"){
 			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
+			    }else if(casestring=="CNGPH"){
+			    	toggleConGraphDialog();
+			    }else if(casestring=="FLXRPT"){
+			    	flexRepDialog();
+			    }else if(casestring=="SHPFL"){
+			    	ShapeFileExpStart();
+			    }else if(casestring=="DDRPT"){
+			    	openDatadumpRep();
 			    }else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1768,12 +1786,3 @@ function updateListDialog(agenciesIds){
 		}									
 	}
 }
-/*
- * Connectivity Graph
- */ 
-$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="con-graph-button" style="border-radius:5px; background-color:#FFF" onclick="toggleConGraphDialog()">G</button></div>');
-
-/*
- * ShapeFile export wizard
- */
-$('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="shapefile-export-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="shapefile-export-button" style="border-radius:5px; background-color:#FFF" onclick="ShapeFileExpStart()">S</button></div>');

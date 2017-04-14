@@ -1,4 +1,4 @@
-// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
 //   This file is part of Transit Network Analysis Software Tool.
 //
 //    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify

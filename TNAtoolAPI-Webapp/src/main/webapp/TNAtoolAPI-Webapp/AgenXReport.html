@@ -1,164 +1,224 @@
 <html>
 
 <head>
-	<meta charset="utf-8" />
-	<title>Transit Agency Extended Report</title>
-	
-	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
-	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
-	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
-	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
-	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
-	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
-	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
-	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
-	<script src="../resources/js/date.js"></script>
-	<script src="../resources/data/Datasources.js"></script>
-	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
-	<script src="../resources/js/JSMethods.js"></script>
-	
-	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
-	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
-	 
+<meta charset="utf-8" />
+<title>Transit Agency Extended Report</title>
+
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+<script
+	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js"
+	type="text/javascript"></script>
+<script
+	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js"
+	type="text/javascript"></script>
+<script
+	src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<script
+	src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+<script
+	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+<script
+	src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+<script
+	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+<script src="../resources/js/date.js"></script>
+<script src="../resources/data/Datasources.js"></script>
+<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+<script src="../resources/data/metricDefinitions.js"></script>
+<script src="../resources/js/JSMethods.js"></script>
+
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="../resources/css/report.css" />
+
 <script type="text/javascript">
+	var type = getURIParameter("type");
+	var x = getURIParameter("x");
+	var los = getURIParameter("l");
+	var geoid = getURIParameter("geoid");
+	var geotype = parseInt(getURIParameter("geotype"));
+	var areaId = getURIParameter("areaId");
+	var dateIOnumber = 3; // the number is used to map selected date(s) to the metrics affected by the date(s).
+	var w_qstringa = getURIParameter("agency");
+	var fAverage = new Array();
+	var fMedian = new Array();	
+	w_qstringd = getDates(keyName);
+	html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
+	html += '<thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>';
 
-var type = getURIParameter("type");
-var x = getURIParameter("x");
-var geoid = getURIParameter("geoid");
-var geotype=parseInt(getURIParameter("geotype"));
-var areaId = getURIParameter("areaId");
-var dateIOnumber = 2; // the number is used to map selected date(s) to the metrics affected by the date(s).
-var w_qstringa = getURIParameter("agency");
-var fAverage = new Array();
-var fMedian = new Array();
-//ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[3],"");
-w_qstringd = getDates(keyName);
-html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-html += '<thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>';
+	$(document)
+			.ready(
+					function() {
+						$("#Sradius").val(w_qstringx);
+						$("#LoS").val(los);
+						setPopOptions();
+						loadDBList();
+						updateToolTips();
+						progressBar();
+						go(key);
+						$.ajax({
+							type : 'GET',
+							datatype : 'json',
+							url : '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
+									+ w_qstringa + '&day=' + w_qstringd + '&key=' + key + '&dbindex=' + dbindex
+									+ '&popYear=' + popYear + '&areaId=' + areaId + '&type=' + type  + '&l=' + los
+									+ '&username=' + getSession() + '&x=' + w_qstringx + '&geotype=' + geotype
+									+ '&geoid=' + geoid,
+							async : true,
+							success : function(item) {
+								docMetadata = item.metadata;
+								appendNavigation(item.AgencyName);
+								html += '<tr><td class="metric">Agency ID<td>' + item.AgencyId
+										+ '</td></tr><tr><td class="metric">Agency Name</td><td>' + item.AgencyName
+										+ '</td></tr><tr><td class="metric">Route Miles</td><td>' + numberconv(item.RouteMiles)
+										+ '</td></tr><tr><td class="metric">Route Stops</td><td>' + numberconv(item.StopCount)
+										+ '</td></tr><tr><td class="metric">Urban Stops</td><td>' + numberconv(item.UrbanStopCount)
+										+ '</td></tr><tr><td class="metric">Rural Stops</td><td>' + numberconv(item.RuralStopCount)
+										+ '</td></tr><tr><td class="metric">Stops Per Route Mile</td><td>' + numberconv(item.StopPerRouteMile)
+										+ '</td></tr><tr><td class="metric">Service Hours <span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceHours)
+										+ '</td></tr><tr><td class="metric">Service Miles<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceMiles)
+										+ '</td></tr><tr><td class="metric">Urban Population Served<span class="IOSym">(1)</span></td><td>'+ numberconv(item.UPopWithinX)
+										+ '</td></tr><tr><td class="metric">Rural Population Served<span class="IOSym">(1)</span></td><td>'+ numberconv(item.RPopWithinX)
+										+ '</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.UPopLos)
+										+ '</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.RPopLos)
+										+ '</td></tr><tr><td class="metric">Employment Served (RAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.racWithinX) + '</td></tr>';
+								if (popYear > 2010) {
+									html += '<td class="metric">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>N/A</td></tr>';
+								} else {
+									html += '<td class="metric">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX) + '</td></tr>';
+								}
+								html += '<tr><td class="metric">Urban Service Stops<span class="IOSym">(3)</span></td><td>' + numberconv(item.UrbanServiceStops)
+										+ '</td></tr><tr><td class="metric">Rural Service Stops<span class="IOSym">(3)</span></td><td>' + numberconv(item.RuralServiceStops)
+										+ '</td></tr><tr><td class="metric">Urban Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.UPopServedByService)
+										+ '</td></tr><tr><td class="metric">Rural Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.RPopServedByService)
+										+ '</td></tr><tr><td class="metric">Employment Served By Service (RAC)<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.racServedByService) + '</td></tr>';
+								if (popYear > 2010) html += '<tr><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>'+ 'N/A' + '</td></tr>';
+								else html += '<tr><td class="metric">Employees Served By Service (WAC)<span class="IOSym">(1)(3)</span></td><td>'+ numberconv(item.wacServedByService) + '</td></tr>';
+								html += '<tr><td class="metric">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
+										+ '</td></tr><tr><td class="metric" >Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService + '</td>';
+								html += '</tr></tbody></table>';
+								$('#displayReport').append($(html));
+								progressbar.remove();
+								tableProperties.paging = false;
+								tableProperties.ordering = false;
+								table = buildDatatables();
 
-$(document).ready(function(){
-	$("#Sradius").val(w_qstringx);
-	setPopOptions();
-	loadDBList();
-	updateToolTips();
-	progressBar();	
-	go(key);
-		
-	$.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='+w_qstringa+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&areaId='+areaId+'&type='+type+'&username='+getSession()+'&x='+w_qstringx+'&geotype='+geotype+'&geoid='+geoid,
-		async: true,
-		success: function(item){
-			docMetadata = item.metadata;
-
-			appendNavigation(item.AgencyName);
-			//$('h2').append(item.AgencyName+' Extended Report <br><hr>');	
-
-			html += '<tr><td class="metric" title="Identification number reported in the transit agency GTFS feed.">Agency ID<td>'+ item.AgencyId 
-			+'</td></tr><tr><td class="metric" title="Agency name reported in the transit agency GTFS feed.">Agency Name</td><td>' + item.AgencyName 
-			+'</td></tr><tr><td class="metric" title="Summation of the lengths of the longest route variant for all routes that the transit agency serves.">Route Miles</td><td>'+ numberconv(item.RouteMiles) 
-			+'</td></tr><tr><td class="metric" title="Total number of stops served by the transit agency.">Route Stops</td><td>'+ numberconv(item.StopCount) 
-			+'</td></tr><tr><td class="metric" title="Number of stops in the agency\'s routes divided by Route Miles.">Stops Per Route Mile</td><td>' + numberconv(item.StopPerRouteMile) 
-			+'</td></tr><tr><td class="metric" title="Total hours the transit agency spends on serving all round trips of routes. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates.">Service Hours <span class="IOSym">(2)</span></td><td>'+ numberconv(item.ServiceHours)
-			+'</td></tr><tr><td class="metric" title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates.">Service Miles<span class="IOSym">(2)</span></td><td>'+ numberconv(item.ServiceMiles)
-			+'</td></tr><tr><td class="metric" title="Summation of unduplicated urban population within X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">Urban Population Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' + numberconv(item.UPopWithinX)
-			+'</td></tr><tr><td class="metric" title="Summation of unduplicated rural population within X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">Rural Population Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' + numberconv(item.RPopWithinX) 
-			+'</td></tr><tr><td class="metric" title="Summation of  Employment (RAC) within X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">Employment (RAC) Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' + numberconv(item.racWithinX)+'</td></tr>'; 
-		if(popYear>2010)
-			{
-			html+='<td class="metric" title="Summation of Employees(WAC) within X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">Employees (WAC) Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' +'N/A' +'</td></tr>';  
-			}
-		else
-		{html+='<td class="metric" title="Summation of Employees(WAC) within X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">Employees (WAC) Served (Unduplicated)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)+'</td></tr>';  
-			}
-			html+='<tr><td class="metric" title="Number of trips scheduled at a stop in a route. The service stops for a route is calculated as its stop count multiplied by the number of visits per stop. Reported number are cumulative over the selected dates.">Service Stops<span class="IOSym">(2)</span></td><td>' + numberconv(item.ServiceStops)
-			+'</td></tr><tr><td class="metric" title="Total unduplicated urban population impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Urban population served by service is calculated as service stops multiplied by the unduplicated urban population within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Reported number is cumulative over the selected dates.">Urban Population Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.UPopServedByService)
-			+'</td></tr><tr><td class="metric" title="Total unduplicated rural population impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Rural population served by service is calculated as service stops multiplied by the unduplicated rural population within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Reported number is cumulative over the selected dates.">Rural Population Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.RPopServedByService)
-			+'</td></tr><tr><td class="metric" title="Total Employment (RAC) impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Employment (RAC) served by service is calculated as service stops multiplied by the unduplicated Employment (RAC) within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Reported number is cumulative over the selected dates.">Employment (RAC) Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.racServedByService)+'</td></tr>';
-			if(popYear>2010){
-				html+='<tr><td class="metric" title="Total Employees (WAC)  impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Employees (WAC) served by service is calculated as service stops multiplied by the unduplicated Employees (WAC) within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Reported number is cumulative over the selected dates.">Employees (WAC) Served By Service<span class="IOSym">(1)(2)</span></td><td>' + 'N/A'+'</td></tr>';
-				
-			}
-			else{
-			html+='<tr><td class="metric" title="Total Employees (WAC)  impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Employees (WAC) served by service is calculated as service stops multiplied by the unduplicated Employees (WAC) within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Reported number is cumulative over the selected dates.">Employees (WAC) Served By Service<span class="IOSym">(1)(2)</span></td><td>' + numberconv(item.wacServedByService)+'</td></tr>';
-			}
-		html+='<tr><td class="metric" title="Set of days (from the selected days) in which at least one trip is served by the selected transit agency.">Service Days<span class="IOSym">(3)</span></td><td>'+ item.ServiceDays
-			+'</td></tr><tr><td class="metric" title="Earliest and latest arrival and departure times of all stops served by the transit agency.">Hours of Service<span class="IOSym">(3)</span></td><td>'+ item.HoursOfService +'</td>';
-			html +='</tr></tbody></table>';
-			$('#displayReport').append($(html));	
-			progressbar.remove();	
-			
-			tableProperties.paging = false;
-			tableProperties.ordering = false;
-			table = buildDatatables();
-    	}
-	});	    	
-});
-
+								// append toopltips
+								var tooltips = populateMetricDefs();
+								var tempKey = [];
+								$('.metric').each(function(index, item) {
+									tempKey = [$('title').text(),$(item).text().strip().trim() ];
+									$(item).attr('title',tooltips[tempKey]);
+									});
+							}
+						});
+					});
 </script>
 </head>
-<body >
-		<div class="container">
-			<div class="headerL">
-				<h1>Transit Network Analysis Tool Reports</h1>
-			</div>
-			
-			<div class="headerR">				
-				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
-				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
-			</div>
-		</div>	
-		
-		<table id="controls">
-			<tr>
-			  <td id="td1">
-			  	<div class="headerBL"  >
-				<h2 style="margin:0px;"></h2>
+<body>
+	<div class="container">
+		<div class="headerL">
+			<h1>Transit Network Analysis Tool Reports</h1>
+		</div>
+
+		<div class="headerR">
+			<label for="popselect" style="margin-right: 0.5em; font-weight: bold">Population
+				/ Employment Source</label><select id='popselect'
+				data-label='Population Source' name='popYear' class='input dropDown'
+				onchange='reloadPage()'></select> <label for="dbselect"
+				style="margin-right: 0.5em; font-weight: bold">GTFS Source</label><select
+				disabled id='dbselect' data-label='GTFS Source' name='dbindex'
+				class='input dropDown' onchange='reloadPage()'></select> <input
+				type="button" onclick="window.close()" title="Close Report"
+				value="Close Report" class="button closeButton" />
+		</div>
+	</div>
+
+	<table id="controls">
+		<tr>
+			<td id="td1">
+				<div class="headerBL">
+					<h2 style="margin: 0px;"></h2>
 				</div>
-			  </td>
-			  <td id="td2"> 
-			  	<div class="headerBC" id="accordion" >
+			</td>
+			<td id="td2">
+				<div class="headerBC" id="accordion">
 					<h3></h3>
 					<div>
-						<table style="width:100%;">
+						<table style="width: 100%;">
 							<tr>
-								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+								<td id="accordionItems"
+									style="padding-left: 10px; vertical-align: top">
 									<ul data-role="listview">
-							
+
 									</ul>
 								</td>
-								<td style="vertical-align:top;padding-top:15px">
-									<div id="datepicker" ></div>
+								<td style="vertical-align: top; padding-top: 15px">
+									<div id="datepicker"></div>
 								</td>
 							</tr>
 						</table>
-						
+
 					</div>
 				</div>
-			  </td> 
-			  <td id="td3">
-			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <span class="IOSym">(1) </span><input type="text" name="x" id="Sradius" data-iomap = "1" data-label='Population Search Radius (miles)' class="input radius tbox" onkeypress="return isNumber(event)"/>			    	
-			    	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />		    	    	
-		    	</div>
-			  </td>
-			</tr>
-		</table>
-		
-		<p id="displayReport" class="displayReport" style="overflow:auto"><br></p>
+			</td>
+			<td id="td3">
+				<div class="headerBR">
+					<table>
+						<tr>
+							<td>
+								Population Search Radius (miles) <span class="IOSym">(1) </span>
+							</td>
+							<td>
+								<input type="text" name="x" id="Sradius" data-iomap="1"
+								data-label='Population Search Radius (miles)'
+								class="input radius tbox" onkeypress="return isNumber(event)" />
+							</td>
+							<td>
+								<input id="submit" type="button" onclick="reloadPage()"
+								title="Click submit to refresh the report" value="Submit"
+								class="button" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Minimum Level of Service (times)<span class="IOSym">(2) </span>
+							</td>
+							<td>
+								<input type="text" id="LoS" data-iomap="2" data-label="Minimum Level of Service (times)" 
+								class="input tbox" name="l" value="2" onkeypress="return isWholeNumber(event)"/>
+							</td>
+							<td>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<p id="displayReport" class="displayReport" style="overflow: auto">
 		<br>
-		<br>
-		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+	</p>
+	<br>
+	<br>
+	<div id="progressbar" style="width: 40%; margin-left: 27%">
+		<div class="progress-label"></div>
+	</div>
 
 </body>
 </html>

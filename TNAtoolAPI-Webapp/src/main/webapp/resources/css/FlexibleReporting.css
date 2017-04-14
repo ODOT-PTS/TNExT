@@ -1,0 +1,82 @@
+#FlexRepContainer{
+	width:1325px;
+}
+.flexRepDialogSection{
+	height : 400px;
+	width: 20%;
+	float: left;
+	white-space:nowrap;
+}
+	
+.FlexRepSectionContainer{
+	width:initial;
+	height:inherit;
+	overflow-y: scroll;
+	overflow-x: scroll;
+}
+
+.FlexRepSectionHeader{
+	width:inherit-6;
+	height: 25px;
+	background-color:#99b3cc;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 25px; 
+	border-radius : 10px 10px 0px 0px;
+}
+
+#areaSelect{
+	margin-top:5px;
+}
+.FlexRepButton{
+	margin:5px;
+}
+
+.urbanFilter{
+    height: 15px;
+}
+
+hr { 
+    display: block;
+    margin-top: 0.2em;
+    margin-bottom: 0.5em;
+    margin-left: auto;
+    margin-right: auto;
+    border: 0;
+    border-top: 1px solid rgba(125, 124, 124, 0.68);
+}
+
+#accordion{
+	text-align:center;
+	width:95%;
+	margin:0 auto;
+}
+
+.FlexRepParamsMetricsContainer{
+	font-size:80%;
+}
+
+.header2{
+	font-size:80%;
+	font-weight:bold;
+}
+
+#flexRepSubmit{
+    color: black;
+    font-size: 110%;
+    margin: 5px;
+    margin-top: 35px;
+    background-color: #54f524;
+    padding: 7px 30px 7px 30px;
+    border-radius: 10px;
+    font-weight: bold;
+    border-color: burlywood;
+}
+
+.urbanFilter:disabled{
+	cursor: no-drop;
+}
+
+.FlexRepParamInput:disabled{
+	cursor: no-drop;
+}

@@ -10,12 +10,13 @@
   * [V.3 Final Report](reportV3.md)
   
   
-[Features]()
-
- * [Features List](features.md)
 
 [Project Team](team.md)
 [Contact Us](contact.md)
 [gimmick:ThemeChooser](Change theme)
+[Help]()
+
+ * [Metric List](features.md)
+ * [FAQ](faq.md)
 
 [gimmick:theme (inverse: false)](flatly)

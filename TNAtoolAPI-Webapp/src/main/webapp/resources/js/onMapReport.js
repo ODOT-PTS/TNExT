@@ -248,7 +248,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 	onMapCluster.addLayer(onMapPnrCluster);
 	onMapCluster.addLayer(onMapPnrStopCluster);
 	onMapCluster.addLayer(onMapPnrRouteCluster);
-	//onMapCluster.addLayer(onMapTractCluster);
 	map.addLayer(onMapCluster);
 	stopCluster = new Array();
 	routeCluster = new Array();
@@ -266,16 +265,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 	$('#displayGeoReport').empty();
 	$('#displayPnrCounties').empty();
 	$("#overlay").show();	
-	//console.log('/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&username='+getSession());
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&losRadius='+losRadius+'&username='+getSession(),
-		//url: '/TNAtoolAPI-Webapp/queries/transit/DBList',				//delete
 		async: true,
 		success: function(data){
-			//localStorage.setItem('myStorage', JSON.stringify(data));	//delete
-			//data = JSON.parse(localStorage.getItem('myStorage'));		//delete
 			MapBlk = data.MapTR.MapBL;
 			MapBlkSvc = data.MapTR.MapBLS;
 			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
@@ -307,8 +302,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 					spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
 				});
 				$.each(item.MapSL, function(j,jtem){
-					
-					//var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);
 					var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
 						radius: 8,		
 				        fillColor: colorset[c],		
@@ -340,11 +333,7 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 					var polyline = L.multiPolyline(points, {	
 						weight: 5,
 						color: colorset[c],
-						//fillColor: colorset[k],
-						//color: "#000",
-						//weight: 1,
 						opacity: .5,
-						//fillOpacity: 0.6
 						smoothFactor: 1
 						});	
 					polyline.bindPopup('<b>Route ID:</b> '+ktem.Id+'<br><b>Route Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId+'<br><b>Length:</b> '+numberWithCommas(Math.round(ktem.Length*100)/100)+' miles<br><b>Average Route Fare: </b> '+ktem.Fare+'<br><b>Run Frequency:</b> '+ktem.Frequency);
@@ -353,12 +342,10 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 				routeCluster.push(tmpRouteCluster);
 			});		
 			html = html + '</tbody></table>';
-			//html = html + '</tbody>'+html2+'</table>';
 			$('#displayTransitReport').append($(html));
 			var transitTable = $('#transitTable').DataTable( {
 				"paging": false,
 				"bSort": false,
-				//"scrollY": "40%",
 				"dom": 'T<"clear">lfrtip',
 		        "tableTools": {
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -369,7 +356,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 		    $("#transitTable_filter").remove();
 		    $("#transitTable_info").remove();
 		    transitTable.$('tr').click( function () {
-		        // data = oTable.fnGetData( this );
 		    	if($(this).hasClass('selected')){
 		    		
 		    		onMapStopCluster.removeLayer(stopCluster[$(this).index()]);
@@ -405,13 +391,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 						'<td>'+numberWithCommas(item.RuralPopulation)+'</td>'+
 						'<td>'+numberWithCommas(item.Wac)+'</td>'+	
 						'<td>'+numberWithCommas(item.Rac)+'</td></tr>';	
-				/*var tmpBlockCluster = new L.MarkerClusterGroup({
-					maxClusterRadius: 120,
-					iconCreateFunction: function (cluster) {
-						return new L.DivIcon({ html: cluster.getChildCount(), className: GcolorArray[0], iconSize: new L.Point(25, 25) });						
-					},
-					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
-				});*/
 				var tmpBlockCluster = new L.FeatureGroup();
 				var tmpTractCluster = new L.MarkerClusterGroup({
 					maxClusterRadius: 80,
@@ -420,8 +399,7 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 					},
 					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: false
 				});
-				$.each(item.MapBL, function(j,jtem){						
-						//var marker = L.marker([jtem.Lat,jtem.Lng]/*, {icon: onMapIcon}*/);	
+				$.each(item.MapBL, function(j,jtem){							
 						var marker = new L.CircleMarker([jtem.Lat,jtem.Lng], {		
 							radius: 6,		
 							fillColor: getColorBlocks(jtem.Density),		
@@ -440,7 +418,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 							marker.svc = 0;
 							blkSvcFreq = 0;
 						}
-						
 						marker.popDensity = jtem.Density;
 						marker.racDensity = jtem.RacDensity;
 						marker.wacDensity = jtem.WacDensity;
@@ -451,7 +428,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 				});
 				blockCluster.push(tmpBlockCluster);				
 				$.each(item.MapTL, function(k,ktem){
-					//var tractmarker = L.marker([ktem.Lat,ktem.Lng]/*, {icon: onMapIcon}*/);
 					var tractmarker = new L.CircleMarker([ktem.Lat,ktem.Lng], {		
 						radius: 8,		
 				        fillColor: "#0000FF",		
@@ -471,7 +447,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 				"paging": false,
 				"bSort": false,
 				"bAutoWidth": false,
-				//"scrollY": "40%",
 				"dom": 'T<"clear">lfrtip',
 				"tableTools":{
 		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
@@ -482,7 +457,6 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 		    $("#geoTable_filter").remove();
 		    $("#geoTable_info").remove();
 		    geoTable.$('tr').click( function () {
-		        // data = oTable.fnGetData( this );
 		    	if($(this).hasClass('selected')){		    		
 		    		onMapBlockCluster.removeLayer(blockCluster[$(this).index()]);
 		    		onMapTractCluster.removeLayer(tractCluster[$(this).index()]);
@@ -499,8 +473,8 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 		    	}
 		    });		    
 		  //Title VI		
-		    var title6 = data.MapG.TitleVI;		
-		    $('#pd').html(addPercent((100*title6.with_disability/(title6.with_disability+title6.without_disability)).toFixed(2)));		
+		    var title6 = data.MapG.TitleVI;
+			$('#pd').html(addPercent((100*title6.with_disability/(title6.with_disability+title6.without_disability)).toFixed(2)));		
 		    $('#pp').html(addPercent((100*title6.below_poverty/(title6.below_poverty+title6.above_poverty)).toFixed(2)));		
 		    		
 		    $('#pew').html(numWithCommas(title6.white.toFixed(0)));		
@@ -562,7 +536,7 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 				var tmpPnrCluster = new L.FeatureGroup();
 	
 				onMapIcon = L.icon({
-				    iconUrl: 'js/lib/leaflet-0.7/images/pnr.ico',
+				    iconUrl: '../vendors/leaflet-0.7/images/pnr.ico',
 				    iconSize:     [40, 40], // size of the icon
 				    iconAnchor:   [20, 39], // point of the icon which will correspond to marker's location
 				    popupAnchor:  [0, -36] // point from which the popup should open relative to the iconAnchor

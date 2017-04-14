@@ -38,6 +38,8 @@ import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webapp.modifiers.DbUpdate;
+
 public class GtfsDatabaseLoaderMain {
 
   private static Logger _log = LoggerFactory.getLogger(GtfsDatabaseLoaderMain.class);
@@ -57,7 +59,7 @@ public class GtfsDatabaseLoaderMain {
 
   private void run(String[] args) throws IOException {
     CommandLine cli = parseCommandLineOptions(args);
-
+    
     args = cli.getArgs();
     if (args.length != 1) {
       printUsage();
@@ -80,8 +82,8 @@ public class GtfsDatabaseLoaderMain {
     config.setProperty("hibernate.cache.provider_class",
         "org.hibernate.cache.NoCacheProvider");
     config.setProperty("hibernate.hbm2ddl.auto", "update");
-    config.addResource("database/mapping/transit/GtfsMapping.hibernate.xml");
-    config.addResource("database/mapping/transit/HibernateGtfsRelationalDaoImpl.hibernate.xml");
+    config.addResource("com/model/database/connections/transit/mapping/GtfsMapping.hibernate.xml");
+    config.addResource("com/model/database/connections/transit/mapping/HibernateGtfsRelationalDaoImpl.hibernate.xml");
 
     SessionFactory sessionFactory = config.buildSessionFactory();
     HibernateGtfsFactory factory = new HibernateGtfsFactory(sessionFactory);
@@ -91,8 +93,15 @@ public class GtfsDatabaseLoaderMain {
 
     GtfsMutableRelationalDao dao = factory.getDao();
     reader.setEntityStore(dao);
-    reader.run();
-    reader.close();
+    try{
+    	reader.run();
+    }catch(Exception e){
+    	DbUpdate.gtfsMessage=e.getMessage();
+    	DbUpdate.gtfsUpload=true;
+    }finally{
+    	reader.close();
+    	sessionFactory.close();
+    }
   }
 
   private CommandLine parseCommandLineOptions(String[] args) {

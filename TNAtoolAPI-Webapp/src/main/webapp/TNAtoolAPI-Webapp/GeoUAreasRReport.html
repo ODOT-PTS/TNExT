@@ -18,6 +18,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -36,14 +37,14 @@ var popMax = getURIParameter("popMax");
 var popMin = getURIParameter("popMin");
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th class="metric" title="Identification number associated with the geographic area." id="aid">Geo ID</th>'+
-'<th class="metric" title="Name of the geographic area." id="an">Name</th>'+
-'<th class="metric" title="Total population of the geographic area.">Population<span class="IOSym">(1) </span></th>'+
-'<th class="metric" title="Total land area of the geographic area in square miles.">Land Area<span class="IOSym">(1) </span></th>'+
-'<th class="metric" title="Total water area of the geographic area in square miles.">Water Area<span class="IOSym">(1) </span></th>'+
-'<th class="metric" title="Total number of urbanized areas aggregated to generate this report.">Urban Areas<span class="IOSym">(1) </span></th>'+
-'<th class="metric" title="Total number of routes serving stops in the given geographic area.">Total Routes<span class="IOSym">(1) </span></th>'+
-'<th class="metric" title="Total number of stops within the given geographic area.">Total Stops<span class="IOSym">(1) </span></th></tr>';	
+tmp = '<tr><th class="metric" id="aid">Geo ID</th>'+
+'<th class="metric" id="an">Name</th>'+
+'<th class="metric">Population<span class="IOSym">(1) </span></th>'+
+'<th class="metric">Land Area<span class="IOSym">(1) </span></th>'+
+'<th class="metric">Water Area<span class="IOSym">(1) </span></th>'+
+'<th class="metric">Urban Areas<span class="IOSym">(1) </span></th>'+
+'<th class="metric">Total Routes<span class="IOSym">(1) </span></th>'+
+'<th class="metric">Total Stops<span class="IOSym">(1) </span></th></tr>';	
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -127,6 +128,14 @@ $(document).ready(function(){
 		            '</tr>'+
 		        '</table>';
 		    }
+		    
+		 	// append toopltips
+			var tooltips = populateMetricDefs();
+			var tempKey = [];
+			$('.metric').each(function(index, item) {
+				tempKey = [$('title').text(),$(item).text().strip().trim() ];
+				$(item).attr('title',tooltips[tempKey]);
+				});
     	}
 	});
 });

@@ -21,7 +21,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
+//import com.model.database.onebusaway.gtfs.hibernate.objects.ext.AgencyExt;
+import org.onebusaway.gtfs.model.Agency;
 
 @XmlRootElement(name = "Agency")
 public class AgencyType {
@@ -37,7 +38,7 @@ public class AgencyType {
         this.fareUrl = fareUrl;
     }
 
-    public AgencyType(AgencyExt arg) {
+    public AgencyType(Agency arg) {
         this.id = arg.getId();
         this.name = arg.getName();
         this.url = arg.getUrl();

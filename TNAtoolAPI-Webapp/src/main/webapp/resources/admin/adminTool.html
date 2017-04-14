@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>TNA Software Tool ADMIN</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	
+	<script src="https://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+	<script src="https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+	<script src="https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+<!-- 	<script src="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+ -->	<script src="https://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.iframe-transport.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-process.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-image.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-audio.js"></script>
+<!-- 	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-validate.js"></script>
+ -->	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-ui.js"></script>
+<!-- 	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-jquery-ui.js"></script>
+ -->	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/js/jquery.fileupload-video.js"></script>
+	<script src="../resources/admin/adminTool.js"></script>
+	<script src="../resources/admin/jquery.fileupload-validate.js"></script>
+	
+	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/css/jquery.fileupload.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.12.5/css/jquery.fileupload-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" href="../resources/admin/adminTool.css" />
+	
+	
+</head>
+
+<body style="display:none">
+	<!-- <header>
+		<h1 style="width:60%; margin:auto; margin-top:3%">ADMINISTRATIVE INTERFACE</h1>
+	</header> -->
+	
+	<div id="main">
+		<h1 style="width:60%; margin:auto; margin-top:3%; margin-bottom:1em">ADMINISTRATIVE INTERFACE</h1>
+		<input type="button" id="addDB" class="dbButtons" value="Add a New Database" onclick="addModifyDB(defaultInfo, -1)">
+		<!-- <input type="button" id="connectDB" class="dbButtons" value="Add an Existing Database" onclick="addModifyDB(defaultInfo, -1, 1)"> -->
+		
+<!-- 		<input type="button" id="runPlayground" value="Run Playground Add/Remove Processes" onclick="runPlayground('true')"> -->
+		<br><br>
+		<div id="dbList">
+			
+		</div>
+		
+		
+		<div id="dialog-form" title="Database Connection Information">
+		 
+		  <form>
+		    <fieldset id="dialogFields">
+		      
+		    </fieldset>
+		  </form>
+		</div>
+		
+		<div id="gtfs_upload" title="GTFS Add/Remove">
+		 <div id="gtfsNotes">
+		 <h3>Notes:</h3>
+		  <div id="gtfs_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>GTFS feeds to be uploaded must be provided as separate <b>ZIP</b> files.</li>
+			  	<li>Multiple ZIP files can be uploaded at the same time.</li>
+			  	<li>An example of a properly formatted GTFS feed file that can be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/corvallis_transit_agency.zip" download>here</a></b>.</li>
+			  	<li>The corresponding GTFS text files must be directly within the ZIP file.</li>
+			  	<li>GTFS feed files that have been successfully uploaded are displayed in the <b>"Uploaded GTFS Feeds"</b> drop-down list.</li>
+			  	<li>If there is a conflict between the Agency ID of a new GTFS feed being uploaded and the Agency ID of a GTFS feed already present in the database, the new GTFS feed will not be uploaded</li>
+			  </ul>
+		  </div></div><br>
+		  <div id="gtfs_current_feeds" class="upload_cards"><h3>Uploaded GTFS Feeds</h3>
+		  	<div id="agencyList"></div>
+		  </div><br>
+		  <div id="gtfs_upload_feeds" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="gtfs_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]" multiple>
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>
+		
+		<div id="census_upload" title="Census Population Add/Remove">
+		 <div id="censusNotes">
+		 <h3>Notes:</h3>
+		  <div id="census_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Census population data for different states can be selected to be imported into the current database from the list below.</li>
+			  	<li>The population data for the selected states is imported from the pre-built database "census_reference" which is based on Census 2010 population data.</li>
+			  	<li>If a new "census_reference" database is needed to be created (say for Census 2020), the instructions, as well as the sql queries, can be found <b><a href="../resources/admin/sampleFiles/buildCensus.sql" download>here</a></b>.</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="census_import" class="upload_cards"> -->
+		  	<div style="float:left;width:35%;height:350px;margin-left:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States available to be imported:</p><br>
+		  	<table id="availablestates" style="background-color:white"></table>
+		  	<br>
+		  	<input type="button" value="Import" onclick="openCensusState()"; style="width: 60%;">
+		  	</div>
+		  	<div style="float:right;width:35%;height:350px;margin-right:8%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States already imported:</p><br>
+		  	<table id="importedstates" style="background-color:white;"></table>
+		  	</div>
+		  <!-- </div> --><br>
+		  
+		</div>
+	
+		<div id="pnr_upload" title="Park & Ride Add/Remove">
+		 <div id="pnrNotes">
+		 <h3>Notes:</h3>
+		  <div id="pnr_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Park & Ride data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>A sample of a Park & Ride CSV file properly formatted to be processed by this program can be downloaded <b><a href="../resources/admin/sampleFiles/pnr_data.csv" download>here</a></b>.</li>
+			  	<li>The names and the order of the columns in the CSV file to be uploaded must be <u><b>exactly</b></u> the same as those shown in the sample CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="pnr_delete_card" class="upload_cards">
+			  <button type="button" id="deletePNR" class="btn btn-danger delete" onclick="deletePNR()"><span>Delete Existing Park & Ride Data</span></button>
+		  </div><br> -->
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:50%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "park & ride" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatespnr" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="pnr_upload_feeds" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="pnr_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]">
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>
+	
+	<div id="t6_upload" title="Title VI Add/Remove">
+		 <div id="t6Notes">
+		 <h3>Notes:</h3>
+		  <div id="t6_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Title VI data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>Five different CSV files must be uploaded at the same time (as shown in the list below). The name of the files, as well as the names and the order of the columns in the CSV files to be uploaded, must be <b>exactly</b> the same as those shown in the example CSV files accessible via their corresponding hyperlink.</li>
+			  	<table id="t6Table">
+			  		<tr><td></td><td><b>File Name</b></td><td><b>Description</b></td></tr>
+			  		<tr><td>1.</td><td><a href="../resources/admin/sampleFiles/b03002.csv" download>b03002.csv</a></td><td>Hispanic or Latino Origin by Race</td></tr>
+			  		<tr><td>2.</td><td><a href="../resources/admin/sampleFiles/b16004.csv" download>b16004.csv</a></td><td>Age by Language Spoken at Home by Ability to Speak English for the Population 5 Years and Over</td></tr>
+			  		<tr><td>3.</td><td><a href="../resources/admin/sampleFiles/b17021.csv" download>b17021.csv</a></td><td>Poverty Status of Individuals in the Past 12 Months by Living Arrangement</td></tr>
+			  		<tr><td>4.</td><td><a href="../resources/admin/sampleFiles/b18101.csv" download>b18101.csv</a></td><td>Sex by Age by Disability Status</td></tr>
+			  		<tr><td>5.</td><td><a href="../resources/admin/sampleFiles/b19037.csv" download>b19037.csv</a></td><td>Age of Householder by Household Income in the Past 12 Months (in 2015 Inflation-Adjusted Dollar</td></tr>
+			  	</table>
+			  	<!-- <ol style="font-size:80%">
+				  	<li><b><a href="../resources/admin/sampleFiles/b03002.csv" download>b03002.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b16004.csv" download>b16004.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b17021.csv" download>b17021.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b18101.csv" download>b18101.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/b19037.csv" download>b19037.csv</a></b></li>
+			  	</ol> -->
+			  	
+			  	<li>The data for each of the five files listed in the table above must be requested and downloaded <u><b>separately</b></u> from the website <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a> by following these steps:
+			  	<ol style="font-size:80%">
+				  	<li>Go to <a href="https://www.nhgis.org/" target="_blank">www.nhgis.org</a>.</li>
+				  	<li>Click on the "Log in" button to log into your account. If you do not have an account, you can create one for free.</li>
+				  	<li>Once you log in, the "NHGIS Data Finder" page will be displayed automatically which contains four buttons labeled "Geographic Levels", "Year", "Topics", and "Datasets".
+				  	<li>Click on the button labeled "Geographic Levels". This action will open a window that displays different levels for which Title VI data can be selected (e.g., Nation, State, County, etc). To select one of these levels, you must click on the corresponding yellow plus sign (+) icon.</li>
+				  	<li>To access the data to create the files "b03002.csv", "b16004.csv", "b17021.csv", and "b19037.csv", the level "Block Group" must be selected by clicking on the corresponding yellow plus sign. To access the data to create the file "b18101.csv", the level "Census Tract" must be selected. Once the appropriate level has been selected, click the "Submit" button. <b>REMINDER: Each of these files must be created separately</b></b>.</li>
+				  	<li>Click on the button labeled "Years" and then select the most recent range from the list labeled "5-Year Ranges." Click the "Submit" button when done.</li>
+				  	<li>The table displayed in the bottom half of the browser window now lists tables constrained by the year range just selected. The second column of this table is labeled "Table Name". Look for the name of the table you want to download (e.g., "B03002"). You may need to use the page navigation controls shown at the bottom of the browser window.</li>
+				  	<li>Once found, select the table by clicking on the yellow plus sign icon displayed on leftmost column.</li>
+				  	<li>Scroll to the top of the browser window and click on the green button labeled "Continue" on the <b>Data Cart</b> panel.</li>
+				  	<li>Click "Continue" again.</li>
+				  	<li>On the "Review and Submit" page under "Table File Structure," make sure the option "Comma delimited (best for GIS)" is the only one selected.</li>
+				  	<li>Under "Source Tables," click on the button labeled "Geographic Extents" and select the desired US state (e.g., Oregon). Click on the button labeled "Submit".</li>
+				  	<li>On the "Review and Submit" page, click on the button labeled "Submit" displayed at the bottom of the page. This action will open the "Extracts History" page which shows all data requests.</li>
+				  	<li>Wait until your table is ready to download. This process usually takes a few minutes.</li>
+				  	<li>Once the data request has been processed (this usually takes a few minutes), the NHGIS site will send an automatic email to the address used for registration. Alternatively, the browser page "Extract History" can be refreshed until the column labeled "Download Table Data" displays a hyperlink.</li>
+				  	<li>Click on the hyperlink labeled "tables" to download a ZIP file containing the Title VI data for the selected table (e.g., B03002).</li>
+<!-- 				  	<li>For each table downloaded, there will be two CSV and two TXT files (the TXT files are the metadata files for the csv files). The CSV file whose name ends with an "E" (which stands for estimates) is the one needed by the TNA Software Tool.</li>
+ -->				  	<li>The column names of the CSV files are coded. You can use the metadata TXT file to identify the columns you need.</li>
+ 					<li>Rename the CSV file according to the ones specified in the table above (e.g. b03002.csv or b16004.csv).</li>
+			  	</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="t6_delete_card" class="upload_cards">
+			  <button type="button" id="deleteT6" class="btn btn-danger delete" onclick="deleteT6()"><span>Delete Existing Title VI Data</span></button>
+		  </div><br> -->
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:50%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "title VI" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatest6" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="t6_upload_feeds" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="t6_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]" multiple>
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>
+		
+	<div id="emp_upload" title="Employment Add/Remove">
+		 <div id="empNotes">
+		 <h3>Notes:</h3>
+		  <div id="emp_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>Two files with employment data must be uploaded at the same time.</li>
+			  	<li>The name of the files, as well as the names and the order of the columns in the CSV file to be uploaded, must be exactly the same as those shown in the following sample CSV files:
+			  	<ol style="font-size:80%">
+				  	<li><b><a href="../resources/admin/sampleFiles/rac.csv" download>rac.csv</a></b></li> 
+				  	<li><b><a href="../resources/admin/sampleFiles/wac.csv" download>wac.csv</a></b></li> 
+			  	</ol></li>
+			  	<li>Employment data to create the required files can be downloaded from <a href="https://lehd.ces.census.gov/data/" target="_blank">lehd.ces.census.gov/data/</a> by following these steps:
+			  	<ol style="font-size:80%">
+				  	<li>Once the lehd.ces.census.gov/data/ page is loaded, scroll down to the section titled "LEHD Origin-Destination Employment Statistics (LODES)"..</li>
+				  	<li>Select <b>LODES7</b> from the dropdown list labeled "Version".</li>
+				  	<li>Select the desired state from the dropdown list labeled "State".</li>
+				  	<li>Select <b>Residence Area Characteristics (RAC)</b> from the dropdown list labeled "Type".</li>
+				  	<li>Click on the button labeled "View Files".</li>
+				  	<li>From the list, find the file called "[desired state]_rac_S000_JT00_[desired year].csv.gz".</li>
+				  	<li>Right click on the hyperlinked file name and save the file to a desired location.</li>
+				  	<li>Decompress the file to get the "[desired state]_rac_S000_JT00_[desired year].csv" file.</li>
+				  	<li>Repeat steps 4 to 8 to download WAC data.</li>
+				  	<li>Rename the files as "rac.csv" and "wac.csv".</li>
+			  	</ol>
+			  	</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="emp_delete_card" class="upload_cards">
+			  <button type="button" id="deleteEmp" class="btn btn-danger delete" onclick="deleteEmp()"><span>Delete Existing Employment Data</span></button>
+		  </div><br> -->
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:35%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "RAC" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesrac" style="background-color:white;"></table>
+		  </div>
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:35%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "WAC" dataset has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstateswac" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="emp_upload_files" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="emp_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]" multiple>
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>	
+		
+	<div id="femp_upload" title="Employment Projection Add/Remove">
+		 <div id="fempNotes">
+		 <h3>Notes:</h3>
+		  <div id="femp_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Future Employment data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>An example of a properly formatted Employment Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_employment.csv" download>here</a></b>.</li>
+			  	<li>The name of the file, as well as the names and the order of the columns in the Employment Projection CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="femp_delete_card" class="upload_cards">
+			  <button type="button" id="deletefEmp" class="btn btn-danger delete" onclick="deletefEmp()"><span>Delete Existing Future Employment Data</span></button>
+		  </div><br> -->
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:50%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "future employment" data has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesfemp" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="femp_upload_files" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="femp_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]">
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>	
+
+	<div id="fpop_upload" title="Population Projection Add/Remove">
+		 <div id="fpopNotes">
+		 <h3>Notes:</h3>
+		  <div id="fpop_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Population Projection data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>An example of a properly formatted Population Projection CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/future_population.csv" download>here</a></b>.</li>
+			  	<li>The name of the file, as well as the names and the order of the columns in the Population Projection CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="fpop_delete_card" class="upload_cards">
+			  <button type="button" id="deletefPop" class="btn btn-danger delete" onclick="deletefPop()"><span>Delete Existing Population Projection Data</span></button>
+		  </div><br> -->
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:50%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "future population" data has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesfpop" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="fpop_upload_files" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="fpop_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]">
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>	
+		
+		<div id="region_upload" title="Regions Add/Remove">
+		 <div id="regionNotes">
+		 <h3>Notes:</h3>
+		  <div id="region_notes" class=""><h3 style="margin-top: .1em;">Notes:</h3><br>
+			  <ul>
+			  	<li>Regions data must be uploaded in a file using the Comma Separated Value (<b>CSV</b>) format. No other formats are accepted.</li>
+			  	<li>An example of a properly formatted Regions CSV file can be downloaded <b><a href="../resources/admin/sampleFiles/regions.csv" download>here</a></b>.</li>
+			  	<li>The name of the file, as well as the names and the order of the columns in the Regions CSV file to be uploaded, must be <u><b>exactly</b></u> the same as those shown in the example CSV file.</li>
+			  	<li>Note that the contents of the uploaded file must correspond to one specific state (and not multiple states).</li>
+			  </ul>
+		  </div></div><br>
+		  <!-- <div id="fpop_delete_card" class="upload_cards">
+			  <button type="button" id="deletefPop" class="btn btn-danger delete" onclick="deletefPop()"><span>Delete Existing Population Projection Data</span></button>
+		  </div><br> -->
+		  <div style="/* width:35%;height:350px;margin-right:8%; */height:50%;overflow:auto;font-size:85%" class="upload_cards">
+		  	<p>States for which the "Regions" data has already been imported into the current database:</p>
+		  	<p>(Note that the following list must exactly correspond to the imported states listed in the "Import Census menu")</p><br>
+		  	<table id="importedstatesregion" style="background-color:white;"></table>
+		  </div><br>
+		  <div id="region_upload_files" class="upload_cards">
+		    <!-- <fieldset id="gtfsDialog"> -->
+		      	<form id="region_upload_form" method="POST" enctype="multipart/form-data">
+			        <div class="row fileupload-buttonbar">
+			            <div class="col-lg-7">
+			                <span class="btn btn-success fileinput-button">
+			                    <i class="glyphicon glyphicon-plus"></i>
+			                    <span>Add files...</span>
+			                    <input type="file" name="files[]">
+			                </span>
+			                <button type="submit" class="btn btn-primary start">
+			                    <i class="glyphicon glyphicon-upload"></i>
+			                    <span>Start upload</span>
+			                </button>
+			                <button type="reset" class="btn btn-warning cancel">
+			                    <i class="glyphicon glyphicon-ban-circle"></i>
+			                    <span>Cancel upload</span>
+			                </button>
+			                
+			            </div>
+			            <!-- The global progress state -->
+			            <div class="col-lg-5 fileupload-progress fade">
+			                <!-- The global progress bar -->
+			                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+			                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+			                </div>
+			                <!-- The extended global progress state -->
+			                <div class="progress-extended">&nbsp;</div>
+			            </div>
+			        </div>
+			        <!-- The table listing the files available for upload/download -->
+			        <table role="presentation" style="width:100%;border-spacing: 10px;" class="table table-striped"><tbody class="files"></tbody></table>
+			    </form>
+		    <!-- </fieldset> -->
+		  	<!-- The template to display files available for upload -->
+			<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+       
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <span class="size">Processing...</span>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled style="display:none">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (true) { %}
+                <button class="btn btn-warning cancel" style="display:">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+	</script>
+			<!-- The template to display files available for download -->
+			<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" disabled style="display:none">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            
+        </td>
+    </tr>
+{% } %}
+</script>
+		</div>
+		</div>	
+		
+		<div id="gtfsFeedbackDialog" title="GTFS Add/Remove/Update Progress"><div style="width:100%;overflow:auto">
+		  <br><p style="font-style: italic;text-align:center"><span id="gtfsFeedbackMessage"></span></p><br>
+		  <table id="gtfsProgressTable" style="width:100%;">
+		  </table>
+		</div></div>
+		
+		<!-- <div id="censusFeedbackDialog" title="Census Population Add/Remove Progress"><div style="width:100%;overflow:auto">
+		  <br><p style="font-style: italic;text-align:center"><img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px"><span id="censusFeedbackMessage"></span></p><br>
+		  <table id="censusProgressTable" style="width:100%;">
+		  </table>
+		</div></div> -->
+		
+		<div id="otherFeedbackDialog" title="Data Import/Remove Progress"><div style="width:100%">
+		  <br><p style="font-style: italic;text-align:center" id="otherFeedbackMessage"></p><br>
+		</div></div>
+		
+		<div id="stateSelectDialog" title="Metadata Information:"><div style="">
+		  <span id="stateSelectSpan"><br>State Name: <select id="selectStateSelector"></select></span><br><br>Add a note (e.g. 2014 5-year summary file):<br>
+		  <input type="text" id="selectStateText" style="width:100%"><br>
+		</div></div>
+		
+	</div>
+	
+	
+</body>
+
+</html>

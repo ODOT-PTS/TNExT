@@ -121,16 +121,15 @@ public class GeoR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String UrbanAreasCount;
+    public String UrbanAreasCount;	
 	
 	@XmlAttribute
     @JsonSerialize
     public String UrbanizedAreasCount;
-	
+
 	@XmlAttribute
     @JsonSerialize
     public String UrbanClustersCount;
-	
 	
 	@XmlAttribute
     @JsonSerialize

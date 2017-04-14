@@ -1,0 +1,454 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Flexible Reporting Wizard</title>
+
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+<script src="../resources/js/date.js"></script>
+<script src="../resources/data/Datasources.js"></script>
+<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+<script src="../resources/js/JSMethods.js"></script>
+
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="../resources/css/report.css" />
+
+<script type="text/javascript">
+var areas = [];
+var agencies = [];
+var dates = [];
+var areaType;
+var reportType;
+var metrics =[];
+var year;
+var minUrbanPop = 2500;
+var maxUrbanPop = 2000000;
+var filterOnUrban = false;
+var los; // Minimum level of service
+var sradius; // search radius
+var rac = window.opener.rac;
+var wac = window.opener.wac;
+var metadata  = '';
+
+$(document).ready(function(){
+	updateToolTips();
+	progressBar();
+	dbindex = window.opener.dbindex;
+	areas = window.opener.areas;
+	agencies = window.opener.agencies;
+	dates = window.opener.dates;
+	areaType = window.opener.areaType;
+	reportType = window.opener.reportType;
+	metrics = window.opener.metrics;
+	los =  $("#LoS", window.opener.document).val();
+	sradius = $("#flexSradius", window.opener.document).val();
+	year = $("#yearSel", window.opener.document).val();
+	filterOnUrban =$("#uAreaFilter", window.opener.document).is(':checked');
+	urbanFilterYear = $("#uAreaYear", window.opener.document).val();
+	wac = window.opener.wac;
+	rac = window.opener.rac;
+	if (filterOnUrban){
+		minUrbanPop = $("#minUrbanPop", window.opener.document).val();
+		maxUrbanPop = $("#maxUrbanPop", window.opener.document).val();
+		}else{
+		minUrbanPop = 2500;
+		maxUrbanPop = 2000000;
+	}
+	
+	if (reportType == 0){  // Transit Service
+		
+		// generating metadata table
+		metadata = '<table style="font-size:15" class="tg">'
+			  + '<tr>'
+			  + '<td class="tg-031e" >Dates:</td>'
+			  + '<td class="tg-031e input" data-label="Selected Dates">' + dates + '</td>'
+			  + '</tr>';
+	  	if (filterOnUrban){
+	  		metadata += '<tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Urban areas projection year:</td>'
+			  + '<td class="tg-yw4l input" data-label="Urban Areas Projection Year">'+ $('#uAreaYear option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '</tr>'
+	  	}						 
+		metadata += '</table>';
+		$('.headerBR').append(metadata);
+		
+		var m = metrics.values;
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepSrv?dbindex='+dbindex+'&agencies='+agencies+'&dates='+dates+'&areas='+ areas+'&areaType='+areaType+'&key='+key
+					+'&urbanFilter='+filterOnUrban+'&username='+getSession()+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&uAreaYear=' +urbanFilterYear,
+			async: true,
+			success: function(d){
+				html = '<table id="RT" class="display" align="center">';
+				tmp = '<tr><th class="metric" title="ID number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+				'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+				'<th class="metric" title="ID associated with the geographic area.">Area ID</th>'+
+				'<th class="metric" title="Area name.">Area Name</th>';
+				if ( m.includes('routeMiles') )
+					tmp += '<th class="metric" title="Summation of the lengths of the longest trips within the geographic area.">Route Miles</th>';
+				if ( m.includes('routeStops') )
+					tmp += '<th class="metric" title="Total number of stops served by the transit agency.">Route Stops</th>';
+				if ( m.includes('stopsPerMile') )
+					tmp += '<th class="metric" title="Number of stops in the agency\'s routes divided by Route Miles.">Stops Per Route Mile</th>';
+				if ( m.includes('serviceMiles') )
+					tmp += '<th class="metric" title="Total miles driven by a transit agency over all round trips of a route. Service miles may be calculated for a specific date or a set of dates specified using the calendar.">Service Miles</th>';
+				if ( m.includes('serviceStops') )
+					tmp += '<th class="metric" title="The service stops for a route is calculated as its stop count multiplied by the number of visits per stop. Reported number are cumulative over the selected dates.">Service Stops</th>';
+				if ( m.includes('serviceHours') )
+					tmp += '<th class="metric" title="Total hours the transit agency spends on serving all round trips of routes. Service hours may be calculated for a specific date or a set of dates specified using the calendar. Reported number are cumulative over the selected dates.">Service Hours</th></tr>';
+				
+				html += '<thead>'+tmp+'</thead><tbody>';
+				$.each(d, function(i,item){
+					html += '<tr><td>' + item.agencyId + '</td>'
+					+ '<td>' + item.agencyName + '</td>'
+					+ '<td>' + item.areaId + '</td>'
+					+ '<td>' + item.areaName + '</td>';
+				if ( m.includes('routeMiles') )
+					html += '<td>' + numWithCommas(item.routeMiles.toFixed(2)) + '</td>';
+				if ( m.includes('routeStops') )
+					html += '<td>' + item.routeStops + '</td>';
+				if ( m.includes('stopsPerMile') )
+					html += '<td>' + ((item.routeStops/item.routeMiles)||0).toFixed(2)  + '</td>';
+				if ( m.includes('serviceMiles') )
+					html += '<td>' + numWithCommas(item.serviceMiles.toFixed(2)) + '</td>';
+				if ( m.includes('serviceStops') )
+					html += '<td>' + item.serviceStops + '</td>';
+				if ( m.includes('serviceHours') )
+					html += '<td>' + secToHour(item.serviceSeconds) + '</td></tr>';
+				});
+				html += '</tbody></table>'
+				$('#displayReport').append($(html));
+				table = buildDatatables();
+				progressbar.remove();
+			}
+		});
+	}else if (reportType == 1){  // Population
+		// generating metadata table
+		metadata = '<table style="font-size:15" class="tg">'
+			  + '<tr>'
+			  + '<td class="tg-031e" >Dates:</td>'
+			  + '<td class="tg-031e input" data-label="Selected Dates">' + dates + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Pop. projection year:</td>'
+			  + '<td class="tg-031e input" data-label="Population Projection Year">' + $('#yearSel option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e"> Min. Level of Service (times):</td>'
+			  + '<td class="tg-031e input" data-label="Minimum Level of Service (times)">' + los + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Pop. search radius (mi.):</td>'
+			  + '<td class="tg-031e input" data-label="Population Search Radius">' + sradius + '</td>'
+			  + '</tr>';
+	  	if (filterOnUrban){
+	  		metadata += '<tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Urban areas projection year:</td>'
+			  + '<td class="tg-yw4l input" data-label="Urban Areas Projection Year">'+ $('#uAreaYear option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '</tr>'
+	  	}			 
+		metadata += '</table>';
+		$('.headerBR').append(metadata);
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepPop?dbindex='+dbindex+'&agencies='+agencies+'&year='+year+'&dates='+dates
+					+'&areas='+ areas+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&key='+key
+					+'&urbanFilter='+filterOnUrban+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&uAreaYear=' +urbanFilterYear,
+			async: true,
+			success: function(d){
+				m = metrics.values;
+				html = '<table id="RT" class="display" align="center">';
+				tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+				'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+				'<th class="metric" title="ID associated with the geographic area.">Area ID</th>'+
+				'<th class="metric" title="Area name.">Area Name</th>'+
+				'<th class="metric" title="Urban or rural population.">Population Type</th>'+
+				'<th class="metric" title="Summation of unduplicated population within X-mile radius (i.e., stop distance) of all stops that the transit agency serves.">Pop. Served</th>'+
+				'<th class="metric" title="Total unduplicated population impacted within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. '
+					+ 'population served by service is calculated as service stops multiplied by the unduplicated population within an X-mile radius (i.e., stop distance) '
+					+ 'of the stops that the transit agency serves more than the given minimum level of service. Reported number is cumulative over the selected dates.">Pop. Served by Service</th>'+
+				'<th class="metric" title="Summation of unduplicated population within an X-mile radius (i.e., stop distance) '
+					+ 'of all stops that the transit agency serves who receive .">Pop. Serve at Level of Service</th></tr>';
+				html += '<thead>'+tmp+'</thead><tbody>';
+				$.each(d, function(i,item){
+					if (m.includes('rural') && item.popType == 'R'){
+						html += '<tr><td>' + item.agencyId + '</td>'
+						+ '<td>' + item.agencyName + '</td>'
+						+ '<td>' + item.areaId + '</td>'
+						+ '<td>' + item.areaName + '</td>'
+						+ '<td>Rural</td>'
+						+ '<td>' + numWithCommas(item.popServed) + '</td>'
+						+ '<td>' + numWithCommas(item.popSS) + '</td>'
+						+ '<td>' + numWithCommas(item.popLOS) + '</td></tr>';
+					}
+					if (m.includes('urban') && item.popType == 'U'){
+						html += '<tr><td>' + item.agencyId + '</td>'
+						+ '<td>' + item.agencyName + '</td>'
+						+ '<td>' + item.areaId + '</td>'
+						+ '<td>' + item.areaName + '</td>'
+						+ '<td>Urban</td>'
+						+ '<td>' + numWithCommas(item.popServed) + '</td>'
+						+ '<td>' + numWithCommas(item.popSS) + '</td>'
+						+ '<td>' + numWithCommas(item.popLOS) + '</td></tr>';
+					}
+					
+				});
+				html += '</tbody></table>'
+				$('#displayReport').append($(html));
+				table = buildDatatables();
+				progressbar.remove();
+			}
+		});
+	}else if (reportType == 2){  // Employment
+		
+		// generating metadata table
+		  metadata = '<table style="font-size:15" class="tg">'
+			  + '<tr>'
+			  + '<td class="tg-031e" >Dates:</td>'
+			  + '<td class="tg-031e input" data-label="Selected Dates">' + dates + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Emp. type:</td>'
+			  + '<td class="tg-031e input" data-label="Employment Type">' + $('#empType option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Emp. projection year:</td>'
+			  + '<td class="tg-031e input" data-label="Employment Projection Year">' + $('#yearSel option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e"> Min. Level of Service (times):</td>'
+			  + '<td class="tg-031e input" data-label="Minimum Level of Service (times)">' + los + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Pop. search radius (mi.):</td>'
+			  + '<td class="tg-031e input" data-label="Population Search Radius">' + sradius + '</td>'
+			  + '</tr>';
+	  	if (filterOnUrban){
+	  		metadata += '<tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Urban areas projection year:</td>'
+			  + '<td class="tg-yw4l input" data-label="Urban Areas Projection Year">'+ $('#uAreaYear option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '</tr>'
+	  	}					 
+		metadata += '</table>';
+		$('.headerBR').append(metadata);
+		
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepEmp?dbindex='+dbindex+'&agencies='+agencies+'&year='+year+'&dates='+dates+'&areas='+ areas
+					+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&urbanFilter='+filterOnUrban+'&key='+key
+					+'&urbanYear='+urbanFilterYear+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&wac='+wac+'&rac='+rac+'&metrics='+metrics.values,
+			async: true,
+			success: function(d){
+				html = '<table id="RT" class="display" align="center">';
+				tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+				'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+				'<th class="metric" title="ID associated with the geographical area.">Area ID</th>'+
+				'<th class="metric" title="Area name.">Area Name</th>';
+				
+				$.each(metrics.values,function(index,item){
+					if (wac){
+						tmp += '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">' + item + ' Served (WAC)</th>'
+						+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius stops of all stops in the given area times service stops.">' + item + ' SS (WAC)</th>'
+						+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receive a specified minimum level of service.">' + item + ' LOS (WAC)</th>';
+					}
+					if (rac){
+						tmp += '<th class="metric" title="Summation of unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">' + item + ' Served (RAC)</th>'
+						+ '<th class="metric" title="Summation of unduplicated employees working within an X-mile radius stops of all stops in the given area times service stops.">' + item + ' SS (RAC)</th>'
+						+ '<th class="metric" title="Summation of unduplicated employees working within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receive a specified minimum level of service.">' + item + ' LOS (RAC)</th>';
+						
+					}
+				});
+				html += '<thead>'+tmp+'</thead><tbody>';
+				$.each(d, function(i,item){
+					html += '<tr><td>' + item.agencyId + '</td>'
+					+ '<td>' + item.agencyName + '</td>'
+					+ '<td>' + item.areaId + '</td>'
+					+ '<td>' + item.areaName + '</td>';
+					
+					$.each(metrics.values,function(j,cat){
+						if (wac){						
+							html += '<td>' + numWithCommas(item[cat + "_served_wac"]) + '</td>'
+							+ '<td>' + numWithCommas(item[cat + "_ss_wac"]) + '</td>'
+							+ '<td>' + numWithCommas(item[cat + "_los_wac"]) + '</td>';
+						};
+						if (rac){						
+							html += '<td>' + numWithCommas(item[cat + "_served_rac"]) + '</td>'
+							+ '<td>' + numWithCommas(item[cat + "_ss_rac"]) + '</td>'
+							+ '<td>' + numWithCommas(item[cat + "_los_rac"]) + '</td>';
+						}
+					});
+					html += '</tr>';
+				});
+				html += '</tbody></table>';
+				$('#displayReport').append($(html));
+				table = buildDatatables();
+				progressbar.remove();
+			}
+		})	
+	}else if (reportType == 3){  // Title VI
+		
+		// generating metadata table
+		metadata = '<table style="font-size:15" class="tg">'
+			  + '<tr>'
+			  + '<td class="tg-031e" >Dates:</td>'
+			  + '<td class="tg-031e input" data-label="Selected Dates">' + dates + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Pop. projection year:</td>'
+			  + '<td class="tg-031e input" data-label="Population Projection Year">' + $('#yearSel option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e"> Min. Level of Service (times):</td>'
+			  + '<td class="tg-031e input" data-label="Minimum Level of Service (times)">' + los + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-031e">Pop. search radius (mi.):</td>'
+			  + '<td class="tg-031e input" data-label="Population Search Radius">' + sradius + '</td>'
+			  + '</tr>';
+	  	if (filterOnUrban){
+	  		metadata += '<tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Urban areas projection year:</td>'
+			  + '<td class="tg-yw4l input" data-label="Urban Areas Projection Year">'+ $('#uAreaYear option:selected',window.opener.document).text() + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '</tr>'
+			  + '<tr>'
+			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '</tr>'
+	  	}					 
+		metadata += '</table>';
+		$('.headerBR').append(metadata);
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepT6?dbindex='+dbindex+'&agencies='+agencies+'&dates='+dates+'&areas='+ areas+'&los='+los
+					+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&urbanYear='+urbanFilterYear+'&key='+key
+					+'&urbanFilter='+filterOnUrban+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&metrics='+metrics.values,
+			async: true,
+			success: function(d){
+				html = '<table id="RT" class="display" align="center">';
+				tmp = '<tr><th class="metric" title="Identification number reported in the transit agency GTFS feed." id="aid">Agency ID</th>'+
+				'<th class="metric" title="Agency name reported in the transit agency GTFS feed." id="an">Agency Name</th>'+
+				'<th class="metric" title="ID associated with the geographical area.">Area ID</th>'+
+				'<th class="metric" title="Area name.">Area Name</th>';
+				
+				$.each(metrics.names,function(index,item){
+					tmp += '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area.">' + item + ' Served</th>'
+					+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius stops of all stops in the given area times service stops.">' + item + ' SS</th>'
+					+ '<th class="metric" title="Summation of unduplicated employees living within an X-mile radius (i.e., stop distance) of all stops within the given geographic area that receive a specified minimum level of service.">' + item + ' LOS</th>';
+				});
+				html += '<thead>'+tmp+'</thead><tbody>';
+				
+				$.each(d, function(i,item){
+					html += '<tr><td>' + item.agencyId + '</td>'
+					+ '<td>' + item.agencyName + '</td>'
+					+ '<td>' + item.areaId + '</td>'
+					+ '<td>' + item.areaName + '</td>';
+					
+					$.each(metrics.values,function(j,cat){
+						html += '<td>' + numWithCommas(item[cat + "_served"]) + '</td>'
+						+ '<td>' + numWithCommas(item[cat + "_ss"]) + '</td>'
+						+ '<td>' + numWithCommas(item[cat + "_los"]) + '</td>';
+					});
+					html += '</tr>';
+				});
+				html += '</tbody></table>';
+				$('#displayReport').append($(html));
+				table = buildDatatables();
+				progressbar.remove();
+			}
+		});
+	}
+});
+
+</script>
+</head>
+<body>
+	<div class="container">
+		<div class="headerL">
+			<h1>Transit Network Analysis Tool Reports</h1>
+		</div>
+
+		<div class="headerR">
+			<input type="button" onclick="window.close()" title="Close Report"
+				value="Close Report" class="button" />
+		</div>
+	</div>
+	<table id="controls">
+		<tr>
+			<td id="td1">
+				<div class="headerBL">
+					<h2 style="margin: 0px;"></h2>
+				</div>
+			</td>
+
+			<td id="td3">
+				<div class="headerBR"></div>
+			</td>
+		</tr>
+	</table>
+
+
+	<p id="displayReport">
+		<br>
+	</p>
+	<br>
+	<br>
+	<div id="progressbar" style="width: 40%; margin-left: 27%">
+		<div class="progress-label"></div>
+	</div>
+</body>
+</html>

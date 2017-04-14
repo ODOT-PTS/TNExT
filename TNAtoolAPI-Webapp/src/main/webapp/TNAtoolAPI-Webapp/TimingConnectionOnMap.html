@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta charset="utf-8" />
+	<title>Transit Network Analysis Tool</title>
+	<script type="text/javascript" src="../resources/js/jquery-1.9.1.min.js"></script>	
+    <script type="text/javascript" src="../resources/js/jquery-ui.js"></script>	
+	<script type="text/javascript" src="../resources/js/jQueryContent.js"></script>
+	<script type="text/javascript" src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script type="text/javascript" src="../resources/js/bootstrap-dropdown.js"></script>
+	<!-- <script type="text/javascript" src="../resources/js/simple-expand.min.js"></script> -->
+	<script type="text/javascript" src="../resources/js/jquery_dialogextend.js"></script>	
+	<script type="text/javascript" src="../resources/data/shapes.js"></script>
+	<script type="text/javascript" src="../resources/data/urbanShapes.js"></script>	
+	<script type="text/javascript" src="../resources/data/tractsShape.js"></script>
+	<script type="text/javascript" src="../resources/js/date.js"></script>
+	<script type="text/javascript" src="../resources/data/Datasources.js"></script>
+	<script type="text/javascript" src="../resources/js/ConnectivityGraph.js"></script>
+	<script type="text/javascript" src="../resources/js/ConnectivityGraph0.js"></script>
+	<script type="text/javascript" src="../vendors/jstree-v.pre1.0/jquery.jstree.js"></script>		
+	<script type="text/javascript" src="../vendors/DataTables/js/jquery.dataTables.js"></script>
+	<script type="text/javascript" src="../vendors/DataTables/js/dataTables.tableTools.js"></script>
+	<!-- <script type="text/javascript" src="../vendors/leaflet-0.7/minimap/html2canvas.js"></script> -->
+	<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet-src.js"></script>
+	<script type="text/javascript" src="../vendors/leaflet-0.7/search/Control.Geocoder.js"></script>
+	<script type="text/javascript" src="../vendors/leaflet-0.7/Control.MiniMap.js"></script>
+	<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet.contextmenu.js"></script>
+	<script type="text/javascript" src="../vendors/leaflet-0.7/Google.js"></script>
+	<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet.draw.js"></script>
+	<script type="text/javascript" src="../vendors/MarkerCluster/leaflet_markercluster-src.js"></script>
+    <script type="text/javascript" src="../resources/js/tile.stamen.js"></script>
+	<script type="text/javascript" src="../resources/js/Polylinencoded.js"></script>
+	<script type="text/javascript" src="../resources/js/onMapReport.js"></script>
+	<script type="text/javascript" src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.1.0/leaflet.polylineDecorator.js"></script>
+	<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.1.0/leaflet.polylineDecorator.min.js.map"></script> -->
+	<script type="text/javascript" src="../resources/js/JSMethods_Onmap.js"></script>
+	<script type="text/javascript" src="../resources/js/JSMethods.js"></script>
+	<script type="text/javascript" src="../resources/js/TimingConnectionMap.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="../resources/css/client.css" />	
+	<link rel="stylesheet" type="text/css" href="../resources/css/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/jquery-ui.multidatespicker.css">
+	<link rel="stylesheet" type="text/css" href="../resources/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/MarkerCluster/MarkerCluster.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/MarkerCluster/MarkerCluster.styles.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/MarkerCluster/MarkerCluster.Default.css" />	
+	<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/leaflet.draw.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/Control.MiniMap.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/leaflet.contextmenu.css" /> 
+	<link rel="stylesheet" type="text/css" href="../vendors/DataTables/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/DataTables/css/dataTables.tableTools.css" />
+	<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/leaflet.css" /> 
+	<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/search/Control.Geocoder.css" />
+	
+</head>
+<body style="height: 100%">
+	<div id="map"> </div>
+	<div id="mapLegend">
+		<label><input checked type="checkbox" id="cbox0" value="originTrip" onchange="toggleTrips(this)"> <span style="font-size: 15pt;color:#0230ff;">-  </span>Selected Trip</label><br>
+		<label><input checked type="checkbox" id="cbox1" value="accessible" onchange="toggleTrips(this)"> <span style="font-size: 15pt;color:#0da00b;">-  </span>Accessible Connections</label><br>
+		<label><input checked type="checkbox" id="cbox2" value="missed" onchange="toggleTrips(this)"> <span style="font-size: 15pt;color:#f44242">-  </span>Missed Connections</label></div>
+</body>

@@ -1,0 +1,65 @@
+DROP TABLE IF EXISTS blkGrp_b16004;
+CREATE TABLE blkGrp_b16004 
+(GISJOIN varchar(21), gbid varchar(21), STATEA varchar(11), COUNTYA varchar(11), TRACTA varchar(11), BLKGRPA varchar(11), 
+from_5_to_17_years int, 
+from_5_to_17_years_speak_only_english int, 
+
+from_5_to_17_years_speak_spanish int, from_5_to_17_years_speak_spanish_very_well int, 
+from_5_to_17_years_speak_spanish_well int, from_5_to_17_years_speak_spanish_not_well int, from_5_to_17_years_speak_spanish_not_at_all int,
+
+from_5_to_17_years_speak_indo_european int, from_5_to_17_years_speak_indo_european_very_well int, 
+from_5_to_17_years_speak_indo_european_well int, from_5_to_17_years_speak_indo_european_not_well int, from_5_to_17_years_speak_indo_european_not_at_all int, 
+
+from_5_to_17_years_speak_asian_and_pacific_island int, from_5_to_17_years_speak_asian_and_pacific_island_very_well int, 
+from_5_to_17_years_speak_asian_and_pacific_island_well int, from_5_to_17_years_speak_asian_and_pacific_island_not_well int, from_5_to_17_years_speak_asian_and_pacific_island_not_at_all int, 
+
+from_5_to_17_years_speak_other int, from_5_to_17_years_speak_other_very_well int, 
+from_5_to_17_years_speak_other_well int, from_5_to_17_years_speak_other_not_well int, from_5_to_17_years_speak_other_not_at_all int,
+
+
+from_18_to_64_years int, 
+from_18_to_64_years_speak_only_english int, 
+
+from_18_to_64_years_speak_spanish int, from_18_to_64_years_speak_spanish_very_well int, 
+from_18_to_64_years_speak_spanish_well int, from_18_to_64_years_speak_spanish_not_well int, from_18_to_64_years_speak_spanish_not_at_all int,
+
+from_18_to_64_years_speak_indo_european int, from_18_to_64_years_speak_indo_european_very_well int, 
+from_18_to_64_years_speak_indo_european_well int, from_18_to_64_years_speak_indo_european_not_well int, from_18_to_64_years_speak_indo_european_not_at_all int, 
+
+from_18_to_64_years_speak_asian_and_pacific_island int, from_18_to_64_years_speak_asian_and_pacific_island_very_well int, 
+from_18_to_64_years_speak_asian_and_pacific_island_well int, from_18_to_64_years_speak_asian_and_pacific_island_not_well int, from_18_to_64_years_speak_asian_and_pacific_island_not_at_all int, 
+
+from_18_to_64_years_speak_other int, from_18_to_64_years_speak_other_very_well int, 
+from_18_to_64_years_speak_other_well int, from_18_to_64_years_speak_other_not_well int, from_18_to_64_years_speak_other_not_at_all int,
+
+
+from_64_to_over int, 
+from_64_to_over_speak_only_english int, 
+
+from_64_to_over_speak_spanish int, from_64_to_over_speak_spanish_very_well int, 
+from_64_to_over_speak_spanish_well int, from_64_to_over_speak_spanish_not_well int, from_64_to_over_speak_spanish_not_at_all int,
+
+from_64_to_over_speak_indo_european int, from_64_to_over_speak_indo_european_very_well int, 
+from_64_to_over_speak_indo_european_well int, from_64_to_over_speak_indo_european_not_well int, from_64_to_over_speak_indo_european_not_at_all int, 
+
+from_64_to_over_speak_asian_and_pacific_island int, from_64_to_over_speak_asian_and_pacific_island_very_well int, 
+from_64_to_over_speak_asian_and_pacific_island_well int, from_64_to_over_speak_asian_and_pacific_island_not_well int, from_64_to_over_speak_asian_and_pacific_island_not_at_all int, 
+
+from_64_to_over_speak_other int, from_64_to_over_speak_other_very_well int, 
+from_64_to_over_speak_other_well int, from_64_to_over_speak_other_not_well int, from_64_to_over_speak_other_not_at_all int,
+
+
+english int, 
+spanish int, spanishVeryWell int, spanishWell int, spanishNotWell int, spanishNotAtAll int, 
+indo_european int, indo_europeanVeryWell int, indo_europeanWell int, indo_europeanNotWell int, indo_europeanNotAtAll int, 
+asian_and_pacific_island int, asian_and_pacific_islandVeryWell int, asian_and_pacific_islandWell int, asian_and_pacific_islandNotWell int, asian_and_pacific_islandNotAtAll int, 
+other int, otherVeryWell int, otherWell int, otherNotWell int, otherNotAtAll int, 
+
+from5to17 int, from18to64 int, above65 int,
+
+CONSTRAINT blkGrp_b16004_pkey PRIMARY KEY (GISJOIN))
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE blkGrp_b16004
+  OWNER TO postgres;

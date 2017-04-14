@@ -17,6 +17,7 @@
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -32,11 +33,10 @@ var minDistances = new Array();
 maxRadius = 1; // maximum search radius in miles.
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th class="metric" title="Transit network cluster ID." id="aid">Cluster ID</th>'+
-'<th class="metric" title="Number of transit agencies that have at least one stop within the specified distance of at least one transit agency in the cluster.">Network Cluster Size<span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="Agency IDs corresponding with transit agencies that have at least one stop within the specified distance of any other agencies in the list.">Connected Agency IDs<span class="IOSym">(1)</span></th>'+
-'<th class="metric" title="List of transit agencies that have at least one stop within the specified distance of any other agencies in the list.">Connected Agency Names<span class="IOSym">(1)</span></th></tr>';
-
+tmp = '<tr><th class="metric" id="aid">Cluster ID</th>'+
+'<th class="metric">Network Cluster Size<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Connected Agency IDs<span class="IOSym">(1)</span></th>'+
+'<th class="metric">Connected Agency Names<span class="IOSym">(1)</span></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -81,39 +81,48 @@ $(document).ready(function(){
 			tableProperties.colsToExport = [0, 1, 2, 3, 4];
 			table = buildDatatables();
 			
-		    $('#RT tbody').on('click', 'td.details-control', function () {
-		        var tr = $(this).parents('tr');
-		        var row = table.row( tr );
-		        var pos = row.index();
-		        if ( row.child.isShown() ) {
-		            row.child.hide("slow");
-		            tr.removeClass('shown');
-		        }
-		        else {
-		            row.child(format(pos)).show();
-		            tr.addClass('shown');
-		        }
-		    } );
+	    $('#RT tbody').on('click', 'td.details-control', function () {
+	        var tr = $(this).parents('tr');
+	        var row = table.row( tr );
+	        var pos = row.index();
+	        if ( row.child.isShown() ) {
+	            row.child.hide("slow");
+	            tr.removeClass('shown');
+	        }
+	        else {
+	            row.child(format(pos)).show();
+	            tr.addClass('shown');
+	        }
+	    } );
 		    
-		    function format ( p ) {
-		        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-		            '<tr>'+
-		                '<td>Connected Agency Names: </td>'+
-		                '<td>'+netNames[p]+'</td>'+
-		            '</tr>'+
-		            '<tr>'+
-		                '<td>Connected Agency Min Spatial Gaps (ft.): </td>'+
-		                '<td>'+minDistances[p]+'</td>'+
-		            '</tr>'+		            
-		        '</table>';
-		    }
-		    $('#RT_wrapper').css("width", $('#RT').css("width"));
-		    $('#RT_wrapper').css("margin", "auto");
-			$("#RT_length").remove();
-		    $("#RT_filter").insertBefore("#RT_info");
-		    $( ".dataTables_filter" ).css( "float", "left");
-		    $( ".dataTables_filter" ).before( "<br>" );
-    }});	
+	    function format ( p ) {
+	        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+	            '<tr>'+
+	                '<td>Connected Agency Names: </td>'+
+	                '<td>'+netNames[p]+'</td>'+
+	            '</tr>'+
+	            '<tr>'+
+	                '<td>Connected Agency Min Spatial Gaps (ft.): </td>'+
+	                '<td>'+minDistances[p]+'</td>'+
+	            '</tr>'+		            
+	        '</table>';
+	    }
+	    $('#RT_wrapper').css("width", $('#RT').css("width"));
+	    $('#RT_wrapper').css("margin", "auto");
+		$("#RT_length").remove();
+	    $("#RT_filter").insertBefore("#RT_info");
+	    $( ".dataTables_filter" ).css( "float", "left");
+	    $( ".dataTables_filter" ).before( "<br>" );
+		    
+		// append toopltips
+		var tooltips = populateMetricDefs();
+		var tempKey = [];
+		$('.metric').each(function(index, item) {
+			tempKey = [$('title').text(),$(item).text().strip().trim() ];
+			$(item).attr('title',tooltips[tempKey]);
+			});
+    	}
+	});	
 });
 
 </script>

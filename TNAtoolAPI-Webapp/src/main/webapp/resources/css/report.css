@@ -286,11 +286,10 @@ div.RHScontrols {
 
 div.headerR {
 	float: right;
-	width: 45%;
+	width: 55%;
 	margin: 1px;
 	height: 35px;
-	text-align:right;
-	
+	text-align:right;	
 }
 
 div#toolbox {
