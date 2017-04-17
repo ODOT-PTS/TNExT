@@ -81,6 +81,16 @@ public class GeoR {
     @JsonSerialize
     public String StopsCount;
 	
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UrbanStops;
+	
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RuralStops;
+	
 	@XmlAttribute
     @JsonSerialize
     public String RoutesCount;
@@ -116,7 +126,7 @@ public class GeoR {
 	@XmlAttribute
     @JsonSerialize
     public String UrbanizedAreasCount;
-	
+
 	@XmlAttribute
     @JsonSerialize
     public String UrbanClustersCount;

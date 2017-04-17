@@ -34,8 +34,9 @@ var dateIOnumber = 4; // the number is used to map selected date(s) to the metri
 var fAverage = new Array();
 var fMedian = new Array();
 var connectedcommunities = '';
-ajaxURL = document.URL.substr(document.URL.indexOf("?")+1).replace("&"+document.URL.split("&")[4],"");
-w_qstring = parseInt(getURIParameter("pop"));
+var popMax = getURIParameter("popMax");
+var popMin = getURIParameter("popMin");
+
 w_qstringd = getDates(keyName);
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
@@ -64,8 +65,10 @@ tmp = '<tr><th  title="Identification number associated with the geographic area
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
-	$("#Upop").val(w_qstring);
+
 	$("#Sradius").val(w_qstringx);
+	$('#popMax').val(popMax);
+	$('#popMin').val(popMin);
 	$("#LoS").val(w_qstringl);
 	setPopOptions();
 	loadDBList();
@@ -76,9 +79,10 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
 		success: function(item){
+			
 			docMetadata = item.metadata;
 			$('h2').append('Aggregated Urban Area Extended Report <br><hr>');	
 			html = html + '<tr><td>' + item.AreaId
@@ -208,13 +212,16 @@ $(document).ready(function(){
 			  <td id="td3">
 			   <div class="RHScontrols">			  	
 			  	<input id="submit" type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" /><br> 
-			    <input type="text" name="x" id="Sradius" data-iomap="2" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/><br>			    	
-			    <input type="text" name="l" id="LoS" data-iomap="3" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/>
-			  	</div>
-			  	<div class="LHScontrols">
-			  	Urban Population Filter  <span class="IOSym">(1) </span><input type="text" name="pop" id="Upop" data-iomap="1" data-label="Urban Population Filter" class="input utbox" onkeypress="return isWholeNumber(event)"/><br>
-			  	Population Search Radius (miles)<span class="IOSym">(2) </span><br>
-			  	Minimum Level of Service (times)<span class="IOSym">(3) </span>
+
+			   	</div>
+			  	<div class="LHScontrols"> 
+			      Minimum Urban Population<span class="IOSym">(1)</span><input type="text" id="popMin" name="popMin" data-iomap="2" data-label="Minimum Urban Population" class="input tbox" onkeypress="return isWholeNumber(event)" style="width: 65px;" /><br>
+			   	  Maximum Urban Population<span class="IOSym">(2)</span><input type="text" id="popMax" name="popMax" data-iomap="1" data-label="Maximum Urban Population" class="input tbox" onkeypress="return isNumber(event)" style="width: 65px; "/><br>		    		
+			  	 Population Search Radius (miles)<span class="IOSym">(2) </span> <input type="text" name="Sradius" id="Sradius" data-iomap="2" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/><br>			    	
+			
+			  	Minimum Level of Service (times)<span class="IOSym">(3) </span> <input type="text" name="LoS" id="LoS" data-iomap="3" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/><br>
+			  
+
 			  	</div>			  				  	
 			  </td>
 			</tr>

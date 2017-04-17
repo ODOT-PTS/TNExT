@@ -198,6 +198,17 @@ public class GeoXR {
     @JsonSerialize
     public String ServiceStops;
 	
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UServiceStops;
+	
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RServiceStops;
+	
+	
 	@XmlAttribute
     @JsonSerialize
     public String ServiceHours;

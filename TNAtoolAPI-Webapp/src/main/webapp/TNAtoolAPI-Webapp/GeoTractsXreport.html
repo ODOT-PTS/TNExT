@@ -60,6 +60,7 @@ $(document).ready(function(){
 		success: function(item){
 			docMetadata = item.metadata;
 			appendNavigation(item.AreaName);
+
 			html += '<tr><td class="metric">Geo ID<td>'+ item.AreaId 
 			+'</td></tr><tr><td class="metric">Name</td><td>' + item.AreaName 
 			+'</td></tr><tr><td class="metric">Route Miles</td><td>'+ numberconv(item.RouteMiles) 
@@ -76,9 +77,11 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.UPopServedAtLoService)			
 			+'</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.RPopServedAtLoService)
 		    +'</td></tr><tr><td class="metric">Percent of Population Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.PopUnServed))
-			+'</td></tr><tr><td class="metric">Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.ServiceStops)
+		    +'</td></tr><tr><td class="metric" >Urban Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.UServiceStops)
+		    +'</td></tr><tr><td class="metric" >Rural Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.RServiceStops)
 			+'</td></tr><tr><td class="metric">Urban Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.UPopServedByService)
 			+'</td></tr><tr><td class="metric">Rural Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.RPopServedByService)
+
 		    //RAC
 		    +'</td></tr><tr><td class="metric">Employment Served (RAC)<span class="IOSym">(1)</span></td><td>' +  numberconv(item.racWithinX)
 			+'</td></tr><tr><td class="metric">Percent of Employment Served (RAC)<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.racServed))

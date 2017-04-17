@@ -1521,11 +1521,13 @@ $mylist
 			    }else if(casestring=="UASR"){
 			    	var popMax='2000000';
 			    	var popMin='0'	;
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+null+'&type=-1');    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&uc=3'+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+null+'&type=-1');    		
 			    }else if(casestring=="AUASR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&pop=50000'+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasRReport.html'+'?&popMin='+popMin+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="ORSR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);	    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);	    		
 			    }else if(casestring=="PNRR"){
 			    	window.open('/TNAtoolAPI-Webapp/ParkRideReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if(casestring=="CNGPH"){

@@ -83,8 +83,8 @@ $(document).ready(function(){
 				html+='<td><a href="#" type="ASR">' + item.AgenciesCount +'</a></td>'+ 
 				'<td>' + numberconv(item.RoutesCount) +'</td>'+ 
 				'<td>'+ numberconv(item.StopsCount) +'</td>'+
-				'<td><a href="#" type="UASR">' + item.UrbanizedAreasCount +'</a></td>'+
-				'<td><a href="#" type="UCSR">' + item.UrbanClustersCount +'</a></td>'+
+				'<td><a href="#" type="UAC">' + item.UrbanizedAreasCount +'</a></td>'+
+				'<td><a href="#" type="UCC">' + item.UrbanClustersCount +'</a></td>'+
 				'<td><a href="#" type="CDSR">' + item.CongDistsCount +'</a></td>'+
 				'<td><a href="#" type="OSR">' + item.RegionsCount +'</a></td>'+
 				'<td><a href="#" type="CPSR">' + item.PlacesCount +'</a></td>'+
@@ -104,8 +104,15 @@ $(document).ready(function(){
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.25';
 		    		window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
-			    }else if($(this).attr('type')=="USR"){
-		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    }else if($(this).attr('type')=="UAC"){
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&type=3'+'&popMin='+popMin+'&popMax='+popMax+'&uc=0'+'&nav='+nav);	    		
+			    }
+			    else if($(this).attr('type')=="UCC"){
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&type=3'+'&popMin='+popMin+'&popMax='+popMax+'&uc=1'+'&nav='+nav);	    		
 			    }else if($(this).attr('type')=="CDSR"){
 		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
 			    }else if($(this).attr('type')=="OSR"){
@@ -204,4 +211,5 @@ $(document).ready(function(){
 		<br>
 		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
 </body>
+
 </html>

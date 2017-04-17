@@ -37,6 +37,7 @@ var fAverage = new Array();
 var fMedian = new Array();
 var ipop=popYear;
 html = '<table id="RT" class="display" align="center">';
+
 tmp = '<tr><th class="metric" id="aid">Geo ID</th>'+
 '<th id="an" class="metric">Name</th>'+
 '<th class="metric">Population</th>'+
@@ -46,8 +47,11 @@ tmp = '<tr><th class="metric" id="aid">Geo ID</th>'+
 '<th class="metric">Water Area</th>'+
 '<th class="metric">Total Agencies</th>'+
 '<th class="metric">Total Routes</th>'+
-'<th class="metric">Total Stops</th>'+
-'<th class="metric">Urban Areas</th></tr>';	
+'<th class="metric">Urban Stops</th>'+
+'<th class="metric">Rural Stops</th>'+
+'<th class="metric">Urbanized Areas</th>'+
+'<th class="metric">Urban Clusters</th></tr>';
+
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -90,9 +94,11 @@ $(document).ready(function(){
 						html+='<td><a href="#" type="AC" id="'+item.id+'">'+item.AgenciesCount+'</a></td>';
 					}
 					html+='<td><a href="#" type="RC" id="'+item.id+'">'+item.RoutesCount+'</a></td>'+
-					'<td><a href="#" type="SC" id="'+item.id+'">'+item.StopsCount+'</a></td>'+	
-					'<td><a href="#" type="UC" id="'+item.id+'">'+item.UrbanAreasCount+'</a></td></tr>';	
-					
+					'<td><a href="#" type="USC" id="'+item.id+'">'+item.UrbanStops+'</a></td>'+ 
+					'<td><a href="#" type="RSC" id="'+item.id+'">'+item.RuralStops+'</a></td>'+ 
+					'<td><a href="#" type="UAC" id="'+item.id+'">'+item.UrbanizedAreasCount+'</a></td>'+
+					'<td><a href="#" type="UCC" id="'+item.id+'">'+item.UrbanClustersCount+'</a></td></tr>';	
+												
 				}												   			
 			});		
 			html += '</tbody></table>';
@@ -111,18 +117,33 @@ $(document).ready(function(){
 
 			    	window.open('/TNAtoolAPI-Webapp/GASReport.html?&areaid='+qstring+'&type=1'+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav);
 			    }
-			    else if($(this).attr('type')=="UC"){
+			    else if($(this).attr('type')=="UCC"){
 			    	qstring = $(this).attr('id');			    	
 			    	var popMax='2000000';
 			    	var popMin='0'	;
 			    	if(agencyId!=null)
 			    		{
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=1'+'&agency='+agencyId+'&nav='+nav);    		
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&uc=1'+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=1'+'&agency='+agencyId+'&nav='+nav);    		
 	    		}
 
 			    	else
 			    		{
-			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=1'+'&nav='+nav);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&uc=1'+'&popMax='+popMax+'&areaid='+qstring+'&type=1'+'&nav='+nav);    		
+			    		}
+
+			    }
+			    else if($(this).attr('type')=="UAC"){
+			    	qstring = $(this).attr('id');			    	
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+			    	if(agencyId!=null)
+			    		{
+			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&uc=0'+'&popYear='+popYear+'&popMin='+popMin+'&popMax='+popMax+'&areaid='+qstring+'&type=1'+'&agency='+agencyId+'&nav='+nav);    		
+	    		}
+
+			    	else
+			    		{
+			    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&popMin='+popMin+'&uc=0'+'&popMax='+popMax+'&areaid='+qstring+'&type=1'+'&nav='+nav);    		
 			    		}
 
 			    }
@@ -137,7 +158,8 @@ $(document).ready(function(){
 		    		}
 		    		url +='&areaid='+qstring+'&type=1'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav;
 			    	window.open(url);			    	
-			    }else if($(this).attr('type')=="SC"){
+			    }
+			    else if($(this).attr('type')=="USC"){
 			    	qstring = $(this).attr('id');
 		    		qstringx = '0.25';
 		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
@@ -146,7 +168,21 @@ $(document).ready(function(){
 		    		if (agencyId!=null){
 		    			url += '&agency='+agencyId
 		    		}
-		    		url +='&areaid='+qstring+'&type=1'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav;
+		    		url +='&areaid='+qstring+'&type=1'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&rc=0'+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav;
+		    		
+		    		window.open(url);			    	
+			    }
+			    
+			    else if($(this).attr('type')=="RSC"){
+			    	qstring = $(this).attr('id');
+		    		qstringx = '0.25';
+		    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+					keyName = setDates(qstringd);
+		    		url = '/TNAtoolAPI-Webapp/stopreport.html?';
+		    		if (agencyId!=null){
+		    			url += '&agency='+agencyId
+		    		}
+		    		url +='&areaid='+qstring+'&type=1'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&rc=1'+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&nav='+nav;
 		    		
 		    		window.open(url);			    	
 			    };
