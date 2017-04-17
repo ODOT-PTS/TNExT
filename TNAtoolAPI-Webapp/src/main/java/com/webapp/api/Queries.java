@@ -168,7 +168,6 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getDBList() throws JSONException {
-
 		String[] DBNames = Databases.dbnames;
 		String[] DBIds = Databases.connectionURLs.clone();
 		for (int i = 0 ; i < DBIds.length ; i++){
@@ -176,7 +175,6 @@ public class Queries {
 			DBIds[i] = temp[temp.length-1];;
 		}	
 		DBList response = new DBList();
-
 		for (int s = 0; s < dbsize; s++) {
 			response.DBelement.add(DBNames[s]);
 			response.DBid.add(DBIds[s]);
@@ -1522,51 +1520,6 @@ public class Queries {
 	}
 
 	/**
-	 * Generates The stops report and geographic allocation of service for
-	 * transit agencies
-	 * 
-	 * @throws SQLException
-	 */
-
-	/*
-	 * @GET
-	 * 
-	 * @Path("/StopsAR")
-	 * 
-	 * @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-	 * MediaType.TEXT_XML }) public Object getSAR(@QueryParam("key") double key,
-	 * 
-	 * @QueryParam("dbindex") Integer dbindex, @QueryParam("username") String
-	 * username, @QueryParam("areaid") String areaId, @QueryParam("type")
-	 * Integer type) throws JSONException { if (dbindex==null || dbindex<0 ||
-	 * dbindex>dbsize-1){ dbindex = default_dbindex; } int index =0; int
-	 * totalLoad = 2; setprogVal(key, (int) Math.round(index*100/totalLoad));
-	 * ArrayList<AgencySR> agencies = new ArrayList<AgencySR>(); AgencySRList
-	 * response = new AgencySRList(); if (type!=null && areaId!=null){ GeoArea
-	 * instance = EventManager.QueryGeoAreabyId(areaId, type, dbindex); agencies
-	 * = PgisEventManager.agencyGeosr(username, type, areaId, dbindex);
-	 * response.metadata =
-	 * "Report Type:Agency Allocation of Service (Transit Agency Summary Report) for "
-	 * +instance.getName()+"("+Types.getAreaName(type)+")" +";Report Date:"+new
-	 * SimpleDateFormat
-	 * ("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime
-	 * ())+";Selected Database:" +Databases.dbnames[dbindex]; response.areaName
-	 * = instance.getName(); //might need to add area type for census tracts and
-	 * some other geo areas response.areaType = instance.getTypeName(); } else {
-	 * agencies = PgisEventManager.agencysr(username, dbindex);
-	 * response.metadata =
-	 * "Report Type:Transit Agency Summary Report;Report Date:"+new
-	 * SimpleDateFormat
-	 * ("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime())+";"+
-	 * "Selected Database:" +Databases.dbnames[dbindex]; } index++;
-	 * setprogVal(key, (int) Math.round(index*100/totalLoad)); response.agencySR
-	 * = agencies; index++; setprogVal(key, (int)
-	 * Math.round(index*100/totalLoad)); try { Thread.sleep(1000); } catch
-	 * (InterruptedException e) { e.printStackTrace(); } progVal.remove(key);
-	 * return response; }
-	 */
-
-	/**
 	 * Returns the list of routes operated by and agency regardless of being
 	 * active or not.
 	 * 
@@ -1980,7 +1933,6 @@ public class Queries {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
 		progVal.remove(key);
 		return response;
 	}
@@ -4194,6 +4146,7 @@ public class Queries {
 					i.centralized = e.getValue().centralized;
 					response.list.add(i);
 				}catch(NullPointerException error){
+					error.printStackTrace();
 					System.out.println("Angecy ID " + e.getKey() + " does not have any service.");
 				}
 			} else {
@@ -4243,7 +4196,7 @@ public class Queries {
 		try {
 			response = SpatialEventManager.getAllAgencies(username, dbindex);
 		} catch (SQLException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		return response;
 	}
@@ -4280,7 +4233,7 @@ public class Queries {
 				sedlist.SEDList.add(seDates);
 			}
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();			
 		}
 		return sedlist;
 	}

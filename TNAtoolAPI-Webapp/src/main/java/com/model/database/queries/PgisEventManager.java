@@ -21,8 +21,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement; 
-import java.text.ParseException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,13 +33,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map.Entry;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -53,7 +45,40 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import com.model.database.Databases;
-import com.model.database.queries.objects.*;
+import com.model.database.queries.objects.AgencyRoute;
+import com.model.database.queries.objects.AgencyRouteList;
+import com.model.database.queries.objects.AgencySR;
+import com.model.database.queries.objects.Attr;
+import com.model.database.queries.objects.CAStop;
+import com.model.database.queries.objects.CAStopsList;
+import com.model.database.queries.objects.EmpData;
+import com.model.database.queries.objects.EmpDataList;
+import com.model.database.queries.objects.GeoArea;
+import com.model.database.queries.objects.GeoR;
+import com.model.database.queries.objects.GeoStopRouteMap;
+import com.model.database.queries.objects.KeyClusterHashMap;
+import com.model.database.queries.objects.MapAgency;
+import com.model.database.queries.objects.MapBlock;
+import com.model.database.queries.objects.MapCounty;
+import com.model.database.queries.objects.MapGeo;
+import com.model.database.queries.objects.MapRoute;
+import com.model.database.queries.objects.MapStop;
+import com.model.database.queries.objects.MapTract;
+import com.model.database.queries.objects.MapTransit;
+import com.model.database.queries.objects.ParknRideCounties;
+import com.model.database.queries.objects.ParknRideCountiesList;
+import com.model.database.queries.objects.PnrInCounty;
+import com.model.database.queries.objects.PnrInCountyList;
+import com.model.database.queries.objects.RouteListm;
+import com.model.database.queries.objects.RouteR;
+import com.model.database.queries.objects.StartEndDates;
+import com.model.database.queries.objects.StopR;
+import com.model.database.queries.objects.TitleVIData;
+import com.model.database.queries.objects.TitleVIDataFloat;
+import com.model.database.queries.objects.TitleVIDataList;
+import com.model.database.queries.objects.Urban;
+import com.model.database.queries.objects.VariantListm;
+import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.util.Types;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -66,15 +91,6 @@ public class PgisEventManager {
 	//public static Connection connection;
 	
 	public static Connection makeConnection(int dbindex){
-		String url = "";
-		switch (dbindex){
-		case 0:
-			url = "gtfsdb";
-			break;
-		case 1:
-			url = "gtfsdb1";
-			break;
-		}
 		Connection response = null;
 		try {
 		Class.forName("org.postgresql.Driver");
@@ -82,8 +98,7 @@ public class PgisEventManager {
            .getConnection(Databases.connectionURLs[dbindex],
            Databases.usernames[dbindex], Databases.passwords[dbindex]);
 		}catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+	        e.printStackTrace();	         
 	      }
 		return response;
 	}
@@ -160,8 +175,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();
       }
       dropConnection(connection);      
       return RouteMiles;
@@ -199,8 +213,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();
       }
       dropConnection(connection);
       if (faredata.size()>0){
@@ -253,9 +266,7 @@ public class PgisEventManager {
 	        stmt.close(); 
 	        results.PnrCountiesList=list;
 	      } catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        e.getStackTrace();
-	        // 
+	        e.printStackTrace();
 	      }
 	      dropConnection(connection);
 	      return results;
@@ -266,10 +277,9 @@ public class PgisEventManager {
 	 */
 	public static PnrInCountyList  getPnrsInCounty(int countyId, int radius, int dbindex, String username){
 		PnrInCountyList results = new PnrInCountyList();
-		String id = countyId+"";
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String query =	"WITH aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds WHERE username='admin' order by aid), "
+		String query =	"WITH aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds WHERE username='"+username+"' order by aid), "
 				+ "pnr AS (SELECT  parknride.* FROM parknride INNER JOIN census_counties AS counties ON ST_contains(ST_Transform(counties.shape,2993), parknride.geom) WHERE counties.countyid = '" + countyId + "'),"
 				+ "temp1 AS (SELECT pnr.*,	gtfs_stops.name stopname, 	gtfs_stops.id stopid, gtfs_stops.agencyid AS agencyid_def "
 				+ "		FROM pnr LEFT JOIN gtfs_stops "
@@ -357,9 +367,7 @@ public class PgisEventManager {
 	        stmt.close(); 
 	        results.PnrCountiesList=list;
 	      } catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        e.getStackTrace();
-	        // 
+	        e.printStackTrace();
 	      }
 	      dropConnection(connection);
 		
@@ -1738,8 +1746,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return results;
@@ -1897,8 +1904,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return response;
@@ -2363,8 +2369,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return response;
@@ -2531,8 +2536,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2731,8 +2735,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2892,8 +2895,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-//	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -2995,8 +2997,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -3024,8 +3025,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return RouteMiles;
@@ -3064,8 +3064,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);
       if (faredata.size()>0){
@@ -3200,8 +3199,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return response;
@@ -4325,8 +4323,7 @@ public class PgisEventManager {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return response;
@@ -4356,8 +4353,7 @@ public class PgisEventManager {
 				response[2] = rs.getLong("wac");
 			}
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }
 		dropConnection(connection);
 	
@@ -4394,8 +4390,8 @@ public class PgisEventManager {
 				response[3] = rs.getLong("totalbelowfifty");
 			}
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	      }
+			e.printStackTrace();
+			}
 		dropConnection(connection);
 		return response;
 	}
@@ -4415,8 +4411,7 @@ public class PgisEventManager {
 				response = rs.getDouble("rtmiles"); 				
 			}
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -4556,8 +4551,7 @@ public class PgisEventManager {
         stmt.close();
         //c.close();
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return population;
@@ -4614,8 +4608,7 @@ public class PgisEventManager {
 		        response.add(instance);
 		        }
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }
 		dropConnection(connection);
 		return response;
@@ -4671,8 +4664,7 @@ public class PgisEventManager {
 		        response.add(instance);
 		        }
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );	         
-	    }
+			e.printStackTrace();	    }
 		dropConnection(connection);
 		return response;
 	}
@@ -4749,8 +4741,7 @@ public class PgisEventManager {
 				rs.close();
 				stmt.close();
 			} catch ( Exception e ) {
-		        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-		         
+				e.printStackTrace();		         
 		      }
 						
 		dropConnection(connection);
@@ -5009,8 +5000,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -5249,8 +5239,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -5414,8 +5403,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		return response;
@@ -5454,8 +5442,7 @@ public class PgisEventManager {
 			rs.close();
 			stmt.close();
 		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
+			e.printStackTrace();	         
 	      }					
 		dropConnection(connection);
 		response.Startdate = startDate;
@@ -5586,9 +5573,9 @@ public static HashMap<String, Long> getStateInfo(int dbindex, String username, S
 	        stmt.close();  
 	    	}
 	 catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	        dropConnection(connection);
-	        }
+		 e.printStackTrace();
+		 dropConnection(connection);
+		 }
 	return response;	
 	}
 
@@ -5781,8 +5768,7 @@ try {
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-         
+    	  e.printStackTrace();         
       }
       dropConnection(connection);      
       return response;
@@ -5821,10 +5807,11 @@ try {
     stmt.close();  
 	}
 	 catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	dropConnection(connection);
-}
-	return response;	}
+		 e.printStackTrace();
+		 dropConnection(connection);
+		 }
+	return response;	
+	}
 
 
 public static long getstopscountbyurban(String urbanId, List<String> selectedAgencies, int dbindex,String username) throws FactoryException, TransformException {			
@@ -5845,10 +5832,9 @@ Connection connection = makeConnection(dbindex);
     stmt.close();  
 	}
 	 catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	dropConnection(connection);
-    
-}
+		 e.printStackTrace();
+		 dropConnection(connection);
+    }
 	return response;	
 }
 
@@ -5871,13 +5857,13 @@ public static long getstopscountbyurban(String urbanId, int dbindex) throws Fact
 		    stmt.close();  
 			}
 			 catch ( Exception e ) {
-			        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-			dropConnection(connection);
-			
-		    
-		}
+				 e.printStackTrace();
+				 dropConnection(connection);
+				 }
 			return response;	
 		}}
+
+
 public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int dbindex) throws FactoryException, TransformException
 {
 	Connection  connection = makeConnection(dbindex);
@@ -5904,12 +5890,11 @@ public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int dbindex
 	}
 	 
 	catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	dropConnection(connection);
-	
-    
-}
-	return response;	}
+		e.printStackTrace();
+		dropConnection(connection);
+		}
+	return response;	
+	}
 
 public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, List<String> selectedAgencies, int dbindex,String username) throws FactoryException, TransformException
 {
@@ -5937,12 +5922,12 @@ public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, List<String
     stmt.close();  
 	}
 	 catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+		 e.printStackTrace();
+		 dropConnection(connection);
+		 }
 	dropConnection(connection);
-	
-    
-}
-	return response;	}
+	return response;	
+	}
 	
 	
 public static  int[] aggurbanemp( int dbindex,String username,int popmax,int popmin,String popYear ) throws FactoryException, TransformException
@@ -5969,11 +5954,10 @@ public static  int[] aggurbanemp( int dbindex,String username,int popmax,int pop
     stmt.close();  
 	}
 	 catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+		 e.printStackTrace();
+		 dropConnection(connection);
+	 	}
 	dropConnection(connection);
-	
-    
-	}
 	return empArray;	
 	}
 }
