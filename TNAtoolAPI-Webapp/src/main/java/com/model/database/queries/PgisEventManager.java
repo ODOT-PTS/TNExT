@@ -3608,8 +3608,6 @@ public class PgisEventManager {
     	  }
      double[] results = new double[7];
      try {
-    	 System.out.print(geotype + "-" + type + ":");
-    	 System.out.println(querytext);
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
         while ( rs.next() ) {

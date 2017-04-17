@@ -110,7 +110,7 @@ var metricDef = [
 		{
 			"report" : "Transit Agencies Summary Report",
 			"metric" : "Geographic Areas",
-			"definition" : "Count of geographic areas that the transit agency operates within. An agencies is operating in an area if it has at least one stops within the area regardless of being served or not.",
+			"definition" : "Count of geographic areas that the transit agency operates within. An agency is operating in an area if it has at least one stop within the area regardless of being served or not.",
 		},
 		{
 			"report" : "Transit Agencies Summary Report",
@@ -192,22 +192,22 @@ var metricDef = [
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop of the transit agency and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop of the transit agency and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop of the transit agency and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop of the transit agency and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."		
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops that the transit agency serves. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."		
 		},
 		{
 			"report" : "Transit Agency Extended Report",
@@ -217,22 +217,22 @@ var metricDef = [
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop served by the agency. Population served by service for a block is calculated as the population of that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates.",
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop served by the agency. Population served by service for a block is calculated as the population of that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates.",
 		},
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop served by the agency. Population served by service for a block is calculated as the population of that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates.",		
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop served by the agency. Population served by service for a block is calculated as the population of that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates.",		
 		},
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop served by the agency. Employment Served by Service for a block is calculated as the number employed people residing in that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates."		
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop served by the agency. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates."		
 		},
 		{
 			"report" : "Transit Agency Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop served by the agency. Employees Served by Service for a block is calculated as the number employed people working in that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates."		
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop served by the agency. Employees Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times the block is served by the agency on the selected date(s). Reported number is cumulative over the selected dates."		
 		},
 		{
 			"report" : "Transit Agency Extended Report",
@@ -381,17 +381,17 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
@@ -406,17 +406,17 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "County Extended Report",
@@ -426,12 +426,12 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Percent of Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
@@ -441,12 +441,12 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "County Extended Report",
@@ -456,12 +456,12 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Percent of Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "County Extended Report",
@@ -471,7 +471,7 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "County Extended Report",
@@ -630,17 +630,17 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -655,17 +655,17 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -675,12 +675,12 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Percent of Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -690,12 +690,12 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -705,12 +705,12 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Percent of Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -720,7 +720,7 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -879,17 +879,17 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -904,17 +904,17 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -924,12 +924,12 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Percent of Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -939,12 +939,12 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -954,12 +954,12 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Percent of Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -969,7 +969,7 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -1123,17 +1123,17 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1148,17 +1148,17 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1168,12 +1168,12 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Percent of Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1183,12 +1183,12 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1198,12 +1198,12 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Percent of Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1213,7 +1213,7 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1357,7 +1357,7 @@ var metricDef = [
 		{
 			"report" : "Aggregated Urban Areas Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Aggregated Urban Areas Extended Report",
@@ -1372,7 +1372,7 @@ var metricDef = [
 		{
 			"report" : "Aggregated Urban Areas Extended Report",
 			"metric" : "Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates.",
+			"definition" : "Summation of Population Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates.",
 		},
 		{
 			"report" : "Aggregated Urban Areas Extended Report",
@@ -1510,17 +1510,17 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -1535,17 +1535,17 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -1555,12 +1555,12 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Percent of Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -1570,12 +1570,12 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -1585,12 +1585,12 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Percent of Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -1600,7 +1600,7 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -1696,27 +1696,27 @@ var metricDef = [
 		{
 			"report" : "Stops Summary Report",
 			"metric" : "Population Served",
-			"definition" : "Total population of unduplicated census blocks with their centroid within X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
+			"definition" : "Total population of unduplicated census blocks with their centroid within an X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Stops Summary Report",
 			"metric" : "Urban Population Served",
-			"definition" : "Total population of urban census blocks with their centroid within X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
+			"definition" : "Total population of urban census blocks with their centroid within an X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Stops Summary Report",
 			"metric" : "Rural Population Served",
-			"definition" : "Total population of rural census blocks with their centroid within X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
+			"definition" : "Total population of rural census blocks with their centroid within an X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Stops Summary Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
+			"definition" : "Total number of employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Stops Summary Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
+			"definition" : "Total number of employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of the stop. This metric is date-independent, i.e., the stop may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Stops Summary Report",
@@ -1828,12 +1828,12 @@ var metricDef = [
 		{
 			"report" : "Routes Summary Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of the route stops. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of the route stops. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Routes Summary Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of the route stops. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of the route stops. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Routes Summary Report",
@@ -1860,7 +1860,7 @@ var metricDef = [
 		{
 			"report" : "Transit Hubs Summary Report",
 			"metric" : "Cluster Centroid Latitude",
-			"definition" : "Latitude of the transit hub centroid. This is calculated as the average of latitudes of stops in the cluster..",
+			"definition" : "Latitude of the transit hub centroid. This is calculated as the average of latitudes of stops in the cluster.",
 		},
 		{
 			"report" : "Transit Hubs Summary Report",
@@ -1910,12 +1910,12 @@ var metricDef = [
 		{
 			"report" : "Transit Hubs Summary Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Transit Hubs Summary Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Transit Hubs Summary Report",
@@ -1997,7 +1997,7 @@ var metricDef = [
 		{
 			"report" : "Key Transit Hubs Report",
 			"metric" : "Visits Count",
-			"definition" : "Total number of times the stops in the cluster are served on the given date(s). Visits for a stop is calculated as summation of number of times a stop is served on selected date(s), i.e., summation of number of trips/runs over all routes where the stop belongs to. Reported number is cumulative over the selected dates."
+			"definition" : "Total number of times the stops in the cluster are served on the given date(s). Visits for a stop are calculated as the summation of the number of times a stop is served on selected date(s), i.e., summation of number of trips/runs over all routes where the stop belongs to. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Key Transit Hubs Report",
@@ -2022,12 +2022,12 @@ var metricDef = [
 		{
 			"report" : "Key Transit Hubs Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Key Transit Hubs Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the cluster. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Key Transit Hubs Report",
@@ -2094,12 +2094,12 @@ var metricDef = [
 		{
 			"report" : "Timing Connection Report",
 			"metric" : "Stop2 ID",
-			"definition" : "ID of the stop that is located within X-miles radius of Stop1 and is served within the selected Time Window on the selected Date.",
+			"definition" : "ID of the stop that is located within an X-mile radius of Stop1 and is served within the selected Time Window on the selected Date.",
 		},
 		{
 			"report" : "Timing Connection Report",
 			"metric" : "Stop2 Name",
-			"definition" : "Name of the stop that is located within X-miles radius of Stop1 and is served within the selected Time Window on the selected Date.",
+			"definition" : "Name of the stop that is located within an X-mile radius of Stop1 and is served within the selected Time Window on the selected Date.",
 		},
 		{
 			"report" : "Timing Connection Report",
@@ -2361,17 +2361,17 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
-			"definition" : "Total unduplicated population of census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Urban Population Served at Level of Service",
-			"definition" : "Total unduplicated population of urban census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of urban census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Rural Population Served at Level of Service",
-			"definition" : "Total unduplicated population of rural census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated population of rural census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
@@ -2386,17 +2386,17 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Urban Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all urban census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Rural Population Served By Service",
-			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Population Served by Service over all rural census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employment Served (RAC)",
-			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people residing in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Tract Extended Report",
@@ -2406,12 +2406,12 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Percent of Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employment Served at Level of Service (RAC)",
-			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people residing in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
@@ -2421,12 +2421,12 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employment Served By Service (RAC)",
-			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employment Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employees Served (WAC)",
-			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Total number of unduplicated employed people working in census blocks with their centroid within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Tract Extended Report",
@@ -2436,12 +2436,12 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Percent of Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employees Served at Level of Service (WAC)",
-			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Total unduplicated employed people working in census blocks with their centroid located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Tract Extended Report",
@@ -2451,7 +2451,7 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Tract Extended Report",
@@ -2523,32 +2523,32 @@ var metricDef = [
 		{
 			"report" : "Employment Report",
 			"metric" : "[Category] - S (RAC)",
-			"definition" : "[Category] Served (S): Total number of unduplicated employed people, belonging to the category, residing in census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "[Category] Served: Total number of unduplicated employed people, belonging to the category, residing in census blocks with their centroids within an X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Employment Report",
 			"metric" : "[Category] - SS (RAC)",
-			"definition" : "[Category] Served by Service (SS): Summation of [Category] Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of employed people, belonging to the category, residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "[Category] Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of employed people, belonging to the category, residing in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Employment Report",
 			"metric" : "[Category] - SLOS (RAC)",
-			"definition" : "[Category] Served at Level of Service (SLOS): Total unduplicated employed people, belonging to the category, residing in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user."
+			"definition" : "[Category] Served at Level of Service: Total unduplicated employed people, belonging to the category, residing in census blocks with their centroids located within an X-mile radius of any stop of the agency/geographic area and served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user."
 		},
 		{
 			"report" : "Employment Report",
 			"metric" : "[Category] - S (WAC)",
-			"definition" : "[Category] Served (S): Total number of unduplicated employed people, belonging to the category, working in census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "[Category] Served: Total number of unduplicated employed people, belonging to the category, working in census blocks with their centroids within an X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Employment Report",
 			"metric" : "[Category] - SS (WAC)",
-			"definition" : "[Category] Served by Service (SS): Summation of [Category] Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of employed people, belonging to the category, working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "[Category] Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of employed people, belonging to the category, working in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Employment Report",
 			"metric" : "[Category] - SLOS (WAC)",
-			"definition" : "[Category] Served at Level of Service (SLOS): Total unduplicated employed people, belonging to the category, working in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user."
+			"definition" : "[Category] Served at Level of Service: Total unduplicated employed people, belonging to the category, working in census blocks with their centroids located within an X-mile radius of any stop of the agency/geographic area and served at least N-times on the selected date(s). X is the employment search radius and N is the minimum level of service set by the user."
 		},
 		
 		// 17. Title VI
@@ -2560,17 +2560,17 @@ var metricDef = [
 		{
 			"report" : "Title VI Report",
 			"metric" : "[Category] - S",
-			"definition" : "Number of Individuals Served (S): Total number of unduplicated individuals, belonging to the category, in census blocks with their centroids within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+			"definition" : "Number of Individuals Served: Total number of unduplicated individuals, belonging to the category, in census blocks with their centroids within an X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. Each block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
 		},
 		{
 			"report" : "Title VI Report",
 			"metric" : "[Category] - SS",
-			"definition" : "Number of Individuals Served by Service (SS): Summation of [Category] Served by Service over all census blocks that have their centroid within X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of individuals, belonging to the category, in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
+			"definition" : "Number of Individuals Served by Service: Summation of [Category] Served by Service over all census blocks that have their centroid within an X-mile radius (i.e., stop distance) of any stop of the agency/geographic area. [Category] Served by Service for a block is calculated as the number of individuals, belonging to the category, in that block multiplied by the times that block is served on the selected date(s). Reported number is cumulative over the selected dates."
 		},
 		{
 			"report" : "Title VI Report",
 			"metric" : "[Category] - SLOS",
-			"definition" : "Number of Individuals Served at Level of Service (SLOS): Total unduplicated individuals, belonging to the category, in census blocks with their centroids located within X-miles radius of any stop of the agency/geographic area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+			"definition" : "Number of Individuals Served at Level of Service: Total unduplicated individuals, belonging to the category, in census blocks with their centroids located within an X-mile radius of any stop of the agency/geographic area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
 		},
 
 ];

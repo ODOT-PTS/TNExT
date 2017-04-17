@@ -88,16 +88,29 @@ function generateDatadump() {
 		runAjaxAreas(0, areaType, 'ODOT_Transit_Regions_Extended_Reports_Dump');
 		break;
 	case 5: // Agencies
-		csvContent += 'AgencyName' + ',' + 'Route Miles' + ',' + 'Route Stops'
-				+ ',' + 'Stops Per Route Mile' + ',' + 'Service Hours' + ','
-				+ 'Service Miles' + ',' + 'Urban Population Served' + ','
-				+ 'Rural Population Served' + ',' + 'Employment (RAC) Served'
-				+ ',' + 'Employees (WAC) Served' + ',' + 'Service Stops' + ','
-				+ 'Urban Pop. Served By Service' + ','
-				+ 'Rural Pop. Served By Service' + ','
-				+ 'Employment (RAC) Served By Service' + ','
-				+ 'Employees (WAC) Served By Service' + ',' + 'Service Days'
-				+ ',' + 'Hours of Service\n';
+		csvContent += 'AgencyName' + ',' 
+			+ 'Route Miles' + ',' 
+			+ 'Route Stops'	+ ',' 
+			+ 'Urban Stops' + ',' 
+			+ 'Rural Stops' + ','
+			+ 'Stops Per Route Mile' + ',' 
+			+ 'Service Hours' + ','
+			+ 'Service Miles' + ',' 
+			+ 'Urban Population Served' + ','
+			+ 'Rural Population Served' + ','
+			+ 'Urban Population Served at Level of Service' + ','
+			+ 'Rural Population Served at Level of Service' + ','
+			+ 'Employment Served (RAC)' + ',' 
+			+ 'Employees Served (WAC)' + ',' 
+			+ 'Urban Service Stops' + ','
+			+ 'Rural Service Stops' + ','
+			+ 'Urban Pop. Served By Service' + ','
+			+ 'Rural Pop. Served By Service' + ','
+			+ 'Employment Served By Service (RAC)' + ','
+			+ 'Employees Served By Service (WAC)' + ',' 
+			+ 'Service Days' + ','
+			+ 'Hours of Service\n';
+		
 		// getting agencies list
 		agencies = [];
 		$.ajax({
@@ -192,7 +205,7 @@ function runAjaxAgency(ind, fileName){
 	console.log('/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
 				+ agencies[ind] + '&day=' + dates + '&key=' + key + '&popYear='
 				+ popYear + '&areaId=null&type=' + 0 + '&username='
-				+ getSession() + '&x=' + sRadius + '&geotype=' + -1
+				+ getSession() + '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
 				+ '&geoid=null&dbindex=' + $('#dbselect').val());
 	$.ajax({
 		type : 'GET',
@@ -200,28 +213,39 @@ function runAjaxAgency(ind, fileName){
 		url : '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
 				+ agencies[ind] + '&day=' + dates + '&key=' + key + '&popYear='
 				+ popYear + '&areaId=null&type=' + 0 + '&username='
-				+ getSession() + '&x=' + sRadius + '&geotype=' + -1
+				+ getSession() + '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
 				+ '&geoid=null&dbindex=' + $('#dbselect').val(),
 		async : false,
 		success : function(d) {
-			csvContent += d.AgencyName.replace(/,/g,'') + ',' + d.RouteMiles + ','
-					+ d.StopCount + ',' + d.StopPerRouteMile + ','
-					+ d.ServiceHours + ',' + d.ServiceMiles + ','
-					+ d.UPopWithinX + ',' + d.RPopWithinX + ','
-					+ d.racWithinX + ',';
+			csvContent += d.AgencyName.replace(/,/g,'') + ',' 
+				+ d.RouteMiles + ','
+				+ d.StopCount + ','
+				+ d.UrbanStopCount + ','
+				+ d.RuralStopCount + ','
+				+ d.StopPerRouteMile + ','
+				+ d.ServiceHours + ',' 
+				+ d.ServiceMiles + ','
+				+ d.UPopWithinX + ',' 
+				+ d.RPopWithinX + ','
+				+ d.UPopLos + ','
+				+ d.RPopLos + ','
+				+ d.racWithinX + ',';
 			if (popYear > 2010)
 				csvContetn += 'N/A,';
 			else
 				csvContent += d.wacWithinX + ',';
-			csvContent += d.ServiceStops + ',' + d.UPopServedByService
-					+ ',' + d.RPopServedByService + ','
-					+ d.racServedByService + ',' + d.wacServedByService
-					+ ',';
+			csvContent += d.UrbanServiceStops + ','
+				+ d.RuralServiceStops + ',' 
+				+ d.UPopServedByService + ',' 
+				+ d.RPopServedByService + ','
+				+ d.racServedByService + ',';
 			if (popYear > 2010)
 				csvContetn += 'N/A,';
 			else
 				csvContent += d.wacServedByService + ',';
-			csvContent += d.HoursOfService + '\n';
+			csvContent += d.ServiceDays + ','
+				+ d.HoursOfService + '\n';
+			
 			progressVal = Math.max(Math.floor((ind + 1) / agencies.length * 100),1);
 			ind += 1;
 			if (ind < agencies.length)
