@@ -163,9 +163,12 @@ public class PgisEventManager {
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       float RouteMiles = 0;
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), trips as (select agencyid, routeid, "
-      		+ "round(max(length)::numeric,2) as length from "+Types.getTripMapTableName(type)+" map inner join aids on map.agencyid_def=aids.aid where "+
-        Types.getIdColumnName(type)+" ='"+areaId +"'  group by agencyid, routeid) select sum(length) as routemiles from trips;";
+      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
+      		+ "trips as (select agencyid, routeid, round(max(length)::numeric,2) as length "
+      		+ "		from "+Types.getTripMapTableName(type)+" map inner join aids on map.agencyid_def=aids.aid "
+			+ "		where "+Types.getIdColumnName(type)+" ='"+areaId +"' "
+			+ "		group by agencyid, routeid) "
+			+ "select sum(length) as routemiles from trips;";
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -1688,7 +1691,7 @@ public class PgisEventManager {
     	  geocriteria1 = "left(blockid,11)";
     	  geocriteria2 = "left(block.blockid,11)";
     	  column = "blockid";
-      } else {// census place, urban area, ODOT region, or congressional district
+      } else {// census place, urban area, ODOT region, state, or congressional district
     	  column = Types.getIdColumnName(geotype);
     	  geocriteria1 = Types.getIdColumnName(geotype);
     	  geocriteria2 = "block."+Types.getIdColumnName(geotype);
@@ -1739,9 +1742,7 @@ public class PgisEventManager {
         	results[3] = rs.getLong("urbanemployment"); 
         	results[4] = rs.getLong("ruralemployment"); 
         	results[5] = rs.getLong("urbanemployee"); 
-        	results[6] = rs.getLong("ruralemployee"); 
-        
-        
+        	results[6] = rs.getLong("ruralemployee");    
         }
         rs.close();
         stmt.close();        
@@ -1869,12 +1870,9 @@ public class PgisEventManager {
     	      		+"uwacserved as (select COALESCE(sum(wac),0) as uswac from wacserved where poptype='U'),"
     	      		+"rwacserved as (select COALESCE(sum(wac),0) as rswac from wacserved where poptype='R'),"
     	      		+ "svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
-    	      	  +"select svcmiles,svchours,coalesce(usvcstops,0) as usvcstops ,coalesce(rsvcstops,0) as rsvcstops,svcstops,upoplos,rpoplos,uspop,rspop,uraclos,rraclos,usrac,rsrac,uwaclos,rwaclos,uswac,rswac,svdays,fromtime,totime,connections"
-    	      	  + " from service inner join upopatlos on true inner join rpopatlos on true inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true inner join uracatlos on true inner join rracatlos on true inner join uracserved on true inner join rracserved on true inner join uwacatlos on true inner join rwacatlos on true inner join uwacserved on true inner join rwacserved on true inner join rsvc on true inner join usvc on true";
-
-    	      	 
-    	      	 
-     }
+    	      	    +"select svcmiles,svchours,coalesce(usvcstops,0) as usvcstops ,coalesce(rsvcstops,0) as rsvcstops,svcstops,upoplos,rpoplos,uspop,rspop,uraclos,rraclos,usrac,rsrac,uwaclos,rwaclos,uswac,rswac,svdays,fromtime,totime,connections"
+    	      	    + " from service inner join upopatlos on true inner join rpopatlos on true inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true inner join uracatlos on true inner join rracatlos on true inner join uracserved on true inner join rracserved on true inner join uwacatlos on true inner join rwacatlos on true inner join uwacserved on true inner join rwacserved on true inner join rsvc on true inner join usvc on true";
+    	 }
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -5625,8 +5623,8 @@ GeoArea response = new GeoArea();
 
  if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
     	query="with temp as (Select * from census_counties where countyId="+id1+"),employment as (select e"+popYear+" as employment from temp left join lodes_rac_projection_county using(countyId) )," 
-+"employees as (select sum(c000) as employees from temp left join lodes_blocks_wac on temp.countyid=left(lodes_blocks_wac.blockid,5)  group by countyid,left(lodes_blocks_wac.blockid,5) )"
-+"select * from temp cross join employment cross join employees ";
+    			+"employees as (select sum(c000) as employees from temp left join lodes_blocks_wac on temp.countyid=left(lodes_blocks_wac.blockid,5)  group by countyid,left(lodes_blocks_wac.blockid,5) )"
+    			+"select * from temp cross join employment cross join employees ";
       areaID="countyId";
 	  areaName="cname";
 	  } else if (type==1){//census tract
@@ -5709,11 +5707,21 @@ GeoArea response = new GeoArea();
 
 		   	 +"temp1 as (select blockid ,odotregionid  from temp left join census_blocks  on census_blocks.regionid=temp.odotregionid),"
 		   	 +" employment as (select sum(C000_"+popYear+") as employment,odotregionid from temp1 left join lodes_rac_projection_block  using(blockid) group by  odotregionid),"
-		     	+"employees as (select sum(c000) as employees,odotregionid from temp1 left join lodes_blocks_wac using(blockid) group by odotregionid )"
+		     +"employees as (select sum(c000) as employees,odotregionid from temp1 left join lodes_blocks_wac using(blockid) group by odotregionid )"
 		   	 +"select * from temp cross join employment cross join employees ";
 		     areaID="odotregionid";
 		 areaName="odotregionname";
-	  } else {// census place or congressional district    	  
+	  } else if (type == 6){// states
+		      query = "with temp as (Select stateid, sname, landarea from census_states where stateid=" + id1 + "),"
+		      		+ "employment as (select sum(e"+popYear+") as employment "
+      				+ "		from temp left join lodes_rac_projection_county on left(countyId,2)=" + id1 + "),"
+		      		+ "employees as (select sum(c000) as employees "
+		      		+ "		from temp left join lodes_blocks_wac on temp.stateid=left(lodes_blocks_wac.blockid,2) ), "
+		      		+ "population as (select sum(population" + popYear + ") as population" + popYear + " from census_counties where left(countyid,2)=" + id1 + ") "
+		      		+ "select * from temp cross join population cross join employment cross join employees";
+		      areaID = "stateid";
+		      areaName = "sname";		    		  
+	  }else {// census place or congressional district
     	  if (type == 2) {
 		  query="with temp as (Select * from census_places where placeid="+id1+"),"
 		  +"temp1 as (select blockid ,placeid  from temp left join census_blocks  using(placeid)),"
@@ -5735,7 +5743,6 @@ GeoArea response = new GeoArea();
 		 }
     	  }
 populationyear="population"+popYear;
-//System.out.println(query);
 try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -5747,21 +5754,7 @@ try {
         	response.setPopulation (rs.getLong(populationyear));
         	response.setLandarea(rs.getLong("landarea"));
         	response.setEmployee(rs.getLong("employees"));
-        	response.setEmployment(rs.getLong("employment"));
-        	
-        	//response.setLandarea(Math.round(rs.getLong("landarea")/2.58999e4)/100.0);
-//        	response.setWaterarea(rs.getLong("waterarea"));
-//        	if (type==0){
-//        		
-//        		instance.ODOTRegion = rs.getString("odotregionid");
-//        		instance.ODOTRegionName = rs.getString("regionname");
-//        		instance.TractsCount = String.valueOf(rs.getLong("tracts"));
-//        	}
-//			
-//        	if (type==4){
-//        		//String[] buffer = (String[]) rs.getArray("names").getArray();
-//        	}
-//     
+        	response.setEmployment(rs.getLong("employment"));        	
         }
         rs.close();
         stmt.close();        

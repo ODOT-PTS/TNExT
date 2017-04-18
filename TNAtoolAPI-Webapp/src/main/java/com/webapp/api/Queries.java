@@ -3115,6 +3115,7 @@ public class Queries {
 		HashMap<String, Long> geocounts = new HashMap<String, Long>();
 		geocounts = PgisEventManager.getStateInfo(dbindex, username, popYear);
 		GeoR each = new GeoR();
+		each.id = "41";
 		each.Name = "Oregon";
 		each.CountiesCount = String.valueOf(geocounts.get("county"));
 		each.TractsCount = String.valueOf(geocounts.get("tract"));
@@ -3338,8 +3339,10 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getGeoXR(@QueryParam("areaid") String areaId,
-			@QueryParam("type") int type, @QueryParam("day") String date,
-			@QueryParam("x") double x, @QueryParam("l") Integer L,
+			@QueryParam("type") int type, 
+			@QueryParam("day") String date,
+			@QueryParam("x") double x, 
+			@QueryParam("l") Integer L,
 			@QueryParam("key") double key,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("popYear") String popYear,
@@ -3368,8 +3371,6 @@ public class Queries {
 		GeoXR response = new GeoXR();
 		GeoArea instance = PgisEventManager.QueryGeoAreabyId(type, areaId,
 				dbindex, username, popYear, -1, null);
-		// GeoArea instance = EventManager.QueryGeoAreabyId(areaId, type,
-		// dbindex, Integer.parseInt(popYear));
 		response.metadata = "Report Type:"
 				+ instance.getTypeName()
 				+ " Extended Report;Report Date:"

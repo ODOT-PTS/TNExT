@@ -1501,7 +1501,7 @@ $mylist
 					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/KeyHubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if (casestring=="SSR"){			    	
-			    	window.open('/TNAtoolAPI-Webapp/StateSreport.html?&dbindex='+dbindex+'&popYear='+popYear);
+			    	window.open('/TNAtoolAPI-Webapp/GeoStateSreport.html?&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if (casestring=="TCR") {
 			    	window.open('/TNAtoolAPI-Webapp/TimingConnection.html?&dbindex=' + dbindex);
 			    }else if (casestring=="ASR"){

@@ -18,11 +18,46 @@ package com.model.database.queries.util;
 
 public class Types {
 
-	private final static String[] GeoTypes = {"Counties", "Census Tracts", "Census Places", "Urban Areas", "ODOT Transit Regions", "Congressional Districts"};
-	private final static String[] GeoTypeTripMapTables = {"census_counties_trip_map", "census_tracts_trip_map", "census_places_trip_map", "census_urbans_trip_map", "census_counties_trip_map", "census_congdists_trip_map"};
-	private final static String[] GeoTypeIdColumns = {"countyid", "tractid", "placeid", "urbanid", "regionid", "congdistid"};
-	private final static String[] GeoTypeTableNames = {"census_counties", "census_tracts", "census_places", "census_urbans", "census_counties", "census_congdists"};
-	private final static String[] GeoTypeNameColumns = {"cname", "tname", "pname", "uname", "regionname", "cname"};
+	private final static String[] GeoTypes = {
+		"Counties", 
+		"Census Tracts", 
+		"Census Places", 
+		"Urban Areas", 
+		"ODOT Transit Regions", 
+		"Congressional Districts",
+		"States"};
+	private final static String[] GeoTypeTripMapTables = {
+		"census_counties_trip_map", 
+		"census_tracts_trip_map", 
+		"census_places_trip_map", 
+		"census_urbans_trip_map", 
+		"census_counties_trip_map", 
+		"census_congdists_trip_map",
+		"census_states_trip_map"};
+	private final static String[] GeoTypeIdColumns = {
+		"countyid", 
+		"tractid", 
+		"placeid", 
+		"urbanid", 
+		"regionid", 
+		"congdistid",
+		"stateid"};
+	private final static String[] GeoTypeTableNames = {
+		"census_counties", 
+		"census_tracts", 
+		"census_places", 
+		"census_urbans", 
+		"census_counties", 
+		"census_congdists",
+		"census_states"};
+	private final static String[] GeoTypeNameColumns = {
+		"cname", 
+		"tname", 
+		"pname", 
+		"uname", 
+		"regionname", 
+		"cname",
+		"sname"};
 	
 	public static String getAreaName(int type){
 		if (type>GeoTypes.length-1 || type<0)

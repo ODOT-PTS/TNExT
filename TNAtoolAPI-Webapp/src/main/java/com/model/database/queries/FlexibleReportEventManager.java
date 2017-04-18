@@ -43,13 +43,13 @@ public class FlexibleReportEventManager {
 			String query = "";
 
 			if (areaType.equals("state")) {
-				query = "SELECT sum(landarea) as landarea, sum(waterarea) AS waterarea, sum(population) AS population "
-						+ "	FROM census_counties";
+				query = "SELECT stateid, sname, landarea, waterarea, population "
+						+ "	FROM census_states ORDER BY sname";
 				ResultSet rs = stmt.executeQuery(query);
 				while (rs.next()) {
 					GeoArea i = new GeoArea();
-					i.setId("41");
-					i.setName("Oregon");
+					i.setId(rs.getString("stateid"));
+					i.setName(rs.getString("sname"));
 					i.setLandarea(rs.getLong("landarea"));
 					i.setWaterarea(rs.getLong("waterarea"));
 					i.setPopulation(rs.getLong("population"));

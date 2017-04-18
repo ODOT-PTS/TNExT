@@ -57,37 +57,43 @@ function generateDatadump() {
 	csvContent = '';
 	
 	switch (parseInt(reportType)) {
-	case 0: // counties
-		areaType = 0;
+	case 0: // states
+		areaType = 6;
+		csvContent += 'State' + ',' + tempHeaders;
+		areaIDs = getAreaIDs('state');
+		runAjaxAreas(0, areaType, 'Statewide_Extended_Reports_Dump');
+		break;
+	case 1: // counties
+		areaType = 1;
 		csvContent = 'County' + ',' + tempHeaders;		
 		areaIDs = getAreaIDs('county');
 		runAjaxAreas(0, areaType, 'Counties_Extended_Reports_Dump');
 		break;
-	case 1: // places
+	case 2: // places
 		areaType = 2;
 		csvContent += 'Census Place' + ',' + tempHeaders;
 		areaIDs = getAreaIDs('place');
 		runAjaxAreas(0, areaType, 'Places_Extended_Reports_Dump');
 		break;
-	case 2: // congressional district
+	case 3: // congressional district
 		areaType = 5;
 		csvContent += 'Congressional  District' + ',' + tempHeaders;
 		areaIDs = getAreaIDs('congDist');
 		runAjaxAreas(0, areaType, 'Congressional_Districts_Extended_Reports_Dump');
 		break;
-	case 3: // urban areas
+	case 4: // urban areas
 		areaType = 3;
 		csvContent += 'Urban Area' + ',' + tempHeaders;
 		areaIDs = getAreaIDs('urban');
 		runAjaxAreas(0, areaType, 'Urban_Areas_Extended_Reports_Dump');
 		break;
-	case 4: // ODOT transit regions
+	case 5: // ODOT transit regions
 		areaType = 4;
 		csvContent += 'ODOT Transit Region' + ',' + tempHeaders;
 		areaIDs = getAreaIDs('odotRegion');
 		runAjaxAreas(0, areaType, 'ODOT_Transit_Regions_Extended_Reports_Dump');
-		break;
-	case 5: // Agencies
+		break;	
+	case 6: // Agencies
 		csvContent += 'AgencyName' + ',' 
 			+ 'Route Miles' + ',' 
 			+ 'Route Stops'	+ ',' 
@@ -135,15 +141,15 @@ function generateDatadump() {
 
 function runAjaxAreas(ind,areaType,fileName){
 	console.log('/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
-	+ '&x='+sRadius+'&l=2'+'&n='+keyName+'&day='+dates+'&key='+ key
-	+ '&dbindex=' + $('#dbselect').val() + '&los' + los + '&popYear='+popYear
+	+ '&x='+sRadius+'&n='+keyName+'&day='+dates+'&key='+ key
+	+ '&dbindex=' + $('#dbselect').val() + '&l=' + los + '&popYear='+popYear
 	+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
-			+ '&x='+sRadius+'&l=2'+'&n='+keyName+'&day='+dates+'&key='+ key
-			+ '&dbindex=' + $('#dbselect').val() + '&los' + los + '&popYear='+popYear
+			+ '&x='+sRadius+'&n='+keyName+'&day='+dates+'&key='+ key
+			+ '&dbindex=' + $('#dbselect').val() + '&l=' + los + '&popYear='+popYear
 			+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null,
 		async: true,
 		success: function(d){
@@ -314,7 +320,7 @@ function getAreaIDs(areaType){
 		success : function(d) {
 			$.each(d,function(index,item){
 				areas.push(item.id);
-			});
+				});
 			}
 		});
 	return areas;

@@ -34,7 +34,8 @@
 var ipop=popYear;
 
 html = '<table id="RT" class="display" align="center">';
-tmp = '<tr><th class="metric" id="aid">State</th>'+
+tmp = '<tr><th class="metric" id="aid">State ID</th>'+
+'<th class="metric" id="aid">State</th>'+
 '<th class="metric" id="an">Land Area</th>'+
 '<th class="metric" id="an">Total Population</th>'+
 '<th class="metric" id="an">Urban Population</th>'+
@@ -58,7 +59,6 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
-
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -68,7 +68,8 @@ $(document).ready(function(){
 			docMetadata = d.metadata;
 			appendNavigation();
 			$.each(d.GeoR, function(i,item){
-				html +='<tr><td>' + '<a href="#" type="SXR" id="'+item.Name+'">'+item.Name+'</a></td>'+ 
+				html +='<tr><td><a href="#" type="SXR" id="'+item.id+'">' + item.id + '</a></td>'+
+				'<td>' + item.Name+'</td>'+ 
 				'<td>' + numberconv(item.landArea) +'</td>'+
 				'<td>' + numberconv(item.population) +'</td>'+ 
 				'<td>' + numberconv(item.urbanpop) +'</td>'+ 
@@ -100,7 +101,8 @@ $(document).ready(function(){
 			    	qstringx = '0.25';
 			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);			    	   
+					console.log($(this).attr('id'));
+			    	window.open('/TNAtoolAPI-Webapp/GeoStateXreport.html?&x=0.25&l=2&n='+keyName+'&dbindex='+dbindex+'&areaId='+$(this).attr('id')+'&popYear='+popYear+'&nav='+nav);			    	   
 			    }else if($(this).attr('type')=="ASR"){
 		    		qstringx = '0.25';
 		    		window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
