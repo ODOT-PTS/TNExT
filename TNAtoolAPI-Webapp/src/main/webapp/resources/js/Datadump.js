@@ -64,7 +64,7 @@ function generateDatadump() {
 		runAjaxAreas(0, areaType, 'Statewide_Extended_Reports_Dump');
 		break;
 	case 1: // counties
-		areaType = 1;
+		areaType = 0;
 		csvContent = 'County' + ',' + tempHeaders;		
 		areaIDs = getAreaIDs('county');
 		runAjaxAreas(0, areaType, 'Counties_Extended_Reports_Dump');
