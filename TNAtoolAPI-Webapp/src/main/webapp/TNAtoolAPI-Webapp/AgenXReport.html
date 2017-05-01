@@ -113,6 +113,8 @@
 								html += '</tr></tbody></table>';
 								$('#displayReport').append($(html));
 								progressbar.remove();
+								
+								// datatables setting
 								tableProperties.paging = false;
 								tableProperties.ordering = false;
 								table = buildDatatables();

@@ -66,78 +66,6 @@ public static void updateSessions(){
 }
 
 /**
- * returns trip data and shape
- *//*
-	public static Geotrip getTripData(AgencyAndId id) throws FactoryException, TransformException {			
-		session.beginTransaction();
-		Query q = session.getNamedQuery("SHAPE_BY_TRIP");		
-		q.setParameter("id", id);
-		@SuppressWarnings("unchecked")
-		List<Geotrip> results = (List<Geotrip>) q.list();
-        Hutil.getSessionFactory().close();
-        return results.get(0);
-    }*/
-
-/**
- * returns ParknRides within a circle
- */
-	/*public static List<ParknRide> getPnRs(double radius, double lat, double lon, int sessionindex, int dbindex) throws FactoryException, TransformException {
-		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
-		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
-		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
-		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
-		Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
-		Geometry targetGeometry = JTS.transform( point, transform);
-		point = targetGeometry.getCentroid();
-		point.setSRID(2993);	
-		session[sessionindex].beginTransaction();
-		
-		Query q = session[sessionindex].getNamedQuery("PARKNRIDE_WITHIN_CIRCLE");
-		Type geomType = GeometryUserType.TYPE;
-		q.setParameter("point", point, geomType);
-		q.setParameter("radius", radius);
-		@SuppressWarnings("unchecked")
-		List<ParknRide> results = (List<ParknRide>) q.list();
-        Hutil.getSessionFactory()[sessionindex].close();
-        return results;
-    }*/
-	
-/**
- * returns ParknRides within a rectangle
- */	
-	/*public static List<ParknRide> getPnRs(double[] lat, double[] lon, int sessionindex) throws FactoryException, TransformException {			
-
-		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
-		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
-		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
-		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		Coordinate[] coords = new Coordinate[lat.length+1];
-		for(int i=0;i<lat.length;i++){
-			coords[i]= new Coordinate(lat[i], lon[i]);
-		}
-		coords[coords.length-1]= new Coordinate(lat[0], lon[0]);
-		LinearRing ring = geometryFactory.createLinearRing( coords );
-		LinearRing holes[] = null; 
-		Polygon polygon = geometryFactory.createPolygon(ring, holes );
-		//Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
-		Geometry targetGeometry = JTS.transform( polygon, transform);
-		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
-		//point = targetGeometry.getCentroid();
-		targetGeometry.setSRID(2993);	
-		session[sessionindex].beginTransaction();
-		Query q = session[sessionindex].getNamedQuery("PARKNRIDE_WITHIN_RECTANGLE");
-		Type geomType = GeometryUserType.TYPE;
-		q.setParameter("polygon", targetGeometry, geomType);
-		//q.setParameter("radius", d);
-		@SuppressWarnings("unchecked")
-		List<ParknRide> results = (List<ParknRide>) q.list();
-        Hutil.getSessionFactory()[sessionindex].close();
-//        List<ParknRide> results=new ArrayList<ParknRide>();
-        
-        return results;
-    }*/	
-
-/**
  * returns population centroids
  */
 	public static List<Census> getcentroids(double d, double lat, double lon, int sessionindex) throws FactoryException, TransformException {
@@ -303,10 +231,6 @@ public static void updateSessions(){
  * returns number of all geo areas in the DB: keys are : county, tract, place, urban, congdist, region, pop, landarea, urbanpop, ruralpop
  */
 	public static HashMap<String, Long> getGeoCounts(int sessionindex, String popYear) throws FactoryException, TransformException {			
-		session[sessionindex].beginTransaction();
-		//Query q = session[sessionindex].getNamedQuery("GEO_COUNTS");
-		//q.setParameter("popYear","population"+popYear);
-		//@SuppressWarnings("unchecked")
 		String hql = "select (select count(countyId) from County) as county, (select count(tractId) from Tract) as tract, "
 				+ "(select count(placeId) from Place) as place, (select count(urbanId) from Urban) as urban, "
 				+ "(select count(congdistId) from CongDist) as congdist, (select count(distinct regionId) from County) as region, "

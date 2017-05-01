@@ -662,10 +662,6 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 		this._zoom = this._map._zoom;
 		this._currentShownBounds = this._getExpandedVisibleBounds();
-		//alert('a');
-		//sleep(300, doNotDelete);
-		//map._onTransitionEnd;
-		//alert('a');
 	},
 
 	_moveEnd: function () {

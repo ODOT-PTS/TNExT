@@ -90,11 +90,11 @@ $(document).ready(function(){
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numberconv(minUrbanPop) + '</td>'
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numberconv(maxUrbanPop) + '</td>'
 			  + '</tr>'
 	  	}						 
 		metadata += '</table>';
@@ -133,13 +133,13 @@ $(document).ready(function(){
 					+ '<td>' + item.areaId + '</td>'
 					+ '<td>' + item.areaName + '</td>';
 				if ( m.includes('routeMiles') )
-					html += '<td>' + numWithCommas(item.routeMiles.toFixed(2)) + '</td>';
+					html += '<td>' + numberconv(item.routeMiles.toFixed(2)) + '</td>';
 				if ( m.includes('routeStops') )
 					html += '<td>' + item.routeStops + '</td>';
 				if ( m.includes('stopsPerMile') )
 					html += '<td>' + ((item.routeStops/item.routeMiles)||0).toFixed(2)  + '</td>';
 				if ( m.includes('serviceMiles') )
-					html += '<td>' + numWithCommas(item.serviceMiles.toFixed(2)) + '</td>';
+					html += '<td>' + numberconv(item.serviceMiles.toFixed(2)) + '</td>';
 				if ( m.includes('serviceStops') )
 					html += '<td>' + item.serviceStops + '</td>';
 				if ( m.includes('serviceHours') )
@@ -178,11 +178,11 @@ $(document).ready(function(){
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numberconv(minUrbanPop) + '</td>'
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numberconv(maxUrbanPop) + '</td>'
 			  + '</tr>'
 	  	}			 
 		metadata += '</table>';
@@ -216,9 +216,9 @@ $(document).ready(function(){
 						+ '<td>' + item.areaId + '</td>'
 						+ '<td>' + item.areaName + '</td>'
 						+ '<td>Rural</td>'
-						+ '<td>' + numWithCommas(item.popServed) + '</td>'
-						+ '<td>' + numWithCommas(item.popSS) + '</td>'
-						+ '<td>' + numWithCommas(item.popLOS) + '</td></tr>';
+						+ '<td>' + numberconv(item.popServed) + '</td>'
+						+ '<td>' + numberconv(item.popSS) + '</td>'
+						+ '<td>' + numberconv(item.popLOS) + '</td></tr>';
 					}
 					if (m.includes('urban') && item.popType == 'U'){
 						html += '<tr><td>' + item.agencyId + '</td>'
@@ -226,9 +226,9 @@ $(document).ready(function(){
 						+ '<td>' + item.areaId + '</td>'
 						+ '<td>' + item.areaName + '</td>'
 						+ '<td>Urban</td>'
-						+ '<td>' + numWithCommas(item.popServed) + '</td>'
-						+ '<td>' + numWithCommas(item.popSS) + '</td>'
-						+ '<td>' + numWithCommas(item.popLOS) + '</td></tr>';
+						+ '<td>' + numberconv(item.popServed) + '</td>'
+						+ '<td>' + numberconv(item.popSS) + '</td>'
+						+ '<td>' + numberconv(item.popLOS) + '</td></tr>';
 					}
 					
 				});
@@ -270,11 +270,11 @@ $(document).ready(function(){
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numberconv(minUrbanPop) + '</td>'
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numberconv(maxUrbanPop) + '</td>'
 			  + '</tr>'
 	  	}					 
 		metadata += '</table>';
@@ -316,14 +316,14 @@ $(document).ready(function(){
 					
 					$.each(metrics.values,function(j,cat){
 						if (wac){						
-							html += '<td>' + numWithCommas(item[cat + "_served_wac"]) + '</td>'
-							+ '<td>' + numWithCommas(item[cat + "_ss_wac"]) + '</td>'
-							+ '<td>' + numWithCommas(item[cat + "_los_wac"]) + '</td>';
+							html += '<td>' + numberconv(item[cat + "_served_wac"]) + '</td>'
+							+ '<td>' + numberconv(item[cat + "_ss_wac"]) + '</td>'
+							+ '<td>' + numberconv(item[cat + "_los_wac"]) + '</td>';
 						};
 						if (rac){						
-							html += '<td>' + numWithCommas(item[cat + "_served_rac"]) + '</td>'
-							+ '<td>' + numWithCommas(item[cat + "_ss_rac"]) + '</td>'
-							+ '<td>' + numWithCommas(item[cat + "_los_rac"]) + '</td>';
+							html += '<td>' + numberconv(item[cat + "_served_rac"]) + '</td>'
+							+ '<td>' + numberconv(item[cat + "_ss_rac"]) + '</td>'
+							+ '<td>' + numberconv(item[cat + "_los_rac"]) + '</td>';
 						}
 					});
 					html += '</tr>';
@@ -362,11 +362,11 @@ $(document).ready(function(){
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Min. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numWithCommas(minUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Minimum Population of Urban Areas">'+ numberconv(minUrbanPop) + '</td>'
 			  + '</tr>'
 			  + '<tr>'
 			  + '<td class="tg-yw4l">Max. urban pop.:</td>'
-			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numWithCommas(maxUrbanPop) + '</td>'
+			  + '<td class="tg-yw4l input" data-label="Maximum Population of Urban Areas">'+ numberconv(maxUrbanPop) + '</td>'
 			  + '</tr>'
 	  	}					 
 		metadata += '</table>';
@@ -399,9 +399,9 @@ $(document).ready(function(){
 					+ '<td>' + item.areaName + '</td>';
 					
 					$.each(metrics.values,function(j,cat){
-						html += '<td>' + numWithCommas(item[cat + "_served"]) + '</td>'
-						+ '<td>' + numWithCommas(item[cat + "_ss"]) + '</td>'
-						+ '<td>' + numWithCommas(item[cat + "_los"]) + '</td>';
+						html += '<td>' + numberconv(item[cat + "_served"]) + '</td>'
+						+ '<td>' + numberconv(item[cat + "_ss"]) + '</td>'
+						+ '<td>' + numberconv(item[cat + "_los"]) + '</td>';
 					});
 					html += '</tr>';
 				});

@@ -9,10 +9,8 @@
 	<!-- <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script> -->
 	<script type="text/javascript" src="resources/js/jquery-1.9.1.min.js"></script>	
     <script type="text/javascript" src="resources/js/jquery-ui.js"></script>	
-	<script type="text/javascript" src="resources/js/jQueryContent.js"></script>
 	<script type="text/javascript" src="resources/js/jquery-ui.multidatespicker.js"></script>
 	<script type="text/javascript" src="resources/js/bootstrap-dropdown.js"></script>
-	<!-- <script type="text/javascript" src="resources/js/simple-expand.min.js"></script> -->
 	<script type="text/javascript" src="resources/js/jquery_dialogextend.js"></script>	
 	<script type="text/javascript" src="resources/data/shapes.js"></script>
 	<script type="text/javascript" src="resources/data/urbanShapes.js"></script>	
@@ -20,11 +18,9 @@
 	<script type="text/javascript" src="resources/js/date.js"></script>
 	<script type="text/javascript" src="resources/data/Datasources.js"></script>
 	<script type="text/javascript" src="resources/js/ConnectivityGraph.js"></script>
-	<script type="text/javascript" src="resources/js/ConnectivityGraph0.js"></script>
 	<script type="text/javascript" src="vendors/jstree-v.pre1.0/jquery.jstree.js"></script>		
 	<script type="text/javascript" src="vendors/DataTables/js/jquery.dataTables.js"></script>
 	<script type="text/javascript" src="vendors/DataTables/js/dataTables.tableTools.js"></script>
-	<!-- <script type="text/javascript" src="vendors/leaflet-0.7/minimap/html2canvas.js"></script> -->
 	<script type="text/javascript" src="vendors/leaflet-0.7/leaflet-src.js"></script>
 	<script type="text/javascript" src="vendors/leaflet-0.7/search/Control.Geocoder.js"></script>
 	<script type="text/javascript" src="vendors/leaflet-0.7/Control.MiniMap.js"></script>
@@ -36,7 +32,6 @@
 	<script type="text/javascript" src="resources/js/Polylinencoded.js"></script>
 	<script type="text/javascript" src="resources/js/onMapReport.js"></script>
 	<script type="text/javascript" src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
-	<script type="text/javascript" src="resources/js/JSMethods_Onmap.js"></script>
 	<script type="text/javascript" src="resources/js/TimingConnection.js"></script>
 	<script type="text/javascript" src="resources/js/JSMethods.js"></script>
 	<script type="text/javascript" src="resources/js/ShapefileGenerator.js"></script>

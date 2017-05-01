@@ -583,7 +583,9 @@ map.on('popupopen',function (e) {
 		console.log(e);
 	}		
 });
-setDialog();
+
+// set the date in the on-map report dialog box
+setDialogDate();
 function circleMove(latlng){
 	currentCircleCenterTmp = latlng;
 }

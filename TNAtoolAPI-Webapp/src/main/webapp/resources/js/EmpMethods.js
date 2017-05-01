@@ -470,14 +470,14 @@ function openReport2() {
 					+ '<td>' + racData.EmpDataList2[i].name + '</td>';
 			if ($('#reportType').val() == "Agencies") {
 				html += '<td>'
-						+ numWithCommas(racData.EmpDataList2[i].c000served.toFixed(0))
+						+ numberconv(racData.EmpDataList2[i].c000served.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(wacData.EmpDataList2[i].c000served.toFixed(0))
+						+ numberconv(wacData.EmpDataList2[i].c000served.toFixed(0))
 						+ '</td>';
 			} else {
-				html += '<td>' + numWithCommas(racData.EmpDataList2[i].c000.toFixed(0))
+				html += '<td>' + numberconv(racData.EmpDataList2[i].c000.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(wacData.EmpDataList2[i].c000.toFixed(0)) + '</td>';
+						+ numberconv(wacData.EmpDataList2[i].c000.toFixed(0)) + '</td>';
 			}
 
 			var resultSetRac = {};
@@ -545,17 +545,17 @@ function openReport2() {
 					}
 				});
 				if ($('#reportType').val() != 'Agencies')
-					html += '<td>' + numWithCommas(racSummation.toFixed(0)) + '</td>';
-				html += '<td>' + numWithCommas(racPopServedSummation.toFixed(0)) + '</td>'
-						+ '<td>' + numWithCommas(racPopAtLOSSummation.toFixed(0))
+					html += '<td>' + numberconv(racSummation.toFixed(0)) + '</td>';
+				html += '<td>' + numberconv(racPopServedSummation.toFixed(0)) + '</td>'
+						+ '<td>' + numberconv(racPopAtLOSSummation.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(racServedByServiceSummation.toFixed(0)) + '</td>';
+						+ numberconv(racServedByServiceSummation.toFixed(0)) + '</td>';
 				if ($('#reportType').val() != 'Agencies')
-					html += '<td>' + numWithCommas(wacSummation.toFixed(0)) + '</td>';
-				html += '<td>' + numWithCommas(wacPopServedSummation.toFixed(0)) + '</td>'
-						+ '<td>' + numWithCommas(wacPopAtLOSSummation.toFixed(0))
+					html += '<td>' + numberconv(wacSummation.toFixed(0)) + '</td>';
+				html += '<td>' + numberconv(wacPopServedSummation.toFixed(0)) + '</td>'
+						+ '<td>' + numberconv(wacPopAtLOSSummation.toFixed(0))
 						+ '</td>' + '<td>'
-						+ numWithCommas(wacServedByServiceSummation.toFixed(0)) + '</td>';
+						+ numberconv(wacServedByServiceSummation.toFixed(0)) + '</td>';
 			}
 		};
 	} else if (racBool) {
@@ -595,10 +595,10 @@ function openReport2() {
 							html += '<tr><td>' + item.id + '</a></td>' + '<td>'
 									+ item.name + '</td>';
 							if ($('#reportType').val() == 'Agencies')
-								html += '<td>' + numWithCommas(item.c000served.toFixed(0))
+								html += '<td>' + numberconv(item.c000served.toFixed(0))
 										+ '</td>';
 							else
-								html += '<td>' + numWithCommas(item.c000.toFixed(0))
+								html += '<td>' + numberconv(item.c000.toFixed(0))
 										+ '</td>';
 
 							// filling in the other columns of the datatable
@@ -624,16 +624,16 @@ function openReport2() {
 										});
 								if ($('#reportType').val() != 'Agencies')
 									html += '<td>'
-											+ numWithCommas(racSummation.toFixed(0))
+											+ numberconv(racSummation.toFixed(0))
 											+ '</td>';
 								html += '<td>'
-										+ numWithCommas(racPopServedSummation.toFixed(0))
+										+ numberconv(racPopServedSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(racPopAtLOSSummation.toFixed(0))
+										+ numberconv(racPopAtLOSSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(racServedByServiceSummation.toFixed(0))
+										+ numberconv(racServedByServiceSummation.toFixed(0))
 										+ '</td>';
 							}
 						});
@@ -670,10 +670,10 @@ function openReport2() {
 							html += '<tr><td>' + item.id + '</td>' + '<td>'
 									+ item.name + '</td>';
 							if ($('#reportType').val() == 'Agencies')
-								html += '<td>' + numWithCommas(item.c000served.toFixed(0))
+								html += '<td>' + numberconv(item.c000served.toFixed(0))
 										+ '</td>';
 							else
-								html += '<td>' + numWithCommas(item.c000.toFixed(0))
+								html += '<td>' + numberconv(item.c000.toFixed(0))
 										+ '</td>';
 
 							// filling in the other columns of the datatable
@@ -699,16 +699,16 @@ function openReport2() {
 										});
 								if ($('#reportType').val() != 'Agencies')
 									html += '<td>'
-											+ numWithCommas(wacSummation.toFixed(0))
+											+ numberconv(wacSummation.toFixed(0))
 											+ '</td>';
 								html += '<td>'
-										+ numWithCommas(wacPopServedSummation.toFixed(0))
+										+ numberconv(wacPopServedSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(wacPopAtLOSSummation.toFixed(0))
+										+ numberconv(wacPopAtLOSSummation.toFixed(0))
 										+ '</td>'
 										+ '<td>'
-										+ numWithCommas(wacServedByServiceSummation.toFixed(0))
+										+ numberconv(wacServedByServiceSummation.toFixed(0))
 										+ '</td>';
 
 							}

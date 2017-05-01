@@ -154,10 +154,10 @@ function toggleCheckbox(checkbox){
 								ServedByServiceSummation += resultSet[j+'_served'];	
 							}							
 						});
-						if ($('#reportType').val() != 'Agencies') html+='<td>' + numWithCommas(Summation) + '</td>';
-						html += '<td>' + numWithCommas(PopServedSummation) + '</td>'
-						+ '<td>' + numWithCommas(PopAtLOSSummation) + '</td>'
-						+ '<td>' + numWithCommas(ServedByServiceSummation) + '</td>';
+						if ($('#reportType').val() != 'Agencies') html+='<td>' + numberconv(Summation) + '</td>';
+						html += '<td>' + numberconv(PopServedSummation) + '</td>'
+						+ '<td>' + numberconv(PopAtLOSSummation) + '</td>'
+						+ '<td>' + numberconv(ServedByServiceSummation) + '</td>';
 					}
 					html += '</tr>';
 				}

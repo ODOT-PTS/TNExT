@@ -1,3 +1,23 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU  General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+// =========================================================================================================
+//	  This script contains JavaScript variables and methods used to generate Timing Connections Report
+//	  in the Transit Network Analysis Software Tool.
+// =========================================================================================================
+
 var selectedDB = 1;
 var selectedAgency = '';
 var selectedRoute = '';
@@ -8,6 +28,12 @@ function TimingConStart() {
 	window.open('/TNAtoolAPI-Webapp/TimingConnection.html?&dbindex=' + dbindex);
 }
 
+/**
+ * populates the list of agencies based on selected database
+ * 
+ * @param {Integer}
+ *            database index
+ */
 function getAgencies(input) {
 	selectedDB = input;
 	$("#submit").prop('disabled', true);
@@ -39,11 +65,19 @@ function getAgencies(input) {
 	});
 }
 
+/**
+ * populates the list of routes based on selected agency
+ * 
+ * @param {String}
+ *            agency ID
+ */
 function getRoutes(input) {
 	selectedAgency = input.value;
 	$('#routeSelect,#tripSelect').find('option').remove().end();
-	$('#routeSelect').append($('<option value="default">&lt; select &gt;</option>'));
-	$('#tripSelect').append($('<option value="default">&lt; select &gt;</option>'));
+	$('#routeSelect').append(
+			$('<option value="default">&lt; select &gt;</option>'));
+	$('#tripSelect').append(
+			$('<option value="default">&lt; select &gt;</option>'));
 
 	$.ajax({
 		type : 'GET',
@@ -63,6 +97,12 @@ function getRoutes(input) {
 	$("#submit").prop('disabled', true);
 }
 
+/**
+ * populates the list of active trips based on selected route and day
+ * 
+ * @param {String}
+ *            Route ID
+ */
 function getTripsOfDay(input) {
 	selectedRoute = input.value;
 	$('#tripSelect').find('option').remove().end();
@@ -83,7 +123,8 @@ function getTripsOfDay(input) {
 				async : false,
 				success : function(d) {
 					if (d.length == 0) {
-						alert($('#routeSelect option:selected').text() + ' has no runs on the given date in the selected GTFS Source.');
+						alert($('#routeSelect option:selected').text()
+								+ ' has no runs on the given date in the selected GTFS Source.');
 						$('#routeSelect').val('default');
 					} else {
 						$
@@ -116,23 +157,26 @@ function getTripsOfDay(input) {
 	$("#submit").prop('disabled', true);
 }
 
-function getTimingConReport(input) {
+/**
+ * generates the tabular report for timing connections
+ */
+function getTimingConReport() {
 	$('#displayReport').empty();
 	$('#progressbar').show();
 	trips = {};
 	html = '<table id="RT" class="display" align="center">';
-	tmp = '<tr><th class="metric" title="">#</th>'+
-		'<th class="metric" title="Stop belonging to the selected trip." >From - Stop ID</th>'+
-		'<th class="metric" title="Stop belonging to the selected trip.">From - Stop Name</th>'+
-		'<th class="metric" title="Stop belonging to the connected trip.">To - Stop ID</th>'+
-		'<th class="metric" title="Stop belonging to the connected trip.">To - Stop Name</th>'+
-		'<th class="metric" title="The agency that is connected to the selected agency by having a stop and route accessable within the specified radius and time window.">To - Agency</th>'+
-		'<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route ID</th>'+
-		'<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route Name</th>'+
-		'<th class="metric" title="Time of arrival at stop 1.">Arrival at Stop 1</th>'+
-		'<th class="metric" title="Time of departure from stop 2.">Departure from Stop 2</th>'+
-		'<th class="metric" title="The difference between arriving at stop1 and departing from stop2.">Time Difference </th></tr>';
-	html += '<thead>'+tmp+'</thead><tbody>';
+	tmp = '<tr><th class="metric" title="">#</th>'
+			+ '<th class="metric" title="Stop belonging to the selected trip." >From - Stop ID</th>'
+			+ '<th class="metric" title="Stop belonging to the selected trip.">From - Stop Name</th>'
+			+ '<th class="metric" title="Stop belonging to the connected trip.">To - Stop ID</th>'
+			+ '<th class="metric" title="Stop belonging to the connected trip.">To - Stop Name</th>'
+			+ '<th class="metric" title="The agency that is connected to the selected agency by having a stop and route accessable within the specified radius and time window.">To - Agency</th>'
+			+ '<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route ID</th>'
+			+ '<th class="metric" title="The route that is connected to the selected route by having a stop and trip accessable within the specified radius and time window.">To - Route Name</th>'
+			+ '<th class="metric" title="Time of arrival at stop 1.">Arrival at Stop 1</th>'
+			+ '<th class="metric" title="Time of departure from stop 2.">Departure from Stop 2</th>'
+			+ '<th class="metric" title="The difference between arriving at stop1 and departing from stop2.">Time Difference </th></tr>';
+	html += '<thead>' + tmp + '</thead><tbody>';
 
 	$.ajax({
 		type : 'GET',
@@ -165,7 +209,8 @@ function getTimingConReport(input) {
 
 			table = buildDatatables();
 			$('#progressbar').hide();
-			document.getElementById('iframe').contentDocument.location.reload(true);
+			document.getElementById('iframe').contentDocument.location
+					.reload(true);
 		},
 		error : function(e) {
 			console.log('Error: ' + e);
@@ -173,6 +218,9 @@ function getTimingConReport(input) {
 	});
 }
 
+/**
+ * generates the on-map timing connection report
+ */
 function openMap() {
 	$(function() {
 		$("#mapDialog")
@@ -212,4 +260,3 @@ function openMap() {
 						});
 	});
 }
-

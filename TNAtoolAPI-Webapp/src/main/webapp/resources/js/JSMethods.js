@@ -1,8 +1,30 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU  General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+// =========================================================================================================
+//	  This script contains JavaScript variables and methods used to generate tabular reports
+//	  in the Transit Network Analysis Software Tool.
+// =========================================================================================================
+
+
 /////////////////////////////////
 //////						/////
 //////		Variables		/////
 //////						/////
 /////////////////////////////////
+$.getScript('../resources/data/navigation-tree.js');
 var key = Math.random();
 var maxRadius = 5;
 var qstring = '';
@@ -37,7 +59,9 @@ var tableProperties = {
 // //// 	Methods 		/////
 // //// 					/////
 // ///////////////////////////////
-
+/**
+ * populated the dropdown list of databases in tabular reports
+ */
 function loadDBList() {
 	$.ajax({
 		type : 'GET',
@@ -66,6 +90,9 @@ function loadDBList() {
 	});
 }
 
+/**
+ * initializes the progress bar and checks for progress every 100ms
+ */
 function progressBar() {
 	var progressLabel = $(".progress-label");
 	$("#progressbar")
@@ -113,6 +140,11 @@ function pad(s) {
 	return (s < 10) ? '0' + s : s;
 }
 
+/**
+ * initializes datatables and sets the required attributes like number of records,
+ * which columns to hide or sort and etc.
+ * @returns
+ */
 function buildDatatables() {
 	var table = $('#RT').DataTable(
 			{
@@ -221,6 +253,9 @@ function exceedsMaxRadius(x){
 	}
 }
 
+/**
+ * sets the position and transitions for tooltips in tabular reports
+ */
 function updateToolTips() {
 	$(document).tooltip({
 		position : {
@@ -242,22 +277,15 @@ function updateToolTips() {
 			}, 1000);
 		}
 	});
-	
-	// Add title attribute to the I/O relationship symbols.
-	addIOeffects();
 }
 
 /**
- * Add title attribute to the I/O relationship symbols
+ * updates parameters in the URL based on the values 
+ * entered by the users.
+ * 
  */
-function addIOeffects(){
-	$('.IOSym').each(function(index,object){
-		$(object).attr('title','The number(s) shows the inputs on which the metric depends');
-	});
-}
-
 function reloadPage() {
-
+	// check whether the value put in by the users exceeds a maximum 
 	var exit = false;
 	$(".radius").each(function(index, object) {
 		var tmpX = parseFloat($(object).val()).toString();
@@ -267,12 +295,15 @@ function reloadPage() {
 		}
 	});
 	
+	// iterating over tags that belong to [.input] class and updating the associated values in the URL. 
 	if (!exit){
 		var output = document.URL;
 		$(".input").each(function(index, object) {
 			console.log(output, object.name, object.value);
 			output = setURIParameter(output, object.name, object.value, null)
 		});
+		
+		// updating dates
 		try {
 			var dates = $('#datepicker').multiDatesPicker('getDates');
 			if (dates.length == 0) {
@@ -287,7 +318,6 @@ function reloadPage() {
 		} catch (err) {
 			console.log("error: " + err.message);
 		}
-		console.log(output);
 		window.location.href = output;
 	}
 }
@@ -306,15 +336,21 @@ function populateMetricDefs(){
 	return output;
 }
 
+/**
+ * removes the substrings of type '([number])' form the string.
+ * this method is developed to remove Input/Output mapping 
+ * numbers from metric titles in tabular reports. Used in populateMetricDefs().
+ * 
+ * @returns {String}
+ */
 String.prototype.strip = function () {
 	var str = this;
 	for ( var i = 1; i < 10 ; i++)
 		str = str.replace('('+i+')', '');
 	return str;
 }
-/*
- * This method is implemented to be used for gathering the metadata of the
- * report in a text file to be exported.
+/**
+ * gathers the metadata of the tabular report in a text file to be exported.
  */
 function getMetadata() {
 	
@@ -355,13 +391,6 @@ function getMetadata() {
 	});
 	
 	/*
-	 * Appending algortihm for ran to generate the report, if any.
-	 */
-	if (typeof algDesc !== 'undefined') {
-		output = output.concat(algDesc);
-	}
-	
-	/*
 	 * Appending report parameters
 	 */ 
 	output = output.concat('\r\n\r\n\r\nReport Parameters\r\n');
@@ -387,19 +416,28 @@ function getMetadata() {
 		});
 	output = output.concat('\r\n');
 	
-	// Adding description of the footnotes that map inputs and metrics
+	// Adding description of the input/output mapping numbers that map inputs and metrics
 	$(".input").each(function(index, object) {
 		if (!$(object).is('select') && object.dataset.iomap != undefined){
 			output = output.concat('(' + object.dataset.iomap + ') '  + object.dataset.label + '\r\n');
 		}	
 	});
 	
-	// Adding selected dates if exists.
+	// Adding selected dates if any
 	if (keyName != null) output = output.concat('(' + dateIOnumber + ') Selected Service Dates');
 	
 	return output;
 }
 
+/**
+ * Changes the current value of a parameter in a url with a new one
+ * 
+ * @param url
+ * @param param - the parameter to be set in the URL
+ * @param newValue
+ * @param currentValue
+ * @return url
+ */
 function setURIParameter(url, param, newValue, currentValue) {
 	if (newValue != currentValue) {
 		var URL = url.split("&" + param + "=");
@@ -412,6 +450,10 @@ function setURIParameter(url, param, newValue, currentValue) {
 		return url;
 }
 
+/**
+ * returns the latest version of the tool 
+ * @return version
+ */
 function getVersion(){
 	var version = "";
 	$.ajax({
@@ -426,6 +468,12 @@ function getVersion(){
 	return version;
 }
 
+/**
+ * returns the value of a parameter
+ * @param param
+ * @param asArray
+ * @returns
+ */
 function getURIParameter(param, asArray) {
 	return document.location.search.substring(1).split('&').reduce(
 			function(p, c) {
@@ -439,6 +487,13 @@ function getURIParameter(param, asArray) {
 			}, []);
 }
 
+/**
+ * returns the date associated with the 3 character input string 
+ * as dd/mm/yyyy
+ * 
+ * @param string of length 3
+ * @returns date
+ */
 function getDates(hex) {
 	if (hex == "--") {
 		return null;
@@ -485,6 +540,46 @@ function getDates(hex) {
 
 }
 
+/**
+ * gets a date and encode it in a string of length 3
+ * @param str
+ * @returns {String}
+ */
+function setDates(str) {
+	var year = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+			'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+			'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
+			'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '@',
+			'#', '$', '%', '^', '*', '(', ')', '-', '+', '_', '`', '~' ];
+	var month = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l' ];
+	var day = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+			'z', 'A', 'B', 'C', 'D', 'E' ];
+
+	var strs = str.split(',');
+	var hex = "";
+	var date;
+	for (var i = 0; i < strs.length; i++) {
+		date = strs[i].split('/');
+		if (parseInt(date[2]) > 2075) {
+			date[2] = '2075';
+		} else if (parseInt(date[2]) < 2000) {
+			date[2] = '2000';
+		}
+		hex += month[parseInt(date[0]) - 1] + day[parseInt(date[1] - 1)]
+				+ year[parseInt(date[2]) - 2000];
+	}
+	return hex;
+}
+
+/**
+ * initializes the date picker widget and sets the dates based on the dates
+ * in "w_qstringd", a variable used to store selected date values in tabular
+ * reports
+ * 
+ * @param key
+ */
 function go(key) {
 	$("#datepicker").multiDatesPicker(
 			{
@@ -529,6 +624,10 @@ function go(key) {
 	$('.ui-accordion-header').css({'width':'100%','font-size':'80%','margin':'auto','text-align':'center'});
 }
 
+/**
+ * Adds a date to the datepicker widget
+ * @param date
+ */
 function addDate(date) {
 	$(
 			"<li title='Click to remove.' id=" + dateID
@@ -566,6 +665,10 @@ function addDate(date) {
 	$('.selectedDate').css('margin', 'auto');
 }
 
+/**
+ * returns user's session
+ * @returns {String}
+ */
 function getSession() {
 	var username = "admin";
 	$.ajax({
@@ -580,6 +683,11 @@ function getSession() {
 	return username;
 }
 
+/**
+ * removes data, d, and its associated html tag, e,  from datepicker widget
+ * @param e
+ * @param d
+ */
 function dateRemove(e, d) {
 	$(e).remove();
 	$("#datepicker").multiDatesPicker('removeDates', d);
@@ -589,34 +697,14 @@ function dateRemove(e, d) {
 	$("#submit").trigger('mouseenter');
 }
 
-function setDates(str) {
-	var year = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-			'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-			'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
-			'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '@',
-			'#', '$', '%', '^', '*', '(', ')', '-', '+', '_', '`', '~' ];
-	var month = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l' ];
-	var day = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-			'z', 'A', 'B', 'C', 'D', 'E' ];
 
-	var strs = str.split(',');
-	var hex = "";
-	var date;
-	for (var i = 0; i < strs.length; i++) {
-		date = strs[i].split('/');
-		if (parseInt(date[2]) > 2075) {
-			date[2] = '2075';
-		} else if (parseInt(date[2]) < 2000) {
-			date[2] = '2000';
-		}
-		hex += month[parseInt(date[0]) - 1] + day[parseInt(date[1] - 1)]
-				+ year[parseInt(date[2]) - 2000];
-	}
-	return hex;
-}
-
+/**
+ * returns the data populated in tabular reports. This method is called while
+ * setting the datatables properties.
+ * @param dt
+ * @param config
+ * @returns {object}
+ */
 function exportData(dt, config) {
 	var newLine = NewLine(config);
 	var data = dt.buttons.exportData(config.exportOptions);
@@ -657,11 +745,21 @@ function exportData(dt, config) {
 	};
 }
 
+/**
+ * retrurns new line character based on inpur
+ * 
+ * @param configS
+ */
 function NewLine(config) {
 	return config.newline ? config.newline : navigator.userAgent
 			.match(/Windows/) ? '\r\n' : '\n';
 }
 
+/**
+ * takes a number and returns it in non-scientific notation with 1000 seperator (,) 
+ * @param x
+ * @returns
+ */
 function numberconv(x) {
 	x = x + '';
 	if (x.indexOf('E') > -1) 
@@ -676,10 +774,9 @@ function numberconv(x) {
 	}
 }
 
-function numWithCommas(x) {
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
+/**
+ * returns true if the character typed in is a number
+ */
 function isWholeNumber(evt) {
 	evt = (evt) ? evt : window.event;
 	var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -689,6 +786,11 @@ function isWholeNumber(evt) {
 	return true;
 }
 
+/**
+ * returns true if the typed character is a number or '.'
+ * @param evt
+ * @returns {Boolean}
+ */
 function isNumber(evt) {
 	evt = (evt) ? evt : window.event;
 	var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -701,6 +803,9 @@ function isNumber(evt) {
 	return true;
 }
 
+/**
+ * populates the drop down list associated with "Population / Employment Source" on tabular reports
+ */
 function setPopOptions() {
 	var popselect = document.getElementById("popselect");
 	var years = [ 2010, 2015, 2020, 2025, 2030, 2035, 2040, 2045, 2050 ];
@@ -715,19 +820,76 @@ function setPopOptions() {
 	$('#popselect').val(popYear);
 }
 
+/**
+ * returns the index for the latest database
+ * @return int
+ */
+function getDefaultDbIndex(){
+	var dbindex = -1;
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getDefaultDbIndex",
+        dataType: "json",
+        async: false,
+        success: function(d) {
+        	dbindex = d.DBError;
+        }
+	});	
+	return dbindex;
+}
+
+/**
+ * returns today's date in yyyymmdd
+ * @returns {String}
+ */
+function currentDateFormatted(){
+	var today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth()+1; //January is 0!
+	var yyyy = today.getFullYear();
+
+	if(dd<10) {
+	    dd='0'+dd;
+	} 
+
+	if(mm<10) {
+	    mm='0'+mm;
+	} 
+
+	var today = ''+yyyy+mm+dd;
+	return today;
+}
+
+/**
+ * takes a date and remove '/' character from it
+ * @param date
+ * @returns
+ */
 function dateToString(date){
 	var dArr = date.split("/");
 	return dArr[2]+dArr[0]+dArr[1];
 }
 
+/**
+ * takes a date string as 'yyyymmdd' and returns it as 'dd/mm/yyy'
+ *
+ * @param date - String
+ * @returns String
+ */
 function stringToDate(str){
 	var sArr = new Array();
 	sArr.push(str.substring(4, 6));
 	sArr.push(str.substring(6, 8));
 	sArr.push(str.substring(0, 4));
-	return sArr.join("/");
+	var output = sArr.join("/");
+	return output;
 }
 
+/**
+ * add a '$' character to the end of the input
+ * @param v
+ * @returns {String}
+ */
 function showDollarSign(v) {
 	if (!isNaN(v))
 		return '$' + v;
@@ -735,16 +897,33 @@ function showDollarSign(v) {
 		return 'N/A';
 }
 
+/**
+ * adds a '%' character to the end of the input
+ * @param x
+ * @returns {String}
+ */
 function addPercent(x) {
 	return x + '%';
 }
 
+/**
+ * trim the length of the input to 12 characters.
+ * used to trim longitudes.
+ * @param x
+ * @returns
+ */
 function trimLat(x) {
 	if (x.length > 12)
 		x = x.substring(0, 11);
 	return x;
 }
 
+/**
+ * trim the length of the input to 14 characters.
+ * used to trim latitude.
+ * @param x
+ * @returns
+ */
 function trimLon(x) {
 	if (x.length > 14)
 		x = x.substring(0, 13);
@@ -752,7 +931,7 @@ function trimLon(x) {
 }
 
 /**
- * Add the navigation tree to the tablular reports
+ * Adds the navigation tree to the tablular reports
  */
 function appendNavigation(name){
 	if($( "#td2" ).length==0){
@@ -794,6 +973,11 @@ function appendNavigation(name){
 	});
 }
 
+/**
+ * returns the navigation parameter of a tabular report based on its title
+ * @param title
+ * @returns {String}
+ */
 function findNavigationId(title){
 	var nav = getURIParameter("nav");
 	if(nav==null || nav==undefined){
@@ -804,11 +988,17 @@ function findNavigationId(title){
 		}
 	}else{
 		nav += "-"+navigationIdMap[title];
-	}
-	
+	}	
 	return nav;
 }
 
+/**
+ * Alireza
+ * @param node
+ * @param family
+ * @param tree
+ * @param nav
+ */
 function navigationTreeDFS(node, family, tree, nav){
 	
 	if(!family.includes(node.id)){
@@ -827,331 +1017,24 @@ function navigationTreeDFS(node, family, tree, nav){
 		});
 		
 	}
-	//return;
 }
 
-
+/**
+ * hides the nodes of the navigation tree down to the current tabular report
+ * @param tree
+ * @param nav
+ */
 function hideTreeNodes(tree,nav){
 	var root = tree.jstree().get_json()[0];
 	var current = tree.jstree().get_node(nav);
 	var family = [];
 	children = [];
-	family.push(current.id);//console.log(nav);console.log(root.id);console.log(current.id);alert(nav);return;
+	family.push(current.id);
 	while(tree.jstree().get_parent(tree.jstree().get_node(family[family.length-1]))!="#"){
 		family.push(tree.jstree().get_parent(tree.jstree().get_node(family[family.length-1])));
 	}
-	//console.log(root);
-	navigationTreeDFS(root, family, tree, nav);
-	
+	navigationTreeDFS(root, family, tree, nav);	
 }
-
-
-var children;
-var navigationIdMap = {
-	"Statewide Summary Report" : "stateS",
-	"Statewide Extended Report" : "stateX",
-	"Transit Agencies Summary Report" : "agencyS",
-	"Transit Agency Extended Report" : "agencyX",
-	"Counties Summary Report" : "countyS",
-	"County Extended Report" : "countyX",
-	"Tracts Summary Report" : "tractS",
-	"Tract Extended Report" : "tractX",
-	"Congressional Districts Summary Report" : "congS",
-	"Congressional District Extended Report" : "congX",
-	"ODOT Transit Regions Summary Report" : "regionS",
-	"ODOT Transit Region Extended Report" : "regionX",
-	"Census Places Summary Report" : "placeS",
-	"Census Place Extended Report" : "placeX",
-	"Urban Areas Summary Report" : "urbanS",
-	"Urban Area Extended Report" : "urbanX",
-	"Routes Summary Report" : "route",
-	"Stops Summary Report" : "stop"
-};
-var navigationMap = { 
-	'core' : {
-		'data' : [
-		    //statewide statewide    
- 	       	{ "id" : "stateS", "parent" : "#", "text" : "Statewide Summary Report", "data" : {"styleClass" : "test"}},
-	 	    	//nodes under statewide summary
-		       	{ "id" : "stateS-stateX", "parent" : "stateS", "text" : "Statewide Extended Report"},
-		       	{ "id" : "stateS-agencyS", "parent" : "stateS", "text" : "Transit Agencies Summary Report" },
-		       		//nodes under agency summary
-		       		{ "id" : "stateS-agencyS-agencyX", "parent" : "stateS-agencyS", "text" : "Transit Agency Extended Report" },
-		       		{ "id" : "stateS-agencyS-route", "parent" : "stateS-agencyS", "text" : "Routes Summary Report" },
-		       			//nodes under agency->route summary
-			       		{ "id" : "stateS-agencyS-route-stop", "parent" : "stateS-agencyS-route", "text" : "Stops Summary Report" },
-			       		{ "id" : "stateS-agencyS-route-schedule", "parent" : "stateS-agencyS-route", "text" : "Route Schedule Report" },
-		       		{ "id" : "stateS-agencyS-stop", "parent" : "stateS-agencyS", "text" : "Stops Summary Report" },
-		       		{ "id" : "stateS-agencyS-urbanS", "parent" : "stateS-agencyS", "text" : "Urban Areas Summary Report" },
-		       			//nodes under agency->urban summary
-				       	{ "id" : "stateS-agencyS-urbanS-urbanX", "parent" : "stateS-agencyS-urbanS", "text" : "Urban Area Extended Report" },
-				       	{ "id" : "stateS-agencyS-urbanS-route", "parent" : "stateS-agencyS-urbanS", "text" : "Routes Summary Report" },
-					       	//nodes under agency->urban->route summary
-				       		{ "id" : "stateS-agencyS-urbanS-route-stop", "parent" : "stateS-agencyS-urbanS-route", "text" : "Stops Summary Report" },
-				       		{ "id" : "stateS-agencyS-urbanS-route-schedule", "parent" : "stateS-agencyS-urbanS-route", "text" : "Route Schedule Report" },
-				       	{ "id" : "stateS-agencyS-urbanS-stop", "parent" : "stateS-agencyS-urbanS", "text" : "Stops Summary Report" },
-		       		{ "id" : "stateS-agencyS-countyS", "parent" : "stateS-agencyS", "text" : "Counties Summary Report" },
-			       		//nodes under agency->county summary
-					   	{ "id" : "stateS-agencyS-countyS-countyX", "parent" : "stateS-agencyS-countyS", "text" : "County Extended Report" },
-					   	{ "id" : "stateS-agencyS-countyS-route", "parent" : "stateS-agencyS-countyS", "text" : "Routes Summary Report" },
-						   	//nodes under agency->county->route summary
-				       		{ "id" : "stateS-agencyS-countyS-route-stop", "parent" : "stateS-agencyS-countyS-route", "text" : "Stops Summary Report" },
-				       		{ "id" : "stateS-agencyS-countyS-route-schedule", "parent" : "stateS-agencyS-countyS-route", "text" : "Route Schedule Report" },
-					   	{ "id" : "stateS-agencyS-countyS-stop", "parent" : "stateS-agencyS-countyS", "text" : "Stops Summary Report" },
-					   	{ "id" : "stateS-agencyS-countyS-urbanS", "parent" : "stateS-agencyS-countyS", "text" : "Urban Areas Summary Report" },
-					       //nodes under agency->county->urban summary
-					       { "id" : "stateS-agencyS-countyS-urbanS-urbanX", "parent" : "stateS-agencyS-countyS-urbanS", "text" : "Urban Area Extended Report" },
-					       { "id" : "stateS-agencyS-countyS-urbanS-route", "parent" : "stateS-agencyS-countyS-urbanS", "text" : "Routes Summary Report" },
-						       	//nodes under agency->county->urban->route summary
-					       		{ "id" : "stateS-agencyS-countyS-urbanS-route-stop", "parent" : "stateS-agencyS-countyS-urbanS-route", "text" : "Stops Summary Report" },
-					       		{ "id" : "stateS-agencyS-countyS-urbanS-route-schedule", "parent" : "stateS-agencyS-countyS-urbanS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-agencyS-countyS-urbanS-stop", "parent" : "stateS-agencyS-countyS-urbanS", "text" : "Stops Summary Report" },
-					    { "id" : "stateS-agencyS-countyS-tractS", "parent" : "stateS-agencyS-countyS", "text" : "Tracts Summary Report" },
-					        //nodes under agency->county->tract summary
-					        { "id" : "stateS-agencyS-countyS-tractS-tractX", "parent" : "stateS-agencyS-countyS-tractS", "text" : "Tract Extended Report" },
-					        { "id" : "stateS-agencyS-countyS-tractS-route", "parent" : "stateS-agencyS-countyS-tractS", "text" : "Routes Summary Report" },
-						        //nodes under agency->county->tract->route summary
-					       		{ "id" : "stateS-agencyS-countyS-tractS-route-stop", "parent" : "stateS-agencyS-countyS-tractS-route", "text" : "Stops Summary Report" },
-					       		{ "id" : "stateS-agencyS-countyS-tractS-route-schedule", "parent" : "stateS-agencyS-countyS-tractS-route", "text" : "Route Schedule Report" },
-					        { "id" : "stateS-agencyS-countyS-tractS-stop", "parent" : "stateS-agencyS-countyS-tractS", "text" : "Stops Summary Report" },
-					        { "id" : "stateS-agencyS-countyS-tractS-urbanS", "parent" : "stateS-agencyS-countyS-tractS", "text" : "Urban Areas Summary Report" },
-						       //nodes under agency->county->tract->urban summary
-						       { "id" : "stateS-agencyS-countyS-tractS-urbanS-urbanX", "parent" : "stateS-agencyS-countyS-tractS-urbanS", "text" : "Urban Area Extended Report" },
-						       { "id" : "stateS-agencyS-countyS-tractS-urbanS-route", "parent" : "stateS-agencyS-countyS-tractS-urbanS", "text" : "Routes Summary Report" },
-							       //nodes under agency->county->tract->urban->route summary
-						       		{ "id" : "stateS-agencyS-countyS-tractS-urbanS-route-stop", "parent" : "stateS-agencyS-countyS-tractS-urbanS-route", "text" : "Stops Summary Report" },
-						       		{ "id" : "stateS-agencyS-countyS-tractS-urbanS-route-schedule", "parent" : "stateS-agencyS-countyS-tractS-urbanS-route", "text" : "Route Schedule Report" },
-						       { "id" : "stateS-agencyS-countyS-tractS-urbanS-stop", "parent" : "stateS-agencyS-countyS-tractS-urbanS", "text" : "Stops Summary Report" },
-		       		{ "id" : "stateS-agencyS-congS", "parent" : "stateS-agencyS", "text" : "Congretional Districts Summary Report" },
-			       		//nodes under agency->cong summary
-					   	{ "id" : "stateS-agencyS-congS-countyX", "parent" : "stateS-agencyS-congS", "text" : "County Extended Report" },
-					   	{ "id" : "stateS-agencyS-congS-route", "parent" : "stateS-agencyS-congS", "text" : "Routes Summary Report" },
-						   	//nodes under agency->cong->route summary
-						   	{ "id" : "stateS-agencyS-congS-route-stop", "parent" : "stateS-agencyS-congS-route", "text" : "Stops Summary Report" },
-						   	{ "id" : "stateS-agencyS-congS-route-schedule", "parent" : "stateS-agencyS-congS-route", "text" : "Route Schedule Report" },
-					   	{ "id" : "stateS-agencyS-congS-stop", "parent" : "stateS-agencyS-congS", "text" : "Stops Summary Report" },
-					   	{ "id" : "stateS-agencyS-congS-urbanS", "parent" : "stateS-agencyS-congS", "text" : "Urban Areas Summary Report" },
-					       //nodes under agency->cong->urban summary
-					       { "id" : "stateS-agencyS-congS-urbanS-urbanX", "parent" : "stateS-agencyS-congS-urbanS", "text" : "Urban Area Extended Report" },
-					       { "id" : "stateS-agencyS-congS-urbanS-route", "parent" : "stateS-agencyS-congS-urbanS", "text" : "Routes Summary Report" },
-						       //nodes under agency->cong->urban->route summary
-						       { "id" : "stateS-agencyS-congS-urbanS-route-stop", "parent" : "stateS-agencyS-congS-urbanS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-agencyS-congS-urbanS-route-schedule", "parent" : "stateS-agencyS-congS-urbanS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-agencyS-congS-urbanS-stop", "parent" : "stateS-agencyS-congS-urbanS", "text" : "Stops Summary Report" },
-		       		{ "id" : "stateS-agencyS-regionS", "parent" : "stateS-agencyS", "text" : "ODOT Transit Regions Summary Report" },
-			       		//nodes under agency->region summary
-					   	{ "id" : "stateS-agencyS-regionS-countyX", "parent" : "stateS-agencyS-regionS", "text" : "County Extended Report" },
-					   	{ "id" : "stateS-agencyS-regionS-route", "parent" : "stateS-agencyS-regionS", "text" : "Routes Summary Report" },
-						   	//nodes under agency->region->route summary
-						   	{ "id" : "stateS-agencyS-regionS-route-stop", "parent" : "stateS-agencyS-regionS-route", "text" : "Stops Summary Report" },
-						   	{ "id" : "stateS-agencyS-regionS-route-schedule", "parent" : "stateS-agencyS-regionS-route", "text" : "Route Schedule Report" },
-					   	{ "id" : "stateS-agencyS-regionS-stop", "parent" : "stateS-agencyS-regionS", "text" : "Stops Summary Report" },
-					   	{ "id" : "stateS-agencyS-regionS-urbanS", "parent" : "stateS-agencyS-regionS", "text" : "Urban Areas Summary Report" },
-					       //nodes under agency->region->urban summary
-					       { "id" : "stateS-agencyS-regionS-urbanS-urbanX", "parent" : "stateS-agencyS-regionS-urbanS", "text" : "Urban Area Extended Report" },
-					       { "id" : "stateS-agencyS-regionS-urbanS-route", "parent" : "stateS-agencyS-regionS-urbanS", "text" : "Routes Summary Report" },
-						       //nodes under agency->region->urban->route summary
-						       { "id" : "stateS-agencyS-regionS-urbanS-route-stop", "parent" : "stateS-agencyS-regionS-urbanS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-agencyS-regionS-urbanS-route-schedule", "parent" : "stateS-agencyS-regionS-urbanS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-agencyS-regionS-urbanS-stop", "parent" : "stateS-agencyS-regionS-urbanS", "text" : "Stops Summary Report" },
-		       		{ "id" : "stateS-agencyS-placeS", "parent" : "stateS-agencyS", "text" : "Census Places Summary Report" },
-			       		//nodes under agency->place summary
-					   	{ "id" : "stateS-agencyS-placeS-countyX", "parent" : "stateS-agencyS-placeS", "text" : "County Extended Report" },
-					   	{ "id" : "stateS-agencyS-placeS-route", "parent" : "stateS-agencyS-placeS", "text" : "Routes Summary Report" },
-						   	//nodes under agency->place->route summary
-						   	{ "id" : "stateS-agencyS-placeS-route-stop", "parent" : "stateS-agencyS-placeS-route", "text" : "Stops Summary Report" },
-						   	{ "id" : "stateS-agencyS-placeS-route-schedule", "parent" : "stateS-agencyS-placeS-route", "text" : "Route Schedule Report" },
-					   	{ "id" : "stateS-agencyS-placeS-stop", "parent" : "stateS-agencyS-placeS", "text" : "Stops Summary Report" },
-					   	{ "id" : "stateS-agencyS-placeS-urbanS", "parent" : "stateS-agencyS-placeS", "text" : "Urban Areas Summary Report" },
-					       //nodes under agency->place->urban summary
-					       { "id" : "stateS-agencyS-placeS-urbanS-urbanX", "parent" : "stateS-agencyS-placeS-urbanS", "text" : "Urban Area Extended Report" },
-					       { "id" : "stateS-agencyS-placeS-urbanS-route", "parent" : "stateS-agencyS-placeS-urbanS", "text" : "Routes Summary Report" },
-						       //nodes under agency->place->urban->route summary
-						       { "id" : "stateS-agencyS-placeS-urbanS-route-stop", "parent" : "stateS-agencyS-placeS-urbanS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-agencyS-placeS-urbanS-route-schedule", "parent" : "stateS-agencyS-placeS-urbanS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-agencyS-placeS-urbanS-stop", "parent" : "stateS-agencyS-placeS-urbanS", "text" : "Stops Summary Report" },
-		       	{ "id" : "stateS-urbanS", "parent" : "stateS", "text" : "Urban Areas Summary Report" },
-			       //nodes under urban summary
-			       { "id" : "stateS-urbanS-urbanX", "parent" : "stateS-urbanS", "text" : "Urban Area Extended Report" },
-			       { "id" : "stateS-urbanS-route", "parent" : "stateS-urbanS", "text" : "Routes Summary Report" },
-				       //nodes under urban->route summary
-				       { "id" : "stateS-urbanS-route-stop", "parent" : "stateS-urbanS-route", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-urbanS-route-schedule", "parent" : "stateS-urbanS-route", "text" : "Route Schedule Report" },
-			       { "id" : "stateS-urbanS-stop", "parent" : "stateS-urbanS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-urbanS-agencyS", "parent" : "stateS-urbanS", "text" : "Transit Agencies Summary Report" },
-				       //nodes under urban->agency summary
-				       { "id" : "stateS-urbanS-agencyS-agencyX", "parent" : "stateS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
-				       { "id" : "stateS-urbanS-agencyS-route", "parent" : "stateS-urbanS-agencyS", "text" : "Routes Summary Report" },
-					       //nodes under urban->agency->route summary
-					       { "id" : "stateS-urbanS-agencyS-route-stop", "parent" : "stateS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-urbanS-agencyS-route-schedule", "parent" : "stateS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-urbanS-agencyS-stop", "parent" : "stateS-urbanS-agencyS", "text" : "Stops Summary Report" },
-		       	{ "id" : "stateS-countyS", "parent" : "stateS", "text" : "Counties Summary Report" },
-				 	//nodes under county summary
-				   	{ "id" : "stateS-countyS-countyX", "parent" : "stateS-countyS", "text" : "County Extended Report" },
-				   	{ "id" : "stateS-countyS-route", "parent" : "stateS-countyS", "text" : "Routes Summary Report" },
-					   	//nodes under county->route summary
-					   	{ "id" : "stateS-countyS-route-stop", "parent" : "stateS-countyS-route", "text" : "Stops Summary Report" },
-					   	{ "id" : "stateS-countyS-route-schedule", "parent" : "stateS-countyS-route", "text" : "Route Schedule Report" },
-				   	{ "id" : "stateS-countyS-stop", "parent" : "stateS-countyS", "text" : "Stops Summary Report" },
-				   	{ "id" : "stateS-countyS-urbanS", "parent" : "stateS-countyS", "text" : "Urban Areas Summary Report" },
-				       //nodes under county->urban summary
-				       { "id" : "stateS-countyS-urbanS-urbanX", "parent" : "stateS-countyS-urbanS", "text" : "Urban Area Extended Report" },
-				       { "id" : "stateS-countyS-urbanS-route", "parent" : "stateS-countyS-urbanS", "text" : "Routes Summary Report" },
-					       //nodes under county->urban->route summary
-					       { "id" : "stateS-countyS-urbanS-route-stop", "parent" : "stateS-countyS-urbanS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-countyS-urbanS-route-schedule", "parent" : "stateS-countyS-urbanS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-countyS-urbanS-stop", "parent" : "stateS-countyS-urbanS", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-countyS-urbanS-agencyS", "parent" : "stateS-countyS-urbanS", "text" : "Transit Agencies Summary Report" },
-					       //nodes under county->urban->agency summary
-					       { "id" : "stateS-countyS-urbanS-agencyS-agencyX", "parent" : "stateS-countyS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
-					       { "id" : "stateS-countyS-urbanS-agencyS-route", "parent" : "stateS-countyS-urbanS-agencyS", "text" : "Routes Summary Report" },
-						       //nodes under county->urban->agency->route summary
-						       { "id" : "stateS-countyS-urbanS-agencyS-route-stop", "parent" : "stateS-countyS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-countyS-urbanS-agencyS-route-schedule", "parent" : "stateS-countyS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-countyS-urbanS-agencyS-stop", "parent" : "stateS-countyS-urbanS-agencyS", "text" : "Stops Summary Report" },
-				   	{ "id" : "stateS-countyS-agencyS", "parent" : "stateS-countyS", "text" : "Transit Agencies Summary Report" },
-				       //nodes under county->agency summary
-				       { "id" : "stateS-countyS-agencyS-agencyX", "parent" : "stateS-countyS-agencyS", "text" : "Transit Agency Extended Report" },
-				       { "id" : "stateS-countyS-agencyS-route", "parent" : "stateS-countyS-agencyS", "text" : "Routes Summary Report" },
-					       //nodes under county->agency->route summary
-					       { "id" : "stateS-countyS-agencyS-route-stop", "parent" : "stateS-countyS-agencyS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-countyS-agencyS-route-schedule", "parent" : "stateS-countyS-agencyS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-countyS-agencyS-stop", "parent" : "stateS-countyS-agencyS", "text" : "Stops Summary Report" },
-				   	{ "id" : "stateS-countyS-tractS", "parent" : "stateS-countyS", "text" : "Tracts Summary Report" },
-				       //nodes under county->tract summary
-				       { "id" : "stateS-countyS-tractS-tractX", "parent" : "stateS-countyS-tractS", "text" : "Tract Extended Report" },
-				       { "id" : "stateS-countyS-tractS-route", "parent" : "stateS-countyS-tractS", "text" : "Routes Summary Report" },
-					       //nodes under county->tract->route summary
-					       { "id" : "stateS-countyS-tractS-route-stop", "parent" : "stateS-countyS-tractS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-countyS-tractS-route-schedule", "parent" : "stateS-countyS-tractS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-countyS-tractS-stop", "parent" : "stateS-countyS-tractS", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-countyS-tractS-urbanS", "parent" : "stateS-countyS-tractS", "text" : "Urban Areas Summary Report" },
-					       //nodes under county->tract->urban summary
-					       { "id" : "stateS-countyS-tractS-urbanS-urbanX", "parent" : "stateS-countyS-tractS-urbanS", "text" : "Urban Area Extended Report" },
-					       { "id" : "stateS-countyS-tractS-urbanS-route", "parent" : "stateS-countyS-tractS-urbanS", "text" : "Routes Summary Report" },
-						       //nodes under county->tract->urban->route summary
-						       { "id" : "stateS-countyS-tractS-urbanS-route-stop", "parent" : "stateS-countyS-tractS-urbanS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-countyS-tractS-urbanS-route-schedule", "parent" : "stateS-countyS-tractS-urbanS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-countyS-tractS-urbanS-stop", "parent" : "stateS-countyS-tractS-urbanS", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-countyS-tractS-urbanS-agencyS", "parent" : "stateS-countyS-tractS-urbanS", "text" : "Transit Agencies Summary Report" },
-						       //nodes under county->tract->urban->agency summary
-						       { "id" : "stateS-countyS-tractS-urbanS-agencyS-agencyX", "parent" : "stateS-countyS-tractS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
-						       { "id" : "stateS-countyS-tractS-urbanS-agencyS-route", "parent" : "stateS-countyS-tractS-urbanS-agencyS", "text" : "Routes Summary Report" },
-							       //nodes under county->tract->urban->agency->route summary
-							       { "id" : "stateS-countyS-tractS-urbanS-agencyS-route-stop", "parent" : "stateS-countyS-tractS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
-							       { "id" : "stateS-countyS-tractS-urbanS-agencyS-route-schedule", "parent" : "stateS-countyS-tractS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
-						       { "id" : "stateS-countyS-tractS-urbanS-agencyS-stop", "parent" : "stateS-countyS-tractS-urbanS-agencyS", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-countyS-tractS-agencyS", "parent" : "stateS-countyS-tractS", "text" : "Transit Agencies Summary Report" },
-					       //nodes under county->tract->agency summary
-					       { "id" : "stateS-countyS-tractS-agencyS-agencyX", "parent" : "stateS-countyS-tractS-agencyS", "text" : "Transit Agency Extended Report" },
-					       { "id" : "stateS-countyS-tractS-agencyS-route", "parent" : "stateS-countyS-tractS-agencyS", "text" : "Routes Summary Report" },
-						       //nodes under county->tract->agency->route summary
-						       { "id" : "stateS-countyS-tractS-agencyS-route-stop", "parent" : "stateS-countyS-tractS-agencyS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-countyS-tractS-agencyS-route-schedule", "parent" : "stateS-countyS-tractS-agencyS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-countyS-tractS-agencyS-stop", "parent" : "stateS-countyS-tractS-agencyS", "text" : "Stops Summary Report" },
-				{ "id" : "stateS-congS", "parent" : "stateS", "text" : "Congressional Districts Summary Report" },
-			       //nodes under cong summary
-			       { "id" : "stateS-congS-congX", "parent" : "stateS-congS", "text" : "Congressional District Extended Report" },
-			       { "id" : "stateS-congS-route", "parent" : "stateS-congS", "text" : "Routes Summary Report" },
-				       //nodes under cong->route summary
-				       { "id" : "stateS-congS-route-stop", "parent" : "stateS-congS-route", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-congS-route-schedule", "parent" : "stateS-congS-route", "text" : "Route Schedule Report" },
-			       { "id" : "stateS-congS-stop", "parent" : "stateS-congS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-congS-urbanS", "parent" : "stateS-congS", "text" : "Urban Areas Summary Report" },
-				       //nodes under cong->urban summary
-				       { "id" : "stateS-congS-urbanS-urbanX", "parent" : "stateS-congS-urbanS", "text" : "Urban Area Extended Report" },
-				       { "id" : "stateS-congS-urbanS-route", "parent" : "stateS-congS-urbanS", "text" : "Routes Summary Report" },
-					       //nodes under cong->urban->route summary
-					       { "id" : "stateS-congS-urbanS-route-stop", "parent" : "stateS-congS-urbanS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-congS-urbanS-route-schedule", "parent" : "stateS-congS-urbanS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-congS-urbanS-stop", "parent" : "stateS-congS-urbanS", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-congS-urbanS-agencyS", "parent" : "stateS-congS-urbanS", "text" : "Transit Agencies Summary Report" },
-					       //nodes under cong->urban->agency summary
-					       { "id" : "stateS-congS-urbanS-agencyS-agencyX", "parent" : "stateS-congS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
-					       { "id" : "stateS-congS-urbanS-agencyS-route", "parent" : "stateS-congS-urbanS-agencyS", "text" : "Routes Summary Report" },
-						       //nodes under cong->urban->agency->route summary
-						       { "id" : "stateS-congS-urbanS-agencyS-route-stop", "parent" : "stateS-congS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-congS-urbanS-agencyS-route-schedule", "parent" : "stateS-congS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-congS-urbanS-agencyS-stop", "parent" : "stateS-congS-urbanS-agencyS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-congS-agencyS", "parent" : "stateS-congS", "text" : "Transit Agencies Summary Report" },
-				       //nodes under cong->agency summary
-				       { "id" : "stateS-congS-agencyS-agencyX", "parent" : "stateS-congS-agencyS", "text" : "Transit Agency Extended Report" },
-				       { "id" : "stateS-congS-agencyS-route", "parent" : "stateS-congS-agencyS", "text" : "Routes Summary Report" },
-					       //nodes under cong->agency->route summary
-					       { "id" : "stateS-congS-agencyS-route-stop", "parent" : "stateS-congS-agencyS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-congS-agencyS-route-schedule", "parent" : "stateS-congS-agencyS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-congS-agencyS-stop", "parent" : "stateS-congS-agencyS", "text" : "Stops Summary Report" },
-				{ "id" : "stateS-regionS", "parent" : "stateS", "text" : "ODOT Transit Regions Summary Report" },
-			       //nodes under region summary
-			       { "id" : "stateS-regionS-regionX", "parent" : "stateS-regionS", "text" : "ODOT Transit Region Extended Report" },
-			       { "id" : "stateS-regionS-route", "parent" : "stateS-regionS", "text" : "Routes Summary Report" },
-				       //nodes under region->route summary
-				       { "id" : "stateS-regionS-route-stop", "parent" : "stateS-regionS-route", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-regionS-route-schedule", "parent" : "stateS-regionS-route", "text" : "Route Schedule Report" },
-			       { "id" : "stateS-regionS-stop", "parent" : "stateS-regionS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-regionS-urbanS", "parent" : "stateS-regionS", "text" : "Urban Areas Summary Report" },
-				       //nodes under region->urban summary
-				       { "id" : "stateS-regionS-urbanS-urbanX", "parent" : "stateS-regionS-urbanS", "text" : "Urban Area Extended Report" },
-				       { "id" : "stateS-regionS-urbanS-route", "parent" : "stateS-regionS-urbanS", "text" : "Routes Summary Report" },
-					       //nodes under region->urban->route summary
-					       { "id" : "stateS-regionS-urbanS-route-stop", "parent" : "stateS-regionS-urbanS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-regionS-urbanS-route-schedule", "parent" : "stateS-regionS-urbanS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-regionS-urbanS-stop", "parent" : "stateS-regionS-urbanS", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-regionS-urbanS-agencyS", "parent" : "stateS-regionS-urbanS", "text" : "Transit Agencies Summary Report" },
-					       //nodes under region->urban->agency summary
-					       { "id" : "stateS-regionS-urbanS-agencyS-agencyX", "parent" : "stateS-regionS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
-					       { "id" : "stateS-regionS-urbanS-agencyS-route", "parent" : "stateS-regionS-urbanS-agencyS", "text" : "Routes Summary Report" },
-						       //nodes under region->urban->agency->route summary
-						       { "id" : "stateS-regionS-urbanS-agencyS-route-stop", "parent" : "stateS-regionS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-regionS-urbanS-agencyS-route-schedule", "parent" : "stateS-regionS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-regionS-urbanS-agencyS-stop", "parent" : "stateS-regionS-urbanS-agencyS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-regionS-agencyS", "parent" : "stateS-regionS", "text" : "Transit Agencies Summary Report" },
-				       //nodes under region->agency summary
-				       { "id" : "stateS-regionS-agencyS-agencyX", "parent" : "stateS-regionS-agencyS", "text" : "Transit Agency Extended Report" },
-				       { "id" : "stateS-regionS-agencyS-route", "parent" : "stateS-regionS-agencyS", "text" : "Routes Summary Report" },
-					       //nodes under region->agency->route summary
-					       { "id" : "stateS-regionS-agencyS-route-stop", "parent" : "stateS-regionS-agencyS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-regionS-agencyS-route-schedule", "parent" : "stateS-regionS-agencyS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-regionS-agencyS-stop", "parent" : "stateS-regionS-agencyS", "text" : "Stops Summary Report" },
-				{ "id" : "stateS-placeS", "parent" : "stateS", "text" : "Census Places Summary Report" },
-			       //nodes under place summary
-			       { "id" : "stateS-placeS-placeX", "parent" : "stateS-placeS", "text" : "Census Place Extended Report" },
-			       { "id" : "stateS-placeS-route", "parent" : "stateS-placeS", "text" : "Routes Summary Report" },
-				       //nodes under place->route summary
-				       { "id" : "stateS-placeS-route-stop", "parent" : "stateS-placeS-route", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-placeS-route-schedule", "parent" : "stateS-placeS-route", "text" : "Route Schedule Report" },
-			       { "id" : "stateS-placeS-stop", "parent" : "stateS-placeS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-placeS-urbanS", "parent" : "stateS-placeS", "text" : "Urban Areas Summary Report" },
-				       //nodes under place->urban summary
-				       { "id" : "stateS-placeS-urbanS-urbanX", "parent" : "stateS-placeS-urbanS", "text" : "Urban Area Extended Report" },
-				       { "id" : "stateS-placeS-urbanS-route", "parent" : "stateS-placeS-urbanS", "text" : "Routes Summary Report" },
-					       //nodes under place->urban->route summary
-					       { "id" : "stateS-placeS-urbanS-route-stop", "parent" : "stateS-placeS-urbanS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-placeS-urbanS-route-schedule", "parent" : "stateS-placeS-urbanS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-placeS-urbanS-stop", "parent" : "stateS-placeS-urbanS", "text" : "Stops Summary Report" },
-				       { "id" : "stateS-placeS-urbanS-agencyS", "parent" : "stateS-placeS-urbanS", "text" : "Transit Agencies Summary Report" },
-					       //nodes under place->urban->agency summary
-					       { "id" : "stateS-placeS-urbanS-agencyS-agencyX", "parent" : "stateS-placeS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
-					       { "id" : "stateS-placeS-urbanS-agencyS-route", "parent" : "stateS-placeS-urbanS-agencyS", "text" : "Routes Summary Report" },
-						       //nodes under place->urban->agency->route summary
-						       { "id" : "stateS-placeS-urbanS-agencyS-route-stop", "parent" : "stateS-placeS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
-						       { "id" : "stateS-placeS-urbanS-agencyS-route-schedule", "parent" : "stateS-placeS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
-					       { "id" : "stateS-placeS-urbanS-agencyS-stop", "parent" : "stateS-placeS-urbanS-agencyS", "text" : "Stops Summary Report" },
-			       { "id" : "stateS-placeS-agencyS", "parent" : "stateS-placeS", "text" : "Transit Agencies Summary Report" },
-				       //nodes under place->agency summary
-				       { "id" : "stateS-placeS-agencyS-agencyX", "parent" : "stateS-placeS-agencyS", "text" : "Transit Agency Extended Report" },
-				       { "id" : "stateS-placeS-agencyS-route", "parent" : "stateS-placeS-agencyS", "text" : "Routes Summary Report" },
-					       //nodes under place->agency->route summary
-					       { "id" : "stateS-placeS-agencyS-route-stop", "parent" : "stateS-placeS-agencyS-route", "text" : "Stops Summary Report" },
-					       { "id" : "stateS-placeS-agencyS-route-schedule", "parent" : "stateS-placeS-agencyS-route", "text" : "Route Schedule Report" },
-				       { "id" : "stateS-placeS-agencyS-stop", "parent" : "stateS-placeS-agencyS", "text" : "Stops Summary Report" },
-			       
-			       
-
-	    ]
-	}
-};
 
 /**
  * Adds a '0' character to a one digit number

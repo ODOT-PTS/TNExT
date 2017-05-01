@@ -1191,7 +1191,7 @@ public class Queries {
 		response.racWithinX = String.valueOf(Math.round(StopsPopMiles[5]));
 		response.wacWithinX = String.valueOf(Math.round(StopsPopMiles[6]));
 
-		double RouteMiles = StopsPopMiles[3];
+		double RouteMiles = StopsPopMiles[4];
 		response.RouteMiles = String.valueOf(RouteMiles);
 		if (RouteMiles > 0)
 			response.StopPerRouteMile = String.valueOf(Math

@@ -1,3 +1,23 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU  General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+// =========================================================================================================
+//	  This script contains JavaScript variables and methods used to generate On-Map Timing Connections 
+//	  in the Transit Network Analysis Software Tool.
+// =========================================================================================================
+
 var map;
 var missedCons = L.featureGroup(); // Leaflet object
 var missedConsPolylines = []; // Array of Leaflet Polylines
@@ -12,6 +32,7 @@ var originalTripPattern = {patterns: [
 $(document)
 		.ready(
 				function() {
+					//---------------loading map tiles----------------
 					map = new L.Map('map', {
 						minZoom : 0,
 						maxZoom : 18,
@@ -34,6 +55,8 @@ $(document)
 					var initLocation = INIT_LOCATION;
 					map.addLayer(terrainMap);
 					map.setView(initLocation, 7);
+					
+					//-------------- generating route shapes and adding them to the map
 					accessibleCons.addTo(map);
 					missedCons.addTo(map);
 
@@ -53,11 +76,9 @@ $(document)
 				           ]
 						})
 			         ]);
-					originalTrip.bindPopup('<br><b>Route ID:</b> '
-							+ parent.trips[0].routeId
-							+ '<br><b>Route Name:</b> '
-							+ parent.trips[0].routeName + '<br><b>Agency:</b> '
-							+ parent.trips[0].agencyName);
+					originalTrip.bindPopup('<br><b>Route ID:</b> ' + parent.trips[0].routeId
+							+ '<br><b>Route Name:</b> '	+ parent.trips[0].routeName 
+							+ '<br><b>Agency:</b> '	+ parent.trips[0].agencyName);
 					map.addLayer(originalTrip);
 					
 					$.each(parent.trips, function(i, item) {
@@ -100,6 +121,7 @@ $(document)
 					});
 				});
 
+// loading map legend
 $(function() {
 	$("#mapLegend").dialog({
 
@@ -115,6 +137,10 @@ $(function() {
 	$('.ui-dialog-titlebar').css('display', 'none');
 });
 
+/**
+ * hide/display the original trips as well as missed and accessible ones
+ * @param input
+ */
 function toggleTrips(input) {
 	if (input.value == 'originTrip') {
 		if (!$(input).is(':checked'))
