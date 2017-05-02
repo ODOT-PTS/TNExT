@@ -33,7 +33,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.TreeSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1932,14 +1935,8 @@ public class PgisEventManager {
     	  aidsjoin = "inner join aids on aid=stop.agencyid";
       }else {
     	  join = "inner";
-    	  if(type==3){
-    		  aidsjoin = "where map.agencyid='"+agencyId+"'";
-    	  }
-    	  else
-    	  {
-    		  aidsjoin = "where map.agencyid='"+agencyId+"'";
-    	  }
-    		  routesidsjoin = aidsjoin;		
+    	  aidsjoin = "where map.agencyid='"+agencyId+"'";
+   		  routesidsjoin = aidsjoin;		
     	  tractsFilter = " INNER JOIN stops ON ST_Contains(census_tracts.shape, stops.location) ";
       }
       if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
@@ -3100,17 +3097,24 @@ public class PgisEventManager {
       Statement stmt = null;
       String querytext = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
       		+ "population"+popYear+" Between "+String.valueOf(popmin)+" And "+String.valueOf(popmax)+"), stops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid inner join areas on "
-      		+ "stop.urbanid = areas.urbanid), census as (select population"+popYear+" as population from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
-      		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) upop from census ),"
-      		+ "stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop from stopcount inner join "
-      		+ "urbanpop on true";
-      long[] results = new long[3];
+      		+ "stop.urbanid = areas.urbanid), census as (select population"+popYear+" as population, block.blockid from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
+      		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) as upop from census ),"
+      		+"wac as (select sum(C000) as wac from lodes_blocks_wac join census using(blockid)),"
+          +"rac as (select sum(C000_"+popYear+") as rac from lodes_rac_projection_block join census using(blockid)),"
+            +"stopcount as (select count(stops.id) as stopscount from stops)"
+            +"select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop,rac,wac from stopcount inner join urbanpop on true inner join wac on true inner join rac on true ";
+System.out.println(querytext);
+      long[] results = new long[7];
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
         while ( rs.next() ) {
         	results[0] = rs.getLong("stopscount");
         	results[1] = rs.getLong("urbanpop"); 
+            results[5]=rs.getLong("rac");
+            results[6]=rs.getLong("wac");
+       
+       
         }
         rs.close();
         stmt.close();        
@@ -3163,10 +3167,20 @@ public class PgisEventManager {
 			+ "undupblocks as (select block.population"+popYear+" as population, max(stops.service) as service "
 			+ "		from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") "
 			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
+			+ "undupblocks1 as (select block.population"+popYear+" as population, max(stops.service) as service ,blockid"
+			+ "		from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") "
+			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
+			+"swac as (select sum(C000*service) as swac from lodes_blocks_wac join undupblocks1 using(blockid)),"
+            +"srac as (select sum(((C000_"+popYear+")*service):: int) as srac from lodes_rac_projection_block join undupblocks1 using(blockid)),"
 			+ "undupblocksatlos as (select block.population"+popYear+" as population "
 			+ "		from census_blocks block inner join stopsatlos on st_dwithin(block.location, stopsatlos.location, "+String.valueOf(x)+") "
 			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
-			+ "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), "
+			+ "undupblocksatlos1 as (select block.population"+popYear+" as population,block.blockid "
+			+ "		from census_blocks block inner join stopsatlos on st_dwithin(block.location, stopsatlos.location, "+String.valueOf(x)+") "
+			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
+			+"wacatlos as (select sum(C000) as wacatlos from lodes_blocks_wac join undupblocksatlos1 using(blockid)),"
+            +"racatlos as (select sum(C000_"+popYear+" :: int) as racatlos from lodes_rac_projection_block join undupblocksatlos1 using(blockid)),"
+            + "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), "
 			+ "concom as (select distinct map.urbanid from census_urbans_trip_map map "
     		+ "		inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid), "
     		+ "concomnames as (select array_agg(uname order by uname)::text as connections "
@@ -3174,13 +3188,17 @@ public class PgisEventManager {
     		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos from undupblocksatlos), "
     		+ "upopserved as (select COALESCE(sum(population*service),0) as uspop from undupblocks), "
     		+ "svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
-    		+ "select svcmiles, svchours, svcstops, upoplos, uspop, svdays, fromtime, totime, connections "
+    		+ "select svcmiles, svchours, svcstops, upoplos,swac,srac,racatlos,wacatlos,uspop, svdays, fromtime, totime, connections "
     		+ "		from service inner join upopatlos on true "
     		+ "		inner join upopserved on true "
     		+ "		inner join svcdays on true "
     		+ "		inner join svchrs on true "
-    		+ "		inner join concomnames on true";     
-		
+    		+ "		inner join concomnames on true"
+    		+"      inner join srac on true"
+    		+"      inner join swac on true"
+    		+"      inner join racatlos on true"
+    		+"      inner join wacatlos on true";     
+		System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -3189,8 +3207,12 @@ public class PgisEventManager {
         	response.put("svchours", String.valueOf(Math.round(rs.getLong("svchours")/36.00)/100.00));
         	response.put("svcstops", String.valueOf(rs.getLong("svcstops")));
         	response.put("upopatlos", String.valueOf(rs.getLong("upoplos")));
-        	//response.put("rpopatlos", String.valueOf(rs.getLong("rpoplos")));
+        	response.put("racatlos", String.valueOf(rs.getLong("racatlos")));
+        	response.put("wacatlos", String.valueOf(rs.getLong("wacatlos")));
+            //response.put("rpopatlos", String.valueOf(rs.getLong("rpoplos")));
         	response.put("uspop", String.valueOf(rs.getFloat("uspop")));
+        	response.put("srac", String.valueOf(rs.getFloat("srac")));
+        	response.put("swac", String.valueOf(rs.getFloat("swac")));
         	//response.put("rspop", String.valueOf(rs.getFloat("rspop")));
         	response.put("svcdays", String.valueOf(rs.getString("svdays")));
         	response.put("fromtime", String.valueOf(rs.getInt("fromtime")));
@@ -3219,7 +3241,8 @@ public class PgisEventManager {
       Statement stmt = null;     
       String id1="'"+areaid+"'";
       String querytext ="";
-     if(areaid == null){
+     if(areaid == null || areaid.equals("null")){
+    	 System.out.println("null");
       querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid "
       		  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+ String.valueOf(x)+") "
       		  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
@@ -3619,7 +3642,7 @@ public class PgisEventManager {
         	results[1] = rs.getLong("ruralstopcount");
         	results[2] = rs.getLong("urbanpop"); 
         	results[3] = rs.getLong("ruralpop");
-        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;        	
+        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;        
         	results[5] = rs.getLong("rac");
         	results[6] = rs.getLong("wac");        
         	}
@@ -3652,7 +3675,7 @@ public class PgisEventManager {
 				query+=" union all ";
 		}      
     
-      if(areaid.equals("null"))
+      if(areaid.equals("null")|| areaid == null)
       {
       query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((trip.length+trip.estlength)::numeric,2) as length,"
       		+ "		trip.tlength as tlength, trip.stopscount as stops "
@@ -5976,4 +5999,103 @@ public static  int[] aggurbanemp( int dbindex,String username,int popmax,int pop
 	}
 	return empArray;	
 	}
+
+public static Map<String, HeatMap> Heatmap (int dbindex, String popYear) throws ParseException 
+{	
+ Connection connection = makeConnection(dbindex);
+ Statement stmt = null;
+ ArrayList<String> f=new ArrayList<String>();
+ Map<String,HeatMap> r = new LinkedHashMap<String,HeatMap>();
+ 
+int w=0;
+ int day=01;
+ int month1=00;
+ String date="";
+ String datekey="";
+
+ for ( int month=0; month<12; month++){
+//Create a calendar object and set year and month
+	  Calendar mycal = new GregorianCalendar(Integer.valueOf(popYear),month ,1);
+//Get the number of days in that month
+int daysInMonth = mycal.getActualMaximum(Calendar.DAY_OF_MONTH); 
+System.out.println(month+":"+daysInMonth);
+for(day=1;day<=daysInMonth;day++){
+	month1=month+1;
+	String dateString = String.format("%d-%d-%d",Integer.valueOf(popYear), month1, day);
+	Date date1 = new SimpleDateFormat("yyyy-M-d").parse(dateString);
+
+	// Then get the day of week from the Date based on specific locale.
+	String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date1);
+	w=w+1;
+//System.out.println(w);
+String query = "";
+
+if(month1< 10 && day < 10 )
+{
+date=popYear+"0"+month1+"0"+day;
+datekey="0"+month1+"/"+"0"+day+"/"+popYear;
+}
+else if (month1 >= 10 && day < 10)
+{date=popYear+month1+"0"+day;
+datekey=month1+"/"+"0"+day+"/"+popYear;
+}
+else if (day >= 10 && month1 < 10)
+{
+	date=popYear+"0"+month1+day;
+datekey="0"+month1+"/"+day+"/"+popYear;
+
+}
+else
+{date=popYear+month1+day;
+datekey=month1+"/"+day+"/"+popYear;
+}
+//query= "with activeAgencies as (select count(b.id) as active from gtfs_feed_info a join gtfs_agencies b using(defaultid) Where "+date+" between startdate::int And enddate::int),"
+//+"totalAgencies as (select count(b.id) as total from gtfs_feed_info a join gtfs_agencies b using(defaultid))"
+//+"select (active::float/total::float) as norm from activeAgencies Cross join totalAgencies";
+//        
+ 
+query="with svcids as (select serviceid_agencyid, serviceid_id  from gtfs_calendars gc where startdate::int<="+date+" and enddate::int>="+date+" and "+dayOfWeek+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)),"
++"trips as (select trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
++" activeAgencies as (select count(b.id) as active from gtfs_feed_info a join gtfs_agencies b using(defaultid) Where "+date+" between startdate::int And enddate::int),"
++"totalAgencies as (select count(b.id) as total from gtfs_feed_info a join gtfs_agencies b using(defaultid)),"
++"tripcount as (select count (distinct tripid) as tripcount from trips) "
++"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
+ System.out.println(date+":"+datekey);
+ System.out.println(query);
+  try {
+	 
+    stmt = connection.createStatement();
+   ResultSet rs = stmt.executeQuery(query);        
+   while ( rs.next() )
+   {HeatMap q= new HeatMap();
+   q.active=rs.getInt("active");
+   q.total=rs.getInt("total");
+   q.tripcount=rs.getInt("tripcount");
+r.put(datekey,q);
+   }
+    rs.close();
+   stmt.close();        
+  } catch ( Exception e ) {
+    System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+     
+  }
+ 
+}
+ }
+
+ //System.out.println(r.size());
+ dropConnection(connection);      
+
+ 
+ for (Entry<String, HeatMap> name: r.entrySet()){
+
+
+ System.out.println(name.getValue().tripcount + " " + name.getKey());  
+
+
+} 
+ 
+ return(r);
+}
+
 }

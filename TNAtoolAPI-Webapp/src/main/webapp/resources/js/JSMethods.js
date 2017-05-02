@@ -715,6 +715,20 @@ function setPopOptions() {
 	$('#popselect').val(popYear);
 }
 
+function setPopOptions1() {
+	var popselect = document.getElementById("popselect");
+	var years = [ 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018 ,2019 ,2020,2021,2022,2023,2024,2025 ];
+	var option;
+	for (var i = 0; i < years.length; i++) {
+		option = document.createElement('option');
+		option.text = years[i];
+		option.value = years[i];
+		popselect.add(option, i);
+	}
+	;
+	$('#popselect').val(popYear);
+}
+
 function dateToString(date){
 	var dArr = date.split("/");
 	return dArr[2]+dArr[0]+dArr[1];

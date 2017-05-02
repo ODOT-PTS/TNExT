@@ -40,6 +40,9 @@ html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th class="metric" id="aid">Geo ID</th>'+
 '<th class="metric" id="an">Name</th>'+
 '<th class="metric">Population<span class="IOSym">(1) </span></th>'+
+'<th class="metric">Employment (RAC) </th>'+
+
+'<th id="emp1" class="metric"> Employees (WAC) </th>'+
 '<th class="metric">Land Area<span class="IOSym">(1) </span></th>'+
 '<th class="metric">Water Area<span class="IOSym">(1) </span></th>'+
 '<th class="metric">Urban Areas<span class="IOSym">(1) </span></th>'+
@@ -61,12 +64,14 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop='+ upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
-		success: function(d){	
+		success: function(d){
+			
 			docMetadata = d.metadata;
 			$('h2').append('Aggregated Urban Areas Summary Report <br><hr>');
 			$.each(d.GeoR, function(i,item){
+				console.log(item)
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +'<a href="#" type="SR">'+item.Name+
-				'</a></td><td>' +numberconv(item.population) +
+				'</a></td><td>' +numberconv(item.population) +'</td><td>' +numberconv(item.employment) +'</td>'+'<td>' +numberconv(item.employees) +
 				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td><td>'+ item.UrbansCount+'</td>'+
 		   '<td>' + item.RoutesCount + '</td>'+
 				'<td>' + item.StopsCount + '</td></tr>';								   			

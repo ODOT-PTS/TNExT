@@ -1,0 +1,471 @@
+<html>
+
+<head>
+<meta charset="utf-8" />
+<title>Heat Map</title>
+
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+<script
+	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js"
+	type="text/javascript"></script>
+<script
+	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js"
+	type="text/javascript"></script>
+<script
+	src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<script
+	src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+<script
+	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+<script
+	src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+<script
+	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+<script src="../resources/js/date.js"></script>
+<script src="../resources/data/Datasources.js"></script>
+<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+<script src="../resources/js/JSMethods.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="../resources/css/report.css" />
+<style>
+.colchange1 a {
+	background: #FFEDA0 !important;
+	background-color: #FFEDA0 !important;
+	color: #006633;
+}
+
+.colchange2 a {
+	background: #FED976 !important;
+	background-color: #FED976 !important;
+	color: #006633;
+}
+
+.colchange3 a {
+	background: #FEB24C !important;
+	background-color: #FEB24C !important;
+	color: #006633;
+}
+
+.colchange4 a {
+	background: #FD8D3C !important;
+	background-color: #FD8D3C !important;
+	color: #006633;
+}
+
+.colchange5 a {
+	background: #FC4E2A !important;
+	background-color: #FC4E2A !important;
+	color: #006633;
+}
+
+.colchange6 a {
+	background: #E31A1C !important;
+	background-color: #E31A1C !important;
+	color: #f9fafc !important;
+}
+
+.colchange7 a {
+	background: #BD0026 !important;
+	background-color: #BD0026 !important;
+	color: #f9fafc !important;
+}
+
+.colchange8 a {
+	background: #9e0026 !important;
+	background-color: #800026 !important;
+	color: #f9fafc !important;
+}
+
+.colchange9 a {
+	background: #800000 !important;
+	background-color: #800000 !important;
+	color: #f9fafc !important;
+}
+/* .colchange10 a 
+{
+ background: #5ee212 !important;
+    background-color: #5ee212 !important; 
+    color: #006633;
+} */
+<
+style type ='text /css'>.legend-title {
+	width: 30px;
+	margin-top: 10px;
+	margin-left: 5px;
+	font-weight: bold;
+	font-size: 90%;
+}
+
+.my-legend .legend-scale ul {
+	float: left;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.my-legend .legend-scale ul li {
+	font-size: 80%;
+	list-style: none;
+	margin-left: 0;
+	line-height: 18px;
+	padding: 0;
+	margin: 0;
+}
+
+.my-legend ul.legend-labels li span {
+	display: flex;
+	float: left;
+	height: 16px;
+	width: 30px;
+	margin-right: 0;
+	margin-left: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.my-legend .legend-source {
+	font-size: 70%;
+	color: #999;
+	clear: both;
+}
+
+.my-legend a {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	color: #777;
+}
+
+.aa {
+	border: 1px solid black;
+	border-radius: 10px;
+	padding: 1em;
+	position: fixed;
+	bottom: 70;
+	right: 150;
+}
+
+.datepickrelement {
+	border: 1px solid black;
+	width: 1220px;
+	height: 970px;
+	position: relative;
+	margin: 0 auto;
+	margin-top: 35px;
+	padding: 10px;
+	padding-bottom: 0px;
+	overflow-y: auto;
+}
+
+.header1 {
+	margin-left: 500 px;
+	text-align: center;
+	font-size: 105%;
+	color: black;
+	height: 100px border-radius: 10px;
+	cursor: pointer;
+	margin-top: 1%;
+}
+
+.header {
+	margin-left: 550px;
+	font-size: 150%;
+	overflow-y: auto;
+	text-decoration: underline;
+}
+
+.dropDown1 {
+	margin-right: 2em;
+	height: 3%;
+	width: 8%;
+	margin-top: 2px;
+}
+</style>
+<script type="text/javascript">
+	html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
+	html += '<thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>';
+
+	$(document).ready(
+			function() {
+
+				updateToolTips();
+				progressBar();
+				loadDBList();
+				setPopOptions1();
+				//progressBar();
+
+				$.ajax({
+					type : 'GET',
+					datatype : 'json',
+					url : '/TNAtoolAPI-Webapp/queries/transit/heatMap?&key='
+							+ key + '&popYear=' + popYear + '&username='
+							+ getSession() + '&dbindex=' + dbindex,
+					async : true,
+					success : function(item) {
+						console.log(item);
+						// 			console.log(data);
+						// 		 	$.each(item, function(index,item){
+						// 				console.log(item.Date1, item.norm);
+						// 			}); 
+						//	var today = new Date();
+						console.log(popYear)
+						var y = popYear;
+						var a = item.a
+						var b = item.b
+						var c = item.c
+						var d = item.d
+						var e = item.e
+						var f = item.f
+						console.log(a)
+						var g = item.g
+						var h = item.h
+						var i = item.i
+						var x = []
+						var y = []
+						var a1 = []
+						var b1 = []
+						var c1 = []
+						var d1 = []
+						var e1 = []
+						var f1 = []
+						var g1 = []
+						var h1 = []
+						var i1 = []
+						var j1 = []
+						var total = item.total;
+						console.log(total);
+						$.each(a, function(index, item) {
+							a1.push(item.Date)
+							//a1.splice(new Date(item.Date),0,item.active)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(b, function(index, item) {
+							b1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(c, function(index, item) {
+							c1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(d, function(index, item) {
+							d1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(e, function(index, item) {
+							e1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(f, function(index, item) {
+							f1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(g, function(index, item) {
+							g1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(h, function(index, item) {
+							h1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						$.each(i, function(index, item) {
+							i1.push(item.Date)
+							x[new Date(item.Date)] = item.active
+							y[new Date(item.Date)] = item.tripcount
+						});
+						console.log(a1)
+						$('#custom-methods').multiDatesPicker(
+								{
+
+									// 				$('td[data-month="6"]').each(function(ind,item) {
+									// 				    // `this` is the div
+									// 				});
+									// 				$('td[data-month="6"]').find('a').each(function(ind,item) {
+									// 				    console.log(item)
+									// 				});
+									//dateFormat: 'dd-MM-yy',
+									//firstDay: 1, // rows starts on Monday
+									// minDate: new Date(),
+									//maxDate: '+1Y',
+
+									defaultDate : '1/1/' + y,
+									minDate : new Date(popYear, 0, 1),
+									maxDate : new Date(popYear, 11, 31),
+									numberOfMonths : [ 3, 4 ],
+
+									beforeShowDay : function(date) {
+										var formattedDate = jQuery.datepicker
+												.formatDate('mm/dd/yy', date)
+										var toolTip = "MyTooltip";
+										if (a1.indexOf(formattedDate) != -1) {
+											console.log(date + ":" + a1[date])
+											console.log(date);
+											return [ 'true', 'colchange1',
+													toolTip ]
+										}
+										if (b1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange2',
+													"b1[date]" ]
+										}
+										if (c1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange3',
+													"c1[date]" ]
+										}
+										if (d1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange4',
+													"d1[date]" ]
+										}
+										if (e1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange5',
+													"e1[date]" ]
+										}
+										if (f1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange6',
+													"f1[date]" ]
+										}
+										if (g1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange7',
+													"g1[date]" ]
+										}
+										if (h1.indexOf(formattedDate) != -1) {
+											return [ 'true', 'colchange8',
+													"h1[date]" ]
+										} else {
+											return [ 'true', 'colchange9',
+													"i1[date]" ]
+										}
+									}
+
+								});
+						var i = 0
+						while (i < 12) {
+							$('td[data-month=' + i + ']').find('a').each(
+									function(ind, item) {
+
+										inda = ind + 1
+
+										$(this).attr(
+												'title',
+												'Active Agencies:'
+														+ x[new Date(popYear,
+																i, inda)]
+														+ '/'
+														+ total
+														+ '  Tripcount: '
+														+ y[new Date(popYear,
+																i, inda)]);
+									});
+							i = i + 1;
+							$('#dialogPreLoader').remove();
+							$('#bePatient').remove();
+
+						}
+					}
+
+				});
+
+			});
+</script>
+</head>
+<body>
+	<div class="container">
+		<div class="headerL">
+			<h1>Transit Network Analysis Tool Reports</h1>
+		</div>
+
+
+	</div>
+
+
+
+	<div class='datepickrelement'>
+
+		<div class="header1">
+			<h1 class="header">Heat Map</h1>
+			<br> <br> <br> <label for="dbselect"
+				style="margin-right: 0.5em; font-weight: bold">GTFS Source</label><select
+				id='dbselect' data-label='GTFS Source' name='dbindex'
+				class='input dropDown1' onchange='reloadPage()'></select> <label
+				for="popselect" style="margin-right: 0.5em; font-weight: bold">Year</label><select
+				id='popselect' data-label='Population Source' name='popYear'
+				class='input dropDown1' onchange='reloadPage()'></select> <img
+				id="dialogPreLoader" src="../resources/images/287.GIF"
+				alt="Page Loading"
+				style="width: 100px; height: 100px; position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;">
+			<p id="bePatient"
+				style="text-align: center; margin-top: 150px; line-height: 70vh;">
+				<b>This might take a few minutes.</b>
+			</p>
+		</div>
+
+		<table style="width: 100%;">
+			<tr>
+
+				<td style="vertical-align: top; padding-top: 15px">
+					<div id="custom-methods"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div class='aa'>
+
+		<div class='my-legend'>
+			<div class='legend-title'>Number of trips :</div>
+			
+			<div class='legend-scale'>
+				<ul class='legend-labels'>
+					<li><span style='background: #FFEDA0;'></span>0-100</li>
+					<li><span style='background: #FED976;'></span>100-200</li>
+					<li><span style='background: #FEB24C;'></span>200-400</li>
+					<li><span style='background: #FD8D3C;'></span>400-800</li>
+					<li><span style='background: #FC4E2A;'></span>800-1600</li>
+					<li><span style='background: #E31A1C;'></span>1600-2600</li>
+					<li><span style='background: #BD0026;'></span>2600-3600</li>
+					<li><span style='background: #9e0026;'></span>3600-4600</li>
+					<li><span style='background: #800000;'></span>4600+</li>
+				
+				</ul>
+			</div>
+
+
+		</div>
+
+	</div>
+
+
+
+
+	<p id="displayReport" class="displayReport" style="overflow: auto">
+		<br>
+	</p>
+	<br>
+	<br>
+
+
+</body>
+</html>

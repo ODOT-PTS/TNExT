@@ -139,7 +139,7 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');	
 						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&areaid='+null+'&type='+null+'&route='+null+'&nav='+nav);	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&areaid='+null+'&type='+null+'&route='+null+'&nav='+nav+'&rc=3');	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';

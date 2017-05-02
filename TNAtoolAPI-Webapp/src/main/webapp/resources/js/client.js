@@ -1428,6 +1428,8 @@ $mylist
 		    			'<li role="presentation"><a id="DDRPT" href="#"><b>Data Dump Report</b></a></li>'+
 		    			'<li role="presentation"><a id="FLXRPT" href="#"><b>Flexible Reporting Wizard</b></a></li>'+
 		    			'<li role="presentation"><a id="SHPFL" href="#"><b>Shapefile Generator</b></a></li>'+
+		    			'<li role="presentation"><a id="HMP" href="#"><b>Heat Map</b></a></li>'+
+			    		
 		    			'</ul>'+
 	    			'</li>');
 		    		
@@ -1538,7 +1540,15 @@ $mylist
 			    	ShapeFileExpStart();
 			    }else if(casestring=="DDRPT"){
 			    	openDatadumpRep();
-			    }else if(casestring.substring(0,2)=="DB"){
+			    }
+			    else if(casestring=="HMP"){
+			    	
+			    	
+			    	popYear=2017;
+			    	window.open('/TNAtoolAPI-Webapp/HeatMap.html'+'?&dbindex='+dbindex+'&popYear='+popYear);
+					 
+			    }
+			    else if(casestring.substring(0,2)=="DB"){
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
 			    			var dates = $('#datepicker').multiDatesPicker('getDates');			    			
