@@ -60,7 +60,7 @@ var tableProperties = {
 // //// 					/////
 // ///////////////////////////////
 /**
- * populated the dropdown list of databases in tabular reports
+ * populated the drop down list of databases in tabular reports
  */
 function loadDBList() {
 	$.ajax({
@@ -821,7 +821,7 @@ function setPopOptions() {
 }
 
 /**
- * returns the index for the latest database
+ * returns the index of the latest database
  * @return int
  */
 function getDefaultDbIndex(){

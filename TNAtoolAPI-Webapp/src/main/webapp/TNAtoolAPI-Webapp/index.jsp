@@ -31,7 +31,7 @@
     <script type="text/javascript" src="resources/js/tile.stamen.js"></script>
 	<script type="text/javascript" src="resources/js/Polylinencoded.js"></script>
 	<script type="text/javascript" src="resources/js/onMapReport.js"></script>
-	<script type="text/javascript" src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+	<script type="text/javascript" src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>	
 	<script type="text/javascript" src="resources/js/TimingConnection.js"></script>
 	<script type="text/javascript" src="resources/js/JSMethods.js"></script>
 	<script type="text/javascript" src="resources/js/ShapefileGenerator.js"></script>

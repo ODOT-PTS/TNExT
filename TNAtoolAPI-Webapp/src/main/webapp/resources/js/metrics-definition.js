@@ -61,8 +61,6 @@ $.each(Object.keys(reportsDic), function(index, key) {
 	else
 		reportsJson += '\n]}';
 
-	// sort the dictionaries alphabetically
-
 });
 
 /**
@@ -110,8 +108,4 @@ function splitLines(string, lineLength) {
 	}
 	output.push(string);
 	return output;
-}
-
-function sort(dic) {
-	console.log(dic);
 }

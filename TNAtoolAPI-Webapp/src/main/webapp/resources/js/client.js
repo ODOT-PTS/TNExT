@@ -1,9 +1,29 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU  General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+// =========================================================================================================
+//	  This script contains JavaScript variables and methods used to load main map interface and its features
+//	  in the Transit Network Analysis Software Tool and all its features.
+// =========================================================================================================
+
 var default_dbindex = getDefaultDbIndex(); //selects the most recent database 
 var dbindex = default_dbindex;
 var newdates = null;
 var maxRadius = 5;
 
-//setting the URL based on selected dates
+//----------------------- setting the URL based on selected dates - key is string code for date --------------
 var key="--"; //used for saving or loading selected dates
 var URL = document.URL;
 if (URL.split("?").length >0){
@@ -29,7 +49,7 @@ history.pushState('data', '', URL);
 var w_qstringd = getDates(key);
 //end
 
-//starts initializing the map
+//----------------------- initializing the map ---------------------
 var map = new L.Map('map', {	
 	minZoom : 6,
 	maxZoom : 19	
@@ -43,291 +63,14 @@ var terrainMap = new L.StamenTileLayer("terrain");
 var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'+' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '+getVersion()+' beta';
 var osmLayer = new L.TileLayer(OSMURL, 
 		{subdomains: ["otile1-s","otile2-s","otile3-s","otile4-s"], maxZoom: 19, attribution: osmAttrib});
-
-/*var aerialLayer = new L.TileLayer(aerialURL, 
-		{subdomains: ["oatile1","oatile2","oatile3","oatile4"], maxZoom: 19, attribution: osmAttrib});*/
-
 map.addLayer(terrainMap);
 $("body").css("display","");
 $("#overlay").show();
-//end
 
-///******Variables declared for the on-Map connected agencies report ********///
-var connectionMarkers = new L.FeatureGroup();
-var connectionPolylines = new L.FeatureGroup();
-var gap=0.1;
-var selectedAgency;
-var selectedAgencies=Array();
-var polylines = Array();
-var stopsCluster;
-var text='';
-map.addLayer(connectionMarkers);
-map.addLayer(connectionPolylines);
-
-///*********Beginning of on-Map connected agencies report*******///
-var dialog2=$("#connectedAgencies-form").dialog({
-    autoOpen: false,
-    height: 700,
-    width: 350,
-    modal: false,
-    draggable: true,
-    resizable: false,
-    closeOnEscape: false,
-    position: {my: "right top", at: "right-55 top+5", of: window },    
-    buttons: {
-        },
-    close: function() {
-    	//miniMap._restore();
-    	connectionMarkers.eachLayer(function (layer) {
-		    connectionMarkers.removeLayer(layer);
-		});
-    	connectionPolylines.eachLayer(function (layer) {
-    		connectionPolylines.removeLayer(layer);
-		});
-    	$('#Sradius').val(0.1);
-    	gap=0.1;
-    	selectedAgency = [];
-    	selectedAgencies = [];
-    	polylines = [];
-      },
-    open: function(  ) { 	
-    	//miniMap._minimize(); 
-    	dialog.dialog( "close" );
-    	$('.jstree-checked').each(function() {
-    		$( this ).children('a').children('.jstree-checkbox').click();
-    	});
-    	$('#ui-id-1').css('font-size','80%');
-    },
-  }).dialogExtend({
-	  "closable" : true,
-      "minimizable" : true,
-      "minimizeLocation": "right",
-      "minimize" : function() {
-    	  //miniMap._restore();
-      },
-      "restore" : function() {
-    	  //miniMap._minimize();
-      }
-  });
-
-function loadDialog2(node){
-	$mylist.dialogExtend("collapse");
-    dialog2.dialog( "open" );
-    $('#dialogPreLoader2').show();
-	$('#displayConAgenciesTable').empty();
-	var html='';
-	var connectionsClusters=new Array();
-	var key = Math.random();
-	
-	$.ajax({
-		type: 'GET',
-		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+node.attr("id")+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
-		async: true,
-		success: function(data){
-			var cacolorArray=['cagcluster', 'capicluster', 'caccluster', 'carcluster', 'capucluster', 'cabrcluster'];
-			var colorArray=['gcluster', 'picluster', 'ccluster', 'rcluster', 'pucluster', 'brcluster'];
-			var colors = ['rgba(110, 204, 57, 0.8)',
-			              'rgba(255, 51, 255, 0.8)',
-			              'rgba(5, 250, 252, 0.7)',
-			              'rgba(254, 10, 10, 0.6)',
-			              'rgba(122, 0, 245, 0.6)',
-			              'rgba(204, 102, 0, 0.8)'];
-			text = data.agency;
-			$('#dialogSelectedAgency').html(data.agency);
-    		$('#dialogNoOfConnectedAgencies').html(data.ClusterR.length);
-			html = '<table id="connectedAgenciesTable" class="display" align="center">';
-			var tmp = 	'<th>Agency ID </th>'+
-            			'<th>Agency Name</th>'+
-            			'<th>Number of Connections</th></tr>';	
-			html += '<thead>'+tmp+'</thead><tbody>';
-			//var html2 = '<tfoot>'+tmp+'</tfoot>';
-			
-			for (var i = 0; i < data.ClusterR.length; i++) {
-				html += '<td>'+ data.ClusterR[i].id +'</td>'+
-				'<td>'+ data.ClusterR[i].name +'</td>'+
-				'<td>'+ data.ClusterR[i].size +'</td></tr>';
-			}
-			
-			html += '</tbody></table>';
-			$('#displayConAgenciesTable').append(html);
-			var connectedAgenciesTable = $('#connectedAgenciesTable').DataTable( {
-				"paging": false,
-				"bSort": false,
-				"dom": 'T<"clear">lfrtip',
-		        "tableTools": {
-		        	"sSwfPath": "js/lib/DataTables/swf/copy_csv_xls_pdf.swf",
-		        	"sRowSelect": "multi",
-		        	"aButtons": []}
-			});
-			$("#connectedAgenciesTable_length").remove();
-		    $("#connectedAgenciesTable_filter").remove();
-		    $("#connectedAgenciesTable_info").remove();
-		    connectedAgenciesTable.$('tr').click( function () {
-		    	if($(this).hasClass('selected')){
-		    		connectionMarkers.removeLayer(connectionsClusters[$(this).index()]);
-		    		connectionPolylines.removeLayer(polylines[$(this).index()]);
-		    		// remove the selected agency from the list of agencies.
-		    		selectedAgencies.splice(selectedAgencies.indexOf($(this).children().eq(0).html()),1);
-		    	}else{
-		    		var index = $(this).index();
-		    		selectedAgencies.push($(this).children().eq(0).html());
-		    		var agencyId = $(this).children().eq(0).html();
-		    		var c = ($(this).index()+1)%6;
-		    		var tmpConnectionsClusters = new L.MarkerClusterGroup({
-    					iconCreateFunction: function (cluster) {
-    						return new L.DivIcon({ html: cluster.getChildCount(), className: cacolorArray[c], iconSize: new L.Point(25, 25) });						
-    					},
-    					spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
-    				});
-    				var agencyName=data.ClusterR[$(this).index()].name;
-    				$.each(data.ClusterR[$(this).index()].connections, function (i, item){
-    					var str = item.dcoords.replace("{","");
-    					str = str.replace("}","");
-            			str=str.split(",");
-    					var lat = str[0];
-    					var lon = str[1];
-    					
-    					var marker = new L.marker([lat,lon], {icon: L.divIcon({html:'1',iconSize: new L.point( 25, 25 ),className: colorArray[c]})}).on('click',onMarkerClick);
-    					marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
-    					marker.agencyId = agencyId;
-    					marker.lat = lat;
-    					marker.lon = lon;
-    					marker.color = colors[c];
-    					marker.bindPopup('<b>Agency: </b>'+ agencyName +'<br>'+
-    									'<b>Stop Name: </b>'+item.name);
-    					tmpConnectionsClusters.addLayer(marker);
-    				});
-
-    				tmpConnectionsClusters.on('clusterclick', function (a) {
-    				    // a.layer is actually a cluster
-    					for(var i=0; i<a.layer.getAllChildMarkers().length;i++){
-    						if(polylines[a.layer.getAllChildMarkers()[i]._leaflet_id]!=null){
-    							a.layer.getAllChildMarkers()[i].closePopup();
-    							connectionPolylines.removeLayer(polylines[a.layer.getAllChildMarkers()[i]._leaflet_id]);
-    							delete polylines[a.layer.getAllChildMarkers()[i]._leaflet_id];
-    						}
-    					}
-    				});
-    				connectionsClusters[$(this).index()] = (tmpConnectionsClusters);
-		    		connectionMarkers.addLayer(connectionsClusters[$(this).index()]);
-		    	}                   		    	
-		    });
-		    $('#dialogPreLoader2').hide();
-			$.ajax({
-				type: 'GET',
-				datatype: 'jason',
-				url: '/TNAtoolAPI-Webapp/queries/transit/agenStops?agency='+ node.attr("id")+'&dbindex='+dbindex,
-				async: true,
-				success: function(data){
-					var stopsCluster = new L.MarkerClusterGroup({
-						iconCreateFunction: function (cluster) {
-							return new L.DivIcon({ html: cluster.getChildCount(), className: 'caycluster', iconSize: new L.Point(25, 25) });						
-						},
-						spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
-					});
-					
-					$.each(data.stopsList,function(i, item){
-						var marker = new L.marker([item.lat,item.lon] /*,{icon: onMapIcon})*/).on('click',onMarkerClick);
-						marker.bindPopup('<b>Agency:</b> '+item.agencyName+
-										'<br><b>Stop Name: </b> '+item.name);
-						marker.id = item.id;	// This ID is used for pushing the connections of each stop to polylines array.
-						marker.lat = item.lat;
-						marker.lon = item.lon;
-						marker.agencyId = node.attr("id");
-						marker.color = 'rgba(255, 255, 0, 0.8)';
-						stopsCluster.addLayer(marker);
-					}); 
-					connectionMarkers.addLayer(stopsCluster);
-					map.fitBounds(stopsCluster);
-				}
-			});
-		}
-	});
-}
-
-function onMarkerClick(){
-	var id = this._leaflet_id;
-	
-	/*
-	 * A shallow copy of selectedAgencies. This array is trimmed based on whether a stop
-	 * of the original agency is clicked or a stops for one of the agencies in the list.
-	 * This is done to make sure only the connections between the original and the other
-	 * agencies are displayed.
-	 */ 	
-	var agencies;									 	
-	if (this.agencyId == selectedAgency.attr("id")){
-		agencies = [];
-		agencies = selectedAgencies.slice(0);		
-		agencies.splice(agencies.indexOf(this.agencyId),1);
-	}else{
-		agencies = selectedAgency.attr("id");
-	} 		
-	
-	if (polylines[id]==null){
-		var selectedStopLat= this.lat;
-		var selectedStopLon=this.lon;
-		var color = this.color;
+//----------------------- on-map connected agencies report ---------------
+$.getScript('resources/js/ConAgenOnMap.js');
 		
-		this.closePopup();
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: 	'/TNAtoolAPI-Webapp/queries/transit/castops?&lat=' + selectedStopLat +
-					'&lon=' + selectedStopLon +'&agencies='+ agencies +'&radius=' + gap + '&dbindex=' + dbindex,
-			async: true,
-			success: function(data){
-				var sourceMarker = new L.marker([selectedStopLat,selectedStopLon]);
-				var bounds = Array();
-				bounds.push(sourceMarker.getLatLng());
-				var tmpConnectionsPolylines = new L.FeatureGroup();
-				$.each(data.stopsList, function(i,item){
-					if (item.lat!=selectedStopLat && item.lon != selectedStopLon){
-						var latlngs= Array();
-						var destMarker = new L.marker([item.lat,item.lon] /*,{className: 'ycluster', iconSize: new L.Point(10, 10)}).on('click',onClick*/);
-						bounds.push(destMarker.getLatLng());
-						latlngs.push(sourceMarker.getLatLng());
-						latlngs.push(destMarker.getLatLng());
-						var polyline = L.polyline(latlngs, {color: color});
-						tmpConnectionsPolylines.addLayer(polyline);
-					}		
-				});
-				polylines[id] = tmpConnectionsPolylines;
-				connectionPolylines.addLayer(polylines[id]);
-				dialog2.dialogExtend("minimize");
-				map.fitBounds(bounds);
-			}
-		});
-//		selectedAgencies.push(this.agencyId);
-	}else{
-		this.closePopup();
-		connectionPolylines.removeLayer(polylines[id]);
-		delete polylines[id];
-	}
-}
-function reloadDialog2(input){
-	if (input > 5){	// Checks if the entered search radius exceeds the maximum.
-		alert('Enter a radius less than 5 miles.');
-		return;
-	}
-	gap=input;
-	connectionMarkers.eachLayer(function (layer) {
-	    connectionMarkers.removeLayer(layer);
-	});
-	connectionPolylines.eachLayer(function (layer) {
-	    connectionPolylines.removeLayer(layer);
-	});
-	selectedAgencies = [];
-	selectedAgencies.push(selectedAgency.attr("id"));
-	loadDialog2(selectedAgency);
-}
-
-function isNormalInteger(str) {
-    var n = ~~Number(str);
-    return String(n) === str && n >= 0;
-}
-
-///*****************Leaflet Draw******************///
+//----------------------- loading on-map report dialog box ---------------------
 var dialogheight = Math.round((window.innerHeight)*.9); 
 if (dialogheight > 1000){
 	dialogheight = 1000;
@@ -354,7 +97,7 @@ var dialog = $( "#dialog-form" ).dialog({
       },
     open: function( event, ui ) {
     	//miniMap._minimize();
-    	dialog2.dialog('close');
+    	connectedAgenciesDialog.dialog('close');
     },
   }).dialogExtend({
 	  "closable" : true,
@@ -423,13 +166,12 @@ var newDensityValue;
     
     $( "input[name='blocksDensity']" ).each(function() {
     	  $( this ).click(function() {
-    		  //alert( $( this ).val() );
-    		  //blockDensityValue = $( this ).val();
     		  changeDensityStyle($( this ).val());
     	  });
     });
 })();
 
+//---------------- adding leaflet draw features ----------------
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -469,7 +211,7 @@ map.on('draw:drawstart', function (e) {
 	$mylist.dialogExtend("collapse");
 	drawnItems.clearLayers();
 	dialog.dialog( "close" );
-	dialog2.dialog( "close" );
+	connectedAgenciesDialog.dialog( "close" );
 });
 
 $('.leaflet-draw-edit-remove').click(function(event){
@@ -503,6 +245,9 @@ function editCancel(){
 }
 function pad(s) { return (s < 10) ? '0' + s : s; }
 
+/**
+ * saves information of the drawn shape and populates the pop-up
+ */
 map.on('draw:created', function (e) {
 	currentLats = new Array();
 	currentLngs = new Array();
@@ -559,6 +304,10 @@ map.on('draw:created', function (e) {
 			'<p><button type="button" style="width:100%" id="POPbutton" onclick="onMapSubmit()">Generate Report</button></p>'
 	,{closeOnClick:false,draggable:true}).openPopup();		
 });
+
+/**
+ * on click 
+ */
 map.on('popupopen',function (e) {
 	try{
 		
@@ -575,8 +324,6 @@ map.on('popupopen',function (e) {
 				currentX = this.value*1609.344;
 				area = (Math.pow(layer.getRadius()*0.000621371,2)*Math.PI).toFixed(2);
 				$('#POParea').html(area);
-				//alert();
-				//layer.pop
 			});
 		}
 	}catch (e) {
@@ -584,11 +331,23 @@ map.on('popupopen',function (e) {
 	}		
 });
 
-// set the date in the on-map report dialog box
+
+
+// sets the date in the on-map report dialog box
 setDialogDate();
+
+/**
+ * updates the centroid of the circle as it moves
+ */
 function circleMove(latlng){
 	currentCircleCenterTmp = latlng;
 }
+
+/**
+ * updates the seach radius as the circle drawn on map 
+ * is resized
+ * @param radius
+ */
 function circleResize(radius){	
 	radius = Math.round(radius*0.0621371)/100;
 	$('#circleRadius1').css('visibility','visible');
@@ -1279,7 +1038,7 @@ $mylist
                 	"action" : function(node){
                 		selectedAgency=node;
                 		selectedAgencies.push(node.attr("id"));
-                		loadDialog2(selectedAgency);
+                		loadConnectedAgenciesDialog(selectedAgency);
            			}
                 }
         	};        	     
@@ -1578,7 +1337,7 @@ $mylist
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.polygon.handler.disable();
 	    	drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler.disable();
 	    	drawControl._toolbars[L.EditToolbar.TYPE]._modes.edit.handler.disable();
-	    	dialog2.dialog('close');
+	    	connectedAgenciesDialog.dialog('close');
 	    },
 	    "collapse" : function(evt,dlg){	    	
 	    	$(".dropdown-menu").css("top", 100+"%" );
@@ -1757,7 +1516,6 @@ function updateListDialog(agenciesIds){
 	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
 	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
 	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
-	//$("#datesdiv").css({"width":"100%"});
 	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
 	
 	if (w_qstringd){				
@@ -1779,7 +1537,6 @@ function updateListDialog(agenciesIds){
 						}
 		      }
 		});	
-		//alert(w_qstringd);
 		var cdate;
 		for(var i=0; i<w_qstringd.split(",").length; i++){
 			cdate = w_qstringd.split(",")[i];

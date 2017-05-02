@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 // =========================================================================================================
-//	  This script contains JavaScript variables and methods used to load main 
+//	  This script contains JavaScript variables and methods used to load main map interface and its features
 //	  in the Transit Network Analysis Software Tool and all its features.
 // =========================================================================================================
 
@@ -341,8 +341,8 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 			//------------ populating "Transit Agencies" tab -------------
 			MapBlk = data.MapTR.MapBL;
 			MapBlkSvc = data.MapTR.MapBLS;
-			$('#ts').html(numberWithCommas(data.MapTR.TotalStops));
-			$('#tr').html(numberWithCommas(data.MapTR.TotalRoutes));
+			$('#ts').html(numberconv(data.MapTR.TotalStops));
+			$('#tr').html(numberconv(data.MapTR.TotalRoutes));
 			$('#af').html('$'+Math.round(data.MapTR.AverageFare*100)/100);
 			$('#mff').html('$'+data.MapTR.MedianFare);
 			var html = '<table id="transitTable" class="display" align="center">';
@@ -355,9 +355,9 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 			var popupOptions = {'offset': L.point(0, -8)};
 			$.each(data.MapTR.MapAL, function(i,item){
 				html += '<td>'+item.Name+'</td>'+
-						'<td>'+numberWithCommas(item.RoutesCount)+'</td>'+
-						'<td>'+numberWithCommas(item.MapSL.length)+'</td>'+
-						'<td>'+numberWithCommas(item.ServiceStop)+'</td></tr>';
+						'<td>'+numberconv(item.RoutesCount)+'</td>'+
+						'<td>'+numberconv(item.MapSL.length)+'</td>'+
+						'<td>'+numberconv(item.ServiceStop)+'</td></tr>';
 				
 				//------------ adding routes and stops shapes to the map -------------
 				var tmpRouteCluster = new L.FeatureGroup();
@@ -405,7 +405,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 						opacity: .5,
 						smoothFactor: 1
 						});	
-					polyline.bindPopup('<b>Route ID:</b> '+ktem.Id+'<br><b>Route Name:</b> '+ktem.Name+'<br><b>Agency:</b> '+ktem.AgencyId+'<br><b>Length:</b> '+numberWithCommas(Math.round(ktem.Length*100)/100)+' miles<br><b>Average Route Fare: </b> '+ktem.Fare+'<br><b>Run Frequency:</b> '+ktem.Frequency);
+					polyline.bindPopup('<b>Route ID:</b> '+ktem.Id
+							+'<br><b>Route Name:</b> '+ktem.Name
+							+'<br><b>Agency:</b> '+ktem.AgencyId
+							+'<br><b>Length:</b> '+numberconv(Math.round(ktem.Length*100)/100)+' miles'
+							+'<br><b>Average Route Fare: </b> '+ktem.Fare
+							+'<br><b>Run Frequency:</b> '+ktem.Frequency);
 					tmpRouteCluster.addLayer(polyline);
 				});
 				routeCluster.push(tmpRouteCluster);
@@ -438,12 +443,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 		    
 		    
 			//------------ populating "Census" tab -------------
-			$('#tpu').html(numberWithCommas(data.MapG.UrbanPopulation));
-			$('#tpr').html(numberWithCommas(data.MapG.RuralPopulation));
-			$('#tee').html(numberWithCommas(data.MapG.Wac));
-			$('#tem').html(numberWithCommas(data.MapG.Rac));
-			$('#tb').html(numberWithCommas(data.MapG.TotalBlocks));
-			$('#tt').html(numberWithCommas(data.MapG.TotalTracts));					
+			$('#tpu').html(numberconv(data.MapG.UrbanPopulation));
+			$('#tpr').html(numberconv(data.MapG.RuralPopulation));
+			$('#tee').html(numberconv(data.MapG.Wac));
+			$('#tem').html(numberconv(data.MapG.Rac));
+			$('#tb').html(numberconv(data.MapG.TotalBlocks));
+			$('#tt').html(numberconv(data.MapG.TotalTracts));					
 			html = '<table id="geoTable" class="display" align="center">';
 			tmp = '<th>County Name</th>'+
 			'<th>Tracts</th>'+
@@ -456,12 +461,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 			var popupOptions = {'offset': L.point(0, -8)};
 			$.each(data.MapG.MapCL, function(i,item){
 				html += '<td>'+item.Name.replace(' County','')+'</td>'+
-						'<td>'+numberWithCommas(item.MapTL.length)+'</td>'+
-						'<td>'+numberWithCommas(item.MapBL.length)+'</td>'+
-						'<td>'+numberWithCommas(item.UrbanPopulation)+'</td>'+
-						'<td>'+numberWithCommas(item.RuralPopulation)+'</td>'+
-						'<td>'+numberWithCommas(item.Wac)+'</td>'+	
-						'<td>'+numberWithCommas(item.Rac)+'</td></tr>';	
+						'<td>'+numberconv(item.MapTL.length)+'</td>'+
+						'<td>'+numberconv(item.MapBL.length)+'</td>'+
+						'<td>'+numberconv(item.UrbanPopulation)+'</td>'+
+						'<td>'+numberconv(item.RuralPopulation)+'</td>'+
+						'<td>'+numberconv(item.Wac)+'</td>'+	
+						'<td>'+numberconv(item.Rac)+'</td></tr>';	
 				
 				//------------ adding census blocks and tracts shapes to the map -------------
 				var tmpBlockCluster = new L.FeatureGroup();
@@ -496,12 +501,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 						marker.wacDensity = jtem.WacDensity;
 						marker.bindPopup('<b>Block ID:</b> '+jtem.ID
 								+'<br><b>Type:</b> '+jtem.Type
-								+'<br><b>Population:</b> '+numberWithCommas(jtem.Population)
-								+'<br><b>Employees:</b> '+numberWithCommas(jtem.Wac)
-								+'<br><b>Employment:</b> '+numberWithCommas(jtem.Rac)
-								+'<br><b>Level of Service:</b> '+numberWithCommas(blkSvcFreq)
+								+'<br><b>Population:</b> '+numberconv(jtem.Population)
+								+'<br><b>Employees:</b> '+numberconv(jtem.Wac)
+								+'<br><b>Employment:</b> '+numberconv(jtem.Rac)
+								+'<br><b>Level of Service:</b> '+numberconv(blkSvcFreq)
 								+'<br><b>County:</b> '+jtem.County
-								+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)
+								+'<br><b>Land Area:</b> '+ numberconv(Math.round(parseFloat(jtem.LandArea)*0.0000386102)/100)
 								+' mi<sup>2</sup>',popupOptions
 								);
 						tmpBlockCluster.addLayer(marker);				
@@ -516,7 +521,11 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 				        opacity: 1,		
 				        fillOpacity: 0.8,		
 				    });
-					tractmarker.bindPopup('<b>Tract ID:</b> '+ktem.ID+'<br><b>Population:</b> '+numberWithCommas(ktem.Population)+'<br><b>County:</b> '+ktem.County+'<br><b>Land Area:</b> '+ numberWithCommas(Math.round(parseFloat(ktem.LandArea)*0.0000386102)/100)+' mi<sup>2</sup>',popupOptions);
+					tractmarker.bindPopup('<b>Tract ID:</b> '+ktem.ID
+							+'<br><b>Population:</b> '+numberconv(ktem.Population)
+							+'<br><b>County:</b> '+ktem.County
+							+'<br><b>Land Area:</b> '+ numberconv(Math.round(parseFloat(ktem.LandArea)*0.0000386102)/100)
+							+' mi<sup>2</sup>',popupOptions);
 					tmpTractCluster.addLayer(tractmarker);
 				});
 				tractCluster.push(tmpTractCluster);
@@ -597,8 +606,8 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 		    $('#plso4').html(numberconv(title6.other_languagesnotatall.toFixed(0)));
 
 			//------------ populating "Park and Ride" tab -------------
-		    $('#npnr').html(numberWithCommas(data.MapPnR.totalPnR));
-			$('#nspc').html(numberWithCommas(data.MapPnR.totalSpaces));
+		    $('#npnr').html(numberconv(data.MapPnR.totalPnR));
+			$('#nspc').html(numberconv(data.MapPnR.totalSpaces));
 			var html = 	'<table id="pnrTable" class="display" align="center">';
 			var tmp = 	'<tr><th>Row</th>'+
 						'<th>County</th>'+
@@ -613,7 +622,7 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 				
 						'<td>'+item.countyName+'</td>'+
 						'<td>'+item.totalPnRs+'</td>'+
-						'<td>'+numberWithCommas(item.totalSpaces)+'</td></tr>';
+						'<td>'+numberconv(item.totalSpaces)+'</td></tr>';
 				
 				//---------------- adding park and ride icons to the map -----------------
 				var tmpPnrCluster = new L.FeatureGroup();	
