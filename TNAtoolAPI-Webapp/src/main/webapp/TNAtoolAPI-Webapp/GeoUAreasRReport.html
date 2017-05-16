@@ -4,7 +4,7 @@
 	<meta charset="utf-8" />
 	<title>Aggregated Urban Areas Summary Report</title>
 	
-	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+		<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -26,8 +27,8 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
-	
 <script type="text/javascript">
 
 var fAverage = new Array();
@@ -67,12 +68,23 @@ $(document).ready(function(){
 		success: function(d){
 			
 			docMetadata = d.metadata;
+			
 			$('h2').append('Aggregated Urban Areas Summary Report <br><hr>');
+			appendNavigation();
 			$.each(d.GeoR, function(i,item){
 				console.log(item)
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +'<a href="#" type="SR">'+item.Name+
-				'</a></td><td>' +numberconv(item.population) +'</td><td>' +numberconv(item.employment) +'</td>'+'<td>' +numberconv(item.employees) +
-				'</td><td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td><td>'+ item.UrbansCount+'</td>'+
+				'</a></td><td>' +numberconv(item.population) +'</td><td>' +numberconv(item.employment) +'</td>';
+			if(popYear>2010)
+				{
+				html+='<td>N/A</td>';
+				}
+			else
+				{
+				html+='<td>' +numberconv(item.employees) +	'</td>';
+			
+				}
+				html+='<td>' +numberconv(item.landArea) +'</td><td>'+ numberconv(item.waterArea) +'</td><td>'+ item.UrbansCount+'</td>'+
 		   '<td>' + item.RoutesCount + '</td>'+
 				'<td>' + item.StopsCount + '</td></tr>';								   			
 			});		
@@ -89,10 +101,13 @@ $(document).ready(function(){
 			    		///localStorage.setItem(keyName, qstringd);
 						var keyName = setDates(qstringd);		
 					
-			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&popMin='+popMin+'&popMax='+popMax+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);    		
+			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&popMin='+popMin+'&popMax='+popMax+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);    		
 			    } else if ($(this).attr('type')=="SR"){
-			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?popMin='+popMin+'&uc=3'+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear);
-						    		 	    };
+ 			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&popMin='+popMin+'&uc=3'+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
+						    		 	   
+			    
+			    
+			    		 	    };
 			});
 			
 			table = buildDatatables();

@@ -2071,7 +2071,7 @@ public class Queries {
 					geotype,uc);
 		} else {
 			results = PgisEventManager.geoallocation(type, agency, dbindex,
-					username, urbanPop, popYear, "null", "null", "null", 0, 6);
+					username, urbanPop, popYear, "null", "null", "null", -1, 6);
 		}
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
