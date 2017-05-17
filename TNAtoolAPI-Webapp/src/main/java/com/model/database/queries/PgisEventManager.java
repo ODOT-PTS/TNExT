@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +33,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -56,6 +60,7 @@ import com.model.database.queries.objects.EmpDataList;
 import com.model.database.queries.objects.GeoArea;
 import com.model.database.queries.objects.GeoR;
 import com.model.database.queries.objects.GeoStopRouteMap;
+import com.model.database.queries.objects.HeatMap;
 import com.model.database.queries.objects.KeyClusterHashMap;
 import com.model.database.queries.objects.MapAgency;
 import com.model.database.queries.objects.MapBlock;
@@ -76,7 +81,6 @@ import com.model.database.queries.objects.StopR;
 import com.model.database.queries.objects.TitleVIData;
 import com.model.database.queries.objects.TitleVIDataFloat;
 import com.model.database.queries.objects.TitleVIDataList;
-import com.model.database.queries.objects.Urban;
 import com.model.database.queries.objects.VariantListm;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.util.Types;
@@ -455,7 +459,7 @@ public class PgisEventManager {
 	 * @param L - minimum level of service
 	 * @param dbindex - database index
 	 * @param username - user session
-	 * @return
+	 * @return EmpDataList
 	 */
 	public static EmpDataList getEmpData(String projection, String DS, String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
 		String projectionYear = "";
@@ -2046,71 +2050,127 @@ public class PgisEventManager {
     	  {
     		  aidsjoin = "where map.agencyid='"+agencyId+"'";
     	  }
-    		  routesidsjoin = aidsjoin;		
+  		  routesidsjoin = aidsjoin;		
     	  tractsFilter = " INNER JOIN stops ON ST_Contains(census_tracts.shape, stops.location) ";
       }
       if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
-    	  criteria = "left(blockid,11)";      
+          
+    	  criteria = "left(blockid,11)";   
+    	  if (agencyId==null){
+        	   areaquery = "areas as (select countyid as areaid, cname as areaname, population"+popYear+" as population, landarea, waterarea, odotregionid, regionname from census_counties), "
+             	  		+ "tracts as (select count(distinct tractid) as tracts, left(tractid,5) as areaid from census_tracts " + tractsFilter + " group by left(tractid,5)), ";    	  
+        	   urbanquery="urbans1 as (select urbanid ,left(blockid,5) as areaid  from census_blocks),"
+             	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,left(blockid,5) as areaid  from census_blocks group by areaid ),"
+                        +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                          +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+                 
+          }
+          else
+          {
+        	  areaquery = "areas as (select distinct countyid as areaid, cname as areaname, population"+popYear+" as population, landarea, waterarea, odotregionid, regionname from census_counties join stops on countyid=left(areaid,5)), "
+            	  		+ "tracts as (select count(distinct tractid) as tracts, left(tractid,5) as areaid from census_tracts " + tractsFilter + " group by left(tractid,5)), ";    	  
+        	  urbanquery="urbans1 as (select urbanid ,left(blockid,5) as areaid  from census_blocks join stops using(blockid)),"
+            	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,left(blockid,5) as areaid  from census_blocks group by areaid ),"
+                       +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                         +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+                 
+          }
+    	  
+          
+          
+          
+          
     	  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,blockid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
     	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
     			  +"rstops as ( select left(areaid,5) as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  left(areaid,5)),"
                   +"ustops as (select left(areaid,5) as areaid,count(distinct(concat(aid,stopid))) as ustops from stops join census_blocks using(blockid) where poptype='U' group by  left(areaid,5)),";
-          areaquery = "areas as (select countyid as areaid, cname as areaname, population"+popYear+" as population, landarea, waterarea, odotregionid, regionname from census_counties), "
-      	  		+ "tracts as (select count(distinct tractid) as tracts, left(tractid,5) as areaid from census_tracts " + tractsFilter + " group by left(tractid,5)), ";    	  
-      	  employmentquery="employment as (select e"+popYear+" as employment,countyid as areaid from lodes_rac_projection_county), employees as (select sum(c000) as employees,left(blockid,5) as areaid from lodes_blocks_wac group by areaid )";
-      	  urbanquery="urbans1 as (select urbanid ,left(blockid,5) as areaid  from census_blocks),"
-      	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,left(blockid,5) as areaid  from census_blocks group by areaid ),"
-                 +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
-                   +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
-            selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
+           employmentquery="employment as (select e"+popYear+" as employment,countyid as areaid from lodes_rac_projection_county), employees as (select sum(c000) as employees,left(blockid,5) as areaid from lodes_blocks_wac group by areaid )";
+      	   selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
       	  		+ "coalesce(uc,0) as uc, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,  coalesce(rstops,0) as rstops,coalesce(ustops,0) as ustops, odotregionid, regionname, tracts from areas left join stoproutes using(areaid) left join tracts using (areaid) left join routes using(areaid) left join employment using(areaid)left join employees using(areaid)left join urbans using(areaid) left join rstops using(areaid) left join ustops using(areaid) left join ua using(areaid) left join uc using(areaid)";
       	   routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, countyid AS areaid FROM census_counties_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  stoproutes = "left(areaid,5)";
       } else if (type==1){//census tract
+    	
     	  criteria = "left(blockid,11)";    
     	  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,blockid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
     	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
     			  +"rstops as ( select left(areaid,11) as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  left(areaid,11)),"
                   +"ustops as (select left(areaid,11) as areaid,count(distinct(concat(aid,stopid))) as ustops from stops join census_blocks using(blockid) where poptype='U' group by  left(areaid,11)),";
- 
-    	  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population"+popYear+" as population, tract.landarea, tract.waterarea from census_tracts tract),";
+    	  if (agencyId==null){
+    		  areaquery = "areas as (select tractid as areaid, tname as areaname, tract.population"+popYear+" as population, tract.landarea, tract.waterarea from census_tracts tract),";
+    		  urbanquery="urbans1 as (select urbanid ,left(blockid,11) as areaid  from census_blocks),"
+          	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,left(blockid,11) as areaid  from census_blocks group by areaid ),"
+                     +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                       +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+             
+         }
+         else
+         {
+        	 areaquery = "areas as (select distinct tractid as areaid, tname as areaname, tract.population"+popYear+" as population, tract.landarea, tract.waterarea from census_tracts tract join stops on tractid=left(areaid,11)),";
+        	 urbanquery="urbans1 as (select urbanid ,left(blockid,11) as areaid  from census_blocks join stops using(blockid)),"
+         	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,left(blockid,11) as areaid  from census_blocks group by areaid ),"
+                    +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                      +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+       
+         }
     	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, tractid AS areaid FROM census_tracts_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
-    	  urbanquery="urbans1 as (select urbanid ,left(blockid,11) as areaid  from census_blocks),"
-        	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,left(blockid,11) as areaid  from census_blocks group by areaid ),"
-                   +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
-                     +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
-       	  employmentquery="employment as ( select sum(c000_"+popYear+") as employment ,left(blockid,11) as areaid from lodes_rac_projection_block group by areaid),employees as (select sum(c000)as employees ,left(blockid,11) as areaid from lodes_blocks_rac group by areaid)";
+    	     	  employmentquery="employment as ( select sum(c000_"+popYear+") as employment ,left(blockid,11) as areaid from lodes_rac_projection_block group by areaid),employees as (select sum(c000)as employees ,left(blockid,11) as areaid from lodes_blocks_rac group by areaid)";
        	  selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
         	  		+ "coalesce(uc,0) as uc, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,  coalesce(rstops,0) as rstops,coalesce(ustops,0) as ustops from areas left join stoproutes using(areaid)  left join routes using(areaid) left join employment using(areaid)left join employees using(areaid)left join urbans using(areaid) left join rstops using(areaid) left join ustops using(areaid) left join ua using(areaid) left join uc using(areaid)";
         	  } else if (type==3){//census urban
     	  if (areaid.equals("null")|| areaid==null){
     		  
-    		  
     		  //urbanized areas 
     		  if (uc==0){
     	  criteria = Types.getIdColumnName(type);
+     	  if (agencyId==null){
+     		 areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" where population"+popYear+">= 50000),";
+         	   	     
+         }
+         else
+         {
+        	 areaquery = "areas as (select distinct "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" join stops on urbanid=areaid where population"+popYear+"> 50000),";
+         	  
+         }
     	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
-    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" where population"+popYear+"> 50000),";
-    	  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=urbanid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid Group by areaid )  ";
+    	   employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=urbanid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid Group by areaid )  ";
     	 
     	  selectquery = " select areas.areaid, areaname,employment,employees,population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
       	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)left join employment using(areaid)left join employees using(areaid) Where population between "+popMax+" And "+popMin+"";
     		  }
     		  //urban clusters
     		  else  if (uc==1){
-    	    	  criteria = Types.getIdColumnName(type);
+    			  criteria = Types.getIdColumnName(type);
+    			  if (agencyId==null){
+    		     		 areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" where population"+popYear+"< 50000),";
+    		         	   	     
+    		         }
+    		         else
+    		         {
+    		        	 areaquery = "areas as (select distinct "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" join stops on urbanid=areaid where population"+popYear+"< 50000),";
+    		         	  
+    		         }
+    	    
     	    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
-    	    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" where population"+popYear+" between 2500 AND 49999),";
-    	    	  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=urbanid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid Group by areaid )  ";
+    	    		  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=urbanid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid Group by areaid )  ";
     	    	 
     	    	  selectquery = " select areas.areaid, areaname,employment,employees,population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	      	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)left join employment using(areaid)left join employees using(areaid) Where population between "+popMax+" And "+popMin+"";
     	    		  }
     		  else {
-    	    	  criteria = Types.getIdColumnName(type);
+    			  criteria = Types.getIdColumnName(type);
+    			  if (agencyId==null){
+    		     		 areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+"),";
+    		         	   	     
+    		         }
+    		         else
+    		         {
+    		        	 areaquery = "areas as (select distinct  "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" join stops on urbanid=areaid ),";
+    		         	  
+    		         }
+    	    	 
     	    	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, urbanid AS areaid FROM census_urbans_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
-    	    	  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" where population"+popYear+">"+urbanPop+"),";
-    	    	  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=urbanid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid Group by areaid )  ";
+    	    		  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=urbanid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid Group by areaid )  ";
     	    	 
     	    	  selectquery = " select areas.areaid, areaname,employment,employees,population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	      	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid)left join employment using(areaid)left join employees using(areaid) Where population between "+popMax+" And "+popMin+"";
@@ -2119,29 +2179,12 @@ public class PgisEventManager {
     		  }
     	  else{
     	  if(geotype==0)//census counties 
-    	  { System.out.println("h1");
-    		if(uc==1)
+    	  { System.out.println("h1"+aidsjoin);
+    		if(uc==0)
     		{
-    	  criteria = Types.getIdColumnName(type);
+    		criteria = Types.getIdColumnName(type);
         	stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                       +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,5)='"+areaid+"' ),";    		
-        		 routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
-                     +"routes1 as ( select  distinct (urbanid) as areaid,census_counties.shape from census_blocks join census_counties on left(blockid,5)=census_counties.countyid where left(blockid,5)='"+areaid+"' and urbanid is not null),"
-              +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
-                     +"routesf as ( select count(distinct routes) as routes ,areaid from routes1 join routes using(areaid) where st_intersects(routes.shape,routes1.shape)='t' group by areaid),";	
-              
-        	areaquery="areas1 as (select "+ criteria +" as areaid,population"+popYear+",blockid,landarea as landarea , waterarea as waterarea from census_blocks where left(blockid,5)='"+areaid+"' and(poptype='U' OR urbanid is not null) ),";
-            employmentquery="employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from areas1 left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=areas1.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from areas1 left join lodes_blocks_wac on lodes_blocks_wac.blockid=areas1.blockid Group by areaid )  ";
-        	urbanquery="areas as (select areaid,sum(areas1.population"+popYear+") as population, sum(areas1.landarea) as landarea , sum(areas1.waterarea) as waterarea,"+Types.getNameColumn(type)+" as areaname  from areas1 left join census_urbans on urbanid=areaid where population between 2500 AND 49999 group by areaid,areaname),"
-        			+"urbanpop as (select areaid,sum(census_blocks.population"+popYear+") as urbanpop from areas  left join census_blocks on areaid=urbanid group by areaid), ";
-        	selectquery = " select areas.areaid, urbanpop as totalpop,areaname,employment,employees,population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes1,0) as routes, "
-        	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routesf using(areaid) left join routesa using(areaid) left join employment using(areaid)left join employees using(areaid) left join urbanpop using(areaid) Where urbanpop between "+popMax+" And "+popMin+"";
-      	
-    		}
-    		else if( uc==0)
-    		{ criteria = Types.getIdColumnName(type);
-        	stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,5)='"+areaid+"' ),";    		
+                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where left(blockid,5)='"+areaid+"'"+aidsjoin+" ),";    		
      		 routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                   +"routes1 as ( select  distinct (urbanid) as areaid,census_counties.shape from census_blocks join census_counties on left(blockid,5)=census_counties.countyid where left(blockid,5)='"+areaid+"' and urbanid is not null),"
            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
@@ -2154,6 +2197,23 @@ public class PgisEventManager {
      	selectquery = " select areas.areaid, urbanpop as totalpop,areaname,employment,employees,population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes1,0) as routes, "
      	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routesf using(areaid) left join routesa using(areaid) left join employment using(areaid)left join employees using(areaid) left join urbanpop using(areaid) Where urbanpop between "+popMax+" And "+popMin+"";
    	
+    		}
+    		else if( uc==1)
+    		{   criteria = Types.getIdColumnName(type);
+        	stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where left(blockid,5)='"+areaid+"'"+aidsjoin+" ),";    		
+     		 routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
+                  +"routes1 as ( select  distinct (urbanid) as areaid,census_counties.shape from census_blocks join census_counties on left(blockid,5)=census_counties.countyid where left(blockid,5)='"+areaid+"' and urbanid is not null),"
+           +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
+                  +"routesf as ( select count(distinct routes) as routes ,areaid from routes1 join routes using(areaid) where st_intersects(routes.shape,routes1.shape)='t' group by areaid),";	
+           
+     	areaquery="areas1 as (select "+ criteria +" as areaid,population"+popYear+",blockid,landarea as landarea , waterarea as waterarea from census_blocks where left(blockid,5)='"+areaid+"' and(poptype='U' OR urbanid is not null) ),";
+         employmentquery="employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from areas1 left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=areas1.blockid Group by areaid ),employees as (select Sum(lodes_blocks_wac.C000) as employees,areaid from areas1 left join lodes_blocks_wac on lodes_blocks_wac.blockid=areas1.blockid Group by areaid )  ";
+     	urbanquery="areas as (select areaid,sum(areas1.population"+popYear+") as population, sum(areas1.landarea) as landarea , sum(areas1.waterarea) as waterarea,"+Types.getNameColumn(type)+" as areaname  from areas1 left join census_urbans on urbanid=areaid where population between 2500 AND 49999 group by areaid,areaname),"
+     			+"urbanpop as (select areaid,sum(census_blocks.population"+popYear+") as urbanpop from areas  left join census_blocks on areaid=urbanid group by areaid), ";
+     	selectquery = " select areas.areaid, urbanpop as totalpop,areaname,employment,employees,population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes1,0) as routes, "
+     	  		+ "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routesf using(areaid) left join routesa using(areaid) left join employment using(areaid)left join employees using(areaid) left join urbanpop using(areaid) Where urbanpop between "+popMax+" And "+popMin+"";
+     
  		
     			}
     	
@@ -2164,7 +2224,7 @@ public class PgisEventManager {
     		  {
     		  criteria = Types.getIdColumnName(type);
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,11)='"+areaid+"' ),";    		
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where left(blockid,11)='"+areaid+"'"+aidsjoin+" ),";    		
         	   routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_tracts.shape from census_blocks join census_tracts on left(blockid,11)=census_tracts.tractid where left(blockid,11)='"+areaid+"' and urbanid is not null),"
                           +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
@@ -2184,7 +2244,7 @@ public class PgisEventManager {
     		  {
     			  criteria = Types.getIdColumnName(type);
         		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,11)='"+areaid+"' ),";    		
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where left(blockid,11)='"+areaid+"'"+aidsjoin+" ),";    		
             	   routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                           +"routes1 as ( select  distinct (urbanid) as areaid,census_tracts.shape from census_blocks join census_tracts on left(blockid,11)=census_tracts.tractid where left(blockid,11)='"+areaid+"' and urbanid is not null),"
                               +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
@@ -2207,7 +2267,7 @@ public class PgisEventManager {
     	  {
     		  criteria = Types.getIdColumnName(type);
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where placeid='"+areaid+"' ),";    		
+                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where placeid='"+areaid+"'"+aidsjoin+" ),";    		
      	 
 
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
@@ -2229,7 +2289,7 @@ public class PgisEventManager {
     	  {
     		  criteria = Types.getIdColumnName(type);
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where placeid='"+areaid+"' ),";    		
+                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where placeid='"+areaid+"'"+aidsjoin+" ),";    		
      	 
 
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
@@ -2253,7 +2313,7 @@ public class PgisEventManager {
     	  { if(uc==0){
     		  criteria = Types.getIdColumnName(type);
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where regionid='"+areaid+"' ),";    		
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where regionid='"+areaid+"'"+aidsjoin+" ),";    		
          	 
     		  
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
@@ -2276,7 +2336,7 @@ public class PgisEventManager {
     	  {
     		  criteria = Types.getIdColumnName(type);
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where regionid='"+areaid+"' ),";    		
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where regionid='"+areaid+"'"+aidsjoin+" ),";    		
          	 
     		  
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
@@ -2303,6 +2363,9 @@ public class PgisEventManager {
     		
     		  if(uc==0)
     		  {
+    			  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where congdistid='"+areaid+"'"+aidsjoin+" ),";    		
+             	 
     		  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_congdists.shape from census_blocks join census_congdists using(congdistid) where congdistid='"+areaid+"' and urbanid is not null),"
                            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
@@ -2324,6 +2387,9 @@ public class PgisEventManager {
     		  }
     		  else if(uc==1)
     		  {
+    			  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where congdistid='"+areaid+"'"+aidsjoin+" ),";    		
+             	 
     		  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_congdists.shape from census_blocks join census_congdists using(congdistid) where congdistid='"+areaid+"' and urbanid is not null),"
                            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
@@ -2352,21 +2418,36 @@ public class PgisEventManager {
        
     	  else if (type==4) { //ODOT Regions
     	  criteria = Types.getIdColumnName(type);
+    	  
     	  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,blockid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
     	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
     			  +"rstops as ( select regionid as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  regionid),"
                   +"ustops as (select regionid as areaid,count(distinct(concat(aid,stopid))) as ustops from stops join census_blocks using(blockid) where poptype='U' group by regionid),";
-
+if(agencyId==null)
+{
     	  areaquery = "areas as (select odotregionid as areaid,countyid as cid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties,"
       	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname,cid)," + "areas1 as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
       	    	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname),";
+    	  urbanquery="urbans1 as (select urbanid ,regionid as areaid  from census_blocks),"
+      	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,regionid as areaid  from census_blocks group by areaid ),"
+                 +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                   +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+   
+}
+else
+{
+	 areaquery = "areas as (select odotregionid as areaid,countyid as cid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties,"
+   	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname,cid)," +"areai as (select distinct areaid from stops),"+ "areas1 as (select distinct odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
+   	    	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties join areai on odotregionid=areaid group by odotregionid, regionname),";
+	  urbanquery="urbans1 as (select urbanid ,regionid as areaid  from census_blocks join stops using(blockid)),"
+  	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,regionid as areaid  from census_blocks  group by areaid  ),"
+             +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+               +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+
+}
     	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, regionid AS areaid FROM census_counties_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  employmentquery= "employment as (select Sum(lodes_rac_projection_county.e"+popYear+") as employment,areas.areaid as areaid from areas left join lodes_rac_projection_county on lodes_rac_projection_county.countyid=areas.cid Group by areaid ),employees as (select sum(C000) as employees , areaid from areas left join lodes_blocks_wac on left(lodes_blocks_wac.blockid,5)=cid group by areaid)";
-    	  urbanquery="urbans1 as (select urbanid ,regionid as areaid  from census_blocks),"
-        	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,regionid as areaid  from census_blocks group by areaid ),"
-                   +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
-                     +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
-              selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
+    	         selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
         	  		+ "coalesce(uc,0) as uc, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, counties, coalesce(stops,0) as stops,  coalesce(rstops,0) as rstops,coalesce(ustops,0) as ustops from areas1 left join stoproutes using(areaid) left join routes using(areaid) left join employment using(areaid)left join employees using(areaid)left join urbans using(areaid) left join rstops using(areaid) left join ustops using(areaid) left join ua using(areaid) left join uc using(areaid)";
           } else {// census place or congressional district    	  
     	  criteria = Types.getIdColumnName(type);
@@ -2375,14 +2456,26 @@ public class PgisEventManager {
         	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
         			  +"rstops as ( select placeid as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  placeid),"
                       +"ustops as (select placeid as areaid,count(distinct(concat(aid,stopid))) as ustops from stops join census_blocks using(blockid) where poptype='U' group by placeid),";
-    
+    		if(agencyId==null){
+    		  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+"),";
+    		  urbanquery="urbans1 as (select urbanid ,placeid as areaid  from census_blocks),"
+    	      	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,placeid as areaid  from census_blocks group by areaid ),"
+    	                 +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+    	                   +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+    	       
+    		}
+    		else
+    		{
+    			areaquery = "areas as (select distinct "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" join stops on areaid=placeid),";
+    			urbanquery="urbans1 as (select urbanid ,placeid as areaid  from census_blocks join stops using(blockid)),"
+    	      	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,placeid as areaid  from census_blocks group by areaid ),"
+    	                 +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+    	                   +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+    	       	
+    		}
     		  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, placeid AS areaid FROM census_places_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=placeid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ), employees as (select sum(C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid group by areaid ) ";  
-    	  urbanquery="urbans1 as (select urbanid ,placeid as areaid  from census_blocks),"
-      	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,placeid as areaid  from census_blocks group by areaid ),"
-                 +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
-                   +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
-            selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
+    	       selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
       	  		+ "coalesce(uc,0) as uc, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,  coalesce(rstops,0) as rstops,coalesce(ustops,0) as ustops from areas left join stoproutes using(areaid) left join routes using(areaid) left join employment using(areaid)left join employees using(areaid)left join urbans using(areaid) left join rstops using(areaid) left join ustops using(areaid) left join ua using(areaid) left join uc using(areaid)";
     
     	 
@@ -2393,20 +2486,31 @@ public class PgisEventManager {
         	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
         			  +"rstops as ( select congdistid as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  congdistid),"
                       +"ustops as (select congdistid as areaid,count(distinct(concat(aid,stopid))) as ustops from stops join census_blocks using(blockid) where poptype='U' group by congdistid),";
-             
+    		  if(agencyId==null){
+        		  areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+"),";
+        		  urbanquery="urbans1 as (select urbanid ,congdistid as areaid  from census_blocks),"
+              	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,congdistid as areaid  from census_blocks group by areaid ),"
+                         +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                           +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+                  
+    		  }
+        		else
+        		{
+        			areaquery = "areas as (select distinct "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+" join stops on areaid=congdistid),";
+        			urbanquery="urbans1 as (select urbanid ,congdistid as areaid  from census_blocks join stops using(blockid)),"
+                	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,congdistid as areaid  from census_blocks group by areaid ),"
+                           +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
+                             +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
+                    		
+        		}  
     	  routesquery = "routes AS (SELECT count(distinct agencyid||routeid) as routes, congdistid AS areaid FROM census_congdists_trip_map AS map " + routesidsjoin + " GROUP BY areaid),";
     	  employmentquery="temp as (select census_blocks.blockid ,areaid  from areas left join census_blocks on areaid=congdistid),employment as (select Sum(lodes_rac_projection_block.C000_"+popYear+") as employment,areaid from temp left join lodes_rac_projection_block on lodes_rac_projection_block.blockid=temp.blockid Group by areaid ), employees as (select sum(C000) as employees,areaid from temp left join lodes_blocks_wac on lodes_blocks_wac.blockid=temp.blockid group by areaid ) "; 
-    	  urbanquery="urbans1 as (select urbanid ,congdistid as areaid  from census_blocks),"
-        	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,congdistid as areaid  from census_blocks group by areaid ),"
-                   +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
-                     +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
-              selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
+    	    selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
         	  		+ "coalesce(uc,0) as uc, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,  coalesce(rstops,0) as rstops,coalesce(ustops,0) as ustops from areas left join stoproutes using(areaid) left join routes using(areaid) left join employment using(areaid)left join employees using(areaid)left join urbans using(areaid) left join rstops using(areaid) left join ustops using(areaid) left join ua using(areaid) left join uc using(areaid)";
       
       	 
     	  }
-    	 areaquery = "areas as (select "+ criteria +" as areaid, "+Types.getNameColumn(type)+" as areaname, population"+popYear+" as population, landarea, waterarea from " + Types.getTableName(type)+"),";
-    	 // selectquery = " select areas.areaid,employment,employees,areaname,coalesce(urbancount,0) as urbancount, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
+    		 // selectquery = " select areas.areaid,employment,employees,areaname,coalesce(urbancount,0) as urbancount, population, landarea, waterarea,coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, "
     	  		// + "coalesce(stops,0) as stops from areas "+join+" join stoproutes using(areaid) left join routes using(areaid) left join employment using(areaid) left join employees using(areaid)left join urbans using(areaid)";
       }      
      if (stopsquery.isEmpty())
@@ -2424,7 +2528,8 @@ public class PgisEventManager {
     	    		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     	    		+stoproutes+"),"+areaquery+urbanquery+routesquery+employmentquery+selectquery;
      }
-      try {
+    System.out.println(query);
+     try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
         GeoR instance;
@@ -3055,7 +3160,7 @@ public class PgisEventManager {
 	 * 
 	 * @param username
 	 * @param dbindex
-	 * @return
+	 * @return ArrayList<AgencySR>
 	 */
 	public static ArrayList <AgencySR> agencysr(String username, int dbindex) {
 		ArrayList <AgencySR> response = new ArrayList<AgencySR>();		
@@ -3276,17 +3381,24 @@ public class PgisEventManager {
       Statement stmt = null;
       String querytext = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
       		+ "population"+popYear+" Between "+String.valueOf(popmin)+" And "+String.valueOf(popmax)+"), stops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid inner join areas on "
-      		+ "stop.urbanid = areas.urbanid), census as (select population"+popYear+" as population from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
-      		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) upop from census ),"
-      		+ "stopcount as (select count(stops.id) as stopscount from stops) select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop from stopcount inner join "
-      		+ "urbanpop on true";
-      long[] results = new long[3];
+      		+ "stop.urbanid = areas.urbanid), census as (select population"+popYear+" as population, block.blockid from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
+      		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) as upop from census ),"
+      		+"wac as (select sum(C000) as wac from lodes_blocks_wac join census using(blockid)),"
+          +"rac as (select sum(C000_"+popYear+") as rac from lodes_rac_projection_block join census using(blockid)),"
+            +"stopcount as (select count(stops.id) as stopscount from stops)"
+            +"select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop,rac,wac from stopcount inner join urbanpop on true inner join wac on true inner join rac on true ";
+System.out.println(querytext);
+      long[] results = new long[7];
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
         while ( rs.next() ) {
         	results[0] = rs.getLong("stopscount");
         	results[1] = rs.getLong("urbanpop"); 
+            results[5]=rs.getLong("rac");
+            results[6]=rs.getLong("wac");
+       
+       
         }
         rs.close();
         stmt.close();        
@@ -3352,10 +3464,20 @@ public class PgisEventManager {
 			+ "undupblocks as (select block.population"+popYear+" as population, max(stops.service) as service "
 			+ "		from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") "
 			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
+			+ "undupblocks1 as (select block.population"+popYear+" as population, max(stops.service) as service ,blockid"
+			+ "		from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") "
+			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
+			+"swac as (select sum(C000*service) as swac from lodes_blocks_wac join undupblocks1 using(blockid)),"
+            +"srac as (select sum(((C000_"+popYear+")*service):: int) as srac from lodes_rac_projection_block join undupblocks1 using(blockid)),"
 			+ "undupblocksatlos as (select block.population"+popYear+" as population "
 			+ "		from census_blocks block inner join stopsatlos on st_dwithin(block.location, stopsatlos.location, "+String.valueOf(x)+") "
 			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
-			+ "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), "
+			+ "undupblocksatlos1 as (select block.population"+popYear+" as population,block.blockid "
+			+ "		from census_blocks block inner join stopsatlos on st_dwithin(block.location, stopsatlos.location, "+String.valueOf(x)+") "
+			+ "		inner join areas on block.urbanid = areas.urbanid group by blockid), "
+			+"wacatlos as (select sum(C000) as wacatlos from lodes_blocks_wac join undupblocksatlos1 using(blockid)),"
+            +"racatlos as (select sum(C000_"+popYear+" :: int) as racatlos from lodes_rac_projection_block join undupblocksatlos1 using(blockid)),"
+            + "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), "
 			+ "concom as (select distinct map.urbanid from census_urbans_trip_map map "
     		+ "		inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid), "
     		+ "concomnames as (select array_agg(uname order by uname)::text as connections "
@@ -3363,13 +3485,17 @@ public class PgisEventManager {
     		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos from undupblocksatlos), "
     		+ "upopserved as (select COALESCE(sum(population*service),0) as uspop from undupblocks), "
     		+ "svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
-    		+ "select svcmiles, svchours, svcstops, upoplos, uspop, svdays, fromtime, totime, connections "
+    		+ "select svcmiles, svchours, svcstops, upoplos,swac,srac,racatlos,wacatlos,uspop, svdays, fromtime, totime, connections "
     		+ "		from service inner join upopatlos on true "
     		+ "		inner join upopserved on true "
     		+ "		inner join svcdays on true "
     		+ "		inner join svchrs on true "
-    		+ "		inner join concomnames on true";     
-		
+    		+ "		inner join concomnames on true"
+    		+"      inner join srac on true"
+    		+"      inner join swac on true"
+    		+"      inner join racatlos on true"
+    		+"      inner join wacatlos on true";     
+		System.out.println(query);
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -3378,8 +3504,12 @@ public class PgisEventManager {
         	response.put("svchours", String.valueOf(Math.round(rs.getLong("svchours")/36.00)/100.00));
         	response.put("svcstops", String.valueOf(rs.getLong("svcstops")));
         	response.put("upopatlos", String.valueOf(rs.getLong("upoplos")));
-        	//response.put("rpopatlos", String.valueOf(rs.getLong("rpoplos")));
+        	response.put("racatlos", String.valueOf(rs.getLong("racatlos")));
+        	response.put("wacatlos", String.valueOf(rs.getLong("wacatlos")));
+            //response.put("rpopatlos", String.valueOf(rs.getLong("rpoplos")));
         	response.put("uspop", String.valueOf(rs.getFloat("uspop")));
+        	response.put("srac", String.valueOf(rs.getFloat("srac")));
+        	response.put("swac", String.valueOf(rs.getFloat("swac")));
         	//response.put("rspop", String.valueOf(rs.getFloat("rspop")));
         	response.put("svcdays", String.valueOf(rs.getString("svdays")));
         	response.put("fromtime", String.valueOf(rs.getInt("fromtime")));
@@ -3415,7 +3545,8 @@ public class PgisEventManager {
       Statement stmt = null;     
       String id1="'"+areaid+"'";
       String querytext ="";
-     if(areaid == null){
+     if(areaid == null || areaid.equals("null")){
+    	 System.out.println("null");
       querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid "
       		  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+ String.valueOf(x)+") "
       		  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
@@ -3813,7 +3944,7 @@ public class PgisEventManager {
         	results[1] = rs.getLong("ruralstopcount");
         	results[2] = rs.getLong("urbanpop"); 
         	results[3] = rs.getLong("ruralpop");
-        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;        	
+        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;        
         	results[5] = rs.getLong("rac");
         	results[6] = rs.getLong("wac");        
         	}
@@ -3861,7 +3992,7 @@ public class PgisEventManager {
 				query+=" union all ";
 		}      
     
-      if(areaid.equals("null"))
+      if(areaid.equals("null")|| areaid == null)
       {
       query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((trip.length+trip.estlength)::numeric,2) as length,"
       		+ "		trip.tlength as tlength, trip.stopscount as stops "
@@ -6083,4 +6214,125 @@ public class PgisEventManager {
 	dropConnection(connection);
 	return response;	
 	}
-}
+
+	/**
+	 * returns employment and employees information for aggregated
+	 * urban areas.
+	 * 
+	 * @param dbindex
+	 * @param username
+	 * @param popmax - maximum population of the areas to filter on
+	 * @param popmin - minimum population of the areas to filter on
+	 * @param popYear - population projection year
+	 * @return int[]
+	 * @throws FactoryException
+	 * @throws TransformException
+	 */
+	public static int[] aggurbanemp( int dbindex,String username,int popmax,int popmin,String popYear ) 
+			throws FactoryException, TransformException	{
+		Connection  connection = makeConnection(dbindex);
+		String query="";
+		Statement stmt = null;
+		int[] empArray =  new int[2];
+		query ="with temp as (select urbanid,population"+popYear+" as population from census_urbans where population between "+popmin+" and "+popmax+"),"
+				+"block as (select blockid,temp.urbanid from temp join census_blocks using(urbanid)),"
+				+"wac as (select sum(C000) as wac from lodes_blocks_wac join block using(blockid)),"
+				+"rac as (select sum(C000_"+popYear+" :: int) as rac from lodes_rac_projection_block join block using(blockid))"
+				+"select rac,wac from wac cross join rac";
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(query); 
+	        while ( rs.next() ) {
+	        	empArray[0]=rs.getInt("rac");
+	        	empArray[1]=rs.getInt("wac");
+	        }
+			 rs.close();
+			 stmt.close(); 
+			 dropConnection(connection);
+		}
+		 catch ( Exception e ) {
+			 e.printStackTrace();
+		}
+		return empArray;	
+	}
+
+	/**
+	 * returns the total trip count and number of active agencies
+	 * for a given date in a given database
+	 *  
+	 * @param dbindex
+	 * @param popYear
+	 * @return Map<String, HeatMap>
+	 * @throws ParseException
+	 */
+		public static Map<String, HeatMap> Heatmap (int dbindex, String popYear) throws ParseException 
+		{	
+		 Connection connection = makeConnection(dbindex);
+		 Statement stmt = null;
+		 Map<String,HeatMap> r = new LinkedHashMap<String,HeatMap>();
+		 int w=0;
+		 int day=01;
+		 int month1=00;
+		 String date="";
+		 String datekey="";
+		
+		 for ( int month=0; month<12; month++){
+			 //Create a calendar object and set year and month
+			  Calendar mycal = new GregorianCalendar(Integer.valueOf(popYear),month ,1);
+			  //Get the number of days in that month
+			  int daysInMonth = mycal.getActualMaximum(Calendar.DAY_OF_MONTH); 
+			  for(day=1;day<=daysInMonth;day++){
+				  month1=month+1;
+				  String dateString = String.format("%d-%d-%d",Integer.valueOf(popYear), month1, day);
+				  Date date1 = new SimpleDateFormat("yyyy-M-d").parse(dateString);		
+				  // Then get the day of week from the Date based on specific locale.
+				  String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date1);
+				  w=w+1;
+				  String query = "";
+				  if (month1< 10 && day < 10 )
+					  {
+						date=popYear+"0"+month1+"0"+day;
+						datekey="0"+month1+"/"+"0"+day+"/"+popYear;
+						}
+				  else if (month1 >= 10 && day < 10)
+					  {
+					  date=popYear+month1+"0"+day;
+					  datekey=month1+"/"+"0"+day+"/"+popYear;
+					  }
+				  else if (day >= 10 && month1 < 10)
+					  {
+					  date=popYear+"0"+month1+day;
+					  datekey="0"+month1+"/"+day+"/"+popYear;
+					  }
+				  else
+					  {
+					  date=popYear+month1+day;
+					  datekey=month1+"/"+day+"/"+popYear;
+					  }
+				  query="with svcids as (select serviceid_agencyid, serviceid_id  from gtfs_calendars gc where startdate::int<="+date+" and enddate::int>="+date+" and "+dayOfWeek+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)),"
+						  +"trips as (select trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
+						  +" activeAgencies as (select count(b.id) as active from gtfs_feed_info a join gtfs_agencies b using(defaultid) Where "+date+" between startdate::int And enddate::int),"
+						  +"totalAgencies as (select count(b.id) as total from gtfs_feed_info a join gtfs_agencies b using(defaultid)),"
+						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
+						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
+				  try {
+					  stmt = connection.createStatement();
+					  ResultSet rs = stmt.executeQuery(query);
+					  while ( rs.next() ){
+						  HeatMap q= new HeatMap();
+						  q.active=rs.getInt("active");
+						  q.total=rs.getInt("total");
+						  q.tripcount=rs.getInt("tripcount");
+						  r.put(datekey,q);
+						  }
+					  rs.close();
+					  stmt.close();
+					  } catch ( Exception e ) {
+						  e.printStackTrace();
+						  }
+				  }
+			  }
+		 dropConnection(connection);
+		 return(r);
+		 }
+	}

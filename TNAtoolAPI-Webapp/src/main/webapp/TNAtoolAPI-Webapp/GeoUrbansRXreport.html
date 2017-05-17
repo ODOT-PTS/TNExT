@@ -15,6 +15,7 @@
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
 	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
 	<script src="../resources/js/date.js"></script>
 	<script src="../resources/data/Datasources.js"></script>
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
@@ -26,6 +27,13 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
 	
 <script type="text/javascript">
@@ -55,13 +63,28 @@ tmp = '<tr><th  title="Identification number associated with the geographic area
 '<th class="metric">Percent of Population Served <span class="IOSym">(1)(2)</span></th>'+
 '<th class="metric">Percent of Population Served at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
 '<th class="metric">Percent of Population Unserved <span class="IOSym">(1)(2)</span></th>'+
+//RAC
+'<th class="metric">Employment(RAC) Served<span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Percent of Employment(RAC) Served <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Percent of Employment(RAC) at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
+'<th class="metric">Percent of Employment(RAC) Unserved <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric"> Employment(RAC) Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
+//RAC
+//WAC
+'<th class="metric">Employees(WAC) Served<span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Percent of Employees(WAC) Served <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Percent of Employees(WAC) at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
+'<th class="metric">Percent of Employees(WAC) Unserved <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric"> Employees(WAC) Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
+
+//WAC
 '<th class="metric">Service Stops <span class="IOSym">(1)(4)</span></th>'+
 '<th class="metric">Population Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
 '<th class="metric">Service Days <span class="IOSym">(1)(4)</span></th>'+
 '<th class="metric">Hours of Service <span class="IOSym">(1)(4)</span></th>'+
 '<th class="metric">Average Fare <span class="IOSym">(1)</span></th>'+
-'<th class="metric">Median Fare <span class="IOSym">(1)</span></th>'+
-'<th class="metric">Connected Communities <span class="IOSym">(1)</span></th></tr>';
+'<th class="metric">Median Fare <span class="IOSym">(1)</span></th></tr>';
+//'<th class="metric">Connected Communities <span class="IOSym">(1)</span></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -81,10 +104,9 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
-		success: function(item){
-			
+		success: function(item){			
 			docMetadata = item.metadata;
-			$('h2').append('Aggregated Urban Area Extended Report <br><hr>');	
+			appendNavigation();
 			html = html + '<tr><td>' + item.AreaId
 			+'</td><td>' + item.AreaName 
 			+'</td><td class="details-control">'
@@ -100,13 +122,39 @@ $(document).ready(function(){
 			+'</td><td>' + addPercent(numberconv(item.PopServed))
 			+'</td><td>' + addPercent(numberconv(item.PopServedAtLoService))
 			+'</td><td>' + addPercent(numberconv(item.PopUnServed))
-			+'</td><td>' + numberconv(item.ServiceStops)
+			//RAC
+			+'</td><td>' + numberconv(item.racWithinX) 
+			+'</td><td>' + addPercent(numberconv(item.racServed))
+			+'</td><td>' + addPercent(numberconv(item.racServedAtLoService))
+			+'</td><td>' + addPercent(numberconv(item.racUnServed))
+			+'</td><td>' + numberconv(item.racServedByService)+'</td>';
+			//RAC
+			//WAC
+			if(popYear>2010)
+				{
+			    html+='<td> N/A </td>' 
+					+'<td>N/A </td>'
+					+'<td> N/A </td>' 
+					+'<td> N/A </td>' 
+					+'<td> N/A </td>';
+				}
+			else
+				{
+			     html+= '<td>' + numberconv(item.wacWithinX) 
+					+'</td><td>' + addPercent(numberconv(item.wacServed))
+					+'</td><td>' + addPercent(numberconv(item.wacServedAtLoService))
+					+'</td><td>' + addPercent(numberconv(item.wacUnServed))
+					+'</td><td>' + numberconv(item.wacServedByService)+'</td>';
+				}
+			//WAC
+			
+			html+= '<td>' + numberconv(item.ServiceStops)
 			+'</td><td>' + numberconv(item.PopServedByService)
 			+'</td><td>' + item.ServiceDays
 			+'</td><td>' + item.HoursOfService
 			+'</td><td>' + showDollarSign(item.AverageFare)
-			+'</td><td>' + showDollarSign(item.MedianFare)
-			+'</td><td>' + item.ConnectedCommunities+'</td>';
+			+'</td><td>' + showDollarSign(item.MedianFare)+'</td>';
+			//+'</td><td>' + item.ConnectedCommunities+'</td>';
 			fAverage.push(item.AverageFare);
 			fMedian.push(item.MedianFare);
 			connectedcommunities = item.ConnectedCommunities;
@@ -114,7 +162,7 @@ $(document).ready(function(){
 			$('#displayReport').append($(html));	
 			progressbar.remove();
 			
-			tableProperties.hiddenCols = [19,20,21];
+			tableProperties.hiddenCols = [29,30];
 			table = buildDatatables();
 			
 			$('#RT tbody').on('click', 'td.details-control', function () {

@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -101,6 +102,7 @@ import com.model.database.queries.objects.GeoRList;
 import com.model.database.queries.objects.GeoStop;
 import com.model.database.queries.objects.GeoStopRouteMap;
 import com.model.database.queries.objects.GeoXR;
+import com.model.database.queries.objects.HeatMap;
 import com.model.database.queries.objects.HubCluster;
 import com.model.database.queries.objects.HubsClusterList;
 import com.model.database.queries.objects.KeyClusterHashMap;
@@ -1274,6 +1276,7 @@ public class Queries {
 
 		double RouteMiles = StopsPopMiles[4];
 		response.RouteMiles = String.valueOf(RouteMiles);
+		
 		if (RouteMiles > 0)
 			response.StopPerRouteMile = String.valueOf(Math
 					.round((Integer.parseInt(response.StopCount) * 10000.0) / (RouteMiles)) / 10000.0);
@@ -2156,7 +2159,7 @@ public class Queries {
 					geotype,uc);
 		} else {
 			results = PgisEventManager.geoallocation(type, agency, dbindex,
-					username, urbanPop, popYear, "null", "null", "null", 0, 6);
+					username, urbanPop, popYear, "null", "null", "null", -1, 6);
 		}
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -2569,6 +2572,7 @@ public class Queries {
 		long waterarea = 0;
 		long population = 0;
 		int stopscount = 0;
+		int[] emp =  new int[2];
 		List<String> routeL = new ArrayList<String>();
 		for (Urban instance : allurbanareas) {
 			index++;
@@ -2593,9 +2597,11 @@ public class Queries {
 				e1.printStackTrace();
 			}
 			int stopscnt = 0;
+			
 			try {
 				stopscnt = (int) EventManager.getstopscountbyurban(
 						instance.getUrbanId(), selectedAgencies, dbindex);
+				emp = PgisEventManager.aggurbanemp(dbindex,username,popmax,popmin,popYear);
 			} catch (FactoryException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -2620,6 +2626,8 @@ public class Queries {
 		// each.RoutesCount = String.valueOf(routescount);
 		each.RoutesCount = String.valueOf(routeL.size());
 		each.StopsCount = String.valueOf(stopscount);
+		each.employment=String.valueOf(emp[0]);		
+		each.employees=String.valueOf(emp[1]);		
 		response.GeoR.add(each);
 		return response;
 	}
@@ -2671,6 +2679,7 @@ public class Queries {
 		String[] fulldates = fulldate(dates);
 		String[] sdates = datedays[0];
 		String[] days = datedays[1];
+		int[] emp =  new int[2];
 		int totalLoad = 10;
 		int index = 0;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -2678,6 +2687,7 @@ public class Queries {
 		List<Urban> urbans = new ArrayList<Urban>();
 		try {
 			urbans = EventManager.geturbansbypopbet(popmin,popmax,dbindex, popYear);
+			emp=PgisEventManager.aggurbanemp(dbindex,username,popmax,popmin,popYear);
 		} catch (FactoryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -2687,6 +2697,8 @@ public class Queries {
 		} 
     	long population = 0;
     	long LandArea = 0;
+    	long employment=emp[0];
+    	long employees =emp[1];
     	for (Urban inst: urbans){
     		population += inst.getPopulation();
     		LandArea +=inst.getLandarea();
@@ -2714,11 +2726,18 @@ public class Queries {
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.StopsPersqMile = String.valueOf(Math.round(stopspop[0]*25899752356.00/LandArea)/10000.00);
-		response.PopWithinX = String.valueOf(stopspop[1]+stopspop[2]);
-		response.UPopWithinX = String.valueOf(stopspop[1]);
+		response.PopWithinX = String.valueOf(stopspop[1]);
+		response.racWithinX= String.valueOf(stopspop[5]);
+		response.wacWithinX= String.valueOf(stopspop[6]);
+		response.UPopWithinX = String.valueOf(stopspop[1] + stopspop[2]);
 		response.PopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/population))/100.00);
+		response.racServed = String.valueOf(Math.round((10000.00*(stopspop[5])/population))/100.00);
+		response.wacServed = String.valueOf(Math.round((10000.00*(stopspop[6])/population))/100.00);
 		response.UPopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/population))/100.00);	
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[1])/population)))/100.0);
+		response.racUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[5])/population)))/100.0);
+		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[6])/population)))/100.0);
+		
 		HashMap<String, String> servicemetrics = PgisEventManager.UAreasServiceMetrics(sdates, days, fulldates, popmin,popmax, username, L, x, dbindex, popYear);
 		index +=6;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
@@ -2731,6 +2750,14 @@ public class Queries {
 				.valueOf(Math.round(10000.0
 						* Long.parseLong(servicemetrics.get("upopatlos"))
 						/ population) / 100.0);
+		response.racServedAtLoService = String
+				.valueOf(Math.round(10000.0
+						* Long.parseLong(servicemetrics.get("racatlos"))
+						/ employment) / 100.0);
+		response.wacServedAtLoService = String
+				.valueOf(Math.round(10000.0
+						* Long.parseLong(servicemetrics.get("wacatlos"))
+						/ employees) / 100.0);
 		response.UPopServedAtLoService = String.valueOf(Long
 				.parseLong(servicemetrics.get("upopatlos")));
 
@@ -2767,6 +2794,9 @@ public class Queries {
 		}
 		response.ConnectedCommunities = connections;
 		response.PopServedByService = String.valueOf(svcPop);
+		response.racServedByService= servicemetrics.get("srac");
+		response.wacServedByService= servicemetrics.get("swac");
+		
 		response.UPopServedByService = String.valueOf(Float
 				.parseFloat(servicemetrics.get("uspop")));
 		try {
@@ -4734,5 +4764,124 @@ public class Queries {
 				sdates, days, areas, los, sradius, areaType, username,
 				urbanFilter, urbanYear, minUrbanPop, maxUrbanPop,
 				metrics.split(","), key);
+
 	}	
-}
+	@GET
+	@Path("/heatMap")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public HeatMap1 getcsv(
+			@QueryParam("popYear") String popYear, 
+			@QueryParam("dbindex") Integer dbindex ,@QueryParam("username") String username)
+					throws JSONException, SQLException, ParseException {
+		HeatMap1 val=new HeatMap1();
+		Map<String, HeatMap> dateNorm = new LinkedHashMap<String,HeatMap>();
+		dateNorm=PgisEventManager.Heatmap(dbindex,popYear);
+		for (String name: dateNorm.keySet()){
+	        String key1 =name.toString();
+	        String value = dateNorm.get(name).toString();
+	        }
+		val.a=new ArrayList<HeatMap3>();
+		val.b=new ArrayList<HeatMap3>();
+		val.c=new ArrayList<HeatMap3>();
+		val.d=new ArrayList<HeatMap3>();
+		val.e=new ArrayList<HeatMap3>();
+	    val.f=new ArrayList<HeatMap3>();
+		val.g=new ArrayList<HeatMap3>();
+		val.h=new ArrayList<HeatMap3>();
+		val.i=new ArrayList<HeatMap3>();
+		val.j=new ArrayList<HeatMap3>();
+		for (Entry<String, HeatMap> ee : dateNorm.entrySet()) {
+			if(ee.getValue().tripcount<100)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.a.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=100 && ee.getValue().tripcount<200)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.b.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=200 && ee.getValue().tripcount<400)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.c.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=400 && ee.getValue().tripcount<800)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.d.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=800 && ee.getValue().tripcount<1600)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.e.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=1600 && ee.getValue().tripcount<2600)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.f.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=2600 && ee.getValue().tripcount<3600)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.g.add(obj);
+				val.total=obj.total;
+				}
+			else if(ee.getValue().tripcount>=3600 && ee.getValue().tripcount<4600)
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.h.add(obj);
+				val.total=obj.total;
+				}
+			else
+				{
+				HeatMap3 obj =new HeatMap3();
+				obj.Date=ee.getKey();
+				obj.active= ee.getValue().active;
+				obj.total= ee.getValue().total;
+				obj.tripcount= ee.getValue().tripcount;
+				val.i.add(obj);
+				val.total=obj.total;
+				}
+			}
+		return val;
+		}
+	}
