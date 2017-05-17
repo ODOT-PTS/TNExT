@@ -36,10 +36,6 @@ public class ClusterRList {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String metadata;
-	
-	@XmlAttribute
-    @JsonSerialize
     public String agency;
 	
     @XmlElement(name = "ClusterR")

@@ -51,6 +51,17 @@ import com.model.database.queries.objects.TransitConnection;
 
 public class SpatialEventManager {
 
+	/**
+	 * returns a list of park and rides that are located within
+	 * a circle or polygon.
+	 * 
+	 * @param lat
+	 * @param lon
+	 * @param radius
+	 * @param dbindex
+	 * @return List<ParknRide>
+	 * @throws SQLException
+	 */
 	public static List<ParknRide> getPnRs(double[] lat, double[] lon,
 			double radius, int dbindex) throws SQLException {
 		List<ParknRide> output = new ArrayList<ParknRide>();
@@ -114,6 +125,15 @@ public class SpatialEventManager {
 		return output;
 	}
 	
+	/**
+	 * returns trips of a route
+	 * 
+	 * @param agencyID
+	 * @param routeID
+	 * @param dbindex
+	 * @return List<Trip>
+	 * @throws SQLException
+	 */
 	public static List<Trip> QueryTripsbyRoute(String agencyID, String routeID, int dbindex) throws SQLException{
 		List<Trip> output = new ArrayList<Trip>();
 		String query = "SELECT * FROM gtfs_trips WHERE route_agencyid = '" + agencyID + "' AND route_id = '" + routeID + "'";
@@ -135,6 +155,15 @@ public class SpatialEventManager {
 		return output;
 	}
 
+	/**
+	 * returns stop-times of a trip
+	 * 
+	 * @param agencyID
+	 * @param tripID
+	 * @param dbindex
+	 * @return
+	 * @throws SQLException
+	 */
 	public static List<StopTime> Querystoptimebytrip(String agencyID, String tripID, int dbindex) throws SQLException{
 		List<StopTime> output = new ArrayList<StopTime>();
 		String query = "SELECT stoptimes.*, stops.name AS stopsname "
@@ -163,6 +192,14 @@ public class SpatialEventManager {
 		return output;
 	}
 	
+	/**
+	 * return all agencies active in the database
+	 * 
+	 * @param username
+	 * @param dbindex
+	 * @return HashMap<String, ConGraphAgency>
+	 * @throws SQLException
+	 */
 	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
 		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
 		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
@@ -183,7 +220,29 @@ public class SpatialEventManager {
 		return response;
 	}
 	
-	public static Set<ConGraphObj> getConGraphObj(String agencyID, String agencyName, String fulldate, String day, String username, double radius, Statement stmt) throws SQLException{
+	/**
+	 * returns all the connections between the input agency and the other agencies
+	 * in the database. Each ConGraphObj represents a connection which will be 
+	 * displayed on the map as an edge on the Connectivity Graph.
+	 * 
+	 * @param agencyID
+	 * @param agencyName
+	 * @param fulldate
+	 * @param day
+	 * @param username
+	 * @param radius - connection distance
+	 * @param stmt - database statement
+	 * @return Set<ConGraphObj>
+	 * @throws SQLException
+	 */
+	public static Set<ConGraphObj> getConGraphObj(String agencyID, 
+			String agencyName, 
+			String fulldate, 
+			String day, 
+			String username, 
+			double radius, 
+			Statement stmt
+			) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
 		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
@@ -220,7 +279,6 @@ public class SpatialEventManager {
 				+ " select a1id, agencies1.name AS a1name, a2id, agencies2.name AS a2name "
 				+ "	FROM connected_agencies JOIN gtfs_agencies AS agencies1 ON a1id=agencies1.id "
 				+ "	JOIN gtfs_agencies AS agencies2 ON a2id=agencies2.id;";
-//		System.out.println(query);		
 		try{
 			ResultSet rs = stmt.executeQuery(query);
 			
@@ -248,13 +306,15 @@ public class SpatialEventManager {
 			}
 			rs.close();
 		}catch(SQLException e){
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return response;
 	}
 	
 	/**
+	 * Returns the centroid for agencies. If an agency is a centralized agency, 
+	 * only on coordinate is reported. Otherwise, for agencies like Greyhound
+	 * a simplified graph of with the stops as edges is returned.
 	 * 
 	 * @param agencyID
 	 * @param stmt
@@ -262,11 +322,10 @@ public class SpatialEventManager {
 	 * @throws SQLException 
 	 */
 	public static ConGraphAgencyGraph getAgencyCentroids(String agencyID, Statement stmt, double RADIUS) throws SQLException{
-//		ConGraphAgencyGraph response = new ConGraphAgencyGraph(new HashSet<Coordinate[]>());
-		String query = "SELECT name, lat, lon FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
-				+ " ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-				+ " WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";
-//		System.out.println(query);
+		String query = "SELECT name, lat, lon "
+				+ "		FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
+				+ " 	ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+				+ " 	WHERE map.agencyid='" + agencyID + "' ORDER BY lat, lon";
 		ResultSet rs = stmt.executeQuery(query);
 		List<ConGraphCluster> clusters = new ArrayList<ConGraphCluster>();
 		List<Coordinate> points = new ArrayList<Coordinate>();
@@ -279,6 +338,7 @@ public class SpatialEventManager {
 		if ( points.isEmpty())
 			return null;
 		
+		// clustering stops that are within RADIUS distance of each other into one coordinate
 		while (!points.isEmpty()){
 			Set<Coordinate> clusterPoints = new HashSet<Coordinate>();
 			Coordinate currenPoint = points.remove(0);
@@ -297,6 +357,9 @@ public class SpatialEventManager {
 	}
 	
 	/**
+	 * gets coordinates of all stops belonging to the input agency
+	 * and returns the average of stop coordinates as centroid 
+	 * of the agency.
 	 * 
 	 * @param agencyID
 	 * @param stmt
@@ -317,6 +380,15 @@ public class SpatialEventManager {
 		return response;
 	}	
 
+	/**
+	 * returns the median fare for the state
+	 * 
+	 * @param selectedAgencies
+	 * @param FareCount
+	 * @param dbindex
+	 * @return
+	 * @throws SQLException
+	 */
 	public static float getFareMedianForState(List<String> selectedAgencies, int FareCount, int dbindex) throws SQLException{
 		float output = 0;
 		String query = "SELECT price::float FROM gtfs_fare_attributes WHERE agencyid IN (";
@@ -335,7 +407,6 @@ public class SpatialEventManager {
 				System.out.println(counter);
 			}
 		}
-		System.out.println(medianIndex);
 		return output;
 	}
 }

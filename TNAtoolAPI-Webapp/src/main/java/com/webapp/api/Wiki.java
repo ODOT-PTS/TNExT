@@ -31,7 +31,6 @@ public class Wiki extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		request.getRequestDispatcher("/resources/wiki/index.html").forward(
 				request, response);
-
 	}
 
 	// POST

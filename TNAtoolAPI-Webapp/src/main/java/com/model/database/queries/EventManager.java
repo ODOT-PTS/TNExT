@@ -18,7 +18,6 @@ package com.model.database.queries;
 
 import org.hibernate.Session;
 import org.hibernate.Query;
-import org.hibernate.SessionFactory;
 import org.hibernate.type.Type;
 import org.hibernatespatial.GeometryUserType;
 import org.opengis.referencing.FactoryException;
@@ -44,8 +43,6 @@ import com.vividsolutions.jts.geom.Polygon;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-
-
 
 public class EventManager {		
 private	static Session[] session = new Session[Hutil.getSessionFactory().length];
@@ -105,16 +102,12 @@ public static void updateSessions(){
 		LinearRing ring = geometryFactory.createLinearRing( coords );
 		LinearRing holes[] = null; 
 		Polygon polygon = geometryFactory.createPolygon(ring, holes );
-		//Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
 		Geometry targetGeometry = JTS.transform( polygon, transform);
-		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
-		//point = targetGeometry.getCentroid();
 		targetGeometry.setSRID(2993);	
 		session[sessionindex].beginTransaction();
 		Query q = session[sessionindex].getNamedQuery("CENSUS_WITHIN_RECTANGLE");
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("polygon", targetGeometry, geomType);
-		//q.setParameter("radius", d);
 		@SuppressWarnings("unchecked")
 		List<Census> results = (List<Census>) q.list();
         Hutil.getSessionFactory()[sessionindex].close();
@@ -131,7 +124,6 @@ public static void updateSessions(){
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
 		Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
 		Geometry targetGeometry = JTS.transform( point, transform);
-		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
 		session[sessionindex].beginTransaction();
@@ -307,11 +299,9 @@ public static void updateSessions(){
  */
 	public static List<Urban> geturbansbypop(int pop, int sessionindex, String popYear) throws FactoryException, TransformException {			
 		session[sessionindex].beginTransaction();
-		//Query q = session[sessionindex].getNamedQuery("URBANS_BYPOP");
-		//q.setParameter("pop", (long)pop);
-		//@SuppressWarnings("unchecked")
 		String hql = "from Urban where population"+popYear+" >= "+pop;
 		Query q = session[sessionindex].createQuery(hql);
+		@SuppressWarnings("unchecked")
 		List<Urban> results = (List<Urban>) q.list();
         Hutil.getSessionFactory()[sessionindex].close();
         return results;
@@ -322,11 +312,9 @@ public static void updateSessions(){
 	 */
 		public static List<Urban> geturbansbypopbet(int popmin,int popmax, int sessionindex, String popYear) throws FactoryException, TransformException {			
 			session[sessionindex].beginTransaction();
-			//Query q = session[sessionindex].getNamedQuery("URBANS_BYPOP");
-			//q.setParameter("pop", (long)pop);
-			//@SuppressWarnings("unchecked")
 			String hql = "from Urban where population"+popYear+" BETWEEN '"+popmin+"' AND '"+popmax+"'";
 			Query q = session[sessionindex].createQuery(hql);
+			@SuppressWarnings("unchecked")
 			List<Urban> results = (List<Urban>) q.list();
 	        Hutil.getSessionFactory()[sessionindex].close();
 	        return results;
@@ -797,18 +785,7 @@ public static void updateSessions(){
         Hutil.getSessionFactory()[sessionindex].close();
         return result.size();
 	    }
-/**
- * returns list of routes for a given county
- *//*
-	public static int getroutescountsbycounty(String countyId, int sessionindex) throws FactoryException, TransformException {			
-		session[sessionindex].beginTransaction();
-		Query q = session[sessionindex].getNamedQuery("ROUTES_BY_COUNTY");
-		q.setParameter("id", countyId);
-		@SuppressWarnings("unchecked")
-		List<GeoStopRouteMap> result = q.list();
-        Hutil.getSessionFactory()[sessionindex].close();
-        return result.size();
-	    }*/
+
 /**
  * returns count of routes for a given county
  */	
@@ -1018,7 +995,6 @@ public static void updateSessions(){
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();			
 		Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
 		Geometry targetGeometry = JTS.transform( point, transform);
-		//point = geometryFactory.createPoint(targetGeometry.getCoordinate());
 		point = targetGeometry.getCentroid();
 		point.setSRID(2993);	
 		session[sessionindex].beginTransaction();
@@ -1026,7 +1002,6 @@ public static void updateSessions(){
 		Type geomType = GeometryUserType.TYPE;
 		q.setParameter("point", point, geomType);
 		q.setParameter("radius", d);
-		//@SuppressWarnings("unchecked")
 		List results = q.list();
 		long pop = 0;
 		if (results.get(0)!=null){ 
@@ -1077,19 +1052,14 @@ public static void updateSessions(){
 		session[sessionindex].beginTransaction();
 		Type geomType = GeometryUserType.TYPE;		
 		StringBuffer queryBuf = new StringBuffer("from Census");
-		//boolean firstClause = true;
 		int i = 0;		
-		//List<Point> qpoints = new ArrayList<Point>();
 		Point[] plist = new Point[points.size()];
 		for (Coordinate point: points){
-			//queryBuf.append(firstClause ? " where " : " or ");
 			Point p = geometryFactory.createPoint(point);			
 			Geometry targetGeometry = JTS.transform( p, transform);
 			p = targetGeometry.getCentroid();
 			p.setSRID(2993);
 			plist[i]=p;
-			//queryBuf.append("(distance(:point"+String.valueOf(i)+",location)<:radius)");			
-			//firstClause = false;
 			i++;
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
@@ -1102,19 +1072,9 @@ public static void updateSessions(){
 		query.setParameter("radius",d);
 		query.setParameter("allpoints",allpoints,geomType);
 		System.out.println(hqlQuery);		
-		//i=1;
-		/*for (Point p :qpoints){
-			query.setParameter("point"+String.valueOf(i),p,geomType);			
-			i++;
-		}*/
 		@SuppressWarnings("unchecked")
 		List<Census> results = (List<Census>) query.list();		
         Hutil.getSessionFactory()[sessionindex].close();
-        //List results = query.list();
-		//long pop = 0;
-		//if (results.get(0)!=null){ 
-		//pop = (Long) results.get(0);
-		//}
         return results;		
     }
 	public static long getunduppopbatch(double d, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
@@ -1123,48 +1083,28 @@ public static void updateSessions(){
 		MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 		session[sessionindex].beginTransaction();
-		Type geomType = GeometryUserType.TYPE;		
-		//StringBuffer queryBuf = new StringBuffer("select sum(population) from Census where id in (select distinct id from Census");
-		//boolean firstClause = true;
+		Type geomType = GeometryUserType.TYPE;	
 		int i = 0;		
-		//List<Point> qpoints = new ArrayList<Point>();
 		Point[] plist = new Point[points.size()];
 		for (Coordinate point: points){
-			//queryBuf.append(firstClause ? " where " : " or ");
 			Point p = geometryFactory.createPoint(point);
 			Geometry targetGeometry = JTS.transform( p, transform);
 			p = targetGeometry.getCentroid();
 			p.setSRID(2993);
 			plist[i]=p;
-			//qpoints.add(p);
-			//queryBuf.append("(distance(:point"+String.valueOf(i)+",location)<:radius)");			
-			//firstClause = false;
 			i++;
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);
-		//queryBuf.append(" where dwithin(location, :allpoints, :radius) = true ) ");
 		System.out.println("no of points: "+plist.length);
-		//queryBuf.append(") ");
 		Query q = session[sessionindex].getNamedQuery("POP_UNDUP_BATCH");
-		//String hqlQuery = queryBuf.toString();
-		//Query query = session.createQuery(hqlQuery);				
-		//i=1;
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
 		System.out.println(q.toString());
-		/*for (Point p :qpoints){
-			query.setParameter("point"+String.valueOf(i),p,geomType);			
-			i++;
-		}*/
-		//@SuppressWarnings("unchecked")
-		//List<Census> results = (List<Census>) query.list();		
-        
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		System.out.println("Query returned: "+pop);
@@ -1339,6 +1279,7 @@ public static void updateSessions(){
 		Hutil.getSessionFactory()[sessionindex].close();
 		return pop;		
     }
+	
 	public static long geturbanunduppopbatchbypop(double d, int upop, List <Coordinate> points, int sessionindex) throws FactoryException, TransformException {		
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
 		CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:2993");
@@ -1477,7 +1418,6 @@ public static void updateSessions(){
 			List<County> cns = new ArrayList<County>();
 			if (results.size()>0 && results.get(0)!=null){ 
 			cns = (List<County>) results;
-			//pop = (Integer) results.get(0);
 			long LandArea = 0;
 			long WaterArea = 0;
 			long Population = 0;
@@ -1519,7 +1459,6 @@ public static void updateSessions(){
 		County ct = new County();
 		if (results.size()>0 && results.get(0)!=null){ 
 		ct = (County) results.get(0);
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
@@ -1532,7 +1471,6 @@ public static void updateSessions(){
 		List<County> ct = new ArrayList<County>();
 		if (results.size()>0 && results.get(0)!=null){ 
 		ct = (List<County>) results;
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
@@ -1545,7 +1483,6 @@ public static void updateSessions(){
 		Tract ct = new Tract();
 		if (results.size()>0 && results.get(0)!=null){ 
 		ct = (Tract) results.get(0);
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
@@ -1558,7 +1495,6 @@ public static void updateSessions(){
 		Place ct = new Place();
 		if (results.size()>0 && results.get(0)!=null){ 
 		ct = (Place) results.get(0);
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
@@ -1571,7 +1507,6 @@ public static void updateSessions(){
 		Urban ct = new Urban();
 		if (results.size()>0 && results.get(0)!=null){ 
 		ct = (Urban) results.get(0);
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
@@ -1584,65 +1519,8 @@ public static void updateSessions(){
 		CongDist ct = new CongDist();
 		if (results.size()>0 && results.get(0)!=null){ 
 		ct = (CongDist) results.get(0);
-		//pop = (Integer) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
 		return ct;
 	}
-/*
-    private void createAndStoreEvent(String id, String pop, String lat, String lon) {
-
-        //First interpret the WKT string to a point
-        WKTReader fromText = new WKTReader();
-        Geometry geom = null;
-        try {
-            geom = fromText.read(wktPoint);
-        } catch (ParseException e) {
-            throw new RuntimeException("Not a WKT string:" + wktPoint);
-        }
-        if (!geom.getGeometryType().equals("Point")) {
-            throw new RuntimeException("Geometry must be a point. Got a " + geom.getGeometryType());
-        }
-
-        Session session = Hutil.getSessionFactory().getCurrentSession();
-
-        session.beginTransaction();
-
-        Census theEvent = new Census();
-        theEvent.setTitle(title);
-        theEvent.setDate(theDate);
-        theEvent.setLocation((Point) geom);
-        session.save(theEvent);
-
-        session.getTransaction().commit();
-    }
-*/
-    /**
-    * Utility method to assemble all arguments save the first into a String
-    */
-	/*
-    private static String assemble(String[] args){
-            StringBuilder builder = new StringBuilder();
-            for(int i = 1; i<args.length;i++){
-                    builder.append(args[i]).append(" ");
-            }
-            return builder.toString();
-    }
-    private List find(String wktFilter){
-        WKTReader fromText = new WKTReader();
-        Geometry filter = null;
-        try{
-                filter = fromText.read(wktFilter);
-        } catch(ParseException e){
-                throw new RuntimeException("Not a WKT String:" + wktFilter);
-        }
-        Session session = Hutil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
-        System.out.println("Filter is : " + filter);
-        Criteria testCriteria = session.createCriteria(Census.class);
-        testCriteria.add(SpatialRestrictions.within("location", filter));
-        List results = testCriteria.list();
-        session.getTransaction().commit();
-        return results;
-    }*/
 }

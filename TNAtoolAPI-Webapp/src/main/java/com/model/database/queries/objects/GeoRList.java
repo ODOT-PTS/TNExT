@@ -36,10 +36,6 @@ public class GeoRList {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String metadata;
-	
-	@XmlAttribute
-    @JsonSerialize
     public String agencyId;
 	
 	@XmlAttribute

@@ -90,6 +90,12 @@ import com.vividsolutions.jts.geom.Polygon;
 public class PgisEventManager {
 	//public static Connection connection;
 	
+	/**
+	 * makes a connection to a database based on the database index
+	 * 
+	 * @param dbindex
+	 * @return Connection
+	 */
 	public static Connection makeConnection(int dbindex){
 		Connection response = null;
 		try {
@@ -103,6 +109,10 @@ public class PgisEventManager {
 		return response;
 	}
 	
+	/**
+	 * Drops the connection
+	 * @param connection
+	 */
 	public static void dropConnection(Connection connection){
 		try {
 			connection.close();
@@ -117,6 +127,13 @@ public class PgisEventManager {
 	///// CONNECTED AGENCIES ON-MAP REPORT QUERIES
 	/**
 	 * Queries stops within a certain distance of a given stop while filtering the agencies.
+	 * 
+	 * @param lat - stop latitude
+	 * @param lon - stops longitude
+	 * @param gap - search radius
+	 * @param agencies - list of agencies
+	 * @param dbindex
+	 * @return CAStopsList
 	 */
 	public static CAStopsList getConnectedStops(double lat, double lon, double gap, String agencies, int dbindex){
 		CAStopsList results=new CAStopsList();	// This object is declared to hold the stops
@@ -152,11 +169,14 @@ public class PgisEventManager {
 	    dropConnection(connection);
 		return results;
 	}
-	
-	/////GEO AREA EXTENDED REORTS QUERIES
-	
+		
 	/**
-	 *Queries Route miles for a geographic area
+	 * Queries Route miles for a geographic area
+	 * @param type -  area type
+	 * @param areaId - area ID
+	 * @param username - user session
+	 * @param dbindex - database index
+	 * @return routeMiles (float)
 	 */
 	public static float RouteMiles(int type, String areaId, String username, int dbindex) 
     {	
@@ -185,7 +205,15 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *Queries Fare Information for a geographic area. keys are; minfare, maxfare, medianfare, averagefare
+	 * Queries Fare Information for a geographic area. keys are; minfare, maxfare, medianfare, averagefare
+	 * 
+	 * @param type - area type
+	 * @param date
+	 * @param day
+	 * @param areaId
+	 * @param username - user session
+	 * @param dbindex
+	 * @return
 	 */
 	public static HashMap<String, Float> FareInfo(int type, String[] date, String[] day, String areaId, String username, int dbindex) 
     {	
@@ -242,7 +270,12 @@ public class PgisEventManager {
       return response;
     }
 	
-	/** Queries all P&Rs nationwide grouped by county*/
+	/**
+	 * Queries all P&Rs nationwide grouped by county
+	 * 
+	 * @param dbindex
+	 * @return ParknRideCountiesList
+	 */
 	public static ParknRideCountiesList getCountiesPnrs(int dbindex){
 		ParknRideCountiesList results = new ParknRideCountiesList();
 		Connection connection = makeConnection(dbindex);
@@ -264,7 +297,6 @@ public class PgisEventManager {
 	        	instance.accessibleSpaces = rs.getString("accessiblespaces");
 	        	list.add(instance);
 	        }
-//	        results.PnrCountiesList.add(instance);
 	        rs.close();
 	        stmt.close(); 
 	        results.PnrCountiesList=list;
@@ -275,8 +307,13 @@ public class PgisEventManager {
 	      return results;
 	}
 	
-	/** Queries all detailed information on all the PnRs within a given county.
-	 * 
+	/** 
+	 * Queries all detailed information on all the P&Rs within a given county.
+	 * @param countyId
+	 * @param radius - radius to search for transit stops around P&Rs
+	 * @param dbindex
+	 * @param username
+	 * @return PnrInCountyList
 	 */
 	public static PnrInCountyList  getPnrsInCounty(int countyId, int radius, int dbindex, String username){
 		PnrInCountyList results = new PnrInCountyList();
@@ -378,7 +415,11 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 * Queries the list of all agencies' IDs in the database
+	 * Queries the list of all agency IDs in the database
+	 * 
+	 * @param username
+	 * @param dbindex
+	 * @return
 	 */
 	public static List<String> getAgencyList(String username, int dbindex){
 		List<String> result = new ArrayList<String>();
@@ -403,6 +444,18 @@ public class PgisEventManager {
 	
 	/**
 	 * Queries employment data on a given area (based on the reportType)
+	 * 
+	 * @param projection - employment projection year
+	 * @param DS - dataset to query from (WAC or RAC)
+	 * @param reportType - determines whether the report is on agencies or geographical areas 
+	 * @param dates - array of the dates to report on
+	 * @param day - array of days of the week associated with selected dates
+	 * @param fulldates - array of selected dates in full format
+	 * @param radius - search radius
+	 * @param L - minimum level of service
+	 * @param dbindex - database index
+	 * @param username - user session
+	 * @return
 	 */
 	public static EmpDataList getEmpData(String projection, String DS, String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
 		String projectionYear = "";
@@ -1181,6 +1234,16 @@ public class PgisEventManager {
 	
 	/**
 	 * Queries Title VI data on a given area (based on the reportType)
+	 * 
+	 * @param reportType - determines whether the report is on agencies or geographical areas 
+	 * @param dates - array of the dates to report on
+	 * @param day - array of days of the week associated with selected dates
+	 * @param fulldatess - array of selected dates in full format
+	 * @param radius - search radius
+	 * @param L - minimum level of service
+	 * @param dbindex - database index
+	 * @param username - user session
+	 * @return TitleVIDataList
 	 */
 	public static TitleVIDataList getTitleVIData(String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
 		TitleVIDataList results = new TitleVIDataList();
@@ -1655,7 +1718,17 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
+	 * Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops within the given geographic area
+	 * 
+	 * @param type - defines geographical area type
+	 * @param areaId - geographical area ID
+	 * @param username - user session
+	 * @param x - population search radius
+	 * @param dbindex - database index
+	 * @param popYear - population projection year
+	 * @param geoid - ID of the geographical to be intersected with the original area
+	 * @param geotype - type of the geographical to be intersected with the original area
+	 * @return long[]
 	 */
 	public static long[] stopsPop(int type, String areaId, String username, double x, int dbindex, String popYear,String geoid,int geotype) 
     {	
@@ -1754,8 +1827,25 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), served population (urban and rural), service days, hours of service,
-	 *and connected communities for a geographic area. keys are: svcmiles, svchours, svcstops, upopatlos, rpopatlos, uspop, rspop, svcdays, fromtime, totime, connections
+	 * Queries Service miles, service hours, service stops, served pop at level of 
+	 * service (urban and rural), served population (urban and rural), service days, 
+	 * hours of service, and connected communities for a geographic area. keys are: 
+	 * svcmiles, svchours, svcstops, upopatlos, rpopatlos, uspop, rspop, svcdays, 
+	 * fromtime, totime, connections
+	 *
+	 * @param type - determines the of the geographical area 
+	 * @param date - array of dates selected by the user 
+	 * @param day - array of week day selected by the user. For example {"sunday","monday"}
+	 * @param fulldates - array of dates selected by the users in full format
+	 * @param areaId
+	 * @param username
+	 * @param LOS - minimum level of service
+	 * @param x - population search radius
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @param geotype - type of the geographical to be intersected with the original area
+	 * @param geoid - ID of the geographical to be intersected with the original area
+	 * @return
 	 */
 	public static HashMap<String, String> ServiceMetrics(int type, String[] date, String[] day, String[] fulldates, String areaId, String username, int LOS, double x, int dbindex, String popYear,int geotype,String geoid) 
     {	
@@ -1909,10 +1999,23 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *Queries geographic allocation of service for transit agency reports
-	 *0:county 1:census tracts 2:census places 3:urban areas 4:ODOT region 5:congressional district
+	 * Queries geographic allocation of service for transit agency reports
+	 * 0:county 1:census tracts 2:census places 3:urban areas 4:ODOT region 5:congressional district
+	 * @param type - type of the geographical area to filter stops
+	 * @param agencyId
+	 * @param dbindex
+	 * @param username
+	 * @param urbanPop - minimum population of urban areas to filter
+	 * @param popYear - population projection year
+	 * @param popMax - maximum population of urban areas to filter
+	 * @param popMin - minimum population of urban areas to filter
+	 * @param areaid
+	 * @param geotype - type of the geographical area to filter stops
+	 * @param uc - flag to filter on urbanized areas (uc == 0) or on urban clusters (uc ==1)
+	 * @return List<GeoR>
 	 */
-	public static List<GeoR> geoallocation(int type, String agencyId, int dbindex, String username, int urbanPop, String popYear,String popMax,String popMin,String areaid,int geotype,int uc) 
+	public static List<GeoR> geoallocation(int type, String agencyId, int dbindex, String username, int urbanPop, 
+			String popYear,String popMax,String popMin,String areaid,int geotype,int uc) 
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
@@ -2375,7 +2478,16 @@ public class PgisEventManager {
 
 
 	/**
-	 *Queries the transit agency summary report for geographic areas : Agency allocation of service for geographic areas
+	 * Queries the transit agency summary report for geographic areas : Agency 
+	 * allocation of service for geographic areas
+	 * 
+	 * @param username
+	 * @param type - type of the geographical area
+	 * @param areaId - ID of the geographical area
+	 * @param dbindex
+	 * @param geotype - type of the geographical area to be intersected with urban areas for filtering service
+	 * @param geoid - ID of the geographical area to be intersected with urban areas for filtering service 
+	 * @return ArrayList<AgencySR> 
 	 */
 	public static ArrayList <AgencySR> agencyGeosr(String username, int type, String areaId, int dbindex,int geotype,String geoid ) {
 		ArrayList <AgencySR> response = new ArrayList<AgencySR>();		
@@ -2542,15 +2654,44 @@ public class PgisEventManager {
 	
 	
 	/**
-	 *Queries the stops reports:
+	 * Queries the stops reports:
 	 *stops by agency
 	 *stops by agency and route 
 	 *stops by geographic area
 	 *stops by geographic area and agency
 	 *stops by geographic are, agency, and route
-	 * @throws SQLException 
-	*/
-	public static ArrayList <StopR> stopGeosr(String username, int type, String[] dates, String[] days, String areaId, String agency, String route, double x, int dbindex, String popYear,int geotype,String geoid,int rc) throws SQLException {
+	 *
+	 * @param username
+	 * @param type - type of the geographical area
+	 * @param dates - array of dates in yyyymmdd format
+	 * @param days - array of days. E.g. "tuesday"
+	 * @param areaId - geographical area ID
+	 * @param agency - agency ID
+	 * @param route - route ID
+	 * @param x - search radius
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @param geotype - type of the geographical area to be intersected with urban areas for filtering service
+	 * @param geoid - ID of the geographical area to be intersected with urban areas for filtering service 
+	 * @param rc - integer to distinguish rural and urban stops
+	 * @return ArrayList<StopR>
+	 * @throws SQLException
+	 */
+	public static ArrayList <StopR> stopGeosr(
+			String username, 
+			int type, 
+			String[] dates, 
+			String[] days, 
+			String areaId, 
+			String agency, 
+			String route, 
+			double x, 
+			int dbindex, 
+			String popYear,
+			int geotype,
+			String geoid,
+			int rc
+			) throws SQLException {
 		ArrayList <StopR> response = new ArrayList<StopR>();		
 		StopR instance;
 		Connection connection = makeConnection(dbindex);	
@@ -2586,8 +2727,6 @@ public class PgisEventManager {
 		      }	else  { //census place, urban area, ODOT Regions or congressional district
 		    	  criteria = Types.getIdColumnName(type);
 		    	  popsfilter = "block." + criteria + "='" + areaId + "' and";
-		
-		      
 		      }
 			if (route==null){
 				if (agency==null){//stops by areaId
@@ -2738,6 +2877,7 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}
+	
 	/**
 	 * Gets real ID of the agency and returns default ID.
 	 * @param agencyid
@@ -2759,11 +2899,22 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the routes reports:
-	 *routes by agency	 
-	 *routes by geographic area	
-	 *routes by agency and geographic area  
-	*/
+	 * Queries the routes reports:
+	 *  routes by agency	 
+	 *  routes by geographic area	
+	 *  routes by agency and geographic area
+	 * 
+	 * @param username
+	 * @param type - type of the geographical area to filter on
+	 * @param areaId - ID of the geographical area to filter on
+	 * @param agency - Agency ID
+	 * @param date 
+	 * @param day
+	 * @param x - population search radius
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @return ArrayList <RouteR>
+	 */
 	public static ArrayList <RouteR> RouteGeosr(String username, int type, String areaId, String agency, String[] date, String[] day, double x, int dbindex, String popYear) {
 		ArrayList <RouteR> response = new ArrayList<RouteR>();		
 		RouteR instance;
@@ -2900,7 +3051,11 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the transit agency summary report	  
+	 * Queries the transit agency summary report
+	 * 
+	 * @param username
+	 * @param dbindex
+	 * @return
 	 */
 	public static ArrayList <AgencySR> agencysr(String username, int dbindex) {
 		ArrayList <AgencySR> response = new ArrayList<AgencySR>();		
@@ -3000,11 +3155,17 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}	
-	
-/////AGGREGATED URBAN AREAS EXTENDED REPORTS QUERIES
-	
+		
 	/**
-	 *Queries Route miles for all urban areas with population => pop
+	 * Queries Route miles for all urban areas with minimum and maximum
+	 * filter on urban areas population
+	 * 
+	 * @param popmin - minimum population of the urban areas
+	 * @param popmax -  maximum population of the urban areas
+	 * @param username
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @return float - route miles
 	 */
 	public static float AUrbansRouteMiles(Integer popmin, Integer popmax, String username, int dbindex, String popYear) 
     {	
@@ -3030,7 +3191,16 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *Queries Fare Information for urban areas with population >= pop. keys are; minfare, maxfare, medianfare, averagefare
+	 * Queries Fare Information for urban areas with filter on population. keys are; minfare, maxfare, medianfare, averagefare
+	 *  
+	 * @param date - array of selected dates
+	 * @param day - array of selected days of the week. E.g. [sunday, monday] 
+	 * @param popmin - minimum population of urban areas to filter on
+	 * @param popmax - maximum population of urban areas to filter on
+	 * @param username
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @return HashMap<String, Float>
 	 */
 	public static HashMap<String, Float> AUrbansFareInfo(String[] date, String[] day, Integer popmin,Integer popmax, String username, int dbindex, String popYear) 
     {	
@@ -3089,7 +3259,16 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *Queries Stops count and unduplicated urban pop within x meters of all stops within urban areas with population >= pop
+	 * Queries Stops count and unduplicated urban pop within x meters of all stops within urban areas 
+	 * with minimum population of popmin and maximum population of popmax.
+	 * 
+	 * @param popmin - minimum population of the urban areas
+	 * @param popmax -  maximum population of the urban areas
+	 * @param username - user session
+	 * @param x - population search radius
+	 * @param dbindex - databse index
+	 * @param popYear - poulation projection year
+	 * @return long[]
 	 */
 	public static long[] AUrbansstopsPop(Integer popmin,Integer popmax, String username, double x, int dbindex, String popYear) 
     {	
@@ -3119,8 +3298,21 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), served population (urban and rural), service days, hours of service,
-	 *and connected communities for urban areas with population >= pop. keys are: svcmiles, svchours, svcstops, upopatlos, uspop, svcdays, fromtime, totime, connections
+	 * Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), 
+	 * served population (urban and rural), service days, hours of service, and connected communities for 
+	 * urban areas with population >= pop. keys are: svcmiles, svchours, svcstops, upopatlos, uspop, svcdays, fromtime, totime, connections
+	 * 
+	 * @param date - array of dates in yyyymmdd format
+	 * @param day - array of selected day of the week. E.g. [sunday,monday]
+	 * @param fulldates - array of selected dates in full format. E.g., [Mon 15 May 2017]
+	 * @param popmin - minimum population of urban areas to filter on
+	 * @param popmax - maximum population of urban areas to filter on
+	 * @param username - user session
+	 * @param LOS - minimum level of service
+	 * @param x -  population search radius
+	 * @param dbindex - databsase index
+	 * @param popYear - population projection year
+	 * @return HashMap<String, String>
 	 */
 	public static HashMap<String, String> UAreasServiceMetrics(String[] date, String[] day, String[] fulldates, int popmin,int popmax, String username, int LOS, double x, int dbindex, String popYear) 
     {	
@@ -3203,12 +3395,20 @@ public class PgisEventManager {
       return response;
     }
 	
-	/////Agency Extended Report Queries
-	
 	/**
-	 *Queries Stops count, unduplicated urban pop and rural pop within x meters of all stops, and route miles for a given transit agency
+	 * Queries Stops count, unduplicated urban pop and rural pop within x meters of all 
+	 * stops, and route miles for a given transit agency
+	 * 
+	 * @param type - type of the geographical area
+	 * @param agencyId - agency ID
+	 * @param x - population search radius
+	 * @param dbindex - database index
+	 * @param popYear - population projection year
+	 * @param areaid - ID of the geographical area to filter on
+	 * @param geoid - ID of the geographical to be intersected with the original area
+	 * @param geotype - type of the geographical to be intersected with the original area
+	 * @return
 	 */
-
 	public static double[] stopsPopMiles(int type,String agencyId, double x, int dbindex, String popYear,String areaid,String geoid,int geotype) 
     {	
 	  Connection connection = makeConnection(dbindex);
@@ -3628,8 +3828,23 @@ public class PgisEventManager {
 	
 	
 	/**
-	 *Queries Service miles, service hours, service stops, served population (urban and rural), service days, and hours of service for a given agency id. 
-	 *keys are: svcmiles, svchours, svcstops, uspop, rspop, svcdays, fromtime, and totime
+	 * Queries Service miles, service hours, service stops, served population (urban and rural), 
+	 * service days, and hours of service for a given agency id. 
+	 * keys are: svcmiles, svchours, svcstops, uspop, rspop, svcdays, fromtime, and totime
+	 * 
+	 * @param date - array of dates in yyyymmdd format
+	 * @param day - array of selected day of the week. E.g. [sunday,monday]
+	 * @param fulldates - array of selected dates in full format. E.g., [Mon 15 May 2017]
+	 * @param agencyId - agency ID
+	 * @param x - population search radius
+	 * @param LOS - minimum level of service
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @param areaid - ID of the geographical area to filter on
+	 * @param type- type of the geographical area to filter on
+	 * @param geotype - type of the geographical area to be intersected with urban areas for filtering service
+	 * @param geoid - ID of the geographical area to be intersected with urban areas for filtering service 
+	 * @return HashMap<String, String>
 	 */
 	public static HashMap<String, String> AgencyServiceMetrics(String[] date, String[] day, String[] fulldates, String agencyId, double x, int LOS, int dbindex, String popYear,String areaid,int type,int geotype,String geoid) 
     {	
@@ -4251,12 +4466,22 @@ public class PgisEventManager {
       dropConnection(connection);      
       return response;
     }
-
-	//////STATEWIDE EXTENDED REPORT QUERIES
 	
 	/**
-	 *Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), served population (urban and rural), service days, and hours of service
-	 * for the whole state. keys are: svcmiles, svchours, svcstops, upopatlos, rpopatlos, uspop, rspop, svcdays, fromtime, totime.
+	 * Queries Service miles, service hours, service stops, served pop at level of service (urban and rural), 
+	 * served population (urban and rural), service days, and hours of service
+	 * for the whole state. keys are: svcmiles, svchours, svcstops, upopatlos, rpopatlos, 
+	 * uspop, rspop, svcdays, fromtime, totime.
+	 * 
+	 * @param date - array of dates in yyyymmdd format
+	 * @param day - array of selected day of the week. E.g. [sunday,monday]
+	 * @param fulldates - array of selected dates in full format. E.g., [Mon 15 May 2017]
+	 * @param username
+	 * @param LOS - minimum level of service
+	 * @param x - population search radius
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @return HashMap<String, String>
 	 */
 	public static HashMap<String, String> StatewideServiceMetrics(String[] date, String[] day, String[] fulldates, String username, int LOS, double x, int dbindex, String popYear) 
     {	
@@ -4326,7 +4551,13 @@ public class PgisEventManager {
     }
 	
 	/**
-	 *returns sum of unduplicated population within x distance of all stops in the state
+	 * returns sum of unduplicated population and employment within x distance of all stops in the state
+	 * 
+	 * @param x - population search radius
+	 * @param username
+	 * @param dbindex
+	 * @param popYear - population projection year
+	 * @return long[]
 	 */
 	public static long [] PopWithinX(double x, String username, int dbindex, String popYear){
 		long[] response = new long [6];
@@ -4359,10 +4590,11 @@ public class PgisEventManager {
 	/**
 	 * returns the population within x distance of all stops in the state that are located in urban areas
 	 * with over 50k population as well as the population of urban areas with less than 50k pop.
-	 * @param x
+	 * 
+	 * @param x - population search radius
 	 * @param username
 	 * @param dbindex
-	 * @return
+	 * @return long[]
 	 */
 	public static long[] cutOff50(double x, String username, int dbindex, String popYear){
 		long[] response = new long[4];
@@ -4391,8 +4623,12 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}
+	
 	/**
-	 *returns route Miles for the whole state 
+	 * returns route Miles for the whole state
+	 * @param username
+	 * @param dbindex
+	 * @return
 	 */
 	public static double StateRouteMiles(String username, int dbindex){
 		double response = 0;
@@ -4412,122 +4648,15 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}
-	
-	
+		
 	/**
-	 *returns sum of rural/urban population served at specified level of service for the whole state : ALREADY IMPLEMENTED IN EARLIER SERVICE QUERY
-	 */
-	/*public static long[] PopServedatLOS(double x, String date, String day, String username, int l, int dbindex){
-		long[] response = new long[2];
-		Statement stmt = null;
-		Connection connection = makeConnection(dbindex);
-		try{
-			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (select serviceid_agencyid, "
-					+ "serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date+" and enddate::int>="+date+" and "+day
-					+"=1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2) "
-					+ "union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date
-					+"' and exceptiontype=1),trips as (select trip.agencyid as aid, trip.id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, "
-					+ "serviceid_id)),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location from gtfs_stops stop inner join "
-					+ "gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and "
-					+ "stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+l+" ),undupblocksatlos as "
-					+ "(select block.population, block.poptype from census_blocks block inner join stopsatlos on st_dwithin(block.location, stopsatlos.location,"
-					+String.valueOf(x)+") group by blockid),upopatlos as (select COALESCE(sum(population),0) as upoplos from undupblocksatlos where poptype='U'), rpopatlos as "
-					+ "(select COALESCE(sum(population),0) as rpoplos from undupblocksatlos where poptype='R') select upoplos, rpoplos from upopatlos inner join rpopatlos on true");	
-			while ( rs.next() ) {
-				response[0] = rs.getLong("upoplos");
-				response[0] = rs.getLong("rpoplos");
-			}
-		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
-	      }
-		dropConnection(connection);
-		return response;
-	}*/
-	
-	/**
-	 *returns service miles in miles for the whole state for a single day in YYYYMMDD format and day of week in all lower case : ALREADY IMPLEMENTED IN EARLIER SERVICE QUERY
-	 */
-	/*public static double ServiceMiles(String date, String day, String username, int dbindex){
-		double response = 0;
-		Connection connection = makeConnection(dbindex);
-		Statement stmt = null;
-		try{
-			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (select serviceid_agencyid, "
-					+ "serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date+" and enddate::int>="+date+" and "+day
-					+"=1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2) "
-					+ "union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date
-					+"' and exceptiontype=1) select sum(length+estlength) as svcmiles from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)");	
-			while ( rs.next() ) {
-				response = rs.getDouble("svcmiles");
-			}
-		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
-	      }
-		dropConnection(connection);
-		return response;
-	}*/
-	
-	/**
-	 *returns service hours in seconds for the whole state for a single day in YYYYMMDD format and day of week in all lower case : ALREADY IMPLEMENTED IN EARLIER SERVICE QUERY
-	 */
-	/*public static long ServiceHours(String date, String day, String username, int dbindex){
-		long response = 0;
-		Connection connection = makeConnection(dbindex);
-		Statement stmt = null;
-		try{
-			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (select serviceid_agencyid, "
-					+ "serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date+" and enddate::int>="+date+" and "+day
-					+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)"
-					+ " union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date
-					+"' and exceptiontype=1) select sum(trip.tlength) as svchours from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)");	
-			while ( rs.next() ) {
-				response = rs.getLong("svchours");
-			}
-		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
-	      }
-		dropConnection(connection);
-		return response;
-	}*/
-	
-	/**
-	 *returns min and max Hours of service in int time (epoch) fromat for a given date and day of week in an integer array : ALREADY IMPLEMENTED IN EARLIER SERVICE QUERY
-	 */
-	/*public static int[] HoursofService(String date, String day, int dbindex){
-		int[] response = new int[2];
-		Statement stmt = null;
-		Connection connection = makeConnection(dbindex);
-		try{
-			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "select min(arrivaltime) as start, max(departuretime) as finish from gtfs_stop_times stimes inner join "
-					+ "(select agencyid, id from gtfs_trips where serviceid_agencyid||serviceid_id in "
-					+ "(select  serviceid_agencyid||serviceid_id from gtfs_calendars where startdate::int<=" + date	+ " and enddate::int>="	+ date + " and " + day + " = 1 "
-					+ "and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date
-					+ "' and exceptiontype=2) union select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + date + "' and exceptiontype=1))as trips "
-					+ "on trips.agencyid = stimes.trip_agencyid and trips.id = stimes.trip_id where arrivaltime>=0 and departuretime>=0");	
-			while ( rs.next() ) {
-				response[0] = rs.getInt("start"); 
-				response[1] = rs.getInt("finish"); 
-			}
-		} catch ( Exception e ) {
-	        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-	         
-	      }
-		dropConnection(connection);
-		return response;
-	}*/
-	
-	////////AGGREGATED URBAN AREAS EXTENDED REPORT QUERIES
-
-	
-	/**
-	 *Queries undupliated population within x meters of all stops in urban areas with population larger than pop
+	 * Queries undupliated population within x meters of all stops in urban areas with population larger than pop
+	 * 
+	 * @param pop
+	 * @param dbindex
+	 * @param username
+	 * @param x - population search radius
+	 * @return
 	 */
 	public static long UrbanCensusbyPop(int pop, int dbindex, String username, double x) 
     {	
@@ -4552,11 +4681,14 @@ public class PgisEventManager {
       dropConnection(connection);      
       return population;
     }
-	
-	///////OTHER QUERIES FOR CONNECTED AGENCIES, CONNECTED NETWORKS AND TRANSIT HUBS REPORTS
-	
+		
 	/**
-	 *Queries agency clusters (connected agencies) and returns a list of all transit agencies with their connected agencies
+	 * Queries agency clusters (connected agencies) and returns a list of all transit agencies with their connected agencies
+	 * 
+	 * @param dist - stop search radius
+	 * @param username
+	 * @param dbindex
+	 * @return List<agencyCluster>
 	 */
 	public static List<agencyCluster> agencyCluster(double dist, String username, int dbindex){
 		List<agencyCluster> response = new ArrayList<agencyCluster>();
@@ -4609,8 +4741,15 @@ public class PgisEventManager {
 		dropConnection(connection);
 		return response;
 	}
+	
 	/**
-	 *Queries connected transit agencies and list of connections for a given transit agency (connected agencies extended report)
+	 * Queries connected transit agencies and list of connections for a given transit agency (connected agencies extended report)
+	 * 
+	 * @param dist - stop search radius
+	 * @param agencyId  -agency ID
+	 * @param username
+	 * @param dbindex
+	 * @return List<agencyCluster>
 	 */
 	public static List<agencyCluster> agencyClusterDetails(double dist, String agencyId, String username, int dbindex){
 		List<agencyCluster> response = new ArrayList<agencyCluster>();
@@ -4667,7 +4806,11 @@ public class PgisEventManager {
 	
 	/**
 	 * Queries stops of a given agency.
-	 * Used to generate Connecteg Agencies On-map report,
+	 * Used to generate Connected Agencies On-map report.
+	 * 
+	 * @param agencyId
+	 * @param dbindex
+	 * @return CAStopsList
 	 */
 	public static CAStopsList getAgenStops(String agencyId, int dbindex){
 		CAStopsList result = new CAStopsList();
@@ -4700,7 +4843,14 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries frequency of service for all stops in the database for a set of dates and days
+	 * Queries frequency of service for all stops in the database for a set of dates and days
+	 * 
+	 * @param agency
+	 * @param date - array of selected dates in yyyymmdd format
+	 * @param day - array of selected days of the week. For example [sunday,monday] 
+	 * @param username
+	 * @param dbindex
+	 * @return
 	 */
 	public static HashMap<String, Integer> stopFrequency(String agency, String[] date, String[] day, String username, int dbindex){				
 		HashMap<String, Integer> response = new HashMap<String, Integer>();
@@ -4745,7 +4895,9 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 * A hashmap of the clusters is generated (containing the AgencyIDs and IDs of the stops in the cluster)
+	 * A HashMap of the clusters is generated. Each stop ID forms a key and the values are the stops that are 
+	 * within the given radius of the key. (the values reflect ID and Agency IDs stops in a cluster)
+	 * 
 	 * @param radius
 	 * @param dbindex
 	 * @param username
@@ -4784,7 +4936,17 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the transit part of the on map report	
+	 * Queries the transit part of the on map report
+	 * 
+	 * @param date - selected date
+	 * @param day - selected day of the week
+	 * @param username
+	 * @param d - radius of the circle drawn on map
+	 * @param lat - latitude of the centroid of the circle drawn on map or array of latitudes of points forming the polygon on map
+	 * @param lon - longitude of the centroid of the circle drawn on map or array of longitudes of points forming the polygon on map
+	 * @param losR - search radius for minimum level service
+	 * @param dbindex
+	 * @return MapTransit
 	 */
 	public static MapTransit onMapStops(String[] date, String[] day, String username, double d, double[] lat, double[] lon, double losR, int dbindex) {
 		CoordinateReferenceSystem sourceCRS = null;
@@ -5003,7 +5165,12 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the census population, employment, and title vi parts of the on map report	  
+	 * Queries the census population, employment, and title vi parts of the on map report
+	 * @param d - search radius
+	 * @param lat - latitude of the centroid of the circle drawn on map or array of latitudes of points forming the polygon on map
+	 * @param lon - longitude of the centroid of the circle drawn on map or array of longitudes of points forming the polygon on map
+	 * @param dbindex
+	 * @return MapGeo
 	 */
 	public static MapGeo onMapBlocks(double d, double[] lat, double[] lon, int dbindex) {
 		CoordinateReferenceSystem sourceCRS = null;
@@ -5242,7 +5409,13 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries the transit agency tree menu	  
+	 * Queries the transit agency tree menu
+	 * 
+	 * @param date - selected date
+	 * @param day - selected day of the week
+	 * @param username
+	 * @param dbindex
+	 * @return AgencyRouteList
 	 */
 	public static AgencyRouteList agencyMenu(String[] date, String[] day, String username, int dbindex) {
 		AgencyRouteList response = new AgencyRouteList();		
@@ -5406,7 +5579,12 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 *Queries calendar start and end dates by username or username and agency id	  
+	 * Queries calendar start and end dates by username or username and agency ID
+	 * 
+	 * @param username
+	 * @param agency - agency ID
+	 * @param dbindex
+	 * @return StartEndDates
 	 */
 	public static StartEndDates getsedates(String username, String agency, int dbindex) {
 		StartEndDates response = new StartEndDates();		
@@ -5456,7 +5634,10 @@ public class PgisEventManager {
 	}
 	
 	/**
-	 * Adds up title vi data for on map reports	  
+	 * Adds up title VI data in single with all.	  
+	 * 
+	 * @param all (TitleVIDataFloat)
+	 * @param single (TitleVIDataFloat)
 	 */
 	public static void addTitle6(TitleVIDataFloat all, TitleVIDataFloat single){
 		all.id += single.id;
@@ -5498,252 +5679,236 @@ public class PgisEventManager {
 		all.hispanic_or_latino += single.hispanic_or_latino;
 	}
 
-public static HashMap<String, Long> getStateInfo(int dbindex, String username, String popYear){			
-	Connection connection = makeConnection(dbindex);
-	String query="";
-	Statement stmt = null;
-	HashMap<String, Long> response = new HashMap<String, Long>();
-	query = "WITH counties AS (SELECT count(countyid) AS county, stateid FROM census_counties GROUP BY stateid), "
-			+ "tracts AS (SELECT COUNT(tractid) AS tract, stateid FROM census_tracts GROUP BY stateid), "
-			+ "places AS (SELECT COUNT(placeId) AS place, stateid FROM census_places GROUP BY stateid), "
-			+ "urbanized_areas AS (SELECT COUNT(urbanId) AS urbanized_area, stateid "
-			+ "		FROM census_urbans AS urban INNER JOIN census_states AS state "
-			+ "		ON ST_INTERSECTS(urban.shape,state.shape) "
-			+ "		WHERE urban.population" + popYear + " >= 50000 GROUP BY stateid),"
-			+ "urban_clusters AS (SELECT COUNT(urbanId) AS urban_cluster, stateid "
-			+ "		FROM census_urbans AS urban INNER JOIN census_states AS state "
-			+ "		ON ST_INTERSECTS(urban.shape,state.shape) "
-			+ "		WHERE urban.population" + popYear + " >= 2500 AND urban.population" + popYear + " < 50000 GROUP BY stateid),"
-			+ "congdists AS (SELECT COUNT(congdistId) AS congdist, stateid FROM census_congdists  GROUP BY stateid),"
-			+ "regions AS (SELECT COUNT(regionId) AS region, stateid FROM census_counties GROUP BY stateid),"
-			+ "urban_pop AS (SELECT SUM(population" + popYear + ") AS urbanpop, stateid FROM census_blocks WHERE poptype = 'U' GROUP BY stateid),"
-			+ "rural_pop AS (SELECT SUM(population" + popYear + ") AS ruralpop, stateid FROM census_blocks WHERE poptype = 'R' GROUP BY stateid),"
-			+ "emp_rac AS (SELECT sum(C000_" + popYear + ")::bigint AS rac, LEFT(blockid,2) AS stateid FROM lodes_rac_projection_block GROUP BY LEFT(blockid,2)),"
-			+ "emp_wac AS (SELECT sum(C000)AS wac, LEFT(blockid,2) AS stateid FROM lodes_blocks_wac GROUP BY LEFT(blockid,2)),"
-			+ "agencies AS (SELECT COUNT(DISTINCT map.agencyid) AS agency,stateid"
-			+ "		FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
-			+ "		ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
-			+ "		GROUP BY stops.stateid),"
-			+ "stops AS (SELECT COUNT(id) AS stop, stateid FROM gtfs_stops GROUP BY stateid),"
-			+ "trip_states_map AS (SELECT times.trip_id, stops.stateid from  gtfs_stop_times AS times inner join gtfs_stops as stops ON times.stop_id = stops.id AND times.stop_agencyid = stops.agencyid GROUP BY stateid,trip_id),"
-			+ "routes AS (SELECT COUNT(DISTINCT(route_id, route_agencyid)) AS route, stateid FROM gtfs_trips INNER JOIN trip_states_map ON gtfs_trips.id = trip_states_map.trip_id GROUP BY stateid)"
-			+ "SELECT stateid, sname, county, tract, place, urbanized_area, urban_cluster, congdist, region, landarea, stop, "
-			+ "		population" + popYear + " AS pop, urbanpop, ruralpop,rac, wac, agency, route FROM census_states "
-			+ "		INNER JOIN counties USING (stateid)"
-			+ "		INNER JOIN tracts USING (stateid)"
-			+ "		INNER JOIN places USING (stateid)"
-			+ "		INNER JOIN urbanized_areas USING (stateid)"
-			+ "		INNER JOIN urban_clusters USING (stateid) "
-			+ "		INNER JOIN congdists USING (stateid) "
-			+ "		INNER JOIN regions USING (stateid) "
-			+ "		INNER JOIN urban_pop USING (stateid) "
-			+ "		INNER JOIN rural_pop USING (stateid) "
-			+ "		INNER JOIN emp_rac USING (stateid) "
-			+ "		INNER JOIN emp_wac USING (stateid) "
-			+ "		INNER JOIN stops USING (stateid) "
-			+ "		INNER JOIN agencies USING(stateid) "
-			+ "		INNER JOIN routes USING(stateid)";		
-		try {
-	        stmt = connection.createStatement();
-	        ResultSet rs = stmt.executeQuery(query); 
-	        while ( rs.next() ) {
-		    response = new HashMap<String, Long>();
-			response.put("county",  rs.getLong("county"));
-			response.put("tract",  rs.getLong("tract"));
-			response.put("place",  rs.getLong("place"));
-			response.put("urbanized_area", rs.getLong("urbanized_area"));
-			response.put("urban_cluster", rs.getLong("urban_cluster"));
-			response.put("congdist", rs.getLong("congdist"));
-			response.put("region", rs.getLong("region"));
-			response.put("pop", rs.getLong("pop"));
-			response.put("landarea", rs.getLong("landarea"));
-			response.put("urbanpop", rs.getLong("urbanpop"));
-			response.put("ruralpop", rs.getLong("ruralpop"));
-			response.put("rac", rs.getLong("rac"));
-			response.put("wac", rs.getLong("wac"));
-			response.put("agency", rs.getLong("agency"));
-			response.put("route", rs.getLong("route"));
-			response.put("stop", rs.getLong("stop"));
-        }	  
-	        rs.close();
-	        stmt.close();  
-	    	}
-	 catch ( Exception e ) {
-		 e.printStackTrace();
-		 dropConnection(connection);
-		 }
-	return response;	
+	/**
+	 * returns statewide summary report
+	 *  
+	 * @param dbindex
+	 * @param username
+	 * @param popYear
+	 * @return HashMap<String, Long>
+	 */
+	public static HashMap<String, Long> getStateInfo(int dbindex, String username, String popYear){			
+		Connection connection = makeConnection(dbindex);
+		String query="";
+		Statement stmt = null;
+		HashMap<String, Long> response = new HashMap<String, Long>();
+		query = "WITH counties AS (SELECT count(countyid) AS county, stateid FROM census_counties GROUP BY stateid), "
+				+ "tracts AS (SELECT COUNT(tractid) AS tract, stateid FROM census_tracts GROUP BY stateid), "
+				+ "places AS (SELECT COUNT(placeId) AS place, stateid FROM census_places GROUP BY stateid), "
+				+ "urbanized_areas AS (SELECT COUNT(urbanId) AS urbanized_area, stateid "
+				+ "		FROM census_urbans AS urban INNER JOIN census_states AS state "
+				+ "		ON ST_INTERSECTS(urban.shape,state.shape) "
+				+ "		WHERE urban.population" + popYear + " >= 50000 GROUP BY stateid),"
+				+ "urban_clusters AS (SELECT COUNT(urbanId) AS urban_cluster, stateid "
+				+ "		FROM census_urbans AS urban INNER JOIN census_states AS state "
+				+ "		ON ST_INTERSECTS(urban.shape,state.shape) "
+				+ "		WHERE urban.population" + popYear + " >= 2500 AND urban.population" + popYear + " < 50000 GROUP BY stateid),"
+				+ "congdists AS (SELECT COUNT(congdistId) AS congdist, stateid FROM census_congdists  GROUP BY stateid),"
+				+ "regions AS (SELECT COUNT(regionId) AS region, stateid FROM census_counties GROUP BY stateid),"
+				+ "urban_pop AS (SELECT SUM(population" + popYear + ") AS urbanpop, stateid FROM census_blocks WHERE poptype = 'U' GROUP BY stateid),"
+				+ "rural_pop AS (SELECT SUM(population" + popYear + ") AS ruralpop, stateid FROM census_blocks WHERE poptype = 'R' GROUP BY stateid),"
+				+ "emp_rac AS (SELECT sum(C000_" + popYear + ")::bigint AS rac, LEFT(blockid,2) AS stateid FROM lodes_rac_projection_block GROUP BY LEFT(blockid,2)),"
+				+ "emp_wac AS (SELECT sum(C000)AS wac, LEFT(blockid,2) AS stateid FROM lodes_blocks_wac GROUP BY LEFT(blockid,2)),"
+				+ "agencies AS (SELECT COUNT(DISTINCT map.agencyid) AS agency,stateid"
+				+ "		FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
+				+ "		ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+				+ "		GROUP BY stops.stateid),"
+				+ "stops AS (SELECT COUNT(id) AS stop, stateid FROM gtfs_stops GROUP BY stateid),"
+				+ "trip_states_map AS (SELECT times.trip_id, stops.stateid from  gtfs_stop_times AS times inner join gtfs_stops as stops ON times.stop_id = stops.id AND times.stop_agencyid = stops.agencyid GROUP BY stateid,trip_id),"
+				+ "routes AS (SELECT COUNT(DISTINCT(route_id, route_agencyid)) AS route, stateid FROM gtfs_trips INNER JOIN trip_states_map ON gtfs_trips.id = trip_states_map.trip_id GROUP BY stateid)"
+				+ "SELECT stateid, sname, county, tract, place, urbanized_area, urban_cluster, congdist, region, landarea, stop, "
+				+ "		population" + popYear + " AS pop, urbanpop, ruralpop,rac, wac, agency, route FROM census_states "
+				+ "		INNER JOIN counties USING (stateid)"
+				+ "		INNER JOIN tracts USING (stateid)"
+				+ "		INNER JOIN places USING (stateid)"
+				+ "		INNER JOIN urbanized_areas USING (stateid)"
+				+ "		INNER JOIN urban_clusters USING (stateid) "
+				+ "		INNER JOIN congdists USING (stateid) "
+				+ "		INNER JOIN regions USING (stateid) "
+				+ "		INNER JOIN urban_pop USING (stateid) "
+				+ "		INNER JOIN rural_pop USING (stateid) "
+				+ "		INNER JOIN emp_rac USING (stateid) "
+				+ "		INNER JOIN emp_wac USING (stateid) "
+				+ "		INNER JOIN stops USING (stateid) "
+				+ "		INNER JOIN agencies USING(stateid) "
+				+ "		INNER JOIN routes USING(stateid)";		
+			try {
+		        stmt = connection.createStatement();
+		        ResultSet rs = stmt.executeQuery(query); 
+		        while ( rs.next() ) {
+			    response = new HashMap<String, Long>();
+				response.put("county",  rs.getLong("county"));
+				response.put("tract",  rs.getLong("tract"));
+				response.put("place",  rs.getLong("place"));
+				response.put("urbanized_area", rs.getLong("urbanized_area"));
+				response.put("urban_cluster", rs.getLong("urban_cluster"));
+				response.put("congdist", rs.getLong("congdist"));
+				response.put("region", rs.getLong("region"));
+				response.put("pop", rs.getLong("pop"));
+				response.put("landarea", rs.getLong("landarea"));
+				response.put("urbanpop", rs.getLong("urbanpop"));
+				response.put("ruralpop", rs.getLong("ruralpop"));
+				response.put("rac", rs.getLong("rac"));
+				response.put("wac", rs.getLong("wac"));
+				response.put("agency", rs.getLong("agency"));
+				response.put("route", rs.getLong("route"));
+				response.put("stop", rs.getLong("stop"));
+	        }	  
+		        rs.close();
+		        stmt.close();  
+		    	}
+		 catch ( Exception e ) {
+			 e.printStackTrace();
+			 dropConnection(connection);
+			 }
+		return response;	
 	}
 
-
-/*public static HashMap<String, Integer> QueryCounts (int dbindex,String username)
-{
-	Connection connection = makeConnection(dbindex);
-	String query="";
-	Statement stmt = null;
-	HashMap<String, Integer> response = new HashMap<String, Integer>();
-
-query="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),"
-+"stops0 as (select id as agenid,defaultid as defid from aids left join gtfs_agencies on aid=defaultid),"
-+"stops as (select count(distinct(defid || id)) as stops from stops0 left join gtfs_stops on gtfs_stops.agencyid=defid),"
-+"agencies as (select count(distinct agenid) as agencies from stops0),"
-+"routes as (select count(distinct(defid || id)) as routes from stops0 left join gtfs_routes on gtfs_routes.defaultid=defid)" 
-+"select * from stops cross join routes cross join agencies"; 
-try {
-    stmt = connection.createStatement();
-    ResultSet rs = stmt.executeQuery(query); 
-    while ( rs.next() ) {
-
-response = new HashMap<String, Integer>();
-response.put("agency",  rs.getInt("agencies"));
-response.put("stop", rs.getInt("stops"));
-response.put("route", rs.getInt("routes"));
-    }	  
-rs.close();
-stmt.close();  
-}
- catch ( Exception e ) {
-        System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-dropConnection(connection);
-
-
-}
-return response;	}*/
-
-public static GeoArea QueryGeoAreabyId(int type, String id, int dbindex, String username, String popYear,int geotype,String geoid)
-{Connection connection = makeConnection(dbindex);
-String query="";
-String areaID="";
-String areaName="";
-String populationyear="";
-String id1="'"+id+"'";
-
-Statement stmt = null;
-GeoArea response = new GeoArea();
-
- if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
-    	query="with temp as (Select * from census_counties where countyId="+id1+"),employment as (select e"+popYear+" as employment from temp left join lodes_rac_projection_county using(countyId) )," 
-    			+"employees as (select sum(c000) as employees from temp left join lodes_blocks_wac on temp.countyid=left(lodes_blocks_wac.blockid,5)  group by countyid,left(lodes_blocks_wac.blockid,5) )"
-    			+"select * from temp cross join employment cross join employees ";
-      areaID="countyId";
-	  areaName="cname";
-	  } else if (type==1){//census tract
-    	 query="with temp as (Select * from census_tracts where tractid="+id1+"),"
-    			+" employment as (select sum(C000_"+popYear+") as employment from temp left join lodes_rac_projection_block on temp.tractid=left(lodes_rac_projection_block.blockid,11)  group by tractid,left(lodes_rac_projection_block.blockid,11)  ),"
-    			 +"employees as (select sum(c000) as employees from temp left join lodes_blocks_wac on temp.tractid=left(lodes_blocks_wac.blockid,11)  group by tractid,left(lodes_blocks_wac.blockid,11) )"
-    			 +"select * from temp cross join employment cross join employees ";
-		 areaID="tractid";
-		 areaName="tlongname";
-      } else if (type==3){//census urban
-    	  if(geotype==-1)
-    	  {
-    	  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
-    			  +"temp1 as (select blockid ,urbanid  from temp left join census_blocks  using(urbanid)),"
-    			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp1 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
-     			 +"employees as (select sum(c000) as employees,urbanid from temp1 left join lodes_blocks_wac using(blockid) group by urbanid )"
-     			 +"select * from temp cross join employment cross join employees ";
-      areaID="urbanid";
-	  areaName="uname";
-    	  }
-    	  else if(geotype==0)
-    	  {
-    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
-        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And left(blockid,5)='"+geoid+"'),"
-        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And left(blockid,5)='"+geoid+"' ), "
-        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
-         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
-         			 +"select * from temp cross join employment cross join employees ";
-          areaID="urbanid";
-    	  areaName="uname";
-    	  }
-    	  else if(geotype==1)
-    	  {
-    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
-        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And left(blockid,11)='"+geoid+"'),"
-        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And left(blockid,11)='"+geoid+"' ), "
-        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
-         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
-         			 +"select * from temp cross join employment cross join employees ";
-          areaID="urbanid";
-    	  areaName="uname";
-    	  }
-    	  else if(geotype==2)
-    	  {  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
-    			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And placeid='"+geoid+"'),"
-    			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And placeid='"+geoid+"' ), "
-    			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
-     			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
-     			 +"select * from temp cross join employment cross join employees ";
-      areaID="urbanid";
-	  areaName="uname";
-    		  
-    	  }
-    	  
-    	  else if(geotype==4)
-    	  {
-    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
-        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And regionid='"+geoid+"'),"
-        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And regionid='"+geoid+"' ), "
-        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
-         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
-         			 +"select * from temp cross join employment cross join employees ";
-          areaID="urbanid";
-    	  areaName="uname";
-    	  }
-    	  else if(geotype==5)
-    	  {
-    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
-        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And congdistid='"+geoid+"'),"
-        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And congdistid='"+geoid+"' ), "
-        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
-         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
-         			 +"select * from temp cross join employment cross join employees ";
-          areaID="urbanid";
-    	  areaName="uname";
-    	  }
-       
-      } else if (type==4) { //ODOT Regions
-    	  query="with temp as (Select sum(waterarea) as waterarea,sum(landarea) as landarea,odotregionname,odotregionid,sum(population"+popYear+") as population"+popYear+" from census_counties where odotregionid="+id1+" group by odotregionid,odotregionname),"
-
-		   	 +"temp1 as (select blockid ,odotregionid  from temp left join census_blocks  on census_blocks.regionid=temp.odotregionid),"
-		   	 +" employment as (select sum(C000_"+popYear+") as employment,odotregionid from temp1 left join lodes_rac_projection_block  using(blockid) group by  odotregionid),"
-		     +"employees as (select sum(c000) as employees,odotregionid from temp1 left join lodes_blocks_wac using(blockid) group by odotregionid )"
-		   	 +"select * from temp cross join employment cross join employees ";
-		     areaID="odotregionid";
-		 areaName="odotregionname";
-	  } else if (type == 6){// states
-		      query = "with temp as (Select stateid, sname, landarea from census_states where stateid=" + id1 + "),"
-		      		+ "employment as (select sum(e"+popYear+") as employment "
-      				+ "		from temp left join lodes_rac_projection_county on left(countyId,2)=" + id1 + "),"
-		      		+ "employees as (select sum(c000) as employees "
-		      		+ "		from temp left join lodes_blocks_wac on temp.stateid=left(lodes_blocks_wac.blockid,2) ), "
-		      		+ "population as (select sum(population" + popYear + ") as population" + popYear + " from census_counties where left(countyid,2)=" + id1 + ") "
-		      		+ "select * from temp cross join population cross join employment cross join employees";
-		      areaID = "stateid";
-		      areaName = "sname";		    		  
-	  }else {// census place or congressional district
-    	  if (type == 2) {
-		  query="with temp as (Select * from census_places where placeid="+id1+"),"
-		  +"temp1 as (select blockid ,placeid  from temp left join census_blocks  using(placeid)),"
-		  +" employment as (select sum(C000_"+popYear+") as employment,placeid from temp1 left join lodes_rac_projection_block  using(blockid) group by  placeid),"
-			 +"employees as (select sum(c000) as employees,placeid from temp1 left join lodes_blocks_wac using(blockid) group by placeid )"
-			 +"select * from temp cross join employment cross join employees ";
-    	   areaID="placeid";
-		   areaName="pname";
-		  }
-		  
-    	  if (type == 5){ 
-		  query="with temp as (Select * from census_congdists where congdistid="+id1+"),"
-				  +"temp1 as (select blockid ,congdistid  from temp left join census_blocks  using(congdistid)),"
-				  +" employment as (select sum(C000_"+popYear+") as employment,congdistid from temp1 left join lodes_rac_projection_block  using(blockid) group by  congdistid),"
-					 +"employees as (select sum(c000) as employees,congdistid from temp1 left join lodes_blocks_wac using(blockid) group by congdistid )"
-					 +"select * from temp cross join employment cross join employees ";
-    	  areaID="congdistid";
-		   areaName="cname";
-		 }
-    	  }
-populationyear="population"+popYear;
-try {
+	/**
+	 * return information on a geographical area 
+	 * @param type - type of the geographical area
+	 * @param id - ID of the geographical area
+	 * @param dbindex
+	 * @param username
+	 * @param popYear - population projection year
+	 * @param geotype - type of the geographical area to be intersected with urban areas for filtering service
+	 * @param geoid - ID of the geographical area to be intersected with urban areas for filtering service 
+	 * @return GeoArea
+	 */
+	public static GeoArea QueryGeoAreabyId(int type, String id, int dbindex, String username, String popYear,int geotype,String geoid)
+		{Connection connection = makeConnection(dbindex);
+		String query="";
+		String areaID="";
+		String areaName="";
+		String populationyear="";
+		String id1="'"+id+"'";
+		
+		Statement stmt = null;
+		GeoArea response = new GeoArea();
+	
+		 if (type==0){//county: tracts are queries and summed up to reflect the true number of census tracts in the results
+		    	query="with temp as (Select * from census_counties where countyId="+id1+"),employment as (select e"+popYear+" as employment from temp left join lodes_rac_projection_county using(countyId) )," 
+		    			+"employees as (select sum(c000) as employees from temp left join lodes_blocks_wac on temp.countyid=left(lodes_blocks_wac.blockid,5)  group by countyid,left(lodes_blocks_wac.blockid,5) )"
+		    			+"select * from temp cross join employment cross join employees ";
+		      areaID="countyId";
+			  areaName="cname";
+			  } else if (type==1){//census tract
+		    	 query="with temp as (Select * from census_tracts where tractid="+id1+"),"
+		    			+" employment as (select sum(C000_"+popYear+") as employment from temp left join lodes_rac_projection_block on temp.tractid=left(lodes_rac_projection_block.blockid,11)  group by tractid,left(lodes_rac_projection_block.blockid,11)  ),"
+		    			 +"employees as (select sum(c000) as employees from temp left join lodes_blocks_wac on temp.tractid=left(lodes_blocks_wac.blockid,11)  group by tractid,left(lodes_blocks_wac.blockid,11) )"
+		    			 +"select * from temp cross join employment cross join employees ";
+				 areaID="tractid";
+				 areaName="tlongname";
+		      } else if (type==3){//census urban
+		    	  if(geotype==-1)
+		    	  {
+		    	  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
+		    			  +"temp1 as (select blockid ,urbanid  from temp left join census_blocks  using(urbanid)),"
+		    			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp1 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
+		     			 +"employees as (select sum(c000) as employees,urbanid from temp1 left join lodes_blocks_wac using(blockid) group by urbanid )"
+		     			 +"select * from temp cross join employment cross join employees ";
+		      areaID="urbanid";
+			  areaName="uname";
+	    	  }
+	    	  else if(geotype==0)
+	    	  {
+	    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
+	        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And left(blockid,5)='"+geoid+"'),"
+	        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And left(blockid,5)='"+geoid+"' ), "
+	        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
+	         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
+	         			 +"select * from temp cross join employment cross join employees ";
+	          areaID="urbanid";
+	    	  areaName="uname";
+	    	  }
+	    	  else if(geotype==1)
+	    	  {
+	    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
+	        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And left(blockid,11)='"+geoid+"'),"
+	        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And left(blockid,11)='"+geoid+"' ), "
+	        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
+	         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
+	         			 +"select * from temp cross join employment cross join employees ";
+	          areaID="urbanid";
+	    	  areaName="uname";
+	    	  }
+	    	  else if(geotype==2)
+	    	  {  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
+	    			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And placeid='"+geoid+"'),"
+	    			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And placeid='"+geoid+"' ), "
+	    			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
+	     			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
+	     			 +"select * from temp cross join employment cross join employees ";
+	      areaID="urbanid";
+		  areaName="uname";
+	    		  
+	    	  }
+	    	  
+	    	  else if(geotype==4)
+	    	  {
+	    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
+	        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And regionid='"+geoid+"'),"
+	        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And regionid='"+geoid+"' ), "
+	        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
+	         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
+	         			 +"select * from temp cross join employment cross join employees ";
+	          areaID="urbanid";
+	    	  areaName="uname";
+	    	  }
+	    	  else if(geotype==5)
+	    	  {
+	    		  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
+	        			  +"temp1 as (select blockid ,temp.urbanid  from temp left join census_blocks on temp.urbanid="+id1+" And congdistid='"+geoid+"'),"
+	        			 +"temp2 as (select blockid,urbanid from  census_blocks where urbanid="+id1+" And congdistid='"+geoid+"' ), "
+	        			  +" employment as (select sum(C000_"+popYear+") as employment,urbanid from temp2 left join lodes_rac_projection_block  using(blockid) group by  urbanid),"
+	         			 +"employees as (select sum(c000) as employees,urbanid from temp2 left join lodes_blocks_wac using(blockid) group by urbanid )"
+	         			 +"select * from temp cross join employment cross join employees ";
+	          areaID="urbanid";
+	    	  areaName="uname";
+	    	  }
+	       
+	      } else if (type==4) { //ODOT Regions
+	    	  query="with temp as (Select sum(waterarea) as waterarea,sum(landarea) as landarea,odotregionname,odotregionid,sum(population"+popYear+") as population"+popYear+" from census_counties where odotregionid="+id1+" group by odotregionid,odotregionname),"
+	
+			   	 +"temp1 as (select blockid ,odotregionid  from temp left join census_blocks  on census_blocks.regionid=temp.odotregionid),"
+			   	 +" employment as (select sum(C000_"+popYear+") as employment,odotregionid from temp1 left join lodes_rac_projection_block  using(blockid) group by  odotregionid),"
+			     +"employees as (select sum(c000) as employees,odotregionid from temp1 left join lodes_blocks_wac using(blockid) group by odotregionid )"
+			   	 +"select * from temp cross join employment cross join employees ";
+			     areaID="odotregionid";
+			 areaName="odotregionname";
+		  } else if (type == 6){// states
+			      query = "with temp as (Select stateid, sname, landarea from census_states where stateid=" + id1 + "),"
+			      		+ "employment as (select sum(e"+popYear+") as employment "
+	      				+ "		from temp left join lodes_rac_projection_county on left(countyId,2)=" + id1 + "),"
+			      		+ "employees as (select sum(c000) as employees "
+			      		+ "		from temp left join lodes_blocks_wac on temp.stateid=left(lodes_blocks_wac.blockid,2) ), "
+			      		+ "population as (select sum(population" + popYear + ") as population" + popYear + " from census_counties where left(countyid,2)=" + id1 + ") "
+			      		+ "select * from temp cross join population cross join employment cross join employees";
+			      areaID = "stateid";
+			      areaName = "sname";		    		  
+		  }else {// census place or congressional district
+	    	  if (type == 2) {
+			  query="with temp as (Select * from census_places where placeid="+id1+"),"
+			  +"temp1 as (select blockid ,placeid  from temp left join census_blocks  using(placeid)),"
+			  +" employment as (select sum(C000_"+popYear+") as employment,placeid from temp1 left join lodes_rac_projection_block  using(blockid) group by  placeid),"
+				 +"employees as (select sum(c000) as employees,placeid from temp1 left join lodes_blocks_wac using(blockid) group by placeid )"
+				 +"select * from temp cross join employment cross join employees ";
+	    	   areaID="placeid";
+			   areaName="pname";
+			  }
+			  
+	    	  if (type == 5){ 
+			  query="with temp as (Select * from census_congdists where congdistid="+id1+"),"
+					  +"temp1 as (select blockid ,congdistid  from temp left join census_blocks  using(congdistid)),"
+					  +" employment as (select sum(C000_"+popYear+") as employment,congdistid from temp1 left join lodes_rac_projection_block  using(blockid) group by  congdistid),"
+						 +"employees as (select sum(c000) as employees,congdistid from temp1 left join lodes_blocks_wac using(blockid) group by congdistid )"
+						 +"select * from temp cross join employment cross join employees ";
+	    	  areaID="congdistid";
+			   areaName="cname";
+			 }
+	    	  }
+	populationyear="population"+popYear;
+	try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
        
@@ -5765,72 +5930,51 @@ try {
       return response;
     }	
 
-
-
-
-public static List<Urban> geturbansbypop(int pop, int dbindex, String popYear)
-{Connection connection = makeConnection(dbindex);
-String query="";
-
-Statement stmt = null;
-List<Urban> response = new ArrayList<Urban>();
-Urban r = new Urban() ;
-query="with temp as (Select * from census_urbans),"
-           +"blocks as (select blockid,urbanid from census_urbans left join census_blocks using(urbanid)),"
-		   +"rac as (select coalesce(sum(c000_"+popYear+"),0)as rac,urbanid  from blocks left join lodes_rac_projection_block using(blockid)group by urbanid ),"
-		   +"wac as (select coalesce(sum(c000),0)as wac,urbanid  from blocks left join lodes_blocks_wac using(blockid)group by urbanid )"
-		   +"select temp.*,rac,wac from temp join rac using(urbanid) left join wac using (urbanid)";
-try {
-    stmt = connection.createStatement();
-    ResultSet rs = stmt.executeQuery(query); 
-    while ( rs.next() ) {
-       r=new Urban();
-    r.setemployees(rs.getLong("wac"));
-    r.setemployment(rs.getLong("rac"));
-    r.setWaterarea(rs.getLong("waterarea"));	
-    r.setLandarea(rs.getLong("landarea"));
-    r.setPopulation(rs.getLong("population"));
-    r.setPopulation2010(rs.getInt("population"+popYear+""));
-    response.add(r);
-    
-    }
-    rs.close();
-    stmt.close();  
-	}
-	 catch ( Exception e ) {
-		 e.printStackTrace();
-		 dropConnection(connection);
-		 }
-	return response;	
-	}
-
-
-public static long getstopscountbyurban(String urbanId, List<String> selectedAgencies, int dbindex,String username) throws FactoryException, TransformException {			
-Connection connection = makeConnection(dbindex);
-	String query="";
-	String id1="'"+urbanId+"'";
-	Statement stmt = null;
-	long response=0;
-	query ="select count(Id) as stopscount from gtfs_stops where urbanid="+id1+" and agencyId in (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"')";
-	try {
-        stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(query); 
-        while ( rs.next() ) {
-		response=0;
-        rs.getInt("stopscount");
+	/**
+	 * return the number of stops belonging to selectedAgencies and located a give urban area 
+	 * @param urbanId - urban area ID
+	 * @param selectedAgencies - array of selected agency IDs
+	 * @param dbindex
+	 * @param username
+	 * @return number of stops (long)
+	 * @throws FactoryException
+	 * @throws TransformException
+	 */
+	public static long getstopscountbyurban(String urbanId, List<String> selectedAgencies, int dbindex,String username) throws FactoryException, TransformException {			
+	Connection connection = makeConnection(dbindex);
+		String query="";
+		String id1="'"+urbanId+"'";
+		Statement stmt = null;
+		long response=0;
+		query ="select count(Id) as stopscount from gtfs_stops where urbanid="+id1+" and agencyId in (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"')";
+		try {
+	        stmt = connection.createStatement();
+	        ResultSet rs = stmt.executeQuery(query); 
+	        while ( rs.next() ) {
+			response=0;
+	        rs.getInt("stopscount");
+			}
+			 rs.close();
+	    stmt.close();  
 		}
-		 rs.close();
-    stmt.close();  
+		 catch ( Exception e ) {
+			 e.printStackTrace();
+			 dropConnection(connection);
+	    }
+		return response;	
 	}
-	 catch ( Exception e ) {
-		 e.printStackTrace();
-		 dropConnection(connection);
-    }
-	return response;	
-}
 
-public static long getstopscountbyurban(String urbanId, int dbindex) throws FactoryException, TransformException {		
-	{			
+	/**
+	 * returns the number of stops in a give urban area
+	 * 
+	 * @param urbanId - urban area ID
+	 * @param dbindex
+	 * @return number of stops (long)
+	 * @throws FactoryException
+	 * @throws TransformException
+	 */
+	public static long getstopscountbyurban(String urbanId, int dbindex) throws FactoryException, TransformException {		
+		{			
 		Connection connection = makeConnection(dbindex);
 			String query="";
 			String id1="'"+urbanId+"'";
@@ -5854,41 +5998,61 @@ public static long getstopscountbyurban(String urbanId, int dbindex) throws Fact
 			return response;	
 		}}
 
-
-public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int dbindex) throws FactoryException, TransformException
-{
+	/**
+	 * returns list of routes in an urban area
+	 * 
+	 * @param urbanId - urban area ID
+	 * @param dbindex
+	 * @return List<GeoStopRouteMap>
+	 * @throws FactoryException
+	 * @throws TransformException
+	 */
+	public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, int dbindex) throws FactoryException, TransformException
+	{
 	Connection  connection = makeConnection(dbindex);
 	String query="";
 	Statement stmt = null;
 	String id1="'"+urbanId+"'";
 	GeoStopRouteMap r = new GeoStopRouteMap() ;
 	List<GeoStopRouteMap> response = new ArrayList<GeoStopRouteMap>();
-	query ="select routeid,stopid,gsr.agencyid,gtfs_stops.agencyid as defaultid from gtfs_Stop_Route_Map gsr join gtfs_stops on agencyid_def=gtfs_stops.agencyid and stopid=id where urbanid='="+id1+"'";
-	try {
+	query =	"select routeid,stopid,gsr.agencyid,gtfs_stops.agencyid as defaultid "
+			+ "		from gtfs_Stop_Route_Map gsr join gtfs_stops on agencyid_def=gtfs_stops.agencyid and stopid=id "
+			+ "		where urbanid='="+id1+"'";
+	try {		
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
     
         while ( rs.next() ) {
-		 r=new GeoStopRouteMap() ;
-		r.setagencyId(rs.getString("agencyid"));
-		r.setrouteId(rs.getString("routeid"));
-		r.setstopId(rs.getString("stopid"));
-		r.setagencyId_def(rs.getString("defaultid"));
-		response.add(r);
+			r=new GeoStopRouteMap() ;
+			r.setagencyId(rs.getString("agencyid"));
+			r.setrouteId(rs.getString("routeid"));
+			r.setstopId(rs.getString("stopid"));
+			r.setagencyId_def(rs.getString("defaultid"));
+			response.add(r);
 		}
-		 rs.close();
-    stmt.close();  
-	}
-	 
-	catch ( Exception e ) {
-		e.printStackTrace();
-		dropConnection(connection);
+		rs.close();
+		stmt.close();  
+		}catch ( Exception e ) {
+			e.printStackTrace();
+			dropConnection(connection);
 		}
 	return response;	
 	}
-
-public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, List<String> selectedAgencies, int dbindex,String username) throws FactoryException, TransformException
-{
+	
+	/**
+	 * returns list of routes belonging to a set of selected agencies in a
+	 * given urban area.
+	 * 
+	 * @param urbanId - urban area ID
+	 * @param selectedAgencies - list of selected agency IDs
+	 * @param dbindex
+	 * @param username
+	 * @return List<GeoStopRouteMap>
+	 * @throws FactoryException
+	 * @throws TransformException
+	 */
+	public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, List<String> selectedAgencies, int dbindex,String username) throws FactoryException, TransformException
+	{
 	Connection  connection = makeConnection(dbindex);
 	String query="";
 	Statement stmt = null;
@@ -5918,37 +6082,5 @@ public static List<GeoStopRouteMap> getroutesbyurban(String urbanId, List<String
 		 }
 	dropConnection(connection);
 	return response;	
-	}
-	
-	
-public static  int[] aggurbanemp( int dbindex,String username,int popmax,int popmin,String popYear ) throws FactoryException, TransformException
-{
-	Connection  connection = makeConnection(dbindex);
-	String query="";
-	Statement stmt = null;
-	int[] empArray =  new int[2];
-	
-	
-	query ="with temp as (select urbanid,population"+popYear+" as population from census_urbans where population between "+popmin+" and "+popmax+"),"
-+"block as (select blockid,temp.urbanid from temp join census_blocks using(urbanid)),"
-+"wac as (select sum(C000) as wac from lodes_blocks_wac join block using(blockid)),"
-+"rac as (select sum(C000_"+popYear+" :: int) as rac from lodes_rac_projection_block join block using(blockid))"
- +"select rac,wac from wac cross join rac";
-	try {
-        stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(query); 
-        while ( rs.next() ) {
-        	empArray[0]=rs.getInt("rac");
-        	empArray[1]=rs.getInt("wac");
-        }
-		 rs.close();
-    stmt.close();  
-	}
-	 catch ( Exception e ) {
-		 e.printStackTrace();
-		 dropConnection(connection);
-	 	}
-	dropConnection(connection);
-	return empArray;	
 	}
 }

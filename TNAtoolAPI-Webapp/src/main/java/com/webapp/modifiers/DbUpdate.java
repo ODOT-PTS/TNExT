@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
+// Alireza
 package com.webapp.modifiers;
 
 import java.io.BufferedReader;
@@ -353,21 +354,6 @@ public class DbUpdate {
 			//e.printStackTrace();
 			
 		}
-        /*String pass ="PGpass";
-        try{
-        	bf = new BufferedReader(new FileReader(passFile));
-            passkey = bf.readLine();
-            
-            byte[] passByte = passkey.getBytes("UTF-8");
-    		MessageDigest md = MessageDigest.getInstance("MD5");
-    		passByte = md.digest(passByte);
-    		pass = new String(passByte, "UTF-8");
-//    		bf.close();
-        }catch(IOException e){
-        	e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}*/
         
         String email="";
         String lastname="";

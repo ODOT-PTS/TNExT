@@ -24,9 +24,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement(name = "GeoXR")
 public class GeoXR {
-	@XmlAttribute
-    @JsonSerialize
-	public String metadata;
 	
 	@XmlAttribute
     @JsonSerialize

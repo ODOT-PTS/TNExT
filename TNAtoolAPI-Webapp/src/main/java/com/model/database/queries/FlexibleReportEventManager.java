@@ -33,6 +33,12 @@ import com.webapp.api.Queries;
 
 public class FlexibleReportEventManager {
 	
+	/**
+	 * returns list of geographical areas based on the area type/
+	 * @param areaType
+	 * @param dbindex
+	 * @return List<GeoArea>
+	 */
 	public static List<GeoArea> getAreaList(String areaType, int dbindex) {
 		List<GeoArea> output = new ArrayList<GeoArea>();
 		Connection connection = null;
@@ -129,6 +135,24 @@ public class FlexibleReportEventManager {
 		return output;
 	}
 
+	/**
+	 * returns data to populate Transit Service report through the Flexible
+	 * Reporting Wizard
+	 * 
+	 * @param dbindex - database index
+	 * @param agencies - array of agency IDs
+	 * @param date - array of dates to generate the report for
+	 * @param day - array of days. For example {"sunday","monday"}
+	 * @param areas - area IDs
+	 * @param areaType - type of geographical areas
+	 * @param username - user session
+	 * @param urbanFilter - flag on whether to filter on urban areas or not
+	 * @param minUrbanPop - minimum population filter for urban areas
+	 * @param maxUrbanPop - maximum population filter for urban areas
+	 * @param uAreaYear - urban areas population projection year
+	 * @param key - unique key to track and update progress 
+	 * @return List<FlexRepSrv>
+	 */
 	public static List<FlexRepSrv> getFlexRepSrv(int dbindex, String agencies,
 			String[] date, String[] day, String areas, String areaType,
 			String username, boolean urbanFilter,int minUrbanPop,int maxUrbanPop,
@@ -315,6 +339,27 @@ public class FlexibleReportEventManager {
 		return output;
 	}
 	
+	/**
+	 * returns data to populate Population report through the Flexible
+	 * Reporting Wizard
+	 * 
+	 * @param dbindex - database index
+	 * @param agencies - IDs of the selected agencies
+	 * @param date - array of selected dates
+	 * @param day - array of days of the week
+	 * @param popYear - population projection year
+	 * @param areas - list of geographical areas selected by the user 
+	 * @param los -  minimum level of service
+	 * @param sradius - population search radius
+	 * @param areaType - type of the geographical areas selected by the user
+	 * @param username - user session
+	 * @param urbanFilter - flag on whether to filter on urban areas or not
+	 * @param uAreaFliterYear - urban areas population projection year
+	 * @param minUrbanPop - minimum population filter for urban areas
+	 * @param maxUrbanPop - maximum population filter for urban areas
+	 * @param key - unique key to track and update progress
+	 * @return List<FlexRepPop>
+	 */
 	public static List<FlexRepPop> getFlexRepPop(int dbindex, String agencies,
 			String[] date, String[] day, String popYear, String areas, int los,
 			double sradius, String areaType, String username, boolean urbanFilter,
@@ -482,6 +527,35 @@ public class FlexibleReportEventManager {
 		return output;
 	};
 
+	/**
+	 * returns data to populate Employment report through the Flexible
+	 * Reporting Wizard
+	 * 
+	 * @param dbindex - database index
+	 * @param agencies - IDs of the selected agencies
+	 * @param date - array of selected dates
+	 * @param day - array of days of the week
+	 * @param empYear - employment projection year
+	 * @param areas - IDs of the selected areas
+	 * @param los - minimum level of service
+	 * @param sradius - population search radius
+	 * @param areaType - type of area of interest
+	 * @param username - user session
+	 * @param urbanFilter - flag on whether to filter on urban areas or not
+	 * @param uAreaFliterYear - urban areas population projection year
+	 * @param minUrbanPop - minimum population filter for urban areas
+	 * @param maxUrbanPop - maximum population filter for urban areas
+	 * @param wac - flag for Workplace Area Characteristics dataset select
+	 * @param rac - flag for Residential Area Characteristics dataset select
+	 * @param categories - employment categories selected by user to report on
+	 * @param key - unique key to track and update progress
+	 * @return List<FlexRepEmp>
+	 * @throws SQLException
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	public static List<FlexRepEmp> getFlexRepEmp(int dbindex, String agencies,
 			String[] date, String[] day, String empYear, String areas, int los,
 			double sradius, String areaType, String username, boolean urbanFilter, String uAreaFliterYear,
@@ -773,6 +847,31 @@ public class FlexibleReportEventManager {
 		return output;
 	}
 
+	/**
+	 * returns data to populate Title VI report through the Flexible
+	 * Reporting Wizard
+	 * 
+	 * @param dbindex - database index
+	 * @param agencies - IDs of the selected agencies
+	 * @param date - array of selected dates selected by user
+	 * @param day - array of days of the week selected by user
+	 * @param areas - IDs of the selected areas
+	 * @param los - minimum level of service
+	 * @param sradius - population search radius
+	 * @param areaType - type of area of interest
+	 * @param username - user session
+	 * @param urbanFilter - flag on whether to filter on urban areas or not
+	 * @param urbanYear - urban areas population projection year
+	 * @param minUrbanPop - minimum population filter for urban areas
+	 * @param maxUrbanPop - maximum population filter for urban areas
+	 * @param categories - categories selected by user to report on
+	 * @param key - unique key to track and update progress
+	 * @return
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	public static List<FlexRepT6> getFlexRepT6(int dbindex, String agencies,
 			String[] date, String[] day, String areas, int los,
 			double sradius, String areaType, String username, boolean urbanFilter,

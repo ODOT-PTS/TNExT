@@ -1,3 +1,23 @@
+// Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
+//   This file is part of Transit Network Analysis Software Tool.
+//
+//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU  General Public License for more details.
+//
+//    You should have received a copy of the GNU  General Public License
+//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+// =========================================================================================================
+//	  This script contains JavaScript variables and methods used to load Employment Report 
+//	  in the Transit Network Analysis Software Tool and all its features.
+// =========================================================================================================
+
 function bindEvents() {
 	tree = $('#jstree').jstree(true);
 	$(document).on("dnd_stop.vakata", function(e, data) {
@@ -13,7 +33,7 @@ function bindEvents() {
 }
 
 /**
- * return the leaf nodes of a given node.
+ * returns the leaf nodes of a given node.
  */
 function getLeaves(x) {
 	var y = [ x ];
@@ -44,6 +64,9 @@ function getLeaves(x) {
 	return y;
 }
 
+/**
+ * returns employment data for both RAC and WAC datasets
+ */
 function racWacAjax() {
 	$
 			.ajax({
@@ -103,6 +126,9 @@ function racWacAjax() {
 			});
 }
 
+/**
+ * returns employment data for the RAC dataset
+ */
 function racAjax() {
 	$
 			.ajax({
@@ -135,6 +161,9 @@ function racAjax() {
 			});
 }
 
+/**
+ * returns employment data for the RAC dataset
+ */
 function wacAjax() {
 	$
 			.ajax({
@@ -166,6 +195,7 @@ function wacAjax() {
 				}
 			});
 }
+
 
 function toggleCheckbox(checkbox) {
 	if (checkbox.checked) {
@@ -296,12 +326,18 @@ function getTableHeaders() {
 	return y;
 }
 
+/**
+ * Clears html content of the tabular section of the page
+ */
 function clearReport() {
 	document.getElementById('displayReport').innerHTML = "";
 	$('#initialText').show();
 }
 
-
+/**
+ * Updates flags based on dataset selection 
+ * @param e
+ */
 function datasetChange(e) {
 	if (e.value == 'lodes_blocks_wac') {
 		racBool = false;
@@ -335,14 +371,9 @@ function updateProjection() {
 		;
 		$('#dataSet').val('lodes_blocks_rac');
 		$('#promptText')
-				.html(
-						/*
-						 * '<span class="ui-icon ui-icon-alert"
-						 * style="float:left; margin:0 7px 20px 0;"></span>'
-						 */''
-								+ '<span style="line-height: 150%;">The future employment figures provided by this report were estimated using a linear projection '
-								+ 'that used county-level employment for 2010 and employment estimates for the years 2015 and 2025 as a basis.</span>'
-								+ '<br><br><input type="checkbox" id="showMSG">Do not show this message again');
+				.html('<span style="line-height: 150%;">The future employment figures provided by this report were estimated using a linear projection '
+					+ 'that used county-level employment for 2010 and employment estimates for the years 2015 and 2025 as a basis.</span>'
+					+ '<br><br><input type="checkbox" id="showMSG">Do not show this message again');
 		$("#checkbox").attr("disabled", true);
 		$('#checkbox').attr('checked', false);
 		racBool = true;
@@ -365,6 +396,10 @@ function getTrimmedNodeID(x) {
 		return y;
 }
 
+/**
+ * method called to generate the report.
+ * @returns {Number}
+ */
 function openReport() {
 	clearReport();
 	if (exceedsMaxRadius($('#Sradius').val())) { // Checks if the entered
@@ -717,7 +752,5 @@ function openReport2() {
 
 	$('#displayReport').append($(html));
 	$('#dialogPreLoader').hide();
-	
-	//tableProperties.hiddenCols =  [$('#RT thead th').length - 1];
 	table = buildDatatables();
 }

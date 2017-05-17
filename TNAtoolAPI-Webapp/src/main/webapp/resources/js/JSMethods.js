@@ -1054,7 +1054,7 @@ function doubleDigit(input) {
 /**
  * Converts the seconds to time. For example
  * 9000 is returned as 02:30:00.
- * @param input
+ * @param input * 
  * @returns {String}
  */
 function secToHour(input) {
@@ -1062,4 +1062,36 @@ function secToHour(input) {
 	var min = Math.floor(input % 3600 / 60);
 	var sec = Math.floor(input % 3600 % 60);
 	return doubleDigit(hr) + ":" + doubleDigit(min) + ":" + doubleDigit(sec);
+}
+
+/**
+ * drags the map to the input coordinates and draws a circle of
+ * 0.25 miles diameter to generate the on-map report
+ * @param latLng
+ * 
+ */
+function drawCircleAroundCoordinate(latLng) {
+	var lat = latLng[0];
+	var lng = latLng[1];
+	var x = 0.25;
+	var marLat = (Math.round(lat * 1000000) / 1000000).toString().replace('.',
+			'').replace('-', '');
+	var marLng = (Math.round(lng * 1000000) / 1000000).toString().replace('.',
+			'').replace('-', '');
+	drawCentroid[0] = lat;
+	drawCentroid[1] = lng;
+	area = Math.pow(x, 2) * Math.PI;
+	drawCentroid[0] = (Math.round(drawCentroid[0] * 1000000) / 1000000)
+			.toString();
+	drawCentroid[1] = (Math.round(drawCentroid[1] * 1000000) / 1000000)
+			.toString();
+	area = Math.round(area * 100) / 100;
+	var that = drawControl._toolbars[L.DrawToolbar.TYPE]._modes.circle.handler;
+	that.enable();
+	that._startLatLng = [ lat, lng ];
+	that._shape = new L.Circle([ lat, lng ], x * 1609.34,
+			that.options.shapeOptions);
+	that._map.addLayer(that._shape);
+	that._fireCreatedEvent();
+	that.disable();
 }

@@ -95,13 +95,25 @@ $(document).ready(function(){
 				if (item.AgencyId != ''){
 					agencytxt = item.AgencyId;
 				}		
-				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'+ '<td><a href="' 
-				+ item.URL + '" target="_blank">'+ item.AgencyName + '</a></td>'+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'
-				+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'+ '<td><a href="#" type="SC" id="'+item.AgencyId+'">'+item.StopsCount
-				+'</a></td><td class="details-control" type="GA"></td><td>'+item.CountiesCount+'</td><td>'+item.PlacesCount+'</td><td>'+item.UrbansCount+'</td><td>'+item.CongDistsCount
-				+'</td><td>'+item.OdotRegionsCount+'</a></td><td class="details-control" type="FA"></td><td>'+showDollarSign(item.MinFare)+'</td><td>'+showDollarSign(item.AverageFare)+'</td><td>'+showDollarSign(item.MedianFare)
-				+'</td><td>'+showDollarSign(item.MaxFare)+'</td><td>'+item.FareURL+'</td><td>'+item.FeedStartDate+'</td><td>'+item.FeedEndDate+'</a></td><td class="details-control" type="FE"></td><td>'
-				+item.FeedName+'</td><td>'+item.FeedVersion+'</td><td>'+item.FeedPublisherName+'</td><td>'+item.FeedPublisherUrl+'</td></tr>';
+				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.AgencyId+'">'+agencytxt+'</a></td>'
+				+ '<td><a href="' + item.URL + '" target="_blank">'+ item.AgencyName + '</a></td>'
+				+ '<td>' + item.Phone +'</td>'+ '<td><a href="#" type="RC" id="'+ item.AgencyId+'">'+item.RoutesCount+'</a></td>'
+				+ '<td><a href="#" type="SC" id="' + item.AgencyId + '">' + item.StopsCount + '</a></td>'
+				+ '<td class="details-control" type="GA"></td><td>'+item.CountiesCount + '</td>'
+				+ '<td>' + item.PlacesCount+'</td><td>' + item.UrbansCount + '</td>'
+				+ '<td>' + item.CongDistsCount + '</td><td>' + item.OdotRegionsCount + '</a></td>'
+				+ '<td class="details-control" type="FA"></td><td>' + showDollarSign(item.MinFare) + '</td>'
+				+ '<td>' + showDollarSign(item.AverageFare) + '</td>'
+				+ '<td>' + showDollarSign(item.MedianFare) + '</td>'
+				+ '<td>' + showDollarSign(item.MaxFare) + '</td>'
+				+ '<td>' + item.FareURL + '</td>'
+				+ '<td>' + item.FeedStartDate + '</td>'
+				+ '<td>' + item.FeedEndDate + '</a></td>' 
+				+ '<td class="details-control" type="FE"></td>'
+				+ '<td>' + item.FeedName+'</td>'
+				+ '<td>'+item.FeedVersion+'</td>'
+				+ '<td>'+item.FeedPublisherName+'</td>' 
+				+ '<td>'+item.FeedPublisherUrl+'</td></tr>';
 				counties.push(item.CountiesCount);
 				cplaces.push(item.PlacesCount);
 				uareas.push(item.UrbansCount);
@@ -139,7 +151,7 @@ $(document).ready(function(){
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');	
 						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&areaid='+null+'&type='+null+'&route='+null+'&nav='+nav);	    		
+			    		window.open('/TNAtoolAPI-Webapp/stopreport.html?&agency='+qstring+ '&n=' + keyName +  '&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+null+'&areaid='+null+'&type='+null+'&route='+null+'&nav='+nav+'&rc=-1');	    		
 				    }else if($(this).attr('type')=="XR"){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';

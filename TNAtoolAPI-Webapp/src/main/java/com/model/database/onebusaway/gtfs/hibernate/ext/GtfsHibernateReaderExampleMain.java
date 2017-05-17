@@ -113,22 +113,6 @@ public class GtfsHibernateReaderExampleMain {
 	  return response;
   }
     
-  /*public static List<ServiceCalendarExt> QueryCalsforRoute(RouteExt route, int dbindex){
-	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  
-	  return dao.getServiceCalendarsForRoute(route);
-  }*/
-  
-  /*public static ServiceCalendar  QueryCalendarforTrip(Trip trip, int dbindex){
-	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
-	  return dao.getCalendarForServiceId(trip.getServiceId());
-  }*/
-  
- /* public static List<ServiceCalendarDate>  QueryCalendarDatesforTrip(Trip trip, int dbindex){
-	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();
-	  return dao.getCalendarDatesForServiceId(trip.getServiceId());
-  }*/
-  
-  //Alireza
   public static List<ServiceCalendar>  QueryCalendarforAgency(String agency, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	  return dao.getCalendarForAgency(agency);
@@ -138,12 +122,6 @@ public class GtfsHibernateReaderExampleMain {
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);
 	  return dao.getCalendarDatesForAgency(agency);
   }
-  
-  /*public static List<ShapePointExt> Queryshapebytrip(AgencyAndId trip, int dbindex){
-	  GtfsMutableRelationalDao dao = factory[dbindex].getDao();	  
-	  AgencyAndId shapeid = dao.getTripForId(trip).getShapeId();	  
-	  return dao.getShapePointsForShapeId(shapeid);
-  }*/
   
   public static List<FareRule> QueryFareRuleByRoute(Route route, int dbindex){
 	  HibernateGtfsRelationalDaoImplExt dao = new HibernateGtfsRelationalDaoImplExt(sessions[dbindex]);	  	  

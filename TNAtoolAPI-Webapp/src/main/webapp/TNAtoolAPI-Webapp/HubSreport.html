@@ -38,16 +38,6 @@ var w_qstringx3 = parseFloat(getURIParameter("x3"));
 var stops = [];
 var ipop= popYear;
 var dateIOnumber = 4; // the number is used to map the date(s) to metric affected by it.
-var algDesc = "\r\n\r\n\r\nClustering Algorithm\r\n" +
-"--------------------\r\n" +
-"1. For each stop, a list of all the stops located within its \"Stop Cluster Radius\" is identified. Let's call each of these entries a cluster.\r\n" +
-"   For example,suppose that stop A is connected to stops A, B, C and D. This entry is an initial cluster \"A\" with stops {A,B,C,D}.\r\n" + 
-"2. The stops for initial clusters \"B\", \"C\" and \"D\" are added to the stops for cluster \"A\" and initial clusters \"B\", \"C\" and \"D\" are removed from the list prepared in (1).\r\n" + 
-"3. Step (2) is recursively repeated until there is not common stops in the between the remaining entries of the list. This final list contains the transit hubs clusters.\r\n" +
-"4. The cluster centroids are computed as the average latitude and longitude of its stops.\r\n" + 
-"5. Service related metrics such as number of stops, routes, visits, population served and etc. are computed as summation of the said metric over all the stops within the cluster.";
-
-
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 tmp = '<tr><th id="an" class="metric" title="ID number randomly assigned to the cluster.">ID</th>'+
@@ -309,10 +299,7 @@ $(document).ready(function(){
 		        }
 		        subTable+='</table>';
 		        return subTable;
-		    }
-			
-			//This method has to be called after populating the datatable.
-			addIOeffects(); 
+		    }			 
 			
 			// append toopltips
 			var tooltips = populateMetricDefs();

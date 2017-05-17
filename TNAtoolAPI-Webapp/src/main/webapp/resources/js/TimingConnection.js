@@ -190,14 +190,16 @@ function getTimingConReport() {
 		success : function(d) {
 			trips = d;
 			$.each(d, function(index, item) {
-				html += '<tr><td>' + (index + 1) + '</td>' + '<td>'
-						+ item.stopId1 + '</td>' + '<td>' + item.stopName1
-						+ '</td>' + '<td>' + item.stopId2 + '</td>' + '<td>'
-						+ item.stopName2 + '</td>' + '<td>' + item.agencyId
-						+ '</td>' + '<td>' + item.routeId + '</td>' + '<td>'
-						+ item.routeName + '</td>' + '<td>'
-						+ secToHour(item.arrival1) + '</td>' + '<td>'
-						+ secToHour(item.departure2) + '</td>';
+				html += '<tr><td>' + (index + 1) + '</td>' 
+				+ '<td>' + item.stopId1 + '</td>' 
+				+ '<td>' + item.stopName1 + '</td>' 
+				+ '<td>' + item.stopId2 + '</td>' 
+				+ '<td>' + item.stopName2 + '</td>' 
+				+ '<td>' + item.agencyName + '</td>' 
+				+ '<td>' + item.routeId + '</td>' 
+				+ '<td>' + item.routeName + '</td>' 
+				+ '<td>' + secToHour(item.arrival1) + '</td>' 
+				+ '<td>' + secToHour(item.departure2) + '</td>';
 				if (item.timeDiff > 0)
 					html += '<td style="color:green">'
 							+ secToHour(item.timeDiff) + '</td>';

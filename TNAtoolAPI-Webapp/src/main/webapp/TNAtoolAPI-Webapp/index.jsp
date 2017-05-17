@@ -73,7 +73,7 @@
 	
 	<div id="connectedAgencies-form" title="On-Map Connected Agencies Report" style="text-size=50%">
 		<p style="font-size:80%"> Maximum Spatial Gap (miles) <input type="number" name="Sradius" id="Sradius" class="utbox" required min="0.1" value='0.1' step="0.1" onkeypress='return isNumber(event)'/>
-				    	<input id="submit" type="button" onclick="reloadDialog2(document.getElementById('Sradius').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
+				    	<input id="submit" type="button" onclick="reloadConnectedAgenciesDialog(document.getElementById('Sradius').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
 		<p><br><span>Agencies connected to: <b><br>- <span style="font-size:80%; align:center;" id="dialogSelectedAgency"></span></b></span><br>
 		<p id="displayConAgenciesTable"></p>
 		<img id="dialogPreLoader2" src="../resources/images/287.GIF" alt="Page Loading" width="85" height="85" style="margin:100px" >

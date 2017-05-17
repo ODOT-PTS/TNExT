@@ -14,6 +14,8 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
+// Alireza
+
 package com.model.database;
 
 import java.io.BufferedReader;
@@ -82,18 +84,9 @@ public class Databases {
 		dbnames = infoMap.get("dbnames");
 		connectionURLs = infoMap.get("connectionURL");
 		usernames = infoMap.get("username");
-		passwords = infoMap.get("password");
-		/*for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
-			System.out.println(entry.getKey());
-			for(String str: entry.getValue()){
-				System.out.println(str);
-			}
-			
-			System.out.println();
-		}*/
-		
+		passwords = infoMap.get("password");		
 	}
-	
+
 	public static void deactivateDB(int i){
 		String[] newElement;
 		for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {

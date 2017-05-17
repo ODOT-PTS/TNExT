@@ -13,7 +13,10 @@
 //
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
-
+// =========================================================================================================
+//	  This script contains JavaScript variables and methods used to load Flexible Reporting Wizard 
+//	  in the Transit Network Analysis Software Tool and all its features.
+// =========================================================================================================
 var numSelectedAgencies = 0;
 var numSelectedAreas = 0; 
 var maxAgenSelect = 3;
@@ -346,182 +349,10 @@ function flexRepDialog() {
 	 $('#FlexRepUAreasContainer').append(html);
 }
 
-function loadAreaOptions(input){
-	$("#areaList").empty();
-	areas = [];
-	numSelectedAreas = 0;
-	
-	// disable filtering on urban areas if urban area is already selected as the geographical area to report on.
-/*	if ($(input).val() == 5){
-		$('#uAreaFilter').attr('disabled', true);
-		$('.urbanFilter').attr('disabled', true);
-		$('#uAreaFilter').attr('checked', false);
-	}else
-		$('#uAreaFilter').attr('disabled', false);
-		$('.urbanFilter').attr('disabled', true);*/
-	
-	
-	switch(parseInt($(input).val())) {
-    case 0:
-        areaType = "state";
-        break;
-    case 1:
-    	areaType = "county";
-        break;
-    case 2:
-    	areaType = "place";
-        break;
-    case 3:
-    	areaType = "congDist";
-        break;
-    case 4:
-    	areaType = "odotRegion";
-        break;
-    case 5:
-    	areaType = "urban";
-        break;
-	};
-
-	$.ajax({
-		type : 'GET',
-		datatype : 'json',
-		url : '/TNAtoolAPI-Webapp/queries/transit/getAreaList?&dbindex='
-				+ dbindex + '&areaType=' + areaType,
-		async : false,
-		success : function(d) {
-			html = '';
-			$.each(d, function(index, item){
-				html = html.concat('&nbsp;<input type="checkbox" class="areaCheckbox" name="'
-										+ item.name
-										+ '" value="'
-										+ item.id
-										+ '" onchange=areaSelCheck(this)> '
-										+ item.name + '<br>');
-			})
-			$("#areaList").append(html);
-		}	
-	});
-}
-
-function selectAll(input){
-	if (input.value == "area")
-		_class = ".areaCheckbox";
-	
-	if(input.checked){
-		areas = [];
-		$(_class).each(function(index, item){
-			$(item).prop('checked', true);
-			areas.push(item.value);
-		});
-	}else{
-		$(_class).each(function(index, item){
-			$(item).prop('checked', false);
-		});
-		areas = [];
-	}
-}
-
-function toggleUrbanFilters(input){
-	if(input.checked){
-		flag = false;
-		filterOnUrban = true;
-	}
-	else{
-		flag = true;
-		filterOnUrban = false;
-	}
-		
-	$(".urbanFilter").each(function(index, item){
-		$(item).attr('disabled', flag);
-	});
-}
-
-function agencySelCheck(input){
-	agencyID = input.value;
-	if(input.checked){
-		numSelectedAgencies++;
-		agencies.push(agencyID);
-	}else{
-		numSelectedAgencies--;
-		agencies.splice(agencies.indexOf(agencyID));
-	}
-	
-	if (numSelectedAgencies > maxAgenSelect){
-		$(input).prop('checked', false);
-		numSelectedAgencies--;
-		agencies.splice(agencies.indexOf(agencyID));
-		alert('Select at most ' + maxAgenSelect + ' agencies.');
-	}
-}
-
-function showParams(input){
-	// Disabling all inputs and removing list of years.
-	$('.FlexRepParamInput').prop('disabled',true);
-	$('#yearSel').find('.yearOption').remove();
-	$('#yearSel').find('option').prop('selected',true);
-	$('#FlexRepMetrics').empty();
-	metrics = [];
-	reportType = $(input).val();
-	
-	// Enabling the inputs and showing metric options based on selected report type.
-	switch(parseInt($(input).val())) {
-    case 0: // Transit Services
-    	$('#accordion').accordion( "option", "disabled", false );
-    	appendMetrics(serviceMetrics, 'FlexRepMetrics');
-    	break;
-    case 1: // Population  
-    	$('#accordion').accordion( "option", "disabled", false );
-    	$('.FlexRepParamInput').prop('disabled',false);
-    	$('#empType').prop('disabled',true);
-    	$('#yearSel').append(getYearsOption($(input).val()));
-    	appendMetrics(popMetrics, 'FlexRepMetrics');
-    	break;
-    case 2: // Employment
-    	$('#accordion').accordion( "option", "disabled", false );
-    	$('.FlexRepParamInput').prop('disabled',false);
-    	$('#yearSel').append(getYearsOption($(input).val()));
-    	appendMetrics(empMetrics, 'FlexRepMetrics');
-        break;
-    case 3: // Title VI
-    	$('#accordion').accordion( "option", "disabled", false );
-    	$('.FlexRepParamInput').prop('disabled',false);
-    	$('#empType').prop('disabled',true);
-    	$('#yearSel').append(getYearsOption($(input).val()));
-    	appendMetrics(T6Metrics, 'FlexRepMetrics');
-        break;
-	};
-	
-}
-
-function getYearsOption(input){
-	var variable;
-	if (input == 1)
-		variable = popYears;
-	else if (input == 2)
-		variable = empYears;
-	else if (input == 3)
-		variable = T6Years;
-	
-	html = '';
-	$.each(variable,function(index, item){
-		html += "<option class='yearOption' value='" + item.value + "'> " + item.text + "</option>";
-	});
-	return html;
-}
-
-function appendMetrics(input,objID){
-	$.each(input,function(index,item){
-		$('#'+objID).append('&nbsp;<input type="checkbox" class="metricCheckbox" name="'
-				+ item.text
-				+ '" value="'
-				+ item.value
-				+ '"names="'
-				+ item.name
-				+ '" onchange="updateMetrics(this)"> '
-				+ item.text + '<br>');
-	});
-}
-
+/**
+ * check if all required input is provided by the 
+ * user and opens up the report page in a new tab. 
+ */
 function openFlexRepTable(){
 	var reportTypeFlag = false;
 	var datesFlag = false;
@@ -569,6 +400,209 @@ function openFlexRepTable(){
 			alert('Enter all required inputs.');
 }
 
+/**
+ * populates list of geographical areas areas
+ * @param input
+ */
+function loadAreaOptions(input){
+	$("#areaList").empty();
+	areas = [];
+	numSelectedAreas = 0;
+	
+	switch(parseInt($(input).val())) {
+    case 0:
+        areaType = "state";
+        break;
+    case 1:
+    	areaType = "county";
+        break;
+    case 2:
+    	areaType = "place";
+        break;
+    case 3:
+    	areaType = "congDist";
+        break;
+    case 4:
+    	areaType = "odotRegion";
+        break;
+    case 5:
+    	areaType = "urban";
+        break;
+	};
+
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/getAreaList?&dbindex='
+				+ dbindex + '&areaType=' + areaType,
+		async : false,
+		success : function(d) {
+			html = '';
+			$.each(d, function(index, item){
+				html = html.concat('&nbsp;<input type="checkbox" class="areaCheckbox" name="'
+										+ item.name
+										+ '" value="'
+										+ item.id
+										+ '" onchange=areaSelCheck(this)> '
+										+ item.name + '<br>');
+			})
+			$("#areaList").append(html);
+		}	
+	});
+}
+
+/**
+ * method called for select/deselect all
+ * @param input
+ */
+function selectAll(input){
+	if (input.value == "area")
+		_class = ".areaCheckbox";
+	
+	if(input.checked){
+		areas = [];
+		$(_class).each(function(index, item){
+			$(item).prop('checked', true);
+			areas.push(item.value);
+		});
+	}else{
+		$(_class).each(function(index, item){
+			$(item).prop('checked', false);
+		});
+		areas = [];
+	}
+}
+
+/**
+ * updates flags as urban filter is toggled 
+ */
+function toggleUrbanFilters(input){
+	if(input.checked){
+		flag = false;
+		filterOnUrban = true;
+	}
+	else{
+		flag = true;
+		filterOnUrban = false;
+	}
+		
+	$(".urbanFilter").each(function(index, item){
+		$(item).attr('disabled', flag);
+	});
+}
+
+/**
+ * updates the array holding selected agencies' list and makes
+ * sure the number of selected agencies does not exceed the limit.
+ * @param input
+ */
+function agencySelCheck(input){
+	agencyID = input.value;
+	if(input.checked){
+		numSelectedAgencies++;
+		agencies.push(agencyID);
+	}else{
+		numSelectedAgencies--;
+		agencies.splice(agencies.indexOf(agencyID));
+	}
+	
+	if (numSelectedAgencies > maxAgenSelect){
+		$(input).prop('checked', false);
+		numSelectedAgencies--;
+		agencies.splice(agencies.indexOf(agencyID));
+		alert('Select at most ' + maxAgenSelect + ' agencies.');
+	}
+}
+
+/**
+ * displays the list of parameter based on selecter report. 
+ * @param input
+ */
+function showParams(input){
+	// Disabling all inputs and removing list of years.
+	$('.FlexRepParamInput').prop('disabled',true);
+	$('#yearSel').find('.yearOption').remove();
+	$('#yearSel').find('option').prop('selected',true);
+	$('#FlexRepMetrics').empty();
+	metrics = [];
+	reportType = $(input).val();
+	
+	// Enabling the inputs and showing metric options based on selected report type.
+	switch(parseInt($(input).val())) {
+    case 0: // Transit Services
+    	$('#accordion').accordion( "option", "disabled", false );
+    	appendMetrics(serviceMetrics, 'FlexRepMetrics');
+    	break;
+    case 1: // Population  
+    	$('#accordion').accordion( "option", "disabled", false );
+    	$('.FlexRepParamInput').prop('disabled',false);
+    	$('#empType').prop('disabled',true);
+    	$('#yearSel').append(getYearsOption($(input).val()));
+    	appendMetrics(popMetrics, 'FlexRepMetrics');
+    	break;
+    case 2: // Employment
+    	$('#accordion').accordion( "option", "disabled", false );
+    	$('.FlexRepParamInput').prop('disabled',false);
+    	$('#yearSel').append(getYearsOption($(input).val()));
+    	appendMetrics(empMetrics, 'FlexRepMetrics');
+        break;
+    case 3: // Title VI
+    	$('#accordion').accordion( "option", "disabled", false );
+    	$('.FlexRepParamInput').prop('disabled',false);
+    	$('#empType').prop('disabled',true);
+    	$('#yearSel').append(getYearsOption($(input).val()));
+    	appendMetrics(T6Metrics, 'FlexRepMetrics');
+        break;
+	};
+	
+}
+
+/**
+ * populates the year selection drop down based on selected report 
+ * @param input
+ * @returns {String}
+ */
+function getYearsOption(input){
+	var variable;
+	if (input == 1)
+		variable = popYears;
+	else if (input == 2)
+		variable = empYears;
+	else if (input == 3)
+		variable = T6Years;
+	
+	html = '';
+	$.each(variable,function(index, item){
+		html += "<option class='yearOption' value='" + item.value + "'> " + item.text + "</option>";
+	});
+	return html;
+}
+
+/**
+ * appends metrics based on selected reports
+ * @param input
+ * @param objID
+ */
+function appendMetrics(input,objID){
+	$.each(input,function(index,item){
+		$('#'+objID).append('&nbsp;<input type="checkbox" class="metricCheckbox" name="'
+				+ item.text
+				+ '" value="'
+				+ item.value
+				+ '"names="'
+				+ item.name
+				+ '" onchange="updateMetrics(this)"> '
+				+ item.text + '<br>');
+	});
+}
+
+
+
+/**
+ * keeps track of selected areas and makes sure the number of selected 
+ * areas does not exceed the limit.
+ * @param input
+ */
 function areaSelCheck(input){
 	areaID = input.value;
 	if(input.checked){
@@ -587,6 +621,10 @@ function areaSelCheck(input){
 	}
 }
 
+/**
+ * updates the array of selected metrics based on user selection
+ * @param input
+ */
 function updateMetrics( input ){
 	if(input.checked){
 		if (metrics.values == undefined){
@@ -603,9 +641,13 @@ function updateMetrics( input ){
 			metrics.names.splice(metrics.names.indexOf(item),1);
 		});
 	}
-	console.log(metrics);
 }
 
+/**
+ * disables the employment metrics that there is no projection data for them
+ * in the database, i.e., all metrics except for NAICS sectors.
+ * @param input
+ */
 function updateEmpMetrics(input){
 	var year = $(input).val();
 	if (reportType == 2){ // For employment report
@@ -624,6 +666,11 @@ function updateEmpMetrics(input){
 	}
 }
 
+/**
+ * updates flags for employment datasets (WAC/RAC), based on selection.
+ * for 
+ * @param input
+ */
 function updateEmpType(input){
 	if (input.id == 'yearSel'){
 		if(reportType == 2){
@@ -637,7 +684,7 @@ function updateEmpType(input){
 				rac = true; wac = false;
 			}		
 		}
-	}else if (input.id = 'empType'){
+	}else if (input.id == 'empType'){
 		var empType = input.value;
 		if ( empType == 'WACRAC'){
 			wac = rac = true;

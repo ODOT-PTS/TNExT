@@ -75,7 +75,6 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
-	console.log( agencyId==null);
 	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key='+ key+'&agency=null&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	if (agencyId!=null){
 		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
@@ -92,7 +91,6 @@ $(document).ready(function(){
 				nameString ='For '+d.agencyName;
 			}
 			appendNavigation(nameString);
-			//$('h2').append('Urban Areas Summary Report '+nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' +numberconv(item.population) +'</td>';
@@ -160,7 +158,7 @@ $(document).ready(function(){
 		    			url += '&agency='+agencyId
 		    		}
 
-		    		url +='&areaid='+qstring+'&type=3'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+areaid+'&nav='+nav;
+		    		url +='&areaid='+qstring+'&type=3'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+areaid+'&nav='+nav+'&rc=-1';
 		    		window.open(url);
 			    };
 			});

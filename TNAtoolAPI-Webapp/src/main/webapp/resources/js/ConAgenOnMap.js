@@ -121,7 +121,7 @@ function loadConnectedAgenciesDialog(node){
 			html += '</tbody></table>';
 			$('#displayConAgenciesTable').append(html);
 			
-			// initializing datatable
+			// initializing data table
 			var connectedAgenciesTable = $('#connectedAgenciesTable').DataTable( {
 				"paging": false,
 				"bSort": false,
@@ -171,7 +171,7 @@ function loadConnectedAgenciesDialog(node){
     					marker.lon = lon;
     					marker.color = colors[c];
     					marker.bindPopup('<b>Agency: </b>'+ agencyName +'<br>'+
-    									'<b>Stop Name: </b>'+item.name);
+    									'<b>Stop Name: </b>'+item.names);
     					tmpConnectionsClusters.addLayer(marker);
     				});
 
@@ -253,7 +253,7 @@ function onMarkerClick(){
 		var selectedStopLat= this.lat;
 		var selectedStopLon=this.lon;
 		var color = this.color;
-		
+			
 		this.closePopup();
 		$.ajax({
 			type: 'GET',
@@ -269,7 +269,7 @@ function onMarkerClick(){
 				$.each(data.stopsList, function(i,item){
 					if (item.lat!=selectedStopLat && item.lon != selectedStopLon){
 						var latlngs= Array();
-						var destMarker = new L.marker([item.lat,item.lon] /*,{className: 'ycluster', iconSize: new L.Point(10, 10)}).on('click',onClick*/);
+						var destMarker = new L.marker([item.lat,item.lon]);
 						bounds.push(destMarker.getLatLng());
 						latlngs.push(sourceMarker.getLatLng());
 						latlngs.push(destMarker.getLatLng());

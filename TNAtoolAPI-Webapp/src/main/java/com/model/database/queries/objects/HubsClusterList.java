@@ -27,11 +27,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @XmlRootElement( name = "HubClusterList")
 public class HubsClusterList {
-	@XmlAttribute
-    @JsonSerialize
-    public String metadata;
-	
-	@XmlAttribute
+
     @JsonSerialize
     public List<String> keyAgecies;
 	

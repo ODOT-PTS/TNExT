@@ -64,7 +64,6 @@ path.link {
 
 		d3.json("flare.json", function(json) {
 			json = JSON.parse(window[flag] || reportsJson);
-			sort(json);
 			json.x0 = 0;
 			json.y0 = 0;
 			moveChildren(json);

@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
+// Alireza
 package com.webapp.api;
 
 import java.io.BufferedReader;
@@ -44,16 +45,13 @@ public class MainMap extends HttpServlet {
 	// GET
 	@Override
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		
-		setDatabaseParams();
-		
+			HttpServletResponse response) throws ServletException, IOException {		
+		setDatabaseParams();		
 		request.getRequestDispatcher("/TNAtoolAPI-Webapp/index.jsp").forward(request, response);
 		
 	}
 	
-	public void setDatabaseParams() throws IOException{
-		
+	public void setDatabaseParams() throws IOException{		
 		ClassLoader classLoader = getClass().getClassLoader();
 		File databaseParamsFile = new File(classLoader.getResource("admin/resources/databaseParams.csv").getFile());
 		
@@ -144,6 +142,4 @@ public class MainMap extends HttpServlet {
 			ioe.printStackTrace();
 		}
 	}
-	
-	// POST
 }

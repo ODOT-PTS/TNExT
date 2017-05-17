@@ -344,7 +344,7 @@ function circleMove(latlng){
 }
 
 /**
- * updates the seach radius as the circle drawn on map 
+ * updates the search radius as the circle drawn on map 
  * is resized
  * @param radius
  */
@@ -354,10 +354,18 @@ function circleResize(radius){
 	$('#circleRadius2').html(radius);	
 }
 
+/**
+ * close already drawn shapes when click to draw a
+ * new shape
+ */
 map.on('draw:editstart', function (e) {
 	currentLayer.closePopup();
 	dialog.dialog( "close" );
 });
+
+/**
+ * updates store data of the shape upon edit
+ */
 map.on('draw:edited', function (e) {
 	$('#circleRadius1').css('visibility','hidden');
 	var layers = e.layers;
@@ -398,49 +406,10 @@ map.on('draw:edited', function (e) {
     });	
 	dialog.dialog( "close" );	
 }); 
-////////*************************************/////////////////////
-//var Layers = 0;
-var colorIndex;
-function getdata(type,agency,route,variant,k,callback,popup,node) {	
-	switch (type){
-	case 1:
-		var points = [];
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/stops?&agency='+agency+"&dbindex="+dbindex,
-			success: function(d){		
-			$.each(d.stops, function(i,stop){        	
-				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.StopName]);							
-	        });				
-			if (points.length!=0) callback("A"+agency,k,points,popup,node);
-	    }});
-		break;
-	case 2:
-		var points = [];
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/stopsbyroute?&agency='+agency+'&route='+route+"&dbindex="+dbindex,
-			success: function(d){		
-			$.each(d.stops, function(i,stop){        	
-				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.stopName]);				 			
-	        });				
-			if (points.length!=0) callback("R"+agency+route,k,points,popup,node);
-	    }});
-		break;
-	case 3:	
-		$.ajax({
-			type: 'GET',
-			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant+"&dbindex="+dbindex,
-			success: function(d){
-			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
-	    }});
-		break;
-	}		
-};
 
+
+
+//-------------- features for adding layers of geographical areas like counties, urban areas, and etc. to the map (a leaflet feature)----------
 var info = L.control();
 info.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
@@ -448,13 +417,22 @@ info.onAdd = function (map) {
     return this._div;
 };
 
+/**
+ * adds area information to the interface
+ */
 info.update = function (props) {
     this._div.innerHTML = (props ?
-
-        '<div id="box"><b>Name: </b>' + props.name + ' <br/>' + '<b>Area: </b>'+ props.area + ' mi<sup>2</sup><br/><b>Population (2010): </b>'+ props.population+'</div>' 
+        '<div id="box">'
+    		+ '<b>Name: </b>' + props.name + ' <br/>' 
+    		+ '<b>Area: </b>'+ props.area + ' mi<sup>2</sup><br/>'
+    		+ '<b>Population (2010): </b>'+ props.population
+		+'</div>' 
         :'');
 };
 
+/**
+ * adds legends showing the population density of areas
+ */
 var legend = L.control({position: 'bottomright'});		
 legend.onAdd = function (map) {		
     var div = L.DomUtil.create('div', 'legend'),		
@@ -489,9 +467,15 @@ function styleU(feature) {
         fillOpacity: 0.4
     };
 }
+
 function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
 }
+
+/**
+ * changes the style for the area back to normal. 
+ * @param e - area
+ */
 function resetHighlight(e) {	
 	var layer = e.target;
     layer.setStyle({              
@@ -501,6 +485,11 @@ function resetHighlight(e) {
     });
     info.update();
 }
+
+/**
+ * changes the style for the area hovered over. 
+ * @param e - area
+ */
 function highlightFeature(e) {
     var layer = e.target;
     layer.setStyle({              
@@ -512,6 +501,11 @@ function highlightFeature(e) {
     });    
     info.update(layer.feature.properties);    
 }
+
+/**
+ * Alireza
+ * @param e
+ */
 function resetHighlightU(e) {	
 	var layer = e.target;
     layer.setStyle({              
@@ -520,6 +514,12 @@ function resetHighlightU(e) {
     });
     info.update();
 }
+
+/**
+ * changes the style of areas on mouseover and mouseout events
+ * @param feature
+ * @param layer
+ */
 function onEachFeatureU(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
@@ -543,6 +543,10 @@ var odot = L.geoJson(odotregionshape, {style: style, onEachFeature: onEachFeatur
 var congdist = L.geoJson(congdistshape, {style: style, onEachFeature: onEachFeature});
 var urban50k = L.geoJson(urban50shapes, {style: styleU, onEachFeature: onEachFeatureU});
 var urban25k = L.geoJson(urban25shapes, {style: styleU, onEachFeature: onEachFeatureU});
+
+/**
+ * colors to style areas based on their population density
+ */
 function getColor(d) {
     return d > 1000 ? '#800026' :
            d > 500  ? '#BD0026' :
@@ -553,6 +557,10 @@ function getColor(d) {
            d > 10   ? '#FED976' :
                       '#FFEDA0';
 }
+
+/**
+ * colors to style blocks based on their population/employment density
+ */
 function getColorBlocks(d) {
     return d > 10000 ? '#800026' :
            d > 5000  ? '#BD0026' :
@@ -564,6 +572,14 @@ function getColorBlocks(d) {
                        '#FFEDA0';
 }
 var colorset = ["#6ECC39","#FF33FF","#006DFF","#FE0A0A", "#7A00F5", "#CC6600"];
+
+/**
+ * Alireza
+ * @param layerid
+ * @param k
+ * @param points
+ * @param popup
+ */
 function disponmap2(layerid,k,points,popup){	
 	var geojsonMarkerOptions = {
 		    radius: 5,
@@ -604,10 +620,20 @@ function disponmap2(layerid,k,points,popup){
 	mylayer._leaflet_id = layerid;	
 	stops.addLayer(mylayer);	
 };
+
 var popupOptions = {'offset': L.point(0, -8),
 		'closeOnClick':false,
 		'draggable':true
 		};
+
+/**
+ * Alireza
+ * @param layerid
+ * @param k
+ * @param points
+ * @param popup
+ * @param node
+ */
 function disponmap(layerid,k,points,popup,node){
 	
 	var markers;
@@ -669,7 +695,6 @@ function disponmap(layerid,k,points,popup,node){
 	}	
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
-		//var marker = new L.Marker(p[0],{title:popup});
 		var marker = new L.CircleMarker(p[0], {		
 			title: popup,		
 	        radius: 8,		
@@ -714,6 +739,15 @@ function disponmap(layerid,k,points,popup,node){
 	$.jstree._reference($mylist).set_type("default", $(node));
 }
 
+/**
+ * automatically draw a circle around the stops based on the user
+ * specified radius and generates the on-map report. 
+ * @param lat
+ * @param lng
+ * @param mlat
+ * @param mlng
+ * @returns {Boolean}
+ */
 function onMapBeforeSubmit(lat,lng,mlat,mlng){
 	var x = $('#'+mlat+'POPx'+mlng).val();
 	if(isNaN(x)||x<=0){
@@ -743,6 +777,13 @@ var frequencyFlag = true;
 $('.jstree-checkbox').click(function(){		
 	zoomToRouteShapeFlag = true;		
 });		
+
+/**
+ * Adjusts the weight of the line used to show a route based on the number of 
+ * times the route is served (frequecny).
+ * @param freq - frequency
+ * @returns
+ */
 function scaledFreq(freq){		
 	var weight = Math.ceil(Math.log2(freq));		
 	if(weight==1){		
@@ -752,8 +793,18 @@ function scaledFreq(freq){
 	}		
 }
 
+/**
+ * Displays a route selected from the agencies list on the main map interface
+ * on the map. 
+ * @param k
+ * @param d
+ * @param name
+ * @param node
+ */
 function dispronmap(k,d,name,node){	
-	var popHtml = '<b>Agency Name:</b> '+d.agencyName+ '<br><b>Agency ID:</b> '+d.agency+'<br><b>Route Head Sign:</b> '+d.headSign;
+	var popHtml = '<b>Agency Name:</b> '+d.agencyName
+	+ '<br><b>Agency ID:</b> '+d.agency
+	+ '<br><b>Route Head Sign:</b> '+d.headSign;
 	var polyline;
 	if(frequencyFlag){
 		var freq = node.attr("freq");
@@ -911,8 +962,11 @@ for(var i=3;i<=6;i++){
 }
 var $mylist = $("#list");
 var popYear = 2010;
+
+//---------------------- loading on-map floating tool bar ----------------
+
 $mylist
-.jstree({
+.jstree({  // populating "List of Agencies" and their routes 
 	"checkbox": {        
         two_state: true,
         real_checkboxes: false,
@@ -980,15 +1034,12 @@ $mylist
         		"show" : {
                     "label" : "Show Route Shapes",
                     "action" : function (node) { 
-                    	//alert(node.attr("type"));
                     	zoomToRouteShapeFlag = false;
                     	if ($.jstree._reference($mylist)._is_loaded(node)){
                     			$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
                     				if ($.jstree._reference($mylist)._is_loaded(child)){
                     					$.each($.jstree._reference($mylist)._get_children(child), function(i,gchild){                    						
-                    						//if ($.jstree._reference($mylist).is_checked(gchild)){
                     						$.jstree._reference($mylist).change_state(gchild, true);
-                    						//}
                     						if ($(gchild).attr("longest")==1){
                     							$.jstree._reference($mylist).change_state(gchild, false);
                     						}            								
@@ -1047,7 +1098,6 @@ $mylist
                 		"show" : {
                             "label" : "Show Route Shapes",
                             "action" : function (node) { 
-                            	//alert(node.attr("type"));
                             	zoomToRouteShapeFlag = true;
                             		if ($.jstree._reference($mylist)._is_loaded(node)){
         	                    		$.each($.jstree._reference($mylist)._get_children(node), function(i,child){
@@ -1080,7 +1130,7 @@ $mylist
     },
 	"plugins" : [ "themes","types","json_data", "checkbox", "sort", "ui" ,"contextmenu"]			
 })
-.bind("loaded.jstree", function (event, data) {
+.bind("loaded.jstree", function (event, data) { // Intantiating "Oregon Transit Agencies" dialog box 
 	$mylist
 	.dialog({ 
 		"title" : "Oregon Transit Agencies", 
@@ -1112,7 +1162,9 @@ $mylist
 	    	$(".ui-dialog-titlebar-minimize:eq( 2 )").attr("title", "Minimize");
 	    	$(".ui-dialog-titlebar-buttonpane:eq( 2 )").css("right", 68 + "px");    	
 		    var titlebar = $(".ui-dialog-titlebar:eq( 2 )");		
-			var div2 = $("<div/>");			
+			
+		    // "Databases" button on the "Oregon Transit Agencies" dialog box
+		    var div2 = $("<div/>");			
 		    div2.addClass("ui-dialog-titlebar-other");	    
 		    var button2 = $( "<button/>" ).text( "Databases" );	
 		    button2.attr("id", "dbb");
@@ -1125,8 +1177,8 @@ $mylist
 		    div2.append(menucontent);
 		    div2.appendTo(titlebar);
 		    
+		    // "Date Picker" button on the "Oregon Transit Agencies" dialog box
 		    var div3 = $("<div/>");	
-		    //div3.attr("id", "datepickarea");
 		    div3.addClass("ui-dialog-titlebar-other");		    
 		    var button3 = $( "<button/>" ).text( "Date Picker" );
 		    button3.attr("id", "datepick");
@@ -1137,12 +1189,9 @@ $mylist
 	        .css( "top", 55 + "%" )
 	        .appendTo(div3);
 		    div3.append('<div id="datepicker"><br></div>');
-		    div3.appendTo(titlebar);
+		    div3.appendTo(titlebar);		    
 		    
-		    /*var div4 = $("<div/>");
-		    div4.attr("id", "datepickerdiv");
-		    div4.appendTo(titlebar);*/
-		    
+		    // "Reports" button on the "Oregon Transit Agencies" dialog box
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;
 		    var div = $("<div/>");
 		    div.addClass("ui-dialog-titlebar-other");	    
@@ -1155,6 +1204,7 @@ $mylist
 	        .css( "top", 55 + "%" )
 	        .appendTo(div);		    
 
+		    // populating list of reports under "Reports" button on the "Oregon Transit Agencies" dialog box
 		    div.append('<ul id="rmenu" class="dropdown-menu" role="menu" aria-labelledby="drop4">'+
 		    		'<li role="presentation"><a id="SSR" href="#"><b>Statewide Reports</b></a>'+
 			    		'<ul>'+
@@ -1197,17 +1247,17 @@ $mylist
 			$( "#rmenu" ).menu();
 			$( ".ui-menu" ).css('width','21em');
 			$( ".ui-menu-item" ).css('width','21em');
-			$('.ui-dialog-titlebar-other').dropdown();			
+			$('.ui-dialog-titlebar-other').dropdown();	
+			
+			// instanctiating the date picker tiggered by clicking "Date Picker" button on the "Oregon Transit Agencies" dialog box
 			$("#datepicker").multiDatesPicker({
 				changeMonth: false,
 		      	changeYear: false,
 				  onSelect: function(date, inst) {					  
 					  dateID = date.replace("/","").replace("/","");					  
 						if($("#"+dateID).length==0){
-							//alert("add triggered");
 							addDate(date);							
 						}else{
-							//alert("del triggered");
 							$("#"+dateID).remove();							
 						}
 						if($('#datepicker').multiDatesPicker('getDates').length>0){
@@ -1218,28 +1268,24 @@ $mylist
 			      }
 			});
 			
-			//$("#datesdiv").css({"width":"100%"});
 			$("#datepicker").append("<input type='button' value='Submit Dates' id='datepickerSubmit' onclick='updatepicker()'/>");
 			$("#datepicker").css({"display":"inline-block", "z-index":"1000", "position":"fixed"});
-			//$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"}); 
 			$("#datepicker").hide();
 			
 			$('#datepick').click(function () {
-				$("#datepicker").toggle();
-				//updatepicker();
-				
+				$("#datepicker").toggle();				
 			});
 			$('#dbb').click(function () {
 				$("#datepicker").hide();
-				//updatepicker();
 			});
 			$('#repb').click(function () {
 				$("#datepicker").hide();
-				//updatepicker();
 			});		
 			
 			$mylist.dialogExtend("collapse");
 			$("#minimize").attr("title", "Minimize");
+			
+			// linking reports to the cascade menu opened up by clicking "Reports" button on the "Oregon Transit Agencies" dialog box
 			$('a').click(function(e){				
 				var casestring = '';
 				if ($(this).attr('id') != undefined) {
@@ -1303,22 +1349,17 @@ $mylist
 			    	if (dbindex!=parseInt(casestring.substring(2)))
 			    		if ($('#datepicker').multiDatesPicker('getDates').length>0){
 			    			var dates = $('#datepicker').multiDatesPicker('getDates');			    			
-			    			//localStorage.setItem(key, dates.join(","));	
 			    			key = setDates(dates.join(","));
 			    		}
 			    		location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+parseInt(casestring.substring(2)));			    		    		
 			    }else if(casestring=="Emp"){
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    	//var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/Emp.html?&n='+keyName+'&dbindex='+dbindex);
 			    }else if(casestring=="T6"){	
 			    	var d = new Date();
 			    	var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    	//var keyName = Math.random();
-		    		///localStorage.setItem(keyName, qstringd);
 					var keyName = setDates(qstringd);
 			    	window.open('/TNAtoolAPI-Webapp/T6.html?&n='+keyName+'&dbindex='+dbindex);
 			    }
@@ -1362,17 +1403,15 @@ $mylist
 	});   
 	updateListDialog(dialogAgenciesId);
 })
-.bind("change_state.jstree", function (e, d) {
+.bind("change_state.jstree", function (e, d) { // methods called when a checkbox on the List of Agencies is clicked
     var tagName = d.args[0].tagName;
     var refreshing = d.inst.data.core.refreshing;
-    //alert(tagName);
     if ((tagName == "A" || tagName == "INS"|| tagName == "LI")&&(refreshing != true && refreshing != "undefined")) {    	
     	node = d.rslt;    	
     	switch (node.attr("type")){
     	case "agency":   		
     		//checkbox is checked
     		if ($.jstree._reference($mylist).is_checked(node)){
-    			//$(node).disabled = true;
     			$.jstree._reference($mylist).set_type("disabled", $(node));    			   			
     			$.jstree._reference($mylist)._get_children(node).each( function( idx, listItem ) {    				
     				if ($.jstree._reference($mylist).is_checked($(listItem))){
@@ -1389,7 +1428,6 @@ $mylist
     			node.css("opacity", "1");
     			node.css("background-color", colorset[colorIndex%6]);    			
     			getdata(1,node.attr("id"),"","",colorIndex%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
-    			//Layers = Layers + 1;    			
     		} else {    			
     			node.css("background-color","");
     			if ((($($mylist).jstree("get_checked",node,true)).length)>0) node.css("opacity", "0.6");
@@ -1401,7 +1439,7 @@ $mylist
     		}
     		break;
     	case "route":
-    		if ($.jstree._reference($mylist).is_checked(node)){
+    		if ($.jstree._reference($mylist).is_checked(node)){ // if checkbox is checked
     			$.jstree._reference($mylist).set_type("disabled", $(node));    			
     			rparent = $.jstree._reference($mylist)._get_parent(node);    			
     			if($.jstree._reference($mylist).is_checked(rparent)){    			
@@ -1417,7 +1455,6 @@ $mylist
     			node.css("background-color", colorset[colorIndex%6]); 
     			rparent.css("opacity", "0.6");
     			getdata(2,rparent.attr("id"),node.attr("id"),"",colorIndex%6,disponmap,$.jstree._reference($mylist).get_text(node),node);
-    			//Layers = Layers + 1;    			
     		} else {    			
     			if ((($($mylist).jstree("get_checked",rparent,true)).length)==0) rparent.css("opacity", "1");
     			node.css("background-color","");    			    			
@@ -1432,13 +1469,12 @@ $mylist
     		vparent = $.jstree._reference($mylist)._get_parent(node);  
     		rvparent = $.jstree._reference($mylist)._get_parent(vparent); 
     		colorIndex = dialogAgenciesId.indexOf(rvparent.attr("id"));
-    		if ($.jstree._reference($mylist).is_checked(node)){
+    		if ($.jstree._reference($mylist).is_checked(node)){ // if checkbox is checked
     			$.jstree._reference($mylist).set_type("disabled", $(node));    			
     			node.css("background-color", colorset[colorIndex%6]);
     			vparent.css("font-weight", "bold");
     			$.jstree._reference($mylist)._get_parent(vparent).css("opacity", "0.6");
     			getdata(3,d.inst._get_parent((d.inst._get_parent(node))).attr("id"),(d.inst._get_parent(node)).attr("id"),node.attr("id"),colorIndex%6,dispronmap,node.attr("id"),node);
-    			//Layers = Layers + 1;     			
     		} else {    			
     			node.css("background-color","");
     			if ((($($mylist).jstree("get_checked",vparent,true)).length)==0) {
@@ -1457,21 +1493,81 @@ $mylist
     	}    	
     };
 });
+
+var colorIndex;
+
+/**
+ * gets stop/route/route-variant shapes to be displayed on map 
+ * @param type
+ * @param agency
+ * @param route
+ * @param variant
+ * @param k
+ * @param callback
+ * @param popup
+ * @param node
+ */function getdata(type,agency,route,variant,k,callback,popup,node) {	
+	switch (type){
+	case 1:
+		var points = [];
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/stops?&agency='+agency+"&dbindex="+dbindex,
+			success: function(d){		
+			$.each(d.stops, function(i,stop){        	
+				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.StopName]);							
+	        });				
+			if (points.length!=0) callback("A"+agency,k,points,popup,node);
+	    }});
+		break;
+	case 2:
+		var points = [];
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/stopsbyroute?&agency='+agency+'&route='+route+"&dbindex="+dbindex,
+			success: function(d){		
+			$.each(d.stops, function(i,stop){        	
+				points.push([new L.LatLng(Number(stop.lat), Number(stop.lon)),stop.stopName]);				 			
+	        });				
+			if (points.length!=0) callback("R"+agency+route,k,points,popup,node);
+	    }});
+		break;
+	case 3:	
+		$.ajax({
+			type: 'GET',
+			datatype: 'json',
+			url: '/TNAtoolAPI-Webapp/queries/transit/shape?&agency='+agency+'&trip='+variant+"&dbindex="+dbindex,
+			success: function(d){
+			if (d.points!= null) callback(k,d,"V"+agency+route+variant,node);
+	    }});
+		break;
+	}		
+};
+
+/**
+ * updates the selected date parameter in the URL based on user selected dates
+ */
 function updatepicker(){
 	newdates = null;
 	if ($('#datepicker').multiDatesPicker('getDates').length>0){
 		var dates = $('#datepicker').multiDatesPicker('getDates');
 		newdates = dates.join(",");
-		//localStorage.setItem(key, newdates);
 		key = setDates(newdates);
 	} else {						
 			$("#datepick").css({"border":""});
-			//localStorage.removeItem(key);
 			key="--";
 	}
 	location.replace(document.URL.split("?")[0]+"?&n="+key+'&dbindex='+dbindex);
 }
 
+/**
+ * Adds the start and end date of feeds to the "List of Agencies" on the "Oregon Transit
+ * Agencies" floating tool box. Adds list of agencies with no GTFS feed to the end of the 
+ * "List of Agencies".
+ * @param agenciesIds
+ */
 function updateListDialog(agenciesIds){
 	var aList = $( "li[type='agency']" );
 	var count = aList.length;
@@ -1494,11 +1590,9 @@ function updateListDialog(agenciesIds){
 	$('.jstree-no-dots').prepend("<p style='margin-left:3%'><b>List of Agencies:</b></p>");
 	$('.jstree-no-dots').css({"height": "74%","padding-top": "2%"});
 	
-	var noGTFS = [//"Albany Transit System",
+	// list of agencies with no GTFS feeds available
+	var noGTFS = [
 	              "Burns Paiute Tribal Transit Service",
-	              //"Corvallis Transit System", 
-	              //"Linn-Benton Loop",
-	              //"Malheur Council on Aging & Community Services",
 	              "Shawn's Rideshare",
 	              "South Clackamas Transportation District",
 	              "Warm Springs Transit"];
@@ -1518,6 +1612,7 @@ function updateListDialog(agenciesIds){
 	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
 	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
 	
+	// keeps selected dates updated in the date picker 
 	if (w_qstringd){				
 		$( "#datepicker" ).multiDatesPicker({
 			addDates: w_qstringd.split(","),
