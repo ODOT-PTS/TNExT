@@ -1,4 +1,4 @@
------------------------------------------------------------------------
+----------------------------------------------------------------------
 --1)Build a new database and make sure to create the postgis extention
 
 --2)Download census 2010 joint shapefiles from https://www.census.gov/geo/maps-data/data/tiger-data.html.
@@ -747,8 +747,8 @@ CREATE TABLE census_blocks_ref
   countyid character varying(5),			--new
   tractid character varying(11),			--new
   poptype character varying(5),
-  landarea bigint,
-  waterarea bigint,
+  landarea integer,
+  waterarea integer,
   population integer NOT NULL,
   lat double precision NOT NULL,
   lon double precision NOT NULL,
@@ -921,8 +921,8 @@ CREATE TABLE census_blocks
   countyid character varying(5),			--new
   tractid character varying(11),			--new
   poptype character varying(5),
-  landarea bigint,
-  waterarea bigint,
+  landarea integer,
+  waterarea integer,
   population integer NOT NULL,
   lat double precision NOT NULL,
   lon double precision NOT NULL,

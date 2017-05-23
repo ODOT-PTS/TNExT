@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Alireza
+// Creates a static hashmap of all the databases' required connection information from dbinfo.csv
 
 package com.model.database;
 

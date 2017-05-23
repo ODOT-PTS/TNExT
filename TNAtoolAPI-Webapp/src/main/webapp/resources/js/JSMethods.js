@@ -1010,7 +1010,7 @@ function findNavigationId(title){
 }
 
 /**
- * Alireza
+ * A depth-first-search recursive algorithm for building the title navigation trees in tabular reports
  * @param node
  * @param family
  * @param tree

@@ -93,7 +93,7 @@ function openStreetView(lat, lon){
 }
 
 /**
- * Alireza
+ * A helper function to improve the user experience while using the Google street view functionality
  */
 function checkSVChange()
 {
@@ -201,7 +201,7 @@ function geoRadio(r){
 }
 
 /**
- * Alireza
+ * changes the display type of blocks' level of service markers within the on-map report
  * @param b
  * @param densityValue
  */

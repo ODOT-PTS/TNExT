@@ -503,7 +503,7 @@ function highlightFeature(e) {
 }
 
 /**
- * Alireza
+ * changes the style for the Urban areas back to normal.
  * @param e
  */
 function resetHighlightU(e) {	
@@ -574,7 +574,8 @@ function getColorBlocks(d) {
 var colorset = ["#6ECC39","#FF33FF","#006DFF","#FE0A0A", "#7A00F5", "#CC6600"];
 
 /**
- * Alireza
+ * deprecated callback function for building additional markers
+
  * @param layerid
  * @param k
  * @param points
@@ -627,7 +628,7 @@ var popupOptions = {'offset': L.point(0, -8),
 		};
 
 /**
- * Alireza
+ * creates stops' markers generated from Oregon Transit Agencies box
  * @param layerid
  * @param k
  * @param points

@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Alireza
+// Initializes all the file uploads for the administrative interface
 package com.webapp.modifiers;
 
 import java.io.BufferedReader;

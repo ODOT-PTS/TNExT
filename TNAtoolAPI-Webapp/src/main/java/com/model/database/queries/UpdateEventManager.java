@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class UpdateEventManager {
     
 	/**
-	 * Alireza
+	 *Adds additional spatial methods to the current database
 	 * @param connection
 	 * @param dbInfo
 	 */
