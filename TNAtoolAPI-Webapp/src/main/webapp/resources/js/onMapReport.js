@@ -93,7 +93,7 @@ function openStreetView(lat, lon){
 }
 
 /**
- * Alireza
+ * A helper function to improve the user experience while using the Google street view functionality
  */
 function checkSVChange()
 {
@@ -201,7 +201,7 @@ function geoRadio(r){
 }
 
 /**
- * Alireza
+ * changes the display type of blocks' level of service markers within the on-map report
  * @param b
  * @param densityValue
  */
@@ -699,17 +699,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 }
 
 /**
- * Alireza
+ * Takes log of input to adjust the weight
  * @param svc
  * @returns
  */
 function scaledSvc(svc){
-	svc = Math.ceil(Math.log2(svc));		
-	/*if(weight==1){		
-		return 2;		
-	}else{		
-		return weight;		
-	}*/		
+	svc = Math.ceil(Math.log2(svc));	
 	return svc;
 }
 

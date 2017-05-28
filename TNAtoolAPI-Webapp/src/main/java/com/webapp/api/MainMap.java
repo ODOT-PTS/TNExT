@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Alireza
+// Creates the required xml connection files for all databases from databaseParams.csv
 package com.webapp.api;
 
 import java.io.BufferedReader;

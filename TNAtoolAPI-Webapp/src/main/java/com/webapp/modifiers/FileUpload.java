@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Alireza
+// Includes all the methods used in the playground interface (deprecated)
 package com.webapp.modifiers;
 
 import java.io.File;

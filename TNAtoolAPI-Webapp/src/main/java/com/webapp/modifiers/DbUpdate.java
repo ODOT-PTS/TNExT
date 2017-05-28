@@ -14,7 +14,7 @@
 //    You should have received a copy of the GNU  General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Alireza
+// Includes all the methods used for the creation, modification, maintenance, and deletion of databases
 package com.webapp.modifiers;
 
 import java.io.BufferedReader;
