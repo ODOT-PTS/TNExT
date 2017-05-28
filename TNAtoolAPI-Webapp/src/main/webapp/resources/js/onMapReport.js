@@ -699,17 +699,12 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 }
 
 /**
- * Alireza
+ * Takes log of input to adjust the weight
  * @param svc
  * @returns
  */
 function scaledSvc(svc){
-	svc = Math.ceil(Math.log2(svc));		
-	/*if(weight==1){		
-		return 2;		
-	}else{		
-		return weight;		
-	}*/		
+	svc = Math.ceil(Math.log2(svc));	
 	return svc;
 }
 
