@@ -1,0 +1,215 @@
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Statewide Summary Report</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/data/metricDefinitions.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+<script type="text/javascript">
+var ipop=popYear;
+
+html = '<table id="RT" class="display" align="center">';
+tmp = '<tr><th class="metric" id="aid">State</th>'+
+'<th class="metric" id="an">Land Area</th>'+
+'<th class="metric" id="an">Total Population</th>'+
+'<th class="metric" id="an">Urban Population</th>'+
+'<th class="metric" id="an">Rural Population</th>'+
+'<th  class="metric">Employment (RAC)</th>'+
+'<th id="emp1" class="metric">Employees (WAC)</th>'+
+'<th class="metric" id="an">Transit Agencies Count</th>'+
+'<th class="metric">Routes Count</th>'+
+'<th class="metric">Stops Count</th>'+
+'<th class="metric">Urbanized Areas Count</th>'+
+'<th class="metric">Urban Clusters Count</th>'+
+'<th class="metric">Congressional Districts Count</th>'+
+'<th class="metric">ODOT Transit Regions Count</th>'+
+'<th class="metric">Census Places Count</th>'+
+'<th class="metric">Counties Count</th>'+
+'<th class="metric">Census Tracts Count</th></tr>';	
+html += '<thead>'+tmp+'</thead><tbody>';
+
+$(document).ready(function(){
+	setPopOptions();
+	loadDBList();
+	updateToolTips();
+	progressBar();
+
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url: '/TNAtoolAPI-Webapp/queries/transit/stateSR?key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
+		async: true,
+		success: function(d){	
+			docMetadata = d.metadata;
+			appendNavigation();
+			$.each(d.GeoR, function(i,item){
+				html +='<tr><td>' + '<a href="#" type="SXR" id="'+item.Name+'">'+item.Name+'</a></td>'+ 
+				'<td>' + numberconv(item.landArea) +'</td>'+
+				'<td>' + numberconv(item.population) +'</td>'+ 
+				'<td>' + numberconv(item.urbanpop) +'</td>'+ 
+				'<td>' + numberconv(item.ruralpop) +'</td>'+
+				'<td>' + numberconv(item.employment) +'</td>';
+				
+				if(ipop>2010)
+					html+='<td>N/A</td>';
+				else
+					html+='<td>' + numberconv(item.employees) +'</td>';
+					
+				html+='<td><a href="#" type="ASR">' + item.AgenciesCount +'</a></td>'+ 
+				'<td>' + numberconv(item.RoutesCount) +'</td>'+ 
+				'<td>'+ numberconv(item.StopsCount) +'</td>'+
+				'<td><a href="#" type="UAC">' + item.UrbanizedAreasCount +'</a></td>'+
+				'<td><a href="#" type="UCC">' + item.UrbanClustersCount +'</a></td>'+
+				'<td><a href="#" type="CDSR">' + item.CongDistsCount +'</a></td>'+
+				'<td><a href="#" type="OSR">' + item.RegionsCount +'</a></td>'+
+				'<td><a href="#" type="CPSR">' + item.PlacesCount +'</a></td>'+
+				'<td><a href="#" type="CSR">' + item.CountiesCount +'</a></td>'+
+				'<td>' + item.TractsCount +'</td></tr>';				   			
+			});		
+			html += '</tbody></table>';
+			$('#displayReport').append($(html));
+			progressbar.remove();			
+			$('a').click(function(e){
+				var d = new Date();
+			    if ($(this).attr('type')=="SXR"){
+			    	qstringx = '0.25';
+			    	qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+					var keyName = setDates(qstringd);
+			    	window.open('/TNAtoolAPI-Webapp/StateXreport.html?&x='+qstringx+'&l=2&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);			    	   
+			    }else if($(this).attr('type')=="ASR"){
+		    		qstringx = '0.25';
+		    		window.open('/TNAtoolAPI-Webapp/AgenSReport.html?&x='+qstringx+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    }else if($(this).attr('type')=="UAC"){
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&type=3'+'&popMin='+popMin+'&popMax='+popMax+'&uc=0'+'&nav='+nav);	    		
+			    }
+			    else if($(this).attr('type')=="UCC"){
+			    	var popMax='2000000';
+			    	var popMin='0'	;
+		    		window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1'+'&dbindex='+dbindex+'&popYear='+popYear+'&type=3'+'&popMin='+popMin+'&popMax='+popMax+'&uc=1'+'&nav='+nav);	    		
+			    }else if($(this).attr('type')=="CDSR"){
+		    		window.open('/TNAtoolAPI-Webapp/GeoCongDistsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    }else if($(this).attr('type')=="OSR"){
+		    		window.open('/TNAtoolAPI-Webapp/GeoRegionsReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    }else if($(this).attr('type')=="CPSR"){
+		    		window.open('/TNAtoolAPI-Webapp/GeoPlacesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    }else if($(this).attr('type')=="CSR"){
+		    		window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);	    		
+			    };
+			});
+			
+			table = buildDatatables();
+			
+			// Detail controls
+		    $('#RT tbody').on('click', 'td.details-control', function () {
+		        var tr = $(this).parents('tr');
+		        var row = table.row( tr );
+		        var pos = row.index();
+		        if ( row.child.isShown() ) {
+		            row.child.hide("slow");
+		            tr.removeClass('shown');
+		        }
+		        else {
+		            row.child(format(pos)).show();
+		            tr.addClass('shown');
+		        }
+		    } );
+		    
+		    function format ( p ) {
+		        var html;
+		        if (fURL[p]=="-"){
+		        	html = '<td>'+fURL[p]+'</td>';
+		        }else{
+		        	html = '<td><a href="'+fURL[p]+'">'+fURL[p]+'</a></td>';
+		        }
+		    	return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+		            '<tr>'+
+		                '<td>Average Fare: </td>'+
+		                '<td>$'+fAverage[p]+'</td>'+
+		            '</tr>'+
+		            '<tr>'+
+		                '<td>Median Fare: </td>'+
+		                '<td>$'+fMedian[p]+'</td>'+
+		            '</tr>'+
+		            '<tr>'+
+		                '<td>Fare URL: </td>'+
+		                html+
+		            '</tr>'+
+		        '</table>';
+		    }
+		// append toopltips
+		var tooltips = populateMetricDefs();
+		var tempKey = [];
+		$('.metric').each(function(index, item) {
+			tempKey = [$('title').text(),$(item).text().strip().trim() ];
+			$(item).attr('title',tooltips[tempKey]);
+			});  
+    	}
+	});
+});
+
+</script>
+
+
+</head>
+<body>
+		<div class="container">
+			<div class="headerL">
+				<h1>Transit Network Analysis Tool Reports</h1>
+			</div>
+			
+			<div class="headerR">
+				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
+				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button buttonClose" />
+			</div>
+		</div>	
+		<table id="controls">
+			<tr>
+			  <td id="td1">
+			  	<div class="headerBL"  >
+				<h2 style="margin:0px;"></h2>
+				</div>
+			  </td>
+			  
+			  <td id="td3">
+			  	<div class="headerBR" > 
+		    	</div>
+			  </td>
+			</tr>
+		</table>		
+		
+		
+		<p id="displayReport"><br></p>
+		<br>
+		<br>
+		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
+</body>
+
+</html>
