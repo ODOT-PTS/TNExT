@@ -438,12 +438,15 @@ legend.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'legend'),		
         grades = [0, 10, 20, 50, 100, 200, 500, 1000];		
     // loop through our density intervals and generate a label with a colored square for each interval		
-    div.innerHTML = '<p>Population Density</p>';		
+    var html = '<p>Population Density</p>';
+    html += '<table>';
     for (var i = 0; i < grades.length; i++) {		
-        div.innerHTML +=		
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +		
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
+        html +=		
+            '<tr><td><i style="background:' + getColor(grades[i] + 1) + '"></i></td>' +		
+            '<td>&nbsp;' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] : '+') + '</td></tr>';		
     }		
+    html += '</table>';
+    div.innerHTML = html;
     return div;		
 };
 
