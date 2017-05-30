@@ -2,6 +2,8 @@ var children;
 var navigationIdMap = {
 	"Statewide Summary Report" : "stateS",
 	"Statewide Extended Report" : "stateX",
+    "Aggregated Urban Areas Summary Report" : "AggUAS",
+    "Aggregated Urban Areas Extended Report" : "AggUAX",
 	"Transit Agencies Summary Report" : "agencyS",
 	"Transit Agency Extended Report" : "agencyX",
 	"Counties Summary Report" : "countyS",
@@ -27,10 +29,11 @@ var navigationMap = {
 	 	    	//nodes under statewide summary
 		       	{ "id" : "stateS-stateX", "parent" : "stateS", "text" : "Statewide Extended Report"},
 		       	{ "id" : "stateS-agencyS", "parent" : "stateS", "text" : "Transit Agencies Summary Report" },
-		       		//nodes under agency summary
+		       	
+		       	//nodes under agency summary
 		       		{ "id" : "stateS-agencyS-agencyX", "parent" : "stateS-agencyS", "text" : "Transit Agency Extended Report" },
 		       		{ "id" : "stateS-agencyS-route", "parent" : "stateS-agencyS", "text" : "Routes Summary Report" },
-		       			//nodes under agency->route summary
+		       	  		//nodes under agency->route summary
 			       		{ "id" : "stateS-agencyS-route-stop", "parent" : "stateS-agencyS-route", "text" : "Stops Summary Report" },
 			       		{ "id" : "stateS-agencyS-route-schedule", "parent" : "stateS-agencyS-route", "text" : "Route Schedule Report" },
 		       		{ "id" : "stateS-agencyS-stop", "parent" : "stateS-agencyS", "text" : "Stops Summary Report" },
@@ -298,9 +301,25 @@ var navigationMap = {
 					       { "id" : "stateS-placeS-agencyS-route-stop", "parent" : "stateS-placeS-agencyS-route", "text" : "Stops Summary Report" },
 					       { "id" : "stateS-placeS-agencyS-route-schedule", "parent" : "stateS-placeS-agencyS-route", "text" : "Route Schedule Report" },
 				       { "id" : "stateS-placeS-agencyS-stop", "parent" : "stateS-placeS-agencyS", "text" : "Stops Summary Report" },
-			       
-			       
-
+				   	{ "id" : "stateS-AggUAS", "parent" : "stateS", "text" : "Aggregated Urban Areas Summary Report" },
+				      //nodes under Aggregated Urban Areas Report summary
+				       	{ "id" : "stateS-AggUAS-AggUAX", "parent" : "stateS-AggUAS", "text" : "Aggregated Urban Areas Extended Report"},
+				       	{ "id" : "stateS-AggUAS-urbanS", "parent" : "stateS-AggUAS", "text" : "Urban Areas Summary Report"},
+			       		//nodes under Aggregated Urban Areas -> Urban Areas  				        
+					       { "id" : "stateS-AggUAS-urbanS-urbanX", "parent" : "stateS-AggUAS-urbanS", "text" : "Urban Area Extended Report" },
+					       { "id" : "stateS-AggUAS-urbanS-route", "parent" : "stateS-AggUAS-urbanS", "text" : "Routes Summary Report" },
+					       //nodes under Aggregated Urban Areas -> Urban Areas ->route summary
+						       { "id" : "stateS-AggUAS-urbanS-route-stop", "parent" : "stateS-AggUAS-urbanS-route", "text" : "Stops Summary Report" },
+						       { "id" : "stateS-AggUAS-urbanS-route-schedule", "parent" : "stateS-AggUAS-urbanS-route", "text" : "Route Schedule Report" },
+					       { "id" : "stateS-AggUAS-urbanS-stop", "parent" : "stateS-AggUAS-urbanS", "text" : "Stops Summary Report" },
+					       { "id" : "stateS-AggUAS-urbanS-agencyS", "parent" : "stateS-AggUAS-urbanS", "text" : "Transit Agencies Summary Report" },
+						       //nodes under urban->agency summary
+						       { "id" : "stateS-AggUAS-urbanS-agencyS-agencyX", "parent" : "stateS-AggUAS-urbanS-agencyS", "text" : "Transit Agency Extended Report" },
+						       { "id" : "stateS-AggUAS-urbanS-agencyS-route", "parent" : "stateS-AggUAS-urbanS-agencyS", "text" : "Routes Summary Report" },
+							       //nodes under urban->agency->route summary
+							       { "id" : "stateS-AggUAS-urbanS-agencyS-route-stop", "parent" : "stateS-AggUAS-urbanS-agencyS-route", "text" : "Stops Summary Report" },
+							       { "id" : "stateS-AggUAS-urbanS-agencyS-route-schedule", "parent" : "stateS-AggUAS-urbanS-agencyS-route", "text" : "Route Schedule Report" },
+						       { "id" : "stateS-AggUAS-urbanS-agencyS-stop", "parent" : "stateS-AggUAS-urbanS-agencyS", "text" : "Stops Summary Report" },	
 	    ]
 	}
 };

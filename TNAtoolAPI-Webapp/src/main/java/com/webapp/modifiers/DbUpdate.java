@@ -2675,7 +2675,7 @@ public class DbUpdate {
 					+ "location text,"
 					+ "city character varying (30),"
 					+ "zipcode integer,"
-					+ "countyID character(5) NOT NULL,"
+					+ "countyID character varying(5) NOT NULL,"
 					+ "county character varying(50) NOT NULL,"
 					+ "spaces integer,"
 					+ "accessibleSpaces integer,"

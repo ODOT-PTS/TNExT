@@ -47,8 +47,8 @@ tmp = '<tr><th class="metric" id="aid">Geo ID</th>'+
 '<th class="metric">Water Area</th>'+
 '<th class="metric">Total Agencies</th>'+
 '<th class="metric">Total Routes</th>'+
-'<th class="metric" >Urban Stops</th>'+
-'<th class="metric" >Rural Stops</th>'+
+'<th class="metric" >Total Urban Stops</th>'+
+'<th class="metric" >Total Rural Stops</th>'+
 '<th class="metric" >Urbanized Areas</th>'+
 '<th class="metric">Urban Clusters</th></tr>';
 
@@ -75,7 +75,6 @@ $(document).ready(function(){
 				nameString ='For '+d.agencyName;
 			}
 			appendNavigation(nameString);
-			//$('h2').append('Census Places Summary Report '+nameString+'<br><hr>');
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' +numberconv(item.population) + '</td><td>'+numberconv(item.employment)  +'</td>';
