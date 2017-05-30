@@ -187,6 +187,7 @@ public class PgisEventManager {
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       float RouteMiles = 0;
+      
       String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
       		+ "trips as (select agencyid, routeid, round(max(length)::numeric,2) as length "
       		+ "		from "+Types.getTripMapTableName(type)+" map inner join aids on map.agencyid_def=aids.aid "
@@ -194,19 +195,19 @@ public class PgisEventManager {
 			+ "		group by agencyid, routeid) "
 			+ "select sum(length) as routemiles from trips;";
       try {
-        stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(query);        
-        while ( rs.next() ) {
-        	RouteMiles = rs.getFloat("routemiles");                     
-        }
-        rs.close();
-        stmt.close();        
-      } catch ( Exception e ) {
-    	  e.printStackTrace();
-      }
-      dropConnection(connection);      
+    	  stmt = connection.createStatement();
+    	  ResultSet rs = stmt.executeQuery(query);
+    	  while ( rs.next() ) {
+    		  RouteMiles = rs.getFloat("routemiles");
+    	  }
+    	  rs.close();
+    	  stmt.close();
+    	  } catch ( Exception e ) {
+    		  e.printStackTrace();
+    		  }
+      dropConnection(connection);
       return RouteMiles;
-    }
+      }
 	
 	/**
 	 * Queries Fare Information for a geographic area. keys are; minfare, maxfare, medianfare, averagefare
@@ -2075,11 +2076,6 @@ public class PgisEventManager {
                          +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
                  
           }
-    	  
-          
-          
-          
-          
     	  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,blockid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
     	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
     			  +"rstops as ( select left(areaid,5) as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  left(areaid,5)),"
@@ -2179,7 +2175,7 @@ public class PgisEventManager {
     		  }
     	  else{
     	  if(geotype==0)//census counties 
-    	  { System.out.println("h1"+aidsjoin);
+    	  { 
     		if(uc==0)
     		{
     		criteria = Types.getIdColumnName(type);
@@ -2410,10 +2406,7 @@ public class PgisEventManager {
         	
     		  }
     		  }
-    	  
-    	
     	  }
-    	  
     	  }
        
     	  else if (type==4) { //ODOT Regions
@@ -2423,8 +2416,8 @@ public class PgisEventManager {
     	    	  + "gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"), "
     			  +"rstops as ( select regionid as areaid,count(distinct(concat(aid,stopid)))as rstops from stops join census_blocks using(blockid) where poptype='R' group by  regionid),"
                   +"ustops as (select regionid as areaid,count(distinct(concat(aid,stopid))) as ustops from stops join census_blocks using(blockid) where poptype='U' group by regionid),";
-if(agencyId==null)
-{
+    	  if(agencyId==null)
+    	  {
     	  areaquery = "areas as (select odotregionid as areaid,countyid as cid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties,"
       	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname,cid)," + "areas1 as (select odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
       	    	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname),";
@@ -2433,13 +2426,13 @@ if(agencyId==null)
                  +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
                    +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
    
-}
-else
-{
-	 areaquery = "areas as (select odotregionid as areaid,countyid as cid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties,"
+    	  }
+    	  else
+    	  {
+    		  areaquery = "areas as (select odotregionid as areaid,countyid as cid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties,"
    	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties group by odotregionid, regionname,cid)," +"areai as (select distinct areaid from stops),"+ "areas1 as (select distinct odotregionid as areaid, regionname as areaname, string_agg(trim(trailing 'County' from cname), ';' order by cname) as counties, "
    	    	  		+ "sum(population"+popYear+") as population, sum(landarea) as landarea, sum(waterarea) as waterarea from census_counties join areai on odotregionid=areaid group by odotregionid, regionname),";
-	  urbanquery="urbans1 as (select urbanid ,regionid as areaid  from census_blocks join stops using(blockid)),"
+    		  urbanquery="urbans1 as (select urbanid ,regionid as areaid  from census_blocks join stops using(blockid)),"
   	 		+ "urbans as (select count(distinct( urbanid)) as urbancount ,regionid as areaid  from census_blocks  group by areaid  ),"
              +"ua as (select  count(distinct(urbanid)) as ua,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+" >= 50000 group by areaid),"
                +"uc as (select  count(distinct(urbanid))as uc,areaid from urbans1 join census_urbans using(urbanid) where population"+popYear+"  between 2500 and 49999 group by areaid),";
@@ -2528,7 +2521,6 @@ else
     	    		+stoproutes+" as areaid from stops inner join gtfs_stop_route_map map on stops.aid_def = map.agencyid_def and stops.stopid = map.stopid group by "
     	    		+stoproutes+"),"+areaquery+urbanquery+routesquery+employmentquery+selectquery;
      }
-    System.out.println(query);
      try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -3133,7 +3125,6 @@ else
 				+ "		left join stopscount on routes.id = stopscount.routeid "
 				+ "		left join areas on routes.id = areas.routeid and routes.agencyid = areas.aid";					
 		try{
-			System.out.println(mainquery);
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
 			while (rs.next()) {
@@ -3510,8 +3501,7 @@ else
     		+"      inner join srac on true"
     		+"      inner join swac on true"
     		+"      inner join racatlos on true"
-    		+"      inner join wacatlos on true";     
-		System.out.println(query);
+    		+"      inner join wacatlos on true"; 
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
@@ -3522,11 +3512,9 @@ else
         	response.put("upopatlos", String.valueOf(rs.getLong("upoplos")));
         	response.put("racatlos", String.valueOf(rs.getLong("racatlos")));
         	response.put("wacatlos", String.valueOf(rs.getLong("wacatlos")));
-            //response.put("rpopatlos", String.valueOf(rs.getLong("rpoplos")));
         	response.put("uspop", String.valueOf(rs.getFloat("uspop")));
         	response.put("srac", String.valueOf(rs.getFloat("srac")));
         	response.put("swac", String.valueOf(rs.getFloat("swac")));
-        	//response.put("rspop", String.valueOf(rs.getFloat("rspop")));
         	response.put("svcdays", String.valueOf(rs.getString("svdays")));
         	response.put("fromtime", String.valueOf(rs.getInt("fromtime")));
         	response.put("totime", String.valueOf(rs.getInt("totime")));
