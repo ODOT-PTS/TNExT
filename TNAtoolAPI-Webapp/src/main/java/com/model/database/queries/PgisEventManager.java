@@ -186,8 +186,7 @@ public class PgisEventManager {
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
-      float RouteMiles = 0;
-      
+      float RouteMiles = 0;      
       String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
       		+ "trips as (select agencyid, routeid, round(max(length)::numeric,2) as length "
       		+ "		from "+Types.getTripMapTableName(type)+" map inner join aids on map.agencyid_def=aids.aid "
@@ -1775,7 +1774,7 @@ public class PgisEventManager {
     	  geocriteria2 = "block."+Types.getIdColumnName(geotype);
       }
       }
-      if(geotype==-1)
+      if(geotype==-1||geotype==3)
      {
        querytext = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select id, agencyid, "+column+", location from "
       		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"'), census as (select population"+popYear+" as population, poptype,block.blockid from "
@@ -1883,7 +1882,7 @@ public class PgisEventManager {
     	  if (i+1<date.length)
 				query+=" union all ";
 		}      
-     if(geotype==-1){
+     if(geotype==-1||geotype==3){
       query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
       		+ "map.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
       		+"trip.id = map.tripid and trip.agencyid = map.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"'),service as (select COALESCE(sum(length),0) as svcmiles,"
@@ -2114,7 +2113,7 @@ public class PgisEventManager {
        	  selectquery = "select areaid, areaname, population,employment,employees,landarea, waterarea,coalesce(urbancount,0) as urbancount,coalesce(ua,0) as ua,"
         	  		+ "coalesce(uc,0) as uc, coalesce(agencies,0) as agencies, coalesce(routes,0) as routes, coalesce(stops,0) as stops,  coalesce(rstops,0) as rstops,coalesce(ustops,0) as ustops from areas left join stoproutes using(areaid)  left join routes using(areaid) left join employment using(areaid)left join employees using(areaid)left join urbans using(areaid) left join rstops using(areaid) left join ustops using(areaid) left join ua using(areaid) left join uc using(areaid)";
         	  } else if (type==3){//census urban
-    	  if (areaid.equals("null")|| areaid==null){
+    	  if (areaid.equals("null")|| areaid==null|| geotype==3){
     		  
     		  //urbanized areas 
     		  if (uc==0){
@@ -2630,7 +2629,7 @@ public class PgisEventManager {
 	    	  else  {geotripFilter1 = "congdistid"; geotripFilter2 = "census_congdists_trip_map";}
 	      }
 		}
-		if(geotype==-1)
+		if(geotype==-1||geotype==3)
 		{
 		mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select map.agencyid as agencyid, count(id) "
 			+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aid "
@@ -3674,7 +3673,7 @@ public class PgisEventManager {
     					  + "	inner join urbanstopcount on true"
     					  + "	inner join ruralstopcount on true";
     			  }else	if (type==3){//census urban
-    				  if(geotype==-1){
+    				  if(geotype==-1||geotype==3){
     					  querytext = "with census as (select population"+popYear+ " as population, poptype,block.blockid,block.urbanid "
     							  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location,  "+String.valueOf(x)+ ") "
     							  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
@@ -4186,7 +4185,7 @@ public class PgisEventManager {
 	  		  	+ "		inner join rpop_los on true";
     	  }
       else if (type==3){//census urbans
-    	  if (geotype==-1)
+    	  if (geotype==-1||geotype==3)
     	  {
     		  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
     				  + "		map.tlength as tlength, map.stopscount as stops,trip.stopscount as ss "
@@ -5934,7 +5933,7 @@ public class PgisEventManager {
 				 areaID="tractid";
 				 areaName="tlongname";
 		      } else if (type==3){//census urban
-		    	  if(geotype==-1)
+		    	  if(geotype==-1||geotype==3)
 		    	  {
 		    	  query="with temp as (Select * from census_urbans where urbanid="+id1+"),"
 		    			  +"temp1 as (select blockid ,urbanid  from temp left join census_blocks  using(urbanid)),"
