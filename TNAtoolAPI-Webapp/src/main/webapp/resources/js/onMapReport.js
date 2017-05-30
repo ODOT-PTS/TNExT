@@ -699,7 +699,7 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 }
 
 /**
- * Takes log of input to adjust the weight
+ * log-transforms blocks' level of service markers for better visualization of service
  * @param svc
  * @returns
  */
