@@ -8,7 +8,7 @@ ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS asian_and_pacific_isl
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS asian_and_pacific_islandnotwell double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS asian_and_pacific_islandnotatall double precision;
 
-ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS otherverywell double precision;
-ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS otherwell double precision;
-ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS othernotwell double precision;
-ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS othernotatall double precision;
+ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS other_languagesverywell double precision;
+ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS other_languageswell double precision;
+ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS other_languagesnotwell double precision;
+ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS other_languagesnotatall double precision;

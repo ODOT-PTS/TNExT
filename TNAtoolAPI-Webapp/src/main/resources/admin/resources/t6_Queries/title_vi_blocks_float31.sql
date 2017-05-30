@@ -11,5 +11,3 @@ ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS spanishverywell doubl
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS spanishwell double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS spanishnotwell double precision;
 ALTER TABLE title_vi_blocks_float ADD COLUMN IF NOT EXISTS spanishnotatall double precision;
-
-
