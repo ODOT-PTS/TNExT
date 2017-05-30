@@ -37,50 +37,252 @@ var metricDef = [
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Transit Agencies Count",
-			"definition" : "Count of transit agencies operating in the state. Any transit agency with at least one stop in the geographic area is counted."
+			"metric" : "Transit Agencies",
+			"definition" : "Number of transit agencies operating in the state. Any transit agency with at least one stop in the geographic area is counted."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Routes Count",
+			"metric" : "Routes",
 			"definition" : "Total number of routes operated by the transit agencies in the geographic area."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Stops Count",
+			"metric" : "Stops",
 			"definition" : "Total number of stops operated by transit agencies in the geographic area."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Urbanized Areas Count",
-			"definition" : "Count of urbanized areas within the state."
+			"metric" : "Urbanized Areas",
+			"definition" : "Number of Urbanized Areas within the state."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Congressional Districts Count",
-			"definition" : "Count of congressional districts within the state."
+			"metric" : "Urban Clusters",
+			"definition" : "Number of Urban Clusters within the state."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "ODOT Transit Regions Count",
-			"definition" : "Count of ODOT transit regions within the state."
+			"metric" : "Congressional Districts",
+			"definition" : "Number of congressional districts within the state."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Census Places Count",
-			"definition" : "Count of census designated places within the state."
+			"metric" : "ODOT Transit Regions",
+			"definition" : "Number of ODOT transit regions within the state."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Counties Count",
-			"definition" : "Count of counties within the state."
+			"metric" : "Census Places",
+			"definition" : "Number of census designated places within the state."
 		},
 		{
 			"report" : "Statewide Summary Report",
-			"metric" : "Census Tracts Count",
-			"definition" : "Count of census tracts within the state."
+			"metric" : "Counties",
+			"definition" : "Number of counties within the state."
 		},
-
+		{
+			"report" : "Statewide Summary Report",
+			"metric" : "Census Tracts",
+			"definition" : "Number of census tracts within the state."
+		},
+		
+		// Statewide Extended Report
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Geo ID",
+			"definition" : "Identification number associated with the geographic area.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Name",
+			"definition" : "Name of the geographic area.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Route Miles",
+			"definition" : "Summation of the lengths (in miles) of the routes operated by the transit agency within the given geographic area. The length of the longest trip of a route that is running on the selected date(s) is considered as the route length.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Stops Per Square Mile",
+			"definition" : "Stop count in the given geographic area divided by the square miles of the geographic area. This metric is date-independent.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Stops Per Service Mile",
+			"definition" : "Stop count in the given geographic area divided by Service Miles.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Service Hours",
+			"definition" : "Total hours a transit agency spends serving all round trips of routes within the given geographic area. The service hours for a trip are calculated as the difference between the arrival time to the first stop of the trip and the departing time from the last stop of the trip. Service hours may be calculated for a specific date (or a set of dates) specified using the calendar. The services hours reported are cumulative over the selected dates.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Service Miles",
+			"definition" : "Total miles driven over all round trips of routes running on the selected date(s) within the given geographic area. Service miles may be calculated for a specific date (or a set of dates) specified using the calendar. The service miles reported are cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Service Miles Per Square Mile",
+			"definition" : "Service Miles divided by the square miles of the geographic area.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Miles of Service Per Capita",
+			"definition" : "Service Miles divided by the population of the geographic area.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Urban Population Served",
+			"definition" : "Total unduplicated population of urban census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Rural Population Served",
+			"definition" : "Total unduplicated population of rural census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops within the given geographic area. This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Population Served",
+			"definition" : "Total unduplicated population of census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops within the given geographic area divided by the total population of the geographic area. This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Population Served at Level of Service",
+			"definition" : "Total unduplicated population of census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by the total population of the geographic area. X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Urban Population Served at Level of Service",
+			"definition" : " Total unduplicated population of urban census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Rural Population Served at Level of Service",
+			"definition" : " Total unduplicated population of rural census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Population Unserved",
+			"definition" : "100 minus percent of population served.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Urban Service Stops",
+			"definition" : "Total number of times the stops within the urban census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Rural Service Stops",
+			"definition" : "Total number of times the stops within the rural census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Urban Population Served By Service",
+			"definition" : "Summation of Population Served by Service over all urban census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a census block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Rural Population Served By Service",
+			"definition" : "Summation of Population Served by Service over all rural census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the given geographic area. Population served by service for a census block is calculated as the population of that block multiplied by the times that block is served on the selected date(s) by all agencies. The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Employment Served (RAC)",
+			"definition" : "Total number of unduplicated people employed residing in census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each census block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Employment Served (RAC)",
+			"definition" : "Employment Served (RAC) divided by the number of people residing in the given geographic area.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Employment Served at Level of Service (RAC)",
+			"definition" : "Total unduplicated people employed residing in census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by the total number of people employed working in the area. X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Employment Served at Level of Service (RAC)",
+			"definition" : "Total unduplicated people employed residing in census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Employment Unserved (RAC)",
+			"definition" : "100 minus percent of Employment Served (RAC).",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Employment Served By Service (RAC)",
+			"definition" : "Summation of Employment Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people residing in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Employees Served (WAC)",
+			"definition" : "Total number of unduplicated people employed working in census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each census block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s)."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Employees Served (WAC)",
+			"definition" : "Employees Served (WAC) divided by the number of people working in the given geographic area."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Employees Served at Level of Service (WAC)",
+			"definition" : "Total unduplicated people employed working in census blocks whose centroids are located within an X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Employees Served at Level of Service (WAC)",
+			"definition" : "Total unduplicated people employed working in census blocks whose centroids are located within an X-miles radius of any stop that is within the geographical area and served at least N-times on the selected date(s). X is the population search radius and N is the minimum level of service set by the user."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Percent of Employee Unserved (WAC)",
+			"definition" : "100 minus percent of employees served (WAC).",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Employees Served By Service (WAC)",
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Service Days",
+			"definition" : "Set of days (from the selected days) in which at least one trip within the given geographic area is served.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Connected Communities",
+			"definition" : "List of geographic areas of the same type that are connected to the area of interest through routes that are served on the selected date(s).",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Hours of Service",
+			"definition" : " Difference between the earliest arrival time and latest departure time of all transit stops within the given geographic area.",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Minimum Fare",
+			"definition" : "If available, this field points to the minimum fare for the given geographic area during the selected date(s).",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Average Fare",
+			"definition" : "If available, this field points to the average fare for the given geographic area during the selected date(s).",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Median Fare",
+			"definition" : "If available, this field points to the median fare for the given geographic area during the selected date(s).",
+		},
+		{
+			"report" : "Statewide Extended Report",
+			"metric" : "Maximum Fare",
+			"definition" : "If available, this field points to the maximum fare for the given geographic area during the selected date(s).",
+		},
+		
 		// 1. Transit Agency Summary Report
 		{
 			"report" : "Transit Agencies Summary Report",
@@ -298,18 +500,23 @@ var metricDef = [
 		},
 		{
 			"report" : "Counties Summary Report",
-			"metric" : "Total Routes",
-			"definition" : "Total number of routes serving stops in the given geographic area."
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "Counties Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area."
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
 		},
 		{
 			"report" : "Counties Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area."
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "Counties Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 		{
 			"report" : "Counties Summary Report",
@@ -400,8 +607,13 @@ var metricDef = [
 		},
 		{
 			"report" : "County Extended Report",
-			"metric" : "Service Stops",
-			"definition" : "Total number of times the stops within the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+			"metric" : "Urban Service Stops",
+			"definition" : "Total number of times the stops within the urban census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "County Extended Report",
+			"metric" : "Rural Service Stops",
+			"definition" : "Total number of times the stops within the rural census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "County Extended Report",
@@ -557,13 +769,23 @@ var metricDef = [
 		},
 		{
 			"report" : "Census Places Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area."
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "Census Places Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area."
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
+		},
+		{
+			"report" : "Census Places Summary Report",
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "Census Places Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 
 		// 5.5. Census Places Extended Report
@@ -649,8 +871,18 @@ var metricDef = [
 		},
 		{
 			"report" : "Census Place Extended Report",
-			"metric" : "Service Stops",
-			"definition" : "Total number of times the stops within the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+			"metric" : "Percent of Population Unserved",
+			"definition" : "100 minus percent of population served.",
+		},
+		{
+			"report" : "Census Place Extended Report",
+			"metric" : "Urban Service Stops",
+			"definition" : "Total number of times the stops within the urban census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Census Place Extended Report",
+			"metric" : "Rural Service Stops",
+			"definition" : "Total number of times the stops within the rural census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -806,13 +1038,23 @@ var metricDef = [
 		},
 		{
 			"report" : "Congressional Districts Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area.",
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "Congressional Districts Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area.",
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
+		},
+		{
+			"report" : "Congressional Districts Summary Report",
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "Congressional Districts Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 
 		// 6.5 Congressional Districts Extended Report
@@ -898,8 +1140,13 @@ var metricDef = [
 		},
 		{
 			"report" : "Congressional District Extended Report",
-			"metric" : "Service Stops",
-			"definition" : "Total number of times the stops within the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+			"metric" : "Urban Service Stops",
+			"definition" : "Total number of times the stops within the urban census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "Congressional District Extended Report",
+			"metric" : "Rural Service Stops",
+			"definition" : "Total number of times the stops within the rural census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -1269,6 +1516,16 @@ var metricDef = [
 		},
 		{
 			"report" : "Aggregated Urban Areas Summary Report",
+			"metric" : "Employment (RAC)",
+			"definition" : "Total number of people employed residing in the geographic area. Metric is calculated using Working Area Characteristic (WAC) data.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Summary Report",
+			"metric" : "Employees (WAC)",
+			"definition" : "Total number of people employed working in the geographic area. Metric is calculated using Working Area Characteristic (WAC) data.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Summary Report",
 			"metric" : "Land Area",
 			"definition" : "Total land area of the geographic area in square miles.",
 		},
@@ -1433,13 +1690,23 @@ var metricDef = [
 		},
 		{
 			"report" : "ODOT Transit Regions Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area."
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "ODOT Transit Regions Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area."
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
+		},
+		{
+			"report" : "ODOT Transit Regions Summary Report",
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "ODOT Transit Regions Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 		{
 			"report" : "ODOT Transit Regions Summary Report",
@@ -1529,8 +1796,13 @@ var metricDef = [
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
-			"metric" : "Service Stops",
-			"definition" : "Total number of times the stops within the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+			"metric" : "Urban Service Stops",
+			"definition" : "Total number of times the stops within the urban census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
+		},
+		{
+			"report" : "ODOT Transit Region Extended Report",
+			"metric" : "Rural Service Stops",
+			"definition" : "Total number of times the stops within the rural census blocks of the geographic area are served on the given date(s). Service stops for a route is calculated as its stop count multiplied by the number of visits (i.e., trips or runs). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",

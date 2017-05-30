@@ -1804,20 +1804,7 @@ public class Queries {
 			response.AgencyName = GtfsHibernateReaderExampleMain
 					.QueryAgencybyid(agency, dbindex).getName();
 			index++;
-			setprogVal(key, (int) Math.round(index * 100 / totalLoad));
-			response.metadata = "Report Type:Transit Routes Report for Agency;Report Date:"
-					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-							.format(Calendar.getInstance().getTime())
-					+ ";Selected Database:"
-					+ Databases.dbnames[dbindex]
-					+ ";Selected Date(s):"
-					+ date
-					+ ";Population Search Radius(miles):"
-					+ String.valueOf(x)
-					+ ";Selected Transit Agency:"
-					+ agency
-					+ ";"
-					+ DbUpdate.VERSION;
+			setprogVal(key, (int) Math.round(index * 100 / totalLoad));			
 			report = PgisEventManager.RouteGeosr(username, 0, null, agency,
 					sdates, days, x * 1609.34, dbindex, popYear);
 			index++;
@@ -1832,33 +1819,12 @@ public class Queries {
 				response.AgencyName = GtfsHibernateReaderExampleMain
 						.QueryAgencybyid(agency, dbindex).getName();
 				index++;
-				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
-				response.metadata = "Report Type:Transit Routes Report for "
-						+ Types.getAreaName(type)
-						+ ";Report Date:"
-						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-								.format(Calendar.getInstance().getTime())
-						+ ";Selected Database:" + Databases.dbnames[dbindex]
-						+ ";Selected Date(s):" + date
-						+ ";Population Search Radius(miles):"
-						+ String.valueOf(x) + ";Selected Geographic Area:"
-						+ areaid + ";Selected Transit Agency:" + agency + ";"
-						+ DbUpdate.VERSION;
+				setprogVal(key, (int) Math.round(index * 100 / totalLoad));				
 				report = PgisEventManager.RouteGeosr(username, type, areaid,
 						agency, sdates, days, x * 1609.34, dbindex, popYear);
 				index++;
 				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 			} else {// routes report by areaId
-				response.metadata = "Report Type:Transit Routes Report for "
-						+ Types.getAreaName(type)
-						+ ";Report Date:"
-						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-								.format(Calendar.getInstance().getTime())
-						+ ";Selected Database:" + Databases.dbnames[dbindex]
-						+ ";Selected Date(s):" + date
-						+ ";Population Search Radius(miles):"
-						+ String.valueOf(x) + ";Selected Geographic Area:"
-						+ areaid + ";" + DbUpdate.VERSION;
 				report = PgisEventManager.RouteGeosr(username, type, areaid,
 						null, sdates, days, x * 1609.34, dbindex, popYear);
 				index++;

@@ -40,10 +40,7 @@ var fMedian = new Array();
 var ipop=popYear;
 var geoid=null;
 
-
 html = '<table id="RT" class="display" align="center">';
-
-
 tmp = '<tr><th id="aid" class="metric">Geo ID</th>'+
 '<th id="an" class="metric">Name</th>'+
 '<th class="metric">ODOT Region ID</th>'+
@@ -64,7 +61,6 @@ tmp = '<tr><th id="aid" class="metric">Geo ID</th>'+
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
-	//setPopOptions();
 	setPopOptions();
 	loadDBList();
 	updateToolTips();
@@ -83,11 +79,8 @@ $(document).ready(function(){
 			docMetadata = d.metadata;
 			if (agencyId!=null){
 				nameString ='For '+d.agencyName;
-
 			}
 			appendNavigation(nameString);
-			//$('h2').append('Counties Summary Report ' + nameString+'<br><hr>');
-
 			$.each(d.GeoR, function(i,item){
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +
 				item.Name + '</td><td>' + item.ODOTRegion + '</td><td>' + item.ODOTRegionName +'</td><td>' + numberconv(item.population) +
@@ -202,8 +195,8 @@ $(document).ready(function(){
     		url +='&areaid='+qstring+'&type=0'+'&x='+qstringx+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+-1+'&geoid='+geoid+'&rc=1'+'&nav='+nav;
     		
     		window.open(url);			    	
-	    }
-			});
+	   	 	}
+		});
 			
 		
 			

@@ -942,7 +942,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_counties_trip_map;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  e.printStackTrace();
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }

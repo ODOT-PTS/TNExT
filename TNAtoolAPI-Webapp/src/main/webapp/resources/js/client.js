@@ -128,18 +128,18 @@ var newDensityValue;
     		'<p style="margin-top: 0.5em;"><input type="radio" name="blocksDensity" value="pop" checked>Population Density</p>'+
     		'<p><input type="radio" name="blocksDensity" value="rac">Employment Density</p>'+
     		'<p><input type="radio" name="blocksDensity" value="wac">Employee Density</p></br>';	
-    html+='<div id="blockLegendDiv">';
+    html+='<div id="blockLegendDiv"><table>';
     for (var i = 0; i < grades.length; i++) {		
-        html += '<i style="background:' + getColorBlocks(grades[i] + 1) + '"></i> ';
+        html += '<tr><td><i style="background:' + getColorBlocks(grades[i] + 1) + '"></i></td> ';
         if(i==0){
-        	html +=  '0<br>';
+        	html +=  '<td>&nbsp;0</td></tr>';
         }else if(i==1){
-        	html += "0.01"+ (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');	
+        	html += '<td>&nbsp;0.01' + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '</td></tr>' : '+</td></tr>');	
         }else{
-        	html += grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
+        	html += '<td>&nbsp;' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '</td></tr>' : '+</td></tr>');		
     	}
     }		
-    html+='</div>';
+    html+='</table></div>';
     $('#blocksLengend').html(html);
     
     $('#blocksLengend > p').css("margin-bottom","0px");
@@ -438,12 +438,15 @@ legend.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'legend'),		
         grades = [0, 10, 20, 50, 100, 200, 500, 1000];		
     // loop through our density intervals and generate a label with a colored square for each interval		
-    div.innerHTML = '<p>Population Density</p>';		
+    var html = '<p>Population Density</p>';
+    html += '<table>';
     for (var i = 0; i < grades.length; i++) {		
-        div.innerHTML +=		
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +		
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');		
+        html +=		
+            '<tr><td><i style="background:' + getColor(grades[i] + 1) + '"></i></td>' +		
+            '<td>&nbsp;' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] : '+') + '</td></tr>';		
     }		
+    html += '</table>';
+    div.innerHTML = html;
     return div;		
 };
 
