@@ -82,19 +82,18 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username=admin'+'&geotype='+geotype+'&geoid='+geoid+'&rc='+rc,
 		async: true,
 		success: function(d){
-			docMetadata = d.metadata;
 			var namestring = " Stops Report";
-			if (areaId==null){
-				if (route==null){
+			if (areaId==null  || areaId=='null'){
+				if (route==null || route=='null'){
 					namestring = d.AgencyName + namestring;
 				}else {
 					namestring = d.AgencyName + namestring+" for Route "+route;
 				}
 			} else {
-				if (agency==null){
+				if (agency==null|| agency=='null'){
 					namestring = d.AreaName + namestring;
 				} else {
-					if (route==null){
+					if (route==null|| route=='null'){
 						namestring = d.AreaName + namestring+" for "+d.AgencyName;
 					} else {
 						namestring = d.AreaName + namestring+" for "+d.AgencyName+" and Route "+route;
@@ -108,8 +107,8 @@ $(document).ready(function(){
 			if (item.URL !== null)
 				html += '<td> <a href="' + item.URL + '">'+item.StopName+'</a> </td>';
 			else 
-				html += '<td>'+item.StopName+'</td>'
-				+ '<td>'+item.CountyName
+				html += '<td>'+item.StopName+'</td>';
+			html += '<td>'+item.CountyName
 				+ '</td><td>'+item.UrbanName
 				+ '</td><td>'+item.RegionName
 				+ '</td><td>'+item.CongDistName
@@ -120,7 +119,6 @@ $(document).ready(function(){
 				+ '</td><td>'+numberconv(item.UPopWithinX)
 				+ '</td><td>'+numberconv(item.RPopWithinX)
 				+ '</td><td>'+numberconv(item.racWithinX)+'</td>';
-			console.log(item.URL);
 			if(popYear == 2010)
 				html+= '<td>'+numberconv(item.wacWithinX)+'</td>';
 			else

@@ -4,7 +4,7 @@
 	<meta charset="utf-8" />
 	<title>Aggregated Urban Areas Extended Report</title>
 	
-	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
@@ -38,7 +38,7 @@
 	
 <script type="text/javascript">
 
-var dateIOnumber = 4; // the number is used to map selected date(s) to the metrics affected by the date(s).
+var dateIOnumber = 5; // the number is used to map selected date(s) to the metrics affected by the date(s).
 var fAverage = new Array();
 var fMedian = new Array();
 var connectedcommunities = '';
@@ -50,41 +50,40 @@ w_qstringd = getDates(keyName);
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
 tmp = '<tr><th  title="Identification number associated with the geographic area." id="aid">Geo ID </th>'+
 '<th class="metric" id="an">Name </th>'+
-'<th class="metric">Fare <span class="IOSym">(4)</th>'+
-'<th class="metric">Connected Communities <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Route Miles <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Stops Per Square Mile <span class="IOSym">(1)</span></th>'+
-'<th class="metric">Stops Per Service Mile <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Service Hours <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Service Miles <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Service Miles Per Square Mile <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Miles of Service Per Capita <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Population Served<span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric">Percent of Population Served <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric">Percent of Population Served at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
-'<th class="metric">Percent of Population Unserved <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Fare <span class="IOSym">(5)</th>'+
+'<th class="metric">Connected Communities <span class="IOSym">(1)(5)</span></th>'+
+'<th class="metric">Route Miles <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Stops Per Square Mile <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Stops Per Service Mile <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Service Hours <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Service Miles <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Service Miles Per Square Mile <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Miles of Service Per Capita <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Population Served<span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric">Percent of Population Served <span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric">Percent of Population Served at Level of Service <span class="IOSym">(1)(2)(3)(4)(5)</span></th>'+
+'<th class="metric">Percent of Population Unserved <span class="IOSym">(1)(2)(3)</span></th>'+
 //RAC
-'<th class="metric">Employment(RAC) Served<span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric">Percent of Employment(RAC) Served <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric">Percent of Employment(RAC) at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
-'<th class="metric">Percent of Employment(RAC) Unserved <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric"> Employment(RAC) Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
+'<th class="metric">Employment(RAC) Served<span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric">Percent of Employment(RAC) Served <span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric">Percent of Employment(RAC) at Level of Service <span class="IOSym">(1)(2)(3)(4)(5)</span></th>'+
+'<th class="metric">Percent of Employment(RAC) Unserved <span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric"> Employment(RAC) Served By Service <span class="IOSym">(1)(2)(3)(5)</span></th>'+
 //RAC
 //WAC
-'<th class="metric">Employees(WAC) Served<span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric">Percent of Employees(WAC) Served <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric">Percent of Employees(WAC) at Level of Service <span class="IOSym">(1)(2)(3)(4)</span></th>'+
-'<th class="metric">Percent of Employees(WAC) Unserved <span class="IOSym">(1)(2)</span></th>'+
-'<th class="metric"> Employees(WAC) Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
+'<th class="metric">Employees(WAC) Served<span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric">Percent of Employees(WAC) Served <span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric">Percent of Employees(WAC) at Level of Service <span class="IOSym">(1)(2)(3)(4)(5)</span></th>'+
+'<th class="metric">Percent of Employees(WAC) Unserved <span class="IOSym">(1)(2)(3)</span></th>'+
+'<th class="metric"> Employees(WAC) Served By Service <span class="IOSym">(1)(2)(3)(5)</span></th>'+
 
 //WAC
-'<th class="metric">Service Stops <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Population Served By Service <span class="IOSym">(1)(2)(4)</span></th>'+
-'<th class="metric">Service Days <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Hours of Service <span class="IOSym">(1)(4)</span></th>'+
-'<th class="metric">Average Fare <span class="IOSym">(1)</span></th>'+
-'<th class="metric">Median Fare <span class="IOSym">(1)</span></th></tr>';
-//'<th class="metric">Connected Communities <span class="IOSym">(1)</span></th></tr>';
+'<th class="metric">Service Stops <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Population Served By Service <span class="IOSym">(1)(2)(3)(5)</span></th>'+
+'<th class="metric">Service Days <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Hours of Service <span class="IOSym">(1)(2)(5)</span></th>'+
+'<th class="metric">Average Fare <span class="IOSym">(1)(2)</span></th>'+
+'<th class="metric">Median Fare <span class="IOSym">(1)(2)</span></th></tr>';
 html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
@@ -99,14 +98,14 @@ $(document).ready(function(){
 	progressBar();
 	go(key);
 
+	
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
-		success: function(item){			
-			docMetadata = item.metadata;
-			appendNavigation();
+		success: function(item){
+			appendNavigation();		
 			html = html + '<tr><td>' + item.AreaId
 			+'</td><td>' + item.AreaName 
 			+'</td><td class="details-control">'
@@ -212,7 +211,7 @@ $(document).ready(function(){
 				$(item).attr('title',tooltips[tempKey]);
 				});
 		}
-	});	    	
+	});
 });
 </script>
 </head>
@@ -263,13 +262,24 @@ $(document).ready(function(){
 
 			   	</div>
 			  	<div class="LHScontrols"> 
-			      Minimum Urban Population<span class="IOSym">(1)</span><input type="text" id="popMin" name="popMin" data-iomap="2" data-label="Minimum Urban Population" class="input tbox" onkeypress="return isWholeNumber(event)" style="width: 65px;" /><br>
-			   	  Maximum Urban Population<span class="IOSym">(2)</span><input type="text" id="popMax" name="popMax" data-iomap="1" data-label="Maximum Urban Population" class="input tbox" onkeypress="return isNumber(event)" style="width: 65px; "/><br>		    		
-			  	 Population Search Radius (miles)<span class="IOSym">(2) </span> <input type="text" name="Sradius" id="Sradius" data-iomap="2" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/><br>			    	
-			
-			  	Minimum Level of Service (times)<span class="IOSym">(3) </span> <input type="text" name="LoS" id="LoS" data-iomap="3" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/><br>
-			  
-
+			  		<table>
+			  			<tr>
+			  				<td>Minimum Urban Population<span class="IOSym">(1)</span></td>
+			  				<td><input type="text" id="popMin" name="popMin" data-iomap="2" data-label="Minimum Urban Population" class="input tbox" onkeypress="return isWholeNumber(event)" style="width: 65px;" /></td>
+		  				</tr>
+			  			<tr>
+			  				<td>Maximum Urban Population<span class="IOSym">(2)</span></td>
+			  				<td><input type="text" id="popMax" name="popMax" data-iomap="1" data-label="Maximum Urban Population" class="input tbox" onkeypress="return isNumber(event)" style="width: 65px; "/></td>
+		  				</tr>
+			  			<tr>
+			  				<td>Population Search Radius (miles)<span class="IOSym">(3) </span></td>
+			  				<td><input type="text" name="x" id="Sradius" data-iomap="2" data-label="Population Search Radius (miles)" class="input tbox" onkeypress="return isNumber(event)"/></td>
+		  				</tr>
+			  			<tr>
+			  				<td>Minimum Level of Service (times)<span class="IOSym">(4) </span></td>
+			  				<td><input type="text" name="l" id="LoS" data-iomap="3" data-label="Minimum Level of Service (times)" class="input tbox" onkeypress="return isWholeNumber(event)"/></td>
+			  			</tr>
+			  		</table>			      
 			  	</div>			  				  	
 			  </td>
 			</tr>

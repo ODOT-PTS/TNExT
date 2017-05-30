@@ -298,18 +298,23 @@ var metricDef = [
 		},
 		{
 			"report" : "Counties Summary Report",
-			"metric" : "Total Routes",
-			"definition" : "Total number of routes serving stops in the given geographic area."
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "Counties Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area."
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
 		},
 		{
 			"report" : "Counties Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area."
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "Counties Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 		{
 			"report" : "Counties Summary Report",
@@ -557,13 +562,23 @@ var metricDef = [
 		},
 		{
 			"report" : "Census Places Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area."
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "Census Places Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area."
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
+		},
+		{
+			"report" : "Census Places Summary Report",
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "Census Places Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 
 		// 5.5. Census Places Extended Report
@@ -806,13 +821,23 @@ var metricDef = [
 		},
 		{
 			"report" : "Congressional Districts Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area.",
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "Congressional Districts Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area.",
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
+		},
+		{
+			"report" : "Congressional Districts Summary Report",
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "Congressional Districts Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 
 		// 6.5 Congressional Districts Extended Report
@@ -1269,6 +1294,16 @@ var metricDef = [
 		},
 		{
 			"report" : "Aggregated Urban Areas Summary Report",
+			"metric" : "Employment (RAC)",
+			"definition" : "Total number of people employed residing in the geographic area. Metric is calculated using Working Area Characteristic (WAC) data.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Summary Report",
+			"metric" : "Employees (WAC)",
+			"definition" : "Total number of people employed working in the geographic area. Metric is calculated using Working Area Characteristic (WAC) data.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Summary Report",
 			"metric" : "Land Area",
 			"definition" : "Total land area of the geographic area in square miles.",
 		},
@@ -1433,13 +1468,23 @@ var metricDef = [
 		},
 		{
 			"report" : "ODOT Transit Regions Summary Report",
-			"metric" : "Total Stops",
-			"definition" : "Total number of stops within the given geographic area."
+			"metric" : "Total Urban Stops",
+			"definition" : "Total number of stops within the given geographic area located in a urban census block.",
 		},
 		{
 			"report" : "ODOT Transit Regions Summary Report",
-			"metric" : "Urban Areas",
-			"definition" : "Total number of Urban Areas within the geographic area."
+			"metric" : "Total Rural Stops",
+			"definition" : "Total number of stops within the given geographic area located in an rural census block.",
+		},
+		{
+			"report" : "ODOT Transit Regions Summary Report",
+			"metric" : "Urbanized Areas",
+			"definition" : "Total number of Urbanized Areas within the geographic area."
+		},
+		{
+			"report" : "ODOT Transit Regions Summary Report",
+			"metric" : "Urban Clusters",
+			"definition" : "Total number of Urban Clusters within the geographic area."
 		},
 		{
 			"report" : "ODOT Transit Regions Summary Report",

@@ -41,7 +41,7 @@ html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th class="metric" id="aid">Geo ID</th>'+
 '<th class="metric" id="an">Name</th>'+
 '<th class="metric">Population<span class="IOSym">(1) </span></th>'+
-'<th class="metric">Employment (RAC) </th>'+
+'<th class="metric">Employment (RAC)</th>'+
 
 '<th id="emp1" class="metric"> Employees (WAC) </th>'+
 '<th class="metric">Land Area<span class="IOSym">(1) </span></th>'+
@@ -66,10 +66,8 @@ $(document).ready(function(){
 		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop='+ upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
 		success: function(d){
-			docMetadata = d.metadata;
-			appendNavigation();
+			appendNavigation(null);
 			$.each(d.GeoR, function(i,item){
-				console.log(item)
 				html += '<tr><td>' + '<a href="#" type="XR" id="'+item.id+'">'+item.id+'</a></td>'+ '<td>' +'<a href="#" type="SR">'+item.Name+
 				'</a></td><td>' +numberconv(item.population) +'</td><td>' +numberconv(item.employment) +'</td>';
 			if(popYear>2010)
@@ -93,17 +91,11 @@ $(document).ready(function(){
 			    		qstring = $(this).attr('id');
 			    		qstringx = '0.25';
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
-			    		//var keyName = Math.random();
-			    		///localStorage.setItem(keyName, qstringd);
-						var keyName = setDates(qstringd);		
-					
+						var keyName = setDates(qstringd);							
 			    		window.open('/TNAtoolAPI-Webapp/GeoUrbansRXreport.html?&popMin='+popMin+'&popMax='+popMax+'&x='+qstringx+'&l=2'+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);    		
 			    } else if ($(this).attr('type')=="SR"){
  			    	window.open('/TNAtoolAPI-Webapp/GeoUAreasReport.html?&popMin='+popMin+'&uc=3'+'&popMax='+popMax+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);
-						    		 	   
-			    
-			    
-			    		 	    };
+		    	};
 			});
 			
 			table = buildDatatables();
@@ -146,12 +138,12 @@ $(document).ready(function(){
 		    }
 		    
 		 	// append toopltips
-			var tooltips = populateMetricDefs();
+			 var tooltips = populateMetricDefs();
 			var tempKey = [];
 			$('.metric').each(function(index, item) {
 				tempKey = [$('title').text(),$(item).text().strip().trim() ];
 				$(item).attr('title',tooltips[tempKey]);
-				});
+				}); 
     	}
 	});
 });
