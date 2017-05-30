@@ -186,8 +186,7 @@ public class PgisEventManager {
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
-      float RouteMiles = 0;
-      
+      float RouteMiles = 0;      
       String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
       		+ "trips as (select agencyid, routeid, round(max(length)::numeric,2) as length "
       		+ "		from "+Types.getTripMapTableName(type)+" map inner join aids on map.agencyid_def=aids.aid "
