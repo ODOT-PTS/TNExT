@@ -1,6 +1,5 @@
-package com.webapp.api;
+package com.model.database.queries.objects;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -8,8 +7,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class HeatMap1 {
-
-
 	
 	@XmlAttribute
     @JsonSerialize
@@ -54,6 +51,6 @@ public class HeatMap1 {
 	
 	@XmlAttribute
     @JsonSerialize
-	int total;
+	public int total;
 
 }

@@ -1,4 +1,4 @@
-package com.webapp.api;
+package com.model.database.queries.objects;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
@@ -8,18 +8,18 @@ public class HeatMap3 {
 	
 	@XmlAttribute
     @JsonSerialize
-	String Date;
+	public String Date;
 	
 	@XmlAttribute
     @JsonSerialize
-    int total;
+    public int total;
 	
 	@XmlAttribute
     @JsonSerialize
-	int active;
+    public int active;
 	
 	@XmlAttribute
     @JsonSerialize
-	int tripcount;
+    public int tripcount;
 }
 

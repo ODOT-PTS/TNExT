@@ -103,6 +103,8 @@ import com.model.database.queries.objects.GeoStop;
 import com.model.database.queries.objects.GeoStopRouteMap;
 import com.model.database.queries.objects.GeoXR;
 import com.model.database.queries.objects.HeatMap;
+import com.model.database.queries.objects.HeatMap1;
+import com.model.database.queries.objects.HeatMap3;
 import com.model.database.queries.objects.HubCluster;
 import com.model.database.queries.objects.HubsClusterList;
 import com.model.database.queries.objects.KeyClusterHashMap;
