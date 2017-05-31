@@ -17,6 +17,5 @@
 [Help]()
 
  * [Metric List](features.md)
- * [FAQ](faq.md)
 
 [gimmick:theme (inverse: false)](flatly)
