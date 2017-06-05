@@ -245,7 +245,7 @@ var metricDef = [
 		{
 			"report" : "Statewide Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Statewide Extended Report",
@@ -683,7 +683,7 @@ var metricDef = [
 		{
 			"report" : "County Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "County Extended Report",
@@ -952,7 +952,7 @@ var metricDef = [
 		{
 			"report" : "Census Place Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Census Place Extended Report",
@@ -1216,7 +1216,7 @@ var metricDef = [
 		{
 			"report" : "Congressional District Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Congressional District Extended Report",
@@ -1460,7 +1460,7 @@ var metricDef = [
 		{
 			"report" : "Urban Area Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Urban Area Extended Report",
@@ -1615,11 +1615,61 @@ var metricDef = [
 			"report" : "Aggregated Urban Areas Extended Report",
 			"metric" : "Percent of Population Served at Level of Service",
 			"definition" : "Total unduplicated population of census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total population of the area. X is the population search radius and N is the minimum level of service set by the user."
-		},
+		},		
 		{
 			"report" : "Aggregated Urban Areas Extended Report",
 			"metric" : "Percent of Population Unserved",
 			"definition" : "100 minus percent of population served.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Employment Served (RAC)",
+			"definition" : "Total number of unduplicated people employed residing in census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each census block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).",
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Percent of Employment Served at Level of Service (RAC)",
+			"definition" : "Total unduplicated people employed working in census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user." 
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Percent of Employment Served (RAC)",
+			"definition" : "Employment Served (RAC) divided by the number of people residing in the given geographic area.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Percent of Employment Unserved (RAC)",
+			"definition" : "100 minus percent of Employment Served (RAC)." 
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Employment Served By Service (RAC)",
+			"definition" : "Summation of Employment Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of people employed residing in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates." 
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Employees Served (WAC)",
+			"definition" : "Total number of unduplicated people employed working in census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of all stops in the geographic area. Each census block is counted once (unduplicated). This metric is date-independent, i.e., the stops may or may not be served on the selected date(s).",
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Percent of Employees Served (WAC)",
+			"definition" : "Employment Served (WAC) divided by the number of people residing in the given geographic area.",
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Percent of Employees Served at Level of Service (WAC)",
+			"definition" : "Total unduplicated people employed working in census blocks whose centroids are located within an X-mile radius of any stop that is within the geographical area and served at least N-times on the selected date(s) divided by total number of employed people working in the area. X is the population search radius and N is the minimum level of service set by the user." 
+		},		
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Percent of Employees Unserved (WAC)",
+			"definition" : "100 minus percent of Employees Served (WAC)." 
+		},
+		{
+			"report" : "Aggregated Urban Areas Extended Report",
+			"metric" : "Employees Served By Service (WAC)",
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of people employed working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates." 
 		},
 		{
 			"report" : "Aggregated Urban Areas Extended Report",
@@ -1872,7 +1922,7 @@ var metricDef = [
 		{
 			"report" : "ODOT Transit Region Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "ODOT Transit Region Extended Report",
@@ -2723,7 +2773,7 @@ var metricDef = [
 		{
 			"report" : "Tract Extended Report",
 			"metric" : "Employees Served By Service (WAC)",
-			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employment Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
+			"definition" : "Summation of Employees Served by Service over all census blocks whose centroids are located within an X-mile radius (i.e., stop distance) of any stop in the geographic area. Employees Served by Service for a census block is calculated as the number of employed people working in that block multiplied by the times that block is served on the selected date(s). The number reported is cumulative over the selected dates."
 		},
 		{
 			"report" : "Tract Extended Report",
