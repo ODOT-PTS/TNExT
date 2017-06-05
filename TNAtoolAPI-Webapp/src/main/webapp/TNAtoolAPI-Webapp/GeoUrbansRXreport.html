@@ -44,7 +44,7 @@ var fMedian = new Array();
 var connectedcommunities = '';
 var popMax = getURIParameter("popMax");
 var popMin = getURIParameter("popMin");
-
+var LOS= getURIParameter("l");
 w_qstringd = getDates(keyName);
 
 html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
@@ -102,7 +102,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
+		url: '/TNAtoolAPI-Webapp/queries/transit/UrbanrXR?&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&l='+LOS,
 		async: true,
 		success: function(item){
 			appendNavigation();		

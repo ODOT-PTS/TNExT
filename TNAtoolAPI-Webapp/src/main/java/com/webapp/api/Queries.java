@@ -2699,8 +2699,8 @@ public class Queries {
 		response.wacWithinX= String.valueOf(stopspop[6]);
 		response.UPopWithinX = String.valueOf(stopspop[1] + stopspop[2]);
 		response.PopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/population))/100.00);
-		response.racServed = String.valueOf(Math.round((10000.00*(stopspop[5])/population))/100.00);
-		response.wacServed = String.valueOf(Math.round((10000.00*(stopspop[6])/population))/100.00);
+		response.racServed = String.valueOf(Math.round((10000.00*(stopspop[5])/employment))/100.00);
+		response.wacServed = String.valueOf(Math.round((10000.00*(stopspop[6])/employees))/100.00);
 		response.UPopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/population))/100.00);	
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[1])/population)))/100.0);
 		response.racUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[5])/population)))/100.0);
