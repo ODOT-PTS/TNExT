@@ -1517,7 +1517,7 @@ var metricDef = [
 		{
 			"report" : "Aggregated Urban Areas Summary Report",
 			"metric" : "Employment (RAC)",
-			"definition" : "Total number of people employed residing in the geographic area. Metric is calculated using Working Area Characteristic (WAC) data.",
+			"definition" : "Total number of people employed residing in the geographic area. Metric is calculated using Residential Area Characteristic (RAC) data.",
 		},
 		{
 			"report" : "Aggregated Urban Areas Summary Report",
