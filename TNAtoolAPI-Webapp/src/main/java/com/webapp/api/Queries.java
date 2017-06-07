@@ -2546,7 +2546,7 @@ public class Queries {
 			index++;
 			landarea += instance.getLandarea();
 			waterarea += instance.getWaterarea();
-			population += instance.getPopulation();
+			population += instance.getPopulation(Integer.valueOf(popYear));
 			try {
 				List<GeoStopRouteMap> routesL = EventManager.getroutesbyurban(
 						instance.getUrbanId(), selectedAgencies, dbindex);

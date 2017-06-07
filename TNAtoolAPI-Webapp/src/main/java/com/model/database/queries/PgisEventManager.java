@@ -6236,11 +6236,12 @@ public class PgisEventManager {
 		String query="";
 		Statement stmt = null;
 		int[] empArray =  new int[2];
-		query ="with temp as (select urbanid,population"+popYear+" as population from census_urbans where population between "+popmin+" and "+popmax+"),"
+		query ="with temp as (select urbanid,population"+popYear+" as population from census_urbans where population"+popYear+" between "+popmin+" and "+popmax+"),"
 				+"block as (select blockid,temp.urbanid from temp join census_blocks using(urbanid)),"
 				+"wac as (select sum(C000) as wac from lodes_blocks_wac join block using(blockid)),"
 				+"rac as (select sum(C000_"+popYear+" :: int) as rac from lodes_rac_projection_block join block using(blockid))"
-				+"select rac,wac from wac cross join rac";
+				+"select coalesce(rac,0) as rac , coalesce(wac,0) as wac  from wac cross join rac";
+	
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(query); 
