@@ -2694,17 +2694,17 @@ public class Queries {
 		index ++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		response.StopsPersqMile = String.valueOf(Math.round(stopspop[0]*25899752356.00/LandArea)/10000.00);
-		response.PopWithinX = String.valueOf(stopspop[1]);
+		response.PopWithinX = String.valueOf(stopspop[1]+stopspop[2]);
+		response.UPopWithinX = String.valueOf(stopspop[1]);
 		response.racWithinX= String.valueOf(stopspop[5]);
 		response.wacWithinX= String.valueOf(stopspop[6]);
-		response.UPopWithinX = String.valueOf(stopspop[1] + stopspop[2]);
 		response.PopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/population))/100.00);
 		response.racServed = String.valueOf(Math.round((10000.00*(stopspop[5])/employment))/100.00);
 		response.wacServed = String.valueOf(Math.round((10000.00*(stopspop[6])/employees))/100.00);
 		response.UPopServed = String.valueOf(Math.round((10000.00*(stopspop[1])/population))/100.00);	
 		response.PopUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[1])/population)))/100.0);
-		response.racUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[5])/population)))/100.0);
-		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[6])/population)))/100.0);
+		response.racUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[5])/employment)))/100.0);
+		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[6])/employees)))/100.0);
 		
 		HashMap<String, String> servicemetrics = PgisEventManager.UAreasServiceMetrics(sdates, days, fulldates, popmin,popmax, username, L, x, dbindex, popYear);
 		index +=6;
@@ -4743,7 +4743,7 @@ public class Queries {
 					throws JSONException, SQLException, ParseException {
 		HeatMap1 val=new HeatMap1();
 		Map<String, HeatMap> dateNorm = new LinkedHashMap<String,HeatMap>();
-		dateNorm=PgisEventManager.Heatmap(dbindex,popYear);
+		dateNorm=PgisEventManager.Heatmap(dbindex,popYear,username);
 		for (String name: dateNorm.keySet()){
 	        String key1 =name.toString();
 	        String value = dateNorm.get(name).toString();
@@ -4819,7 +4819,7 @@ public class Queries {
 				val.f.add(obj);
 				val.total=obj.total;
 				}
-			else if(ee.getValue().tripcount>=2600 && ee.getValue().tripcount<3600)
+			else if(ee.getValue().tripcount>=2600 && ee.getValue().tripcount<5000)
 				{
 				HeatMap3 obj =new HeatMap3();
 				obj.Date=ee.getKey();
@@ -4829,7 +4829,7 @@ public class Queries {
 				val.g.add(obj);
 				val.total=obj.total;
 				}
-			else if(ee.getValue().tripcount>=3600 && ee.getValue().tripcount<4600)
+			else if(ee.getValue().tripcount>=5000 && ee.getValue().tripcount<8000)
 				{
 				HeatMap3 obj =new HeatMap3();
 				obj.Date=ee.getKey();
