@@ -6314,9 +6314,9 @@ public class PgisEventManager {
 					  }
 				  query="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),"
 				  		+ "svcids as (select serviceid_agencyid, serviceid_id  from gtfs_calendars gc where startdate::int<="+date+" and enddate::int>="+date+" and "+dayOfWeek+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date+"' and exceptiontype=1),"
-						  +"trips as (select trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
-						  +" activeAgencies as (select count(b.id) as active from gtfs_feed_info a join gtfs_agencies b using(defaultid) Where "+date+" between startdate::int And enddate::int),"
-						  +"totalAgencies as (select count(b.id) as total from gtfs_feed_info a join gtfs_agencies b using(defaultid)),"
+						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
+						  +"activeAgencies as (select count(distinct aid) as active from trips),"
+						  +"totalAgencies as (select count(distinct agencyid) as total from  gtfs_trips )," 
 						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
 						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
 				System.out.println(query);
