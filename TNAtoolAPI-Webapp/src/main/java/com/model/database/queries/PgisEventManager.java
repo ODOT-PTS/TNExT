@@ -2044,7 +2044,14 @@ public class PgisEventManager {
       }else {
     	  join = "inner";
     	  if(type==3){
+    		  if(geotype == -1 || geotype==3)
+    		  { 
     		  aidsjoin = "where map.agencyid='"+agencyId+"'";
+    		  }
+    		  else
+    		  { 
+    			  aidsjoin = "and map.agencyid='"+agencyId+"'";}
+    	    	
     	  }
     	  else
     	  {
@@ -2178,9 +2185,16 @@ public class PgisEventManager {
     		if(uc==0)
     		{
     		criteria = Types.getIdColumnName(type);
-        	stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where left(blockid,5)='"+areaid+"'"+aidsjoin+" ),";    		
-     		 routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
+    		 if (agencyId==null){
+    		stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,5)='"+areaid+"'),";    		
+    		 }
+    		else{
+    			stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                        +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where left(blockid,5)='"+areaid+"'"+aidsjoin+"),";    		
+
+    		}
+    		routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                   +"routes1 as ( select  distinct (urbanid) as areaid,census_counties.shape from census_blocks join census_counties on left(blockid,5)=census_counties.countyid where left(blockid,5)='"+areaid+"' and urbanid is not null),"
            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
                   +"routesf as ( select count(distinct routes) as routes ,areaid from routes1 join routes using(areaid) where st_intersects(routes.shape,routes1.shape)='t' group by areaid),";	
@@ -2195,9 +2209,15 @@ public class PgisEventManager {
     		}
     		else if( uc==1)
     		{   criteria = Types.getIdColumnName(type);
-        	stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where left(blockid,5)='"+areaid+"'"+aidsjoin+" ),";    		
-     		 routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
+    		 if (agencyId==null){
+    	    		stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+    	                    +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,5)='"+areaid+"'),";    		
+    	    		 }
+    	    		else{
+    	    			stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,5), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+    	                        +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where left(blockid,5)='"+areaid+"'"+aidsjoin+"),";    		
+
+    	    		}	 routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                   +"routes1 as ( select  distinct (urbanid) as areaid,census_counties.shape from census_blocks join census_counties on left(blockid,5)=census_counties.countyid where left(blockid,5)='"+areaid+"' and urbanid is not null),"
            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
                   +"routesf as ( select count(distinct routes) as routes ,areaid from routes1 join routes using(areaid) where st_intersects(routes.shape,routes1.shape)='t' group by areaid),";	
@@ -2218,9 +2238,15 @@ public class PgisEventManager {
     		  if (uc==0)
     		  {
     		  criteria = Types.getIdColumnName(type);
+    		  if (agencyId==null){
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where left(blockid,11)='"+areaid+"'"+aidsjoin+" ),";    		
-        	   routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,11)='"+areaid+"' ),";    		
+    		  }
+    		  else{
+        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where left(blockid,11)='"+areaid+"'"+aidsjoin+" ),";    		
+        		  }
+    		  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_tracts.shape from census_blocks join census_tracts on left(blockid,11)=census_tracts.tractid where left(blockid,11)='"+areaid+"' and urbanid is not null),"
                           +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
          
@@ -2238,9 +2264,15 @@ public class PgisEventManager {
     		  else
     		  {
     			  criteria = Types.getIdColumnName(type);
-        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where left(blockid,11)='"+areaid+"'"+aidsjoin+" ),";    		
-            	   routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
+    			  if (agencyId==null){
+    	    		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+    	                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where left(blockid,11)='"+areaid+"' ),";    		
+    	    		  }
+    	    		  else{
+    	        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,left(blockid,11), ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+    	                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where left(blockid,11)='"+areaid+"'"+aidsjoin+" ),";    		
+    	        		  }
+    	    		   routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                           +"routes1 as ( select  distinct (urbanid) as areaid,census_tracts.shape from census_blocks join census_tracts on left(blockid,11)=census_tracts.tractid where left(blockid,11)='"+areaid+"' and urbanid is not null),"
                               +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
              
@@ -2261,9 +2293,14 @@ public class PgisEventManager {
     	  { if(uc==0)
     	  {
     		  criteria = Types.getIdColumnName(type);
+    		  if (agencyId==null){
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where placeid='"+areaid+"'"+aidsjoin+" ),";    		
-     	 
+                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where placeid='"+areaid+"' ),";    		
+    		  }
+    		  else{
+        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where placeid='"+areaid+"'"+aidsjoin+" ),";    		
+        		  }
 
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_places.shape from census_blocks join census_places using(placeid) where placeid='"+areaid+"' and urbanid is not null),"
@@ -2283,9 +2320,14 @@ public class PgisEventManager {
     	  else
     	  {
     		  criteria = Types.getIdColumnName(type);
-    		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where placeid='"+areaid+"'"+aidsjoin+" ),";    		
-     	 
+    		  if (agencyId==null){
+        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where placeid='"+areaid+"' ),";    		
+        		  }
+        		  else{
+            		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def where placeid='"+areaid+"'"+aidsjoin+" ),";    		
+            		  }
 
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_places.shape from census_blocks join census_places using(placeid) where placeid='"+areaid+"' and urbanid is not null),"
@@ -2307,9 +2349,15 @@ public class PgisEventManager {
     	  if(geotype==4)//ODOT regions
     	  { if(uc==0){
     		  criteria = Types.getIdColumnName(type);
+    		  if (agencyId==null){
     		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where regionid='"+areaid+"'"+aidsjoin+" ),";    		
-         	 
+                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"  where regionid='"+areaid+"'),";    		
+    		  }
+    		  else {
+        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where regionid='"+areaid+"'"+aidsjoin+" ),";    		
+        		  }
+    		  
     		  
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"rshape as (select st_union(shape) as rshape ,odotregionid from census_counties where odotregionid='"+areaid+"' group by odotregionid),"
@@ -2330,9 +2378,14 @@ public class PgisEventManager {
     	  else
     	  {
     		  criteria = Types.getIdColumnName(type);
-    		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                      +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where regionid='"+areaid+"'"+aidsjoin+" ),";    		
-         	 
+    		  if (agencyId==null){
+        		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+"  where regionid='"+areaid+"'),";    		
+        		  }
+        		  else {
+            		  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                              +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where regionid='"+areaid+"'"+aidsjoin+" ),";    		
+            		  }
     		  
         	  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"rshape as (select st_union(shape) as rshape ,odotregionid from census_counties where odotregionid='"+areaid+"' group by odotregionid),"
@@ -2358,9 +2411,15 @@ public class PgisEventManager {
     		
     		  if(uc==0)
     		  {
+    			  if (agencyId==null){
     			  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where congdistid='"+areaid+"'"+aidsjoin+" ),";    		
-             	 
+                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where congdistid='"+areaid+"'),";    		
+    			  }
+    			  else {
+    				  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                              +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where congdistid='"+areaid+"'"+aidsjoin+" ),";    		
+        		
+    			  }
     		  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_congdists.shape from census_blocks join census_congdists using(congdistid) where congdistid='"+areaid+"' and urbanid is not null),"
                            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
@@ -2382,10 +2441,16 @@ public class PgisEventManager {
     		  }
     		  else if(uc==1)
     		  {
-    			  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
-                          +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where congdistid='"+areaid+"'"+aidsjoin+" ),";    		
-             	 
-    		  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
+    			  if (agencyId==null){
+        			  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                              +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def "+aidsjoin+" where congdistid= '"+areaid+"'),";    		
+        			  }
+        			  else {
+        				  stopsquery="stops as (select stop.id as stopid,stop.agencyid as aid_def, map.agencyid as aid, "+criteria+" as areaid,placeid, ST_SetSRID(ST_Makepoint(lon,lat),4326) AS location FROM gtfs_stops stop inner join "
+                                  +"gtfs_stop_service_map map on stop.id=map.stopid and stop.agencyid=map.agencyid_def  where congdistid='"+areaid+"'"+aidsjoin+" ),";    		
+            		
+        			  }
+    			  routesquery = " routes AS (SELECT distinct(agencyid ||routeid) as route , urbanid AS areaid,shape FROM areas left join census_urbans_trip_map AS map on urbanid=areaid),"
                       +"routes1 as ( select  distinct (urbanid) as areaid,census_congdists.shape from census_blocks join census_congdists using(congdistid) where congdistid='"+areaid+"' and urbanid is not null),"
                            +"routesa AS (select count(distinct agencyid||routeid) as routes1 ,areaid from stops left join gtfs_stop_route_map m on stops.stopid=m.stopid and agencyid_def=stops.aid_def where areaid is not null group by areaid   ),"
          
