@@ -52,7 +52,7 @@ var w_qstringd = getDates(key);
 //----------------------- initializing the map ---------------------
 var map = new L.Map('map', {	
 	minZoom : 6,
-	maxZoom : 19	
+	maxZoom : 18	
 });
 
 var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
