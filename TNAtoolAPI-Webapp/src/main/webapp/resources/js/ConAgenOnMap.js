@@ -280,7 +280,12 @@ function onMarkerClick(){
 				polylines[id] = tmpConnectionsPolylines;
 				connectionPolylines.addLayer(polylines[id]);
 				connectedAgenciesDialog.dialogExtend("minimize");
-				map.fitBounds(bounds);
+				map.fitBounds(bounds,{maxZoom:18});
+				
+				// zoom out if the connection is too small and
+				// map tiles are not small enough to bound the connection.
+				if (map.getZoom >18)
+					map.setZoom(18);
 			}
 		});
 	}else{
