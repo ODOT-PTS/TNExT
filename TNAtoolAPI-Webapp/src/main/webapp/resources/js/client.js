@@ -52,7 +52,7 @@ var w_qstringd = getDates(key);
 //----------------------- initializing the map ---------------------
 var map = new L.Map('map', {	
 	minZoom : 6,
-	maxZoom : 18	
+	maxZoom : 18
 });
 
 var OSMURL    = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png";
@@ -657,6 +657,165 @@ function disponmap(layerid,k,points,popup,node){
 			iconCreateFunction: function (cluster) {
 				return new L.DivIcon({ html: cluster.getChildCount(), className: 'picluster', iconSize: new L.Point(30, 30) });
 			},
+			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
+		});
+		break;
+	case 2:
+		markers = new L.MarkerClusterGroup({
+			maxClusterRadius: 120,
+			iconCreateFunction: function (cluster) {
+				return new L.DivIcon({ html: cluster.getChildCount(), className: 'ccluster', iconSize: new L.Point(30, 30) });
+			},
+			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
+		});
+		break;
+	case 3:
+		markers = new L.MarkerClusterGroup({
+			maxClusterRadius: 120,
+			iconCreateFunction: function (cluster) {
+				return new L.DivIcon({ html: cluster.getChildCount(), className: 'rcluster', iconSize: new L.Point(30, 30) });
+			},
+			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
+		});
+		break;
+	case 4:
+		markers = new L.MarkerClusterGroup({
+			maxClusterRadius: 120,
+			iconCreateFunction: function (cluster) {
+				return new L.DivIcon({ html: cluster.getChildCount(), className: 'pucluster', iconSize: new L.Point(30, 30) });
+			},
+			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
+		});
+		break;
+	default:
+		markers = new L.MarkerClusterGroup({
+			maxClusterRadius: 120,
+			iconCreateFunction: function (cluster) {
+				return new L.DivIcon({ html: cluster.getChildCount(), className: 'brcluster', iconSize: new L.Point(30, 30) });
+			},
+			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: false, maxClusterRadius: 30
+		});
+		
+	}	
+	
+	for (var i = 0; i < points.length; i++) {
+		var p = points[i];
+	switch (k){
+	case 0:
+		var marker=L.marker(p[0], { icon : L.divIcon({ className : 'gcluster1',
+	        iconSize : new L.Point(13,13)}),
+	        title: popup,
+	       
+	       
+		});
+	break;
+	case 1:
+		var marker=L.marker(p[0], { icon : L.divIcon({ className : 'picluster1',
+	        iconSize : new L.Point(13,13)}),
+	        title: popup,
+	       
+	       
+		});
+		break;
+	case 2:
+		var marker=L.marker(p[0], { icon : L.divIcon({ className : 'ccluster1',
+	        iconSize : new L.Point(13,13)}),
+	        title: popup,
+	       
+	       
+		});
+		break;
+	case 3:
+		var marker=L.marker(p[0], { icon : L.divIcon({ className : 'rcluster1',
+	        iconSize : new L.Point(13,13)}),
+	        title: popup,
+	       
+	       
+		});
+		break;
+	case 4:
+		var marker=L.marker(p[0], { icon : L.divIcon({ className : 'pucluster1',
+	        iconSize : new L.Point(13,13)}),
+	        title: popup,
+	       
+	       
+		});
+		break;
+	default:
+		var marker=L.marker(p[0], { icon : L.divIcon({ className : 'brcluster1',
+	        iconSize : new L.Point(13,13)}),
+	        title: popup,
+	       
+	       
+		});
+		//break;
+	}	
+	
+	
+	
+	var marLat = (Math.round(marker.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
+		var marLng = (Math.round(marker.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
+		marker.on('popupopen', function(e) {
+			dialog.dialog( "close" );
+			var markerLat = (Math.round(this.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
+			var markerLng = (Math.round(this.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
+			$( '#'+markerLat+'POPdatepicker'+markerLng).datepicker({
+				showButtonPanel: true,
+				onSelect: function (date) {
+					currentDate = date;
+					}
+			});
+		
+			$('#'+markerLat+'POPdatepicker'+markerLng).datepicker( "setDate", new Date());
+			var d = new Date();
+			currentDate = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');			
+			$('.leaflet-popup-content-wrapper').css('opacity','0.80');
+			$('.leaflet-popup-close-button').css({'color':'#9B9A9A','z-index':'1'});
+		});
+	
+		
+	
+	     
+	marker.bindPopup(
+				'<p><b>'+p[1]+'</b></p>'+
+				'<p><b>Location:</b><br>'+
+				'<span style="padding-left:1em">Latitude: <span style="padding-left:1.5em">'+p[0].lat+'</span></span><br>'+
+		    	'<span style="padding-left:1em">Longitude: <span>'+p[0].lng+'</span></span>'+
+				'<p><b>Date:</b> <input readonly type="text" class="POPcal" id="'+marLat+'POPdatepicker'+marLng+'"></p>'+
+				'<p><b>Population Search Radius (miles):</b> <input type="text" value="0.25" id="'+marLat+'POPx'+marLng+'" style="width:40px"></p>'+
+				'<p><button type="button" id="'+marLat+'POPbutton'+marLng+'" style="width:100%" onclick="onMapBeforeSubmit('+p[0].lat+','+p[0].lng+','+marLat+','+marLng+')">Generate Report</button></p>'+
+				'<p><button type="button" style="width:100%" id="'+marLat+'streetViewButton" onclick="openStreetView('+p[0].lat+','+p[0].lng+')">Open Street View</button></p>'				
+				,popupOptions);
+	
+		markers.addLayer(marker);
+	
+		
+	}
+	markers._leaflet_id = layerid;
+	stops.addLayer(markers);
+	$.jstree._reference($mylist).set_type("default", $(node));
+	//$('div.circle').css({"background-color":"red"});
+	
+}
+/*function disponmap(layerid,k,points,popup,node){
+	
+	var markers;
+	switch (k){
+	case 0:
+		markers = new L.MarkerClusterGroup({
+			maxClusterRadius: 120,
+			iconCreateFunction: function (cluster) {
+			return new L.DivIcon({ html: cluster.getChildCount(), className: 'gcluster', iconSize: new L.Point(30, 30) });
+		},
+		spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
+	});
+	break;
+	case 1:
+		markers = new L.MarkerClusterGroup({
+			maxClusterRadius: 120,
+			iconCreateFunction: function (cluster) {
+				return new L.DivIcon({ html: cluster.getChildCount(), className: 'picluster', iconSize: new L.Point(30, 30) });
+			},
 			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 		});
 		break;
@@ -687,7 +846,7 @@ function disponmap(layerid,k,points,popup,node){
 			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 		});
 		break;
-	default:
+	case 5:
 		markers = new L.MarkerClusterGroup({
 			maxClusterRadius: 120,
 			iconCreateFunction: function (cluster) {
@@ -695,19 +854,11 @@ function disponmap(layerid,k,points,popup,node){
 			},
 			spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true, singleMarkerMode: true, maxClusterRadius: 30
 		});
-		//break;
+		break;
 	}	
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
-		var marker = new L.CircleMarker(p[0], {		
-			title: popup,		
-	        radius: 8,		
-	        fillColor: colorset[k],		
-	        color: "#333333",		
-	        weight: 2,		
-	        opacity: 1,		
-	        fillOpacity: 0.8,		
-	    });
+		var marker = new L.Marker(p[0],{title:popup});
 		var marLat = (Math.round(marker.getLatLng().lat * 1000000) / 1000000).toString().replace('.','').replace('-','');
 		var marLng = (Math.round(marker.getLatLng().lng * 1000000) / 1000000).toString().replace('.','').replace('-','');
 		marker.on('popupopen', function(e) {
@@ -741,7 +892,7 @@ function disponmap(layerid,k,points,popup,node){
 	markers._leaflet_id = layerid;
 	stops.addLayer(markers);
 	$.jstree._reference($mylist).set_type("default", $(node));
-}
+}*/
 
 /**
  * automatically draw a circle around the stops based on the user

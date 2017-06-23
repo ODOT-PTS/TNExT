@@ -70,6 +70,20 @@
 	border-radius: 15px;
 	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
   }
+  .picluster1 {
+    background-color: rgba(255, 51, 255, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	
+	 border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+  
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
   .brcluster {
     background-color: rgba(204, 102, 0, 0.7);
     width: 25px;
@@ -119,6 +133,67 @@
 	text-align: center;
 	border-radius: 15px;
 	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .brcluster1 {
+    background-color: rgba(204, 102, 0, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	 border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+  	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .pucluster1 {
+    background-color: rgba(122, 0, 245, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	 border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+  
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+.gcluster1 {
+    background-color: rgba(110, 204, 57, 0.7);
+    width: 5px;
+	height: 5px;
+	margin-left: 2px;
+	margin-top: 2px;
+	text-align: center;
+	 border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .ccluster1 {
+    background-color: rgba(0, 109, 255, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	 border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+  	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+   .rcluster1 {
+    background-color: rgba(254, 10, 10, 0.7);
+    width: 25px;
+	height: 25px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: center;
+	 border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
   }
  .caycluster {
     background-color: rgba(255, 255, 0, 0.6);
