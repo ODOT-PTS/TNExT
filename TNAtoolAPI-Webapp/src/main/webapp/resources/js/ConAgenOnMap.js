@@ -260,7 +260,7 @@ function onMarkerClick(){
 			datatype: 'json',
 			url: 	'/TNAtoolAPI-Webapp/queries/transit/castops?&lat=' + selectedStopLat +
 					'&lon=' + selectedStopLon +'&agencies='+ agencies +'&radius=' + gap + '&dbindex=' + dbindex,
-			async: true,
+			async: false,
 			success: function(data){
 				var sourceMarker = new L.marker([selectedStopLat,selectedStopLon]);
 				var bounds = Array();
