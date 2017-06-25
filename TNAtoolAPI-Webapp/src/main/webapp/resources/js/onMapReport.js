@@ -460,8 +460,13 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 			html += '<thead>'+tmp+'</thead><tbody>';
 			var popupOptions = {'offset': L.point(0, -8)};
 			$.each(data.MapG.MapCL, function(i,item){
-				html += '<td>'+item.Name.replace(' County','')+'</td>'+
-						'<td>'+numberconv(item.MapTL.length)+'</td>'+
+				console.log(item)
+			if(item.Name!=null)
+				html += '<td>'+item.Name.replace(' County','')+'</td>';
+			else
+				html +='<td>'+"null"+'</td>';
+				
+				html+='<td>'+numberconv(item.MapTL.length)+'</td>'+
 						'<td>'+numberconv(item.MapBL.length)+'</td>'+
 						'<td>'+numberconv(item.UrbanPopulation)+'</td>'+
 						'<td>'+numberconv(item.RuralPopulation)+'</td>'+
