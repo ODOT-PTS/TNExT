@@ -31,6 +31,10 @@ public class StopR {
 	
 	@XmlAttribute
     @JsonSerialize
+	public String defAgencyId;
+	
+	@XmlAttribute
+    @JsonSerialize
 	public String AgencyName;	
 	
 	@XmlAttribute
