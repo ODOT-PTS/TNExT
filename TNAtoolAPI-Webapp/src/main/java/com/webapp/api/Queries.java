@@ -4852,4 +4852,15 @@ public class Queries {
 			}
 		return val;
 		}
-	}
+	@GET
+	@Path("/Daterange")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getDaterange(@QueryParam("dbindex") Integer dbindex)
+			throws SQLException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
+		
+		return PgisEventManager.daterange(dbindex);
+
+	}		
+}

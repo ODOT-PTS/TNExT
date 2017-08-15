@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -6407,4 +6408,86 @@ public class PgisEventManager {
 		 dropConnection(connection);
 		 return(r);
 		 }
-	}
+	
+		public static Map<String, Daterange> daterange( int dbindex) 
+				throws FactoryException, TransformException	{
+			Connection  connection = makeConnection(dbindex);
+			String query="";
+			Statement stmt = null;
+		
+		 Map<String,Daterange> r = new LinkedHashMap<String,Daterange>();
+			query ="select feedname,startdate,enddate from gtfs_feed_info";
+		int start =0;
+		int end =1000000000;
+		int starta =0;
+		int enda =1000000000;
+			try {
+		        stmt = connection.createStatement();
+		        ResultSet rs = stmt.executeQuery(query); 
+		     
+		        
+		        while ( rs.next() ) {
+		        	Daterange a =  new Daterange();
+		        a.feedname=rs.getString("feedname");
+		        a.startdate=rs.getInt("startdate");
+		         a.syear =  a.startdate/ 10000;
+		        a.smonth = (a.startdate % 10000) / 100;
+		        a.sday = a.startdate % 100;
+		        a.enddate=rs.getInt("enddate");
+		         a.eyear =   a.enddate/ 10000;
+		         a.emonth = ( a.enddate % 10000) / 100;
+		         a.eday =  a.enddate % 100;
+		        r.put(a.feedname, a);
+		       if(a.startdate>start && a.startdate<end) 
+		       {start=a.startdate;
+		       }
+		       if(a.enddate<end && a.enddate>start)
+		       {
+		       end=a.enddate;
+		       }
+		       
+		        }
+				 rs.close();
+				 stmt.close(); 
+				 dropConnection(connection);
+	int u=0;
+				 
+			for (Entry<String, Daterange> entry : r.entrySet()) {
+			u=u+1;
+				if( entry.getValue().startdate<=end && entry.getValue().enddate>=start )
+			  {
+//				  start=20160101;
+//				  end=20160101;
+			  starta=starta+1;
+				  		  }
+		
+			
+			}
+		
+			if(u!=starta)
+			{
+				start=20160101;
+			  end=20160101;
+			}
+			Daterange a =  new Daterange();
+			a.feedname="Overlap";
+		
+			a.startdate=start;
+		         a.syear =  start/ 10000;
+		        a.smonth = (start % 10000) / 100;
+		        a.sday = start % 100;
+		        a.enddate=end;
+		         a.eyear =   end/ 10000;
+		         a.emonth = ( end % 10000) / 100;
+		         a.eday =  end % 100;
+		        r.put(a.feedname, a);
+			}
+			 catch ( Exception e ) {
+				 e.printStackTrace();
+			}
+			return r;	
+		}
+	
+
+
+}

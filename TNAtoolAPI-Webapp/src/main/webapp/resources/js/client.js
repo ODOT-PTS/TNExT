@@ -1769,6 +1769,50 @@ function updateListDialog(agenciesIds){
 	}
 	
 	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
+	$.ajax({
+		type: 'GET',
+		datatype: 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex,
+		async: false,
+		success: function(item){
+		
+			$.each(item, function(i,item){
+			if(item.feedname=="Overlap")	
+				{
+				var a=item.smonth+"/"+item.sday+"/"+item.syear;
+			    var b=item.emonth+"/"+item.eday+"/"+item.eyear;
+				}
+			
+			if (typeof a != 'undefined')
+				{
+				$mylist.append( "<div id='valid'><p style='margin-left:2.5%'><b>Valid Date Range:</b></p></div>" );
+				
+				if(a=="1/1/2016")
+					{
+					$mylist.append( "<div  id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>No valid date range</a></p></div>" );
+					}
+				else{
+					$mylist.append( "<div id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>"+a+"-"+b+"</a></p></div>" );
+				}
+		
+				}
+				});	
+			 
+		}
+	});
+	$('a').click(function(e){
+		var d = new Date();
+	    if($(this).attr('type')=="RC"){
+	    		qstring = $(this).attr('id');
+	    		qstringx = '0.25';
+	    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
+				var keyName = setDates(qstringd); 		
+
+	    		window.open('/TNAtoolAPI-Webapp/Daterange.html?&dbindex='+dbindex);
+
+    }
+	});
+
 	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
 	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
 	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
