@@ -1787,7 +1787,7 @@ function updateListDialog(agenciesIds){
 				{
 				$mylist.append( "<div id='valid'><p style='margin-left:2.5%'><b>Valid Date Range:</b></p></div>" );
 				
-				if(a=="1/1/2016")
+				if(a=="1/1/2025")
 					{
 					$mylist.append( "<div  id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>No valid date range</a></p></div>" );
 					}
@@ -1815,6 +1815,8 @@ function updateListDialog(agenciesIds){
 
 	$mylist.append( "<div id='dateList'><p style='margin-left:3%'><b>Selected Dates:</b></p></div>" );
 	$("#dateList").append("<div id='datesdiv' style='padding-left: 4%;'><ul id='datesarea'></ul></div>");
+	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;margin-top:1%'><i>Software tool version : 4.16.07</i></p></div>" );
+	
 	$("#datesarea").css({"list-style-type":"none","margin":"0","padding":"0"});
 	
 	// keeps selected dates updated in the date picker 

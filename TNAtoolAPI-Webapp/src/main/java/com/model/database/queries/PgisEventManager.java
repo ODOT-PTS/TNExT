@@ -6456,7 +6456,7 @@ public class PgisEventManager {
 			u=u+1;
 				if( entry.getValue().startdate<=end && entry.getValue().enddate>=start )
 			  {
-//				  start=20160101;
+//				  start=20260101;
 //				  end=20160101;
 			  starta=starta+1;
 				  		  }
@@ -6466,8 +6466,8 @@ public class PgisEventManager {
 		
 			if(u!=starta)
 			{
-				start=20160101;
-			  end=20160101;
+				start=20250101;
+			  end=20250101;
 			}
 			Daterange a =  new Daterange();
 			a.feedname="Overlap";
