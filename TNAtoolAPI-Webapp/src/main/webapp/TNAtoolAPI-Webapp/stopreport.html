@@ -189,8 +189,9 @@ $(document).ready(function(){
 			  <td id="td3">
 			  	<div class="headerBR" > 
 			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" data-label="Population Search Radius (miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>
-			    	<input type="button" onclick="reloadPage()" title="Click submit to refresh the report"  value="Submit" class="button" />
-		    	</div>
+			<input id="submit" type="button" onclick="reloadPage()"
+								title="Click submit to refresh the report" value="Submit"
+								class="button" />  	</div>
 			  </td>
 			</tr>
 		</table>

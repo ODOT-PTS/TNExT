@@ -5905,7 +5905,7 @@ public class PgisEventManager {
 				+ "		ON ST_INTERSECTS(urban.shape,state.shape) "
 				+ "		WHERE urban.population" + popYear + " >= 2500 AND urban.population" + popYear + " < 50000 GROUP BY stateid),"
 				+ "congdists AS (SELECT COUNT(congdistId) AS congdist, stateid FROM census_congdists  GROUP BY stateid),"
-				+ "regions AS (SELECT COUNT(regionId) AS region, stateid FROM census_counties GROUP BY stateid),"
+				+ "regions AS (SELECT COUNT(distinct odotregionid) as region , stateid FROM census_counties GROUP BY stateid),"
 				+ "urban_pop AS (SELECT SUM(population" + popYear + ") AS urbanpop, stateid FROM census_blocks WHERE poptype = 'U' GROUP BY stateid),"
 				+ "rural_pop AS (SELECT SUM(population" + popYear + ") AS ruralpop, stateid FROM census_blocks WHERE poptype = 'R' GROUP BY stateid),"
 				+ "emp_rac AS (SELECT sum(C000_" + popYear + ")::bigint AS rac, LEFT(blockid,2) AS stateid FROM lodes_rac_projection_block GROUP BY LEFT(blockid,2)),"
@@ -6416,7 +6416,7 @@ public class PgisEventManager {
 			Statement stmt = null;
 		
 		 Map<String,Daterange> r = new LinkedHashMap<String,Daterange>();
-			query ="select feedname,startdate,enddate from gtfs_feed_info";
+			query ="select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
 		int start =0;
 		int end =1000000000;
 		int starta =0;
@@ -6428,6 +6428,9 @@ public class PgisEventManager {
 		        
 		        while ( rs.next() ) {
 		        	Daterange a =  new Daterange();
+		        	a.agencyids=rs.getString("agencyids");
+		        	a.agencynames=rs.getString("agencynames");
+			        
 		        a.feedname=rs.getString("feedname");
 		        a.startdate=rs.getInt("startdate");
 		         a.syear =  a.startdate/ 10000;

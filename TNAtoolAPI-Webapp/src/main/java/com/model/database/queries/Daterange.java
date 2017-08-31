@@ -18,6 +18,10 @@ public class Daterange {
 	
 	@XmlAttribute
     @JsonSerialize
+	public String agencyids;
+	
+	@XmlAttribute
+    @JsonSerialize
 	public int startdate;
     
 	@XmlAttribute

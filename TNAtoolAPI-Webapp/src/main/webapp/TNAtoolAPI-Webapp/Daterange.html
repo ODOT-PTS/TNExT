@@ -193,14 +193,14 @@ bold-green-font {
 					    
 					    	 data.addRows([
 									        [item.feedname, item.feedname, 'GTFS',
-									         new Date(item.syear, item.smonth, item.sday), new Date(item.eyear, item.emonth, item.eday), null, 120, null]
+									         new Date(item.syear, (item.smonth - 1) , item.sday), new Date(item.eyear, (item.emonth-1), item.eday), null, 120, null]
 									      ]);
 					    	 }
 					    	 else{
 					    		
 					    		 data.addRows([
 										        [item.feedname, item.feedname, 'GTFS',
-										         new Date(item.syear, item.smonth, item.sday), new Date(item.eyear, item.emonth, item.eday), null, 0, null]
+										         new Date(item.syear, (item.smonth-1), item.sday), new Date(item.eyear, (item.emonth-1), item.eday), null, 0, null]
 										      ]);
 					    	 }
 					      });
