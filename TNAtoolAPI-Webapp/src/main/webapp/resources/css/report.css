@@ -52,6 +52,16 @@ em{
 	margin-left: 3px;		
 }
 
+.timepicker1 {
+	height: 25px;	
+	width: 75px;		
+	padding-top:0px;
+	padding-bottom:0px;
+	padding-right:0px;
+	padding-left:4px;
+	margin-left: 3px;		
+}
+
 .ui-tooltip {
 	font-size:80%;
 	padding: 5px 5px;

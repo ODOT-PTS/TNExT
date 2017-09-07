@@ -21,7 +21,7 @@
 	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
 	<script src="../resources/data/metricDefinitions.js"></script>
 	<script src="../resources/js/JSMethods.js"></script>
-	
+	<script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
@@ -29,7 +29,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
 	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
-	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
 <script type="text/javascript">
 
 w_qstringd = getDates(keyName);
@@ -41,6 +41,8 @@ var geoid = getURIParameter("geoid");
 var route = getURIParameter("route");
 var agency = getURIParameter("agency");
 var rc= getURIParameter("rc");
+var stime = getURIParameter("stime");
+var etime = getURIParameter("etime");
 var table;
 var xhr='';
 var ipop=popYear;
@@ -57,7 +59,7 @@ tmp = '<tr><th id="aid">Agency ID</th>'+
 '<th class="metric">Congressional District</th>' +
 '<th class="metric">Census Place</th>' + 
 '<th class="metric">Routes Stop Belongs To</th>'+
-'<th class="metric">Visits <span class="IOSym">(2)</span></th>'+
+'<th class="metric">Visits <span class="IOSym">(2)(3)(4)</span></th>'+
 '<th class="metric">Population Served<span class="IOSym">(1)</span></th>'+
 '<th class="metric">Urban Population Served<span class="IOSym">(1)</span></th>'+
 '<th class="metric">Rural Population Served<span class="IOSym">(1)</span></th>'+
@@ -70,16 +72,19 @@ html += '<thead>'+tmp+'</thead><tbody>';
 
 $(document).ready(function(){
 	$('#Sradius').val(w_qstringx);
+	$('#stime').val(stime);
+	$('#etime').val(etime);
 	setPopOptions();
 	loadDBList();
 	updateToolTips();
 	progressBar();		
 	go(key);
-	
+	  $('input.timepicker').timepicker({timeFormat: 'H:mm',scrollbar:true});
+	  $('input.timepicker1').timepicker({timeFormat: 'H:mm',scrollbar:true});
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username=admin'+'&geotype='+geotype+'&geoid='+geoid+'&rc='+rc,
+		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username=admin'+'&geotype='+geotype+'&geoid='+geoid+'&rc='+rc+'&stime='+stime+'&etime='+etime,
 		async: true,
 		success: function(d){
 			var namestring = " Stops Report";
@@ -155,6 +160,7 @@ $(document).ready(function(){
 			<div class="headerR">
 				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -188,10 +194,24 @@ $(document).ready(function(){
 			  </td> 
 			  <td id="td3">
 			  	<div class="headerBR" > 
-			    	Population Search Radius (miles) <input type="text" name="x" id="Sradius" data-label="Population Search Radius (miles)" class="input radius tbox" onkeypress="return isNumber(event)"/>
-			<input id="submit" type="button" onclick="reloadPage()"
+			    <table>
+			    	<tr>
+			    	<td style="font-size:15">Population Search Radius (miles)</td> 
+			    	<td><input type="text" name="x" id="Sradius" data-label="Population Search Radius (miles)" style='width: 150px' class="input radius tbox" onkeypress="return isNumber(event)"/></td>
+                   <td><input id="submit" type="button" onclick="reloadPage()"
 								title="Click submit to refresh the report" value="Submit"
-								class="button" />  	</div>
+								class="button" /></td>
+                    </tr>
+                    <tr>    
+                       <td style="font-size:15">Start Time<span class="IOSym">(3)</span></td>
+                       <td><input type="text" id="stime"  class="timepicker1" name="time" style='width: 150px ' style='height: 25px '/></td>
+				      </tr>
+				      <tr>
+				         <td style="font-size:15">End Time<span class="IOSym">(4)</span></td>
+				         <td><input type="text" id="etime" class=" timepicker1" name="time" style='width: 150px' style='height: 25px '/></td>			
+			 	</tr>
+			 	</table>
+			 	</div>
 			  </td>
 			</tr>
 		</table>

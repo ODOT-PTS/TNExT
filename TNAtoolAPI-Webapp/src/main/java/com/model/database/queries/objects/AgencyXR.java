@@ -55,6 +55,14 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
+    public String URouteMiles;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RRouteMiles;
+	
+	@XmlAttribute
+    @JsonSerialize
     public String UPopWithinX;
 	
 	@XmlAttribute

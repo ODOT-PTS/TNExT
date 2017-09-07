@@ -2852,7 +2852,9 @@ public class PgisEventManager {
 			String popYear,
 			int geotype,
 			String geoid,
-			int rc
+			int rc,
+			String stime,
+			String etime
 			) throws SQLException {
 		ArrayList <StopR> response = new ArrayList<StopR>();		
 		StopR instance;
@@ -2863,12 +2865,21 @@ public class PgisEventManager {
 		String popsfilter = "";
 		String mainquery ="with ";
 		String criteria = "";
+		String [] st=stime.split(":");
+		String [] et=etime.split(":");
+		int stime1=0;
+		int etime1=0;
+		System.out.println(etime+"="+et[0]+et[1]);
+		System.out.println(stime+"="+st[0]+st[1]);
+		stime1=(Integer.parseInt(st[0])*100)+Integer.parseInt(st[1]);
+		etime1=(Integer.parseInt(et[0])*100)+Integer.parseInt(et[1]);
+		System.out.println(stime1+"-"+etime1);
 		String agencyDefaultID = new String();
 		if (agency != null) {agencyDefaultID = getDefaultAgencyID(agency, dbindex);}
 		HashMap<String, Integer> stopsVisits = new HashMap<String, Integer>();
 		if (dates != null && days != null){
 			
-			stopsVisits = stopFrequency(agency, dates, days, username, dbindex);
+			stopsVisits = stopFrequency(agency, dates, days, username, dbindex,stime1,etime1);
 		}			
 				
 		if (areaId==null){//stops by agency or stops by agency and route
@@ -3631,14 +3642,18 @@ public class PgisEventManager {
 			  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
 			  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 			  + "	inner join census_blocks using(blockid) where map.agencyid= '"+agencyId+"' and poptype='R'), "
-			  + "routes as (select max(round((trip.length+trip.estlength)::numeric,2)) as length, trip.route_id as" 
-		      + " 	routeid from gtfs_trips trip where trip.agencyid='"+agencyId+"' "
-		      + "	group by trip.route_id), "
-		      + "rmiles as (select sum(length) as rtmiles from routes) " 
+			  +"routes as (select distinct on ( routeid) "
+			  +"round((trip.length+trip.estlength)::numeric,2) as length, trip.route_id as routeid, id ,shape  as tripshape "
+			  +"from gtfs_trips trip  where trip.agencyid='"+agencyId+"' order by routeid,length DESC,shape,id), "
+              +" rrtmiles as ( select sum(ST_Length(st_transform(ST_Intersection(census_blocks.shape,tripshape),2993))/1609.34) as rrtmiles from census_blocks join routes on ST_intersects(census_blocks.shape,tripshape) where poptype='R'),"
+              +" urtmiles as ( select sum(ST_Length(st_transform(ST_Intersection(census_blocks.shape,tripshape),2993))/1609.34) as urtmiles from census_blocks join routes on ST_intersects(census_blocks.shape,tripshape) where poptype='U'),"
+              + "rmiles as (select sum(length) as rtmiles from routes) " 
 		      + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-		      + "	COALESCE(rpop,0) as ruralpop,coalesce(employment,0) as rac,coalesce(employees,0) as wac, COALESCE(rtmiles,0) as rtmiles "
+		      + "	COALESCE(rpop,0) as ruralpop,coalesce(employment,0) as rac,coalesce(employees,0) as wac, COALESCE(rtmiles,0) as rtmiles, COALESCE(urtmiles,0) as urtmiles ,COALESCE(rrtmiles,0) as rrtmiles "
 		      + "	from urbanpop inner join ruralpop on true "
 		      + "	inner join rmiles on true "
+		      + "	inner join urtmiles on true "
+		      + "	inner join rrtmiles on true "
 		      + "	inner join employment on true "
 		      + "	inner join employees  on true "
 		      + "	inner join urbanstopcount on true "
@@ -4005,7 +4020,8 @@ public class PgisEventManager {
     	    					  + "	inner join ruralstopcount on true";
     				  }
     	  }
-     double[] results = new double[7];
+     double[] results = new double[9];
+    System.out.println(querytext);
      try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
@@ -4014,9 +4030,13 @@ public class PgisEventManager {
         	results[1] = rs.getLong("ruralstopcount");
         	results[2] = rs.getLong("urbanpop"); 
         	results[3] = rs.getLong("ruralpop");
-        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;        
+        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;      
         	results[5] = rs.getLong("rac");
-        	results[6] = rs.getLong("wac");        
+        	results[6] = rs.getLong("wac");   
+        	if(areaid == null || areaid.equals("null")){
+        	results[7] = Math.round(rs.getFloat("urtmiles")*100.0)/100.0;        
+        	results[8] = Math.round(rs.getFloat("rrtmiles")*100.0)/100.0;        
+        	}
         	}
         rs.close();
         stmt.close();        
@@ -5053,7 +5073,58 @@ public class PgisEventManager {
 	 * @param dbindex
 	 * @return
 	 */
-	public static HashMap<String, Integer> stopFrequency(String agency, String[] date, String[] day, String username, int dbindex){				
+	public static HashMap<String, Integer> stopFrequency(String agency, String[] date, String[] day, String username, int dbindex,int stime,int etime){				
+		HashMap<String, Integer> response = new HashMap<String, Integer>();
+		Connection connection = makeConnection(dbindex);
+		String agencyFilter = "";
+		System.out.println(stime+"-"+etime);
+		if (agency != null){
+			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
+		}
+		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'" + agencyFilter + "), svcids as (";
+		Statement stmt = null;
+		for (int i=0; i<date.length; i++){
+			mainquery+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
+					+" and enddate::int>="+date[i]+" and "+day[i]+"=1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from "
+					+ "gtfs_calendar_dates where date='"+date[i]+"' and exceptiontype=2) union select serviceid_agencyid as aid, serviceid_id as sid from gtfs_calendar_dates gcd "
+					+ "inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date[i]+"' and exceptiontype=1)";
+			if (i+1<date.length)
+				mainquery+=" union all ";
+		}
+		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), "
+				+"triptimes as (SELECT times.trip_agencyid, times.trip_id, FLOOR(MIN(arrivaltime)/3600) AS arrival_hour, FLOOR(MIN(arrivaltime)%3600/60) AS arrival_minute, FLOOR((MIN(arrivaltime)%3600%60)/60) AS arrival_second, "
+	 			+" 	FLOOR(MAX(departuretime)/3600) AS departure_hour, FLOOR(MAX(departuretime)%3600/60) AS departure_minute, FLOOR((MAX(departuretime)%3600%60)/60) AS departure_second"
+	 		    +"	FROM trips INNER JOIN gtfs_stop_times AS times "
+	 			+"ON trips.tripid = times.trip_id "
+				+"WHERE times.arrivaltime > 0 "
+	 			+"GROUP BY times.trip_agencyid, times.trip_id),"
+	 			+"trips1 as ( select trip_agencyid as aid ,trip_id as tripid,(arrival_hour*100+arrival_minute),arrival_hour,arrival_minute from triptimes where (arrival_hour*100+arrival_minute) between "+stime+" and "+etime+" ),"	
+				+ "stopservices0 as (select stime.stop_agencyid as aid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips1.aid),0) as service "
+				+ "		from gtfs_stop_times stime JOIN trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid "
+				+ "		group by stime.stop_agencyid, stime.stop_id), "
+				+ "stopservices1 as (select stop_agencyid as aid, stop_agencyid||stop_id as stopid, 0 as service "
+				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices0) "
+				+ "		group by stop_agencyid, stop_id), "
+				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
+				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
+		System.out.print(mainquery);	
+		try{
+				stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(mainquery);
+				while (rs.next()) {
+					response.put(rs.getString("stopid"), rs.getInt("service"));
+			        }
+				rs.close();
+				stmt.close();
+			} catch ( Exception e ) {
+				e.printStackTrace();		         
+		      }
+						
+		dropConnection(connection);
+		return response;
+	}
+	
+	public static HashMap<String, Integer> stopFrequency1(String agency, String[] date, String[] day, String username, int dbindex){				
 		HashMap<String, Integer> response = new HashMap<String, Integer>();
 		Connection connection = makeConnection(dbindex);
 		String agencyFilter = "";

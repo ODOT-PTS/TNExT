@@ -1277,8 +1277,11 @@ public class Queries {
 		response.wacWithinX = String.valueOf(Math.round(StopsPopMiles[6]));
 
 		double RouteMiles = StopsPopMiles[4];
+		double URouteMiles = StopsPopMiles[7];
+		double RRouteMiles = StopsPopMiles[8];
 		response.RouteMiles = String.valueOf(RouteMiles);
-		
+		response.URouteMiles = String.valueOf(URouteMiles);
+		response.RRouteMiles = String.valueOf(RRouteMiles);
 		if (RouteMiles > 0)
 			response.StopPerRouteMile = String.valueOf(Math
 					.round((Integer.parseInt(response.StopCount) * 10000.0) / (RouteMiles)) / 10000.0);
@@ -1369,7 +1372,9 @@ public class Queries {
 			@QueryParam("username") String username,
 			@QueryParam("geotype") Integer geotype,
 			@QueryParam("geoid") String geoid,
-			@QueryParam("rc") Integer rc 
+			@QueryParam("rc") Integer rc, 
+			@QueryParam("stime") String stime ,
+			@QueryParam("etime") String etime 
 			) throws JSONException,
 			SQLException {
 		if (Double.isNaN(x) || x <= 0) {
@@ -1409,7 +1414,7 @@ public class Queries {
 						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
 						+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
 						+ String.valueOf(x) + ";Selected Transit Agency:" + agency + ";" + DbUpdate.VERSION;
-				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34,dbindex, popYear,-1,null,rc);
+				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34,dbindex, popYear,-1,null,rc,stime,etime);
 				index++;
 				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 			} else {// agency and route
@@ -1428,7 +1433,7 @@ public class Queries {
 						+ ";"
 						+ DbUpdate.VERSION;
 				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, routeid, x * 1609.34,
-						dbindex, popYear,-1,null,rc);
+						dbindex, popYear,-1,null,rc,stime,etime);
 				index++;
 				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 			}
@@ -1459,11 +1464,11 @@ public class Queries {
 					if (!geoid.equals("null")) {
 						report = PgisEventManager.stopGeosr(username, type,
 								fulldates, days, areaid, null, null,
-								x * 1609.34, dbindex, popYear, geotype, geoid,rc);
+								x * 1609.34, dbindex, popYear, geotype, geoid,rc,stime,etime);
 					} else {
 						report = PgisEventManager.stopGeosr(username, type,
 								fulldates, days, areaid, null, null,
-								x * 1609.34, dbindex, popYear, -1, null, rc);
+								x * 1609.34, dbindex, popYear, -1, null, rc,stime,etime);
 					}
 					index++;
 					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1488,11 +1493,11 @@ public class Queries {
 					if (!geoid.equals("null")) {
 						report = PgisEventManager.stopGeosr(username, type,
 								fulldates, days, areaid, agency, null,
-								x * 1609.34, dbindex, popYear, geotype, geoid, rc);
+								x * 1609.34, dbindex, popYear, geotype, geoid, rc,stime,etime);
 					} else {
 						report = PgisEventManager.stopGeosr(username, type,
 								fulldates, days, areaid, agency, null,
-								x * 1609.34, dbindex, popYear, -1, null, rc);
+								x * 1609.34, dbindex, popYear, -1, null, rc,stime,etime);
 					}
 					index++;
 					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1517,11 +1522,11 @@ public class Queries {
 				if (!geoid.equals("null")) {
 					report = PgisEventManager.stopGeosr(username, type,
 							fulldates, days, areaid, agency, routeid,
-							x * 1609.34, dbindex, popYear, geotype, geoid, rc);
+							x * 1609.34, dbindex, popYear, geotype, geoid, rc,stime,etime);
 				} else {
 					report = PgisEventManager.stopGeosr(username, type,
 							fulldates, days, areaid, agency, routeid,
-							x * 1609.34, dbindex, popYear, -1, null, rc);
+							x * 1609.34, dbindex, popYear, -1, null, rc,stime,etime);
 				}
 				index++;
 				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -3955,7 +3960,7 @@ public class Queries {
 		int progress = 0;
 		setprogVal(key, 5);
 		final HashMap<String, Integer> serviceMap = PgisEventManager
-				.stopFrequency(null, dates, days, username, dbindex);
+				.stopFrequency1(null, dates, days, username, dbindex);
 
 		setprogVal(key, 10);
 		int totalLoad = x.entrySet().size();

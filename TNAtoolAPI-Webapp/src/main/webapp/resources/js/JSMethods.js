@@ -305,6 +305,19 @@ function reloadPage() {
 		
 		// updating dates
 		try {
+			var stime=$('#stime').val();
+			var etime=$('#etime').val();
+			var hs=stime.split(":");
+			var st=(parseInt(hs[0])*100)+parseInt(hs[1]);
+			var he=etime.split(":");
+			var et=(parseInt(he[0])*100)+parseInt(he[1]);
+			if(et>st){
+			output = setURIParameter(output, 'stime',stime, keyName)
+            output = setURIParameter(output, 'etime',etime, keyName)
+			}
+			else{
+				alert("Choose an end time that is the after start time")
+			}
 			var dates = $('#datepicker').multiDatesPicker('getDates');
 			if (dates.length == 0) {
 				$("#datepicker").multiDatesPicker({
