@@ -10,7 +10,7 @@ The following software packages must be installed on a computer to be able to ho
     set to run on PostgreSQL 9.4. 
 3.	**[PostGIS](http://postgis.net/install/) extension** to PostgreSQL to enable spatial analysis.
 4.	**Database dumps**. Database dumps can be found [here](https://drive.google.com/open?id=0Bx4Zxars8NaNOWNxTlctME92OGc). Note that database dumps have to be 
-    restored with the same name.
+    restored with the same name. In other words, `winter16.backup` should be restored to a postgreql database named `winter16`.
 5.	**Java IDE**. For development purposes, any Java IDE can be used to clone the source code 
     available at the GitHub repository. Otherwise, the source code can be downloaded 
     directly from GitHub. 
