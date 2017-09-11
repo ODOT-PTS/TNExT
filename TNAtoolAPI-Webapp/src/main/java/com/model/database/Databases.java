@@ -38,6 +38,7 @@ public class Databases {
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
 			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
 			BufferedReader reader = new BufferedReader(new FileReader(
 					path+"../../src/main/resources/admin/resources/dbInfo.csv"));
 			String[] keys = reader.readLine().trim().split(",");
