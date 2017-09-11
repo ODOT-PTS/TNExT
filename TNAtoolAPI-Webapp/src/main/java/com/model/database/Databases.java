@@ -38,10 +38,30 @@ public class Databases {
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
 			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
             System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
-			BufferedReader reader = new BufferedReader(new FileReader(
+
+			BufferedReader reader = null;
+
+            try { 
+                // This is the location of the config file on OSU's server.
+                reader = new BufferedReader(new FileReader(
 					path+"../../src/main/resources/admin/resources/dbInfo.csv"));
-			String[] keys = reader.readLine().trim().split(",");
+
+            } catch (java.io.FileNotFoundException e1) {
+                System.err.println("Load failed from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
+
+                try { 
+                    // Fixme. hard code location of config file on Trillium's server.
+                    reader = new BufferedReader(new FileReader(
+                                "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv"));
+                } catch (java.io.FileNotFoundException e2) {
+                    System.err.println("Load failed from: " + "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv");
+                }
+
+            }
+            
+            			String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
 			String line = reader.readLine();
 			while (line != null && !line.equals("")) {
