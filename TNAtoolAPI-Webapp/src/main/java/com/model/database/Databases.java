@@ -124,7 +124,7 @@ public class Databases {
 		spatialConfigPaths = infoMap.get("spatialConfigPaths");
 		ConfigPaths = infoMap.get("ConfigPaths");
 		if(b){
-			String connectionPath = ConfigurationDirectory; // path + "../../src/main/resources/"; Ed 2017-09-12
+			String connectionPath = ConfigurationDirectory() ; // path + "../../src/main/resources/"; Ed 2017-09-12
 			for (int k=0; k<ConfigPaths.length; k++){
 				ConfigPaths[k] = connectionPath+ConfigPaths[k];
 			}
@@ -158,7 +158,7 @@ public class Databases {
 
         System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
 
-		String connectionPath = ConfigurationDirectory; // path + "../../src/main/resources/"; // Ed 2017-09-12
+		String connectionPath = ConfigurationDirectory(); // path + "../../src/main/resources/"; // Ed 2017-09-12
 
 		for (int k=0; k<ConfigPaths.length; k++){
 			ConfigPaths[k] = connectionPath + ConfigPaths[k];
