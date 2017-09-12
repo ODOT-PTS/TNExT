@@ -60,6 +60,7 @@ public class Databases {
                  +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
                     System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
                     path);
+
             ConfigurationDirectory = 
                 ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
                 ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory")
@@ -72,14 +73,18 @@ public class Databases {
             System.err.format(
                     "Testing property from catlina.properties file, edu.oregonstate.tnatool.NoneSuch: %s\n", 
                     System.getProperty("edu.oregonstate.tnatool.NoneSuch"));
-            System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
+
+            System.err.println("Attempting to load dbInfo.csv from: " + ConfigurationDirectory + "/admin/resources/dbInfo.csv");
+            //System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
 
 			BufferedReader reader = null;
 
             try { 
                 // This is the location of the config file on OSU's server.
+                //reader = new BufferedReader(new FileReader(
+			     //		path + "../../src/main/resources/admin/resources/dbInfo.csv"));
                 reader = new BufferedReader(new FileReader(
-					path + "../../src/main/resources/admin/resources/dbInfo.csv"));
+					ConfigurationDirectory + "/admin/resources/dbInfo.csv"));
 
             } catch (java.io.FileNotFoundException e1) {
                 String trillium_dbinfo_path = "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv";
