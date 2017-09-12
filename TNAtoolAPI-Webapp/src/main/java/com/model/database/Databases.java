@@ -33,15 +33,20 @@ import org.apache.commons.collections.iterators.EntrySetMapIterator;
 public class Databases {
 	public static HashMap<String, String[]> infoMap = getDbInfo();
 
-	public static String path;
+	// public static String path;
     
-    public static String ConfigurationDirectory;
+    public static String ConfigurationDirectory = 
+        ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
+        ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
+        : Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
+
+    public static String dbInfoCsvPath = ConfigurationDirectory + "/admin/resources/dbInfo.csv";
 
 	public static HashMap<String, String[]> getDbInfo() {
 
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
-			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			//path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
             // Ed 2017-09-12
             //
@@ -56,15 +61,17 @@ public class Databases {
             //
             //
             System.err.format(
-                    "Loading configuration direcotry from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
+                    "Loading configuration directory from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
                  +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
                     System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
-                    path);
+                    Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 
+            /*
             ConfigurationDirectory = 
                 ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
                 ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
                 : path + "../../src/main/resources/";
+                */
 
             System.err.format("ConfigurationDirectory: %s\n", ConfigurationDirectory);
 
@@ -81,26 +88,8 @@ public class Databases {
 
 			BufferedReader reader = null;
 
-            try { 
-                // This is the location of the config file on OSU's server.
-                //reader = new BufferedReader(new FileReader(
-			     //		path + "../../src/main/resources/admin/resources/dbInfo.csv"));
-                reader = new BufferedReader(new FileReader(
-					ConfigurationDirectory + "/admin/resources/dbInfo.csv"));
-
-            } catch (java.io.FileNotFoundException e1) {
-                String trillium_dbinfo_path = "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv";
-
-                System.err.println("Load failed from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
-                try { 
-                    // Fixme. hard code location of config file on Trillium's server.
-                    System.err.println("Attempting to load dbInfo.csv from: " + trillium_dbinfo_path);
-                    reader = new BufferedReader(new FileReader(trillium_dbinfo_path));
-                } catch (java.io.FileNotFoundException e2) {
-                    System.err.println("Load failed from: " + trillium_dbinfo_path);
-                }
-
-            }
+            // This is the location of the config file on OSU's server.
+            reader = new BufferedReader(new FileReader(ConfigurationDirectory + "/admin/resources/dbInfo.csv"));
             
             String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();

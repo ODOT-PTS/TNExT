@@ -101,7 +101,7 @@ import com.webapp.api.Queries;
 public class DbUpdate {
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
-	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];
+	private static final String dbURL  = Databases.connectionURLs[Databases.connectionURLs.length-1];
 	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];
 	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];
 //	private static final int DBINDEX = Databases.dbsize-1;
@@ -178,7 +178,8 @@ public class DbUpdate {
 		File inputFile = new File(tmpPath + "dbInfo.csv");*/
 		
 		ClassLoader classLoader = getClass().getClassLoader();
-		File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+		//File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+		File inputFile = new File( Databases.dbInfoCsvPath); // Ed 2017-09-12
 		
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String dbInfo = reader.readLine();
