@@ -62,7 +62,7 @@ public class Databases {
 
             }
             
-            			String[] keys = reader.readLine().trim().split(",");
+            String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
 			String line = reader.readLine();
 			while (line != null && !line.equals("")) {
@@ -127,12 +127,15 @@ public class Databases {
 	
 	public static int dbsize = infoMap.get("databaseIndex").length;
 	public final static int defaultDBIndex = 0;
-	public static String[] spatialConfigPaths = infoMap
-			.get("spatialConfigPaths");
-	public static String[] ConfigPaths = infoMap.get("ConfigPaths");
+	public static String[] spatialConfigPaths = infoMap.get("spatialConfigPaths");
+	public static String[] ConfigPaths        = infoMap.get("ConfigPaths");
 	static{
+        System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
+
 		String connectionPath = path + "../../src/main/resources/";
 		for (int k=0; k<ConfigPaths.length; k++){
+
+            System.err.format("Databases::static{} ConfigPath[%d] is %s\n", k, ConfigPaths[k]); //Ed 2017-09-12 for logging xml use.
 			ConfigPaths[k] = connectionPath + ConfigPaths[k];
 		}	    
 	}		 
