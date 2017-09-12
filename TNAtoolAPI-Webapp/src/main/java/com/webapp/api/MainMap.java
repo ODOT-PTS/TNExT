@@ -40,6 +40,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.model.database.Databases;
+
+
 @WebServlet(urlPatterns = "/TNAtoolAPI-Webapp")
 public class MainMap extends HttpServlet {
 	// GET
@@ -78,9 +81,14 @@ public class MainMap extends HttpServlet {
 	    	  parseConnectionFiles(listOfFiles[i],params,dbNames[i]);
 	      }
 	    }
-	    File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-		File tempFile = new File(classLoader.getResource("admin/resources").getPath()+"/dbInfoTmp.csv");
-	    setDatabaseInfoFile(params,inputFile,tempFile);
+
+	    //File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+	    File inputFile = new File( Databases.dbInfoCsvPath());
+
+		//File tempFile = new File(classLoader.getResource("admin/resources").getPath()+"/dbInfoTmp.csv");
+		File tempFile = new File(Databases.dbInfoCsvPathTempFile());
+
+	    setDatabaseInfoFile(params, inputFile, tempFile);
 	}
 	
 	private void setDatabaseInfoFile(String[] params, File inputFile, File tempFile) throws IOException{

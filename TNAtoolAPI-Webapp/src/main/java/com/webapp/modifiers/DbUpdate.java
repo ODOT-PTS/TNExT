@@ -174,11 +174,6 @@ public class DbUpdate {
     @Path("/readDBinfo")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object readDBinfo() throws IOException{
-		/*String tmpPath = basePath+"../../src/main/webapp/resources/admin/";
-		File inputFile = new File(tmpPath + "dbInfo.csv");*/
-		
-		ClassLoader classLoader = getClass().getClassLoader();
-		//File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
 		File inputFile = new File( Databases.dbInfoCsvPath() ); // Ed 2017-09-12
 		
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
@@ -197,11 +192,7 @@ public class DbUpdate {
     @Path("/getIndex")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getIndex() throws IOException{
-		/*String tmpPath = basePath+"../../src/main/webapp/resources/admin/";
-		File inputFile = new File(tmpPath + "dbInfo.csv");*/
-		
-		ClassLoader classLoader = getClass().getClassLoader();
-		File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+		File inputFile = new File( Databases.dbInfoCsvPath() ); // Ed 2017-09-12
 		
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		int j=0;
@@ -737,6 +728,13 @@ public class DbUpdate {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deleteDB(@QueryParam("index") String i) throws IOException{
 		
+        // FIXME. Change to use Databases.dbInfoCsvPath() 
+        // 
+        // It will be a little tricky to do this properly, not deleting our
+        // config file, without any testing on OSU server.
+        //
+        // Ed 2017-09-12
+
 //		String tmpPath = basePath+"TNAtoolAPI-Webapp/WebContent/admin/";
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		ClassLoader classLoader = getClass().getClassLoader();
@@ -897,6 +895,13 @@ public class DbUpdate {
     public Object updateDB(@QueryParam("db") String db, @QueryParam("oldName") String oldName, @QueryParam("oldcfgSpatial") String oldcfgSpatial, @QueryParam("oldcfgTransit") String oldcfgTransit) throws IOException{
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		ClassLoader classLoader = getClass().getClassLoader();
+
+        // FIXME. Change to use Databases.dbInfoCsvPath()
+        // 
+        // It will be a little tricky to do this properly, not deleting our
+        // config file, without any testing on OSU server.
+        //
+        // Ed 2017-09-12
 		File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
 		File tempFile = new File(path + "admin/resources/tmp.csv");
 		File dstfile = new File(path+"../../src/main/resources/admin/resources/dbInfo.csv");

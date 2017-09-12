@@ -52,6 +52,16 @@ public class Databases {
         return ConfigurationDirectory() + "/admin/resources/dbInfo.csv"; 
     }
 
+    public static String dbInfoCsvPathTempFile() { 
+        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.tmp"; 
+    }
+
+    public static String dbInfoCsvPathBackupFile() { 
+        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.backup"; 
+    }
+
+
+
 	public static HashMap<String, String[]> getDbInfo() {
 
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
