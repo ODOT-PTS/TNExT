@@ -93,6 +93,8 @@ public class Databases {
 	}
 	
 	public static void updateDbInfo(boolean b) {
+        System.err.format("Databases::updateDbInfo() called."); //Ed 2017-09-12 for logging xml use.
+
 		dbsize = infoMap.get("databaseIndex").length;
 		spatialConfigPaths = infoMap.get("spatialConfigPaths");
 		ConfigPaths = infoMap.get("ConfigPaths");
