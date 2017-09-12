@@ -179,7 +179,7 @@ public class DbUpdate {
 		
 		ClassLoader classLoader = getClass().getClassLoader();
 		//File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-		File inputFile = new File( Databases.dbInfoCsvPath); // Ed 2017-09-12
+		File inputFile = new File( Databases.dbInfoCsvPath() ); // Ed 2017-09-12
 		
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String dbInfo = reader.readLine();
