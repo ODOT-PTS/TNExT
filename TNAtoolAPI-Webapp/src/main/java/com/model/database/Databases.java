@@ -49,14 +49,15 @@ public class Databases {
 					path+"../../src/main/resources/admin/resources/dbInfo.csv"));
 
             } catch (java.io.FileNotFoundException e1) {
-                System.err.println("Load failed from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
+                String trillium_dbinfo_path = "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv";
 
+                System.err.println("Load failed from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
                 try { 
                     // Fixme. hard code location of config file on Trillium's server.
-                    reader = new BufferedReader(new FileReader(
-                                "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv"));
+                    System.err.println("Attempting to load dbInfo.csv from: " + trillium_dbinfo_path);
+                    reader = new BufferedReader(new FileReader(trillium_dbinfo_path));
                 } catch (java.io.FileNotFoundException e2) {
-                    System.err.println("Load failed from: " + "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv");
+                    System.err.println("Load failed from: " + trillium_dbinfo_path);
                 }
 
             }
