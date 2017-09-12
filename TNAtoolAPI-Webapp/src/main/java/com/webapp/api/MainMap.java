@@ -55,15 +55,29 @@ public class MainMap extends HttpServlet {
 	}
 	
 	public void setDatabaseParams() throws IOException{		
+        // Ed 2017-09-12
+        //
+        // Note:
+        //
+        // This appears to automatically "rewrite" the dbInfo.csv file and
+        // hibernate xml files based on credentials provided in the
+        // databaseParams.csv file.
+        //
+        // I think it would be simpler and better to set up credentials using
+        // either java properties, or environment variables if the Java JDBC
+        // library provides a way to do that.
+        //
 		ClassLoader classLoader = getClass().getClassLoader();
-		File databaseParamsFile = new File(classLoader.getResource("admin/resources/databaseParams.csv").getFile());
+		//File databaseParamsFile = new File(classLoader.getResource("admin/resources/databaseParams.csv").getFile());
+		File databaseParamsFile = new File(Databases.databaseParamsCsvPath());
 		
 		BufferedReader reader = new BufferedReader(new FileReader(databaseParamsFile));
 		reader.readLine();
 		String[] params = reader.readLine().trim().split(",");
 		reader.close();
 		
-		File connectionFolder = new File(classLoader.getResource("com/model/database/connections/spatial").getFile());
+		//File connectionFolder = new File(classLoader.getResource("com/model/database/connections/spatial").getFile());
+		File connectionFolder = new File(Databases.dbSpatialConnectionFolder());
 		File[] listOfFiles = connectionFolder.listFiles();
 		String[] dbNames = new String[listOfFiles.length];
 	    for (int i = 0; i < listOfFiles.length; i++) {
@@ -72,7 +86,9 @@ public class MainMap extends HttpServlet {
 	    	  parseConnectionFiles(listOfFiles[i],params,dbNames[i]);
 	      }
 	    }
-	    connectionFolder = new File(classLoader.getResource("com/model/database/connections/transit").getFile());
+	    //connectionFolder = new File(classLoader.getResource("com/model/database/connections/transit").getFile());
+		connectionFolder = new File(Databases.dbTransitConnectionFolder());
+
 	    listOfFiles = connectionFolder.listFiles();
 		dbNames = new String[listOfFiles.length];
 	    for (int i = 0; i < listOfFiles.length; i++) {

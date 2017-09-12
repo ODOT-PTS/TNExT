@@ -60,6 +60,20 @@ public class Databases {
         return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.backup"; 
     }
 
+    public static String databaseParamsCsvPath() {
+        return ConfigurationDirectory() + "admin/resources/databaseParams.csv"; 
+    }
+
+    // For use by MainMap.java configuration-file auto-rewrite madness.
+    // Ed 2017-09-12
+    public static String dbSpatialConnectionFolder() { 
+        return ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+    }
+
+    public static String dbTransitConnectionFolder() { 
+        return ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+    }
+
 
 
 	public static HashMap<String, String[]> getDbInfo() {
