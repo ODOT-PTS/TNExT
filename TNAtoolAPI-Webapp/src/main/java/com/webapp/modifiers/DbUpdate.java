@@ -99,8 +99,6 @@ import com.webapp.api.Queries;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-	private final static String basePath = "C:/Users/tnatool/Development/Repository/test/";
-	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.4/bin/";
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
 	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];
