@@ -48,7 +48,9 @@ public class Databases {
             : Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
     }
 
-    public static String dbInfoCsvPath() { return ConfigurationDirectory() + "/admin/resources/dbInfo.csv"; }
+    public static String dbInfoCsvPath() { 
+        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv"; 
+    }
 
 	public static HashMap<String, String[]> getDbInfo() {
 
@@ -69,7 +71,8 @@ public class Databases {
             // It's probably reasonable to add this code instead to the static { } block for this class.
             //
             //
-            System.err.format("ConfigurationDirectory: %s\n", ConfigurationDirectory());
+            System.err.format("ConfigurationDirectory(): %s\n", ConfigurationDirectory());
+            System.err.format("dbInfoCsvPath(): %s\n",          dbInfoCsvPath());
 
             // Ed 2017-09-12 test setting properties from Tomcat configuration.
             System.err.format(
