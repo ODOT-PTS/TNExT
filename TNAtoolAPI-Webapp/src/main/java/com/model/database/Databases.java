@@ -41,8 +41,11 @@ public class Databases {
 
             // Ed 2017-09-12 test setting properties from Tomcat configuration.
             System.err.format(
-                    "Testing property from catlina.properties file, edu.oregonstate.tnatool.TestProperty: %s", 
-                    System.getProperty("edu.oregonstate.tnatool.TestProperty"));
+                    "Testing property from catlina.properties file, edu.oregonstate.tnatool.ConfigurationDirectory: %s\n", 
+                    System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"));
+            System.err.format(
+                    "Testing property from catlina.properties file, edu.oregonstate.tnatool.NoneSuch: %s\n", 
+                    System.getProperty("edu.oregonstate.tnatool.NoneSuch"));
             System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
 
 			BufferedReader reader = null;
