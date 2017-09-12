@@ -63,8 +63,10 @@ public class Databases {
 
             ConfigurationDirectory = 
                 ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
-                ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory")
+                ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
                 : path + "../../src/main/resources/";
+
+            System.err.format("ConfigurationDirectory: %s\n", ConfigurationDirectory);
 
             // Ed 2017-09-12 test setting properties from Tomcat configuration.
             System.err.format(
