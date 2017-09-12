@@ -15,6 +15,7 @@ The following software packages must be installed on a computer to be able to ho
     available at the GitHub repository. Otherwise, the source code can be downloaded 
     directly from GitHub. 
 6.	**Maven Apache Project**. Maven is used to run the TNAST on a Tomcat7 web server.
+7.  **Tomcat Config** The war file should be installed as ROOT.war on the Tomcat7 server, it will be installed to '/' on the server.
             
 # Setting Database Parameters
 Once the source code of the TNAST is downloaded from the GitHub repository and copied onto a local computer disk, the comma separated value (CSV) file named “databaseParams.csv” must be opened. The path to access the file “databaseParams.csv” is shown below. [Project Directory] indicates the location where the source code of the TNAST is saved on the local computer disk.
