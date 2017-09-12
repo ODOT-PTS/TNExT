@@ -295,6 +295,8 @@ public class GtfsHibernateReaderExampleMain {
 
     Configuration config = new Configuration();
 
+    System.err.format("HibernateGtfsFactory::createHibernateGtfsFactory, resource is: %s", resource); // Ed 2017-09-12
+
     if (resource.startsWith(KEY_CLASSPATH)) {
       resource = resource.substring(KEY_CLASSPATH.length());
       config = config.configure(resource);
