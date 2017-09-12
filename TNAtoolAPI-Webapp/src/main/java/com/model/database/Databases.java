@@ -35,16 +35,25 @@ public class Databases {
 
 	// public static String path;
     
-    public static String ConfigurationDirectory = 
-        ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
-        ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
-        : Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
+    public static String ConfigurationDirectory()   {
+        System.err.format(
+                "Loading configuration directory from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
+                +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
+                System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
+                Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 
-    public static String dbInfoCsvPath = ConfigurationDirectory + "/admin/resources/dbInfo.csv";
+        return
+            ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
+            ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
+            : Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
+    }
+
+    public static String dbInfoCsvPath() { return ConfigurationDirectory() + "/admin/resources/dbInfo.csv"; }
 
 	public static HashMap<String, String[]> getDbInfo() {
 
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
+
 		try {
 			//path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
@@ -60,20 +69,7 @@ public class Databases {
             // It's probably reasonable to add this code instead to the static { } block for this class.
             //
             //
-            System.err.format(
-                    "Loading configuration directory from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
-                 +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
-                    System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
-                    Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-
-            /*
-            ConfigurationDirectory = 
-                ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
-                ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
-                : path + "../../src/main/resources/";
-                */
-
-            System.err.format("ConfigurationDirectory: %s\n", ConfigurationDirectory);
+            System.err.format("ConfigurationDirectory: %s\n", ConfigurationDirectory());
 
             // Ed 2017-09-12 test setting properties from Tomcat configuration.
             System.err.format(
@@ -83,13 +79,13 @@ public class Databases {
                     "Testing property from catlina.properties file, edu.oregonstate.tnatool.NoneSuch: %s\n", 
                     System.getProperty("edu.oregonstate.tnatool.NoneSuch"));
 
-            System.err.println("Attempting to load dbInfo.csv from: " + ConfigurationDirectory + "/admin/resources/dbInfo.csv");
+            // System.err.println("Attempting to load dbInfo.csv from: " + ConfigurationDirectory() + "/admin/resources/dbInfo.csv");
+            System.err.println("Attempting to load dbInfo.csv from: " + dbInfoCsvPath() );
             //System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
 
 			BufferedReader reader = null;
 
-            // This is the location of the config file on OSU's server.
-            reader = new BufferedReader(new FileReader(ConfigurationDirectory + "/admin/resources/dbInfo.csv"));
+            reader = new BufferedReader(new FileReader(dbInfoCsvPath()));
             
             String[] keys = reader.readLine().trim().split(",");
 			ArrayList<String[]> elem = new ArrayList<String[]>();
