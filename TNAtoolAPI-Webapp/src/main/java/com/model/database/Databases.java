@@ -32,12 +32,38 @@ import org.apache.commons.collections.iterators.EntrySetMapIterator;
 
 public class Databases {
 	public static HashMap<String, String[]> infoMap = getDbInfo();
+
 	public static String path;
+    
+    public static String ConfigurationDirectory;
+
 	public static HashMap<String, String[]> getDbInfo() {
 
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
 		try {
 			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
+            // Ed 2017-09-12
+            //
+            // FIXME. this is set in getDbInfo(), but other methods may want
+            // access to this configuration directory.
+            //
+            // So this code only works if the users of this class call
+            // getDbInfo() before calling other methods which may use the
+            // configuration directory.
+            //
+            // It's probably reasonable to add this code instead to the static { } block for this class.
+            //
+            //
+            System.err.format(
+                    "Loading configuration direcotry from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
+                 +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
+                    System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
+                    path);
+            ConfigurationDirectory = 
+                ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
+                ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory")
+                : path + "../../src/main/resources/";
 
             // Ed 2017-09-12 test setting properties from Tomcat configuration.
             System.err.format(
@@ -53,7 +79,7 @@ public class Databases {
             try { 
                 // This is the location of the config file on OSU's server.
                 reader = new BufferedReader(new FileReader(
-					path+"../../src/main/resources/admin/resources/dbInfo.csv"));
+					path + "../../src/main/resources/admin/resources/dbInfo.csv"));
 
             } catch (java.io.FileNotFoundException e1) {
                 String trillium_dbinfo_path = "/var/lib/tomcat/webapps/ROOT/WEB-INF/classes/admin/resources/dbInfo.csv";
@@ -106,7 +132,7 @@ public class Databases {
 		spatialConfigPaths = infoMap.get("spatialConfigPaths");
 		ConfigPaths = infoMap.get("ConfigPaths");
 		if(b){
-			String connectionPath = path + "../../src/main/resources/";
+			String connectionPath = ConfigurationDirectory; // path + "../../src/main/resources/"; Ed 2017-09-12
 			for (int k=0; k<ConfigPaths.length; k++){
 				ConfigPaths[k] = connectionPath+ConfigPaths[k];
 			}
@@ -137,9 +163,10 @@ public class Databases {
 	public static String[] spatialConfigPaths = infoMap.get("spatialConfigPaths");
 	public static String[] ConfigPaths        = infoMap.get("ConfigPaths");
 	static{
+
         System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
 
-		String connectionPath = path + "../../src/main/resources/";
+		String connectionPath = ConfigurationDirectory; // path + "../../src/main/resources/"; // Ed 2017-09-12
 
 		for (int k=0; k<ConfigPaths.length; k++){
 			ConfigPaths[k] = connectionPath + ConfigPaths[k];
