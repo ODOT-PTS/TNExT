@@ -39,6 +39,10 @@ public class Databases {
 		try {
 			path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
+            // Ed 2017-09-12 test setting properties from Tomcat configuration.
+            System.err.format(
+                    "Testing property from catlina.properties file, edu.oregonstate.tnatool.TestProperty: %s", 
+                    System.getProperty("edu.oregonstate.tnatool.TestProperty"));
             System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
 
 			BufferedReader reader = null;
@@ -133,10 +137,11 @@ public class Databases {
         System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
 
 		String connectionPath = path + "../../src/main/resources/";
-		for (int k=0; k<ConfigPaths.length; k++){
+		String connectionPath = path + "../../src/main/resources/";
 
-            System.err.format("Databases::static{} ConfigPath[%d] is %s\n", k, ConfigPaths[k]); //Ed 2017-09-12 for logging xml use.
+		for (int k=0; k<ConfigPaths.length; k++){
 			ConfigPaths[k] = connectionPath + ConfigPaths[k];
+            System.err.format("Databases::static{} ConfigPath[%d] is %s\n", k, ConfigPaths[k]); //Ed 2017-09-12 for logging xml use.
 		}	    
 	}		 
 	public static String[] dbnames = infoMap.get("dbnames");
