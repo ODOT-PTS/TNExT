@@ -137,7 +137,6 @@ public class Databases {
         System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
 
 		String connectionPath = path + "../../src/main/resources/";
-		String connectionPath = path + "../../src/main/resources/";
 
 		for (int k=0; k<ConfigPaths.length; k++){
 			ConfigPaths[k] = connectionPath + ConfigPaths[k];
