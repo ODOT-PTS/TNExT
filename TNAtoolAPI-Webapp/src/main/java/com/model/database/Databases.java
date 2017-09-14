@@ -80,8 +80,6 @@ public class Databases {
         return path;
     }
 
-
-
 	public static HashMap<String, String[]> getDbInfo() {
 
 		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
