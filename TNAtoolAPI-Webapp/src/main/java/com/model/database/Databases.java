@@ -49,7 +49,9 @@ public class Databases {
     }
 
     public static String dbInfoCsvPath() { 
-        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv"; 
+        String path = ConfigurationDirectory() + "/admin/resources/dbInfo.csv";
+        System.err.format( "dbInfoCsvPath called, path is: %s \n", path);
+        return path;
     }
 
     public static String dbInfoCsvPathTempFile() { 
@@ -67,11 +69,15 @@ public class Databases {
     // For use by MainMap.java configuration-file auto-rewrite madness.
     // Ed 2017-09-12
     public static String dbSpatialConnectionFolder() { 
-        return ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+        String path = ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+        System.err.format( "dbSpatialConnectionFolder called, path is: %s \n", path);
+        return path;
     }
 
     public static String dbTransitConnectionFolder() { 
-        return ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+        String path = ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+        System.err.format( "dbTransitConnectionFolder called, path is: %s \n", path);
+        return path;
     }
 
 
