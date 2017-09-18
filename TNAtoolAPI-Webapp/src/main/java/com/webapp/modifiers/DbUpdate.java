@@ -2348,9 +2348,9 @@ public class DbUpdate {
     @Path("/deleteUploadedGTFS")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object deleteUploadedGTFS() throws IOException{
-		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		
-		File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
+		//String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		//File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
+        File gtfsFolder = Databases.ConfigurationDirectory() + "/admin/uploads/gtfs";
 		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
 	    if(files!=null) { 
