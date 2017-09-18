@@ -2533,12 +2533,15 @@ public class DbUpdate {
 		args[2] = "--username=\""+dbInfo[5]+"\"";
 		args[3] = "--password=\""+dbInfo[6]+"\"";
 		
-		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		//String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		//File source = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs/"+feedname);
 		File source = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs/" + feedname );
 		//String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
-        String feed = Databases.ConfigurationDirectory() + "/admin/processFiles/gtfs/" + feedname;
+        // Include dbInfo[0] which is the index number -- this way we save an archive of each file as it's used.
+        String feed = Databases.ConfigurationDirectory() + "/admin/processFiles/gtfs/" + dbInfo[0] + "/"  + feedname;
+
 		File target = new File(feed);
+        target.mkdirs(); // FIXME, catch any error here and log. Ed 2017-09-18
 //		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
     	Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -2648,7 +2651,10 @@ public class DbUpdate {
 			if (rs != null) try { rs.close(); } catch (SQLException e) {}
 			if (statement != null) try { statement.close(); } catch (SQLException e) {}
 			if (c != null) try { c.close(); } catch (SQLException e) {}
-			target.delete();
+
+            // For Issue #6, do not delete the file, so we can keep it for reference!
+            // https://github.com/pouyalireza/TNAST_MAVEN/issues/6/
+			// target.delete();
 		}
 		
 //		System.out.println("done");
