@@ -75,7 +75,7 @@ public class Databases {
     }
 
     public static String dbTransitConnectionFolder() { 
-        String path = ConfigurationDirectory() + "com/model/database/connections/spatial"; 
+        String path = ConfigurationDirectory() + "com/model/database/connections/transit"; 
         System.err.format( "dbTransitConnectionFolder called, path is: %s \n", path);
         return path;
     }
@@ -100,19 +100,8 @@ public class Databases {
             //
             //
             System.err.format("ConfigurationDirectory(): %s\n", ConfigurationDirectory());
-            System.err.format("dbInfoCsvPath(): %s\n",          dbInfoCsvPath());
 
-            // Ed 2017-09-12 test setting properties from Tomcat configuration.
-            System.err.format(
-                    "Testing property from catlina.properties file, edu.oregonstate.tnatool.ConfigurationDirectory: %s\n", 
-                    System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"));
-            System.err.format(
-                    "Testing property from catlina.properties file, edu.oregonstate.tnatool.NoneSuch: %s\n", 
-                    System.getProperty("edu.oregonstate.tnatool.NoneSuch"));
-
-            // System.err.println("Attempting to load dbInfo.csv from: " + ConfigurationDirectory() + "/admin/resources/dbInfo.csv");
             System.err.println("Attempting to load dbInfo.csv from: " + dbInfoCsvPath() );
-            //System.err.println("Attempting to load dbInfo.csv from: " + path + "../../src/main/resources/admin/resources/dbInfo.csv");
 
 			BufferedReader reader = null;
 
@@ -143,8 +132,8 @@ public class Databases {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("The database size is : "
-				+ String.valueOf(infoMap.get("databaseIndex").length));
+		System.out.println("The number of databases in dbInfo.csv is is: " 
+                + String.valueOf(infoMap.get("databaseIndex").length));
 		return infoMap;
 	}
 	
@@ -155,7 +144,7 @@ public class Databases {
 		spatialConfigPaths = infoMap.get("spatialConfigPaths");
 		ConfigPaths = infoMap.get("ConfigPaths");
 		if(b){
-			String connectionPath = ConfigurationDirectory() ; // path + "../../src/main/resources/"; Ed 2017-09-12
+			String connectionPath = ConfigurationDirectory(); // path + "../../src/main/resources/"; Ed 2017-09-12
 			for (int k=0; k<ConfigPaths.length; k++){
 				ConfigPaths[k] = connectionPath+ConfigPaths[k];
 			}
@@ -186,7 +175,6 @@ public class Databases {
 	public static String[] spatialConfigPaths = infoMap.get("spatialConfigPaths");
 	public static String[] ConfigPaths        = infoMap.get("ConfigPaths");
 	static{
-
         System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
 
 		String connectionPath = ConfigurationDirectory(); // path + "../../src/main/resources/"; // Ed 2017-09-12

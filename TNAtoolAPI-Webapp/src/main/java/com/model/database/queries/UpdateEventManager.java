@@ -687,6 +687,9 @@ public class UpdateEventManager {
 	 * @param dbInfo
 	 */
 	public static void addFunction(Connection connection, String[] dbInfo){
+        // Ed 2017-09-18
+        // FIXME: we want this to evaluate to:
+        // /var/lib/tomcat/webapps-development/ROOT/resources/admin/ + resources/Functions.sql
 		String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		path = path+"../../src/main/resources/admin/resources/Functions.sql";
 		path = path.substring(1, path.length());

@@ -42,14 +42,16 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.webapp.api.MainMap;
 
+import com.model.database.Databases;
+
 @WebServlet(urlPatterns = "/TNAtoolAPI-Webapp/admin")
 public class Admin extends HttpServlet {
 	// GET
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("/resources/admin/adminTool.html").forward(
-				request, response);
+        request.getRequestDispatcher("/resources/admin/adminTool.html").forward(
+                request, response);
 
 	}
 
@@ -80,9 +82,8 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/gtfs");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
@@ -108,9 +109,10 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/pnr");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/pnr");
+			                //File loc = new File(path
+                            //			+ "../../src/main/webapp/resources/admin/uploads/pnr");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
@@ -132,9 +134,10 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/t6");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/t6");
+			                //File loc = new File(path
+			        	//			+ "../../src/main/webapp/resources/admin/uploads/t6");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
@@ -156,9 +159,10 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/emp");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/emp");
+			                //File loc = new File(path
+			        	////			+ "../../src/main/webapp/resources/admin/uploads/emp");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
@@ -180,9 +184,10 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/femp");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/femp");
+			                //File loc = new File(path
+			        		//		+ "../../src/main/webapp/resources/admin/uploads/femp");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
@@ -204,9 +209,11 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/fpop");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                //File loc = new File(path
+			        	//			+ "../../src/main/webapp/resources/admin/uploads/fpop");
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/fpop");
+
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
@@ -228,9 +235,10 @@ public class Admin extends HttpServlet {
 		        	for(FileItem item: items){
 			            if (!item.isFormField()) {
 			                String fileName = item.getName();
-			                String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			                File loc = new File(path
-			        				+ "../../src/main/webapp/resources/admin/uploads/region");
+			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			                //File loc = new File(path
+			        	//			+ "../../src/main/webapp/resources/admin/uploads/region");
+			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/region");
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
