@@ -2534,8 +2534,10 @@ public class DbUpdate {
 		args[3] = "--password=\""+dbInfo[6]+"\"";
 		
 		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		File source = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs/"+feedname);
-		String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
+		//File source = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs/"+feedname);
+		File source = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs/" + feedname );
+		//String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
+        String feed = Databases.ConfigurationDirectory() + "/admin/processFiles/gtfs/" + feedname;
 		File target = new File(feed);
 //		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
