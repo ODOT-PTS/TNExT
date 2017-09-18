@@ -84,6 +84,7 @@ public class Admin extends HttpServlet {
 			                String fileName = item.getName();
 			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			                File loc = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs");
+                            System.err.println("Uploading gtfs to " + loc);
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }
