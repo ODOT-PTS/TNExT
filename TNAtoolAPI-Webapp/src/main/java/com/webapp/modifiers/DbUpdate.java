@@ -2350,7 +2350,7 @@ public class DbUpdate {
     public Object deleteUploadedGTFS() throws IOException{
 		//String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		//File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
-        File gtfsFolder = Databases.ConfigurationDirectory() + "/admin/uploads/gtfs";
+        File gtfsFolder = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs" );
 		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
 	    if(files!=null) { 
