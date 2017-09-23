@@ -66,42 +66,9 @@
 	
 	  ga('create', 'UA-64807119-1', 'auto');
 	  ga('send', 'pageview');
-	var feeds;
-	var feed;
-
-	  $.ajax({
-	    	type: 'GET',
-			datatype: 'json',
-			url : '/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex,
-			async: false,
-			
-	    	success: function(item){
-	    		console.log(item)
-	    		$.each(item, function(i,item){
-				 feeds=feeds+item.feedname+",";
-				
-	    	    });
-	    		 feed = feeds.substring(0, feeds.length - 1);
-	  
-	    	}			
+	
 	   
-	    });
-	 alert(feed);
-	    $.ajax({
-	    	type: 'GET',
-			datatype: 'json',
-			url : '/TNAtoolAPI-Webapp/queries/transit/feedselect?&feeds='+feed,
-			async: false,
-			
-	    	success: function(item){
-	    		console.log(item)
-	    		
-	    		
-	    
-	    
-	    	}			
 	   
-	    });
 	  </script>
 	 
 </head>
