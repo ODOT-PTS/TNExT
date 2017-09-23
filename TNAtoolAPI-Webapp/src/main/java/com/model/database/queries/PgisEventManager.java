@@ -5091,17 +5091,17 @@ public class PgisEventManager {
 			if (i+1<date.length)
 				mainquery+=" union all ";
 		}
-		mainquery +="), trips as (select agencyid as aid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)), "
+		mainquery +="), trips as (select agencyid as aid, id as tripid,count(id) as servicecount from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id )group by id,aid), "
 				+"triptimes as (SELECT times.trip_agencyid, times.trip_id, FLOOR(MIN(arrivaltime)/3600) AS arrival_hour, FLOOR(MIN(arrivaltime)%3600/60) AS arrival_minute, FLOOR((MIN(arrivaltime)%3600%60)/60) AS arrival_second, "
-	 			+" 	FLOOR(MAX(departuretime)/3600) AS departure_hour, FLOOR(MAX(departuretime)%3600/60) AS departure_minute, FLOOR((MAX(departuretime)%3600%60)/60) AS departure_second"
+	 			+" 	FLOOR(MAX(departuretime)/3600) AS departure_hour, FLOOR(MAX(departuretime)%3600/60) AS departure_minute, FLOOR((MAX(departuretime)%3600%60)/60) AS departure_second,servicecount"
 	 		    +"	FROM trips INNER JOIN gtfs_stop_times AS times "
 	 			+"ON trips.tripid = times.trip_id "
 				+"WHERE times.arrivaltime > 0 "
-	 			+"GROUP BY times.trip_agencyid, times.trip_id),"
-	 			+"trips1 as ( select trip_agencyid as aid ,trip_id as tripid,(arrival_hour*100+arrival_minute),arrival_hour,arrival_minute from triptimes where (arrival_hour*100+arrival_minute) between "+stime+" and "+etime+" ),"	
-				+ "stopservices0 as (select stime.stop_agencyid as aid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips1.aid),0) as service "
+	 			+"GROUP BY times.trip_agencyid, times.trip_id,servicecount),"
+	 			+"trips1 as ( select trip_agencyid as aid ,trip_id as tripid,(arrival_hour*100+arrival_minute),arrival_hour,arrival_minute,servicecount from triptimes where (arrival_hour*100+arrival_minute) between "+stime+" and "+etime+" ),"	
+				+ "stopservices0 as (select stime.stop_agencyid as aid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips1.aid)*servicecount,0) as service "
 				+ "		from gtfs_stop_times stime JOIN trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid "
-				+ "		group by stime.stop_agencyid, stime.stop_id), "
+				+ "		group by stime.stop_agencyid, stime.stop_id,servicecount), "
 				+ "stopservices1 as (select stop_agencyid as aid, stop_agencyid||stop_id as stopid, 0 as service "
 				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices0) "
 				+ "		group by stop_agencyid, stop_id), "
@@ -6561,7 +6561,39 @@ public class PgisEventManager {
 			}
 			return r;	
 		}
-	
+		public static Map<String,Agencyselect> Agencyget( int dbindex) 
+				throws FactoryException, TransformException	{
+			Connection  connection = makeConnection(dbindex);
+			String query="";
+			Statement stmt = null;
+		
+		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
+			query ="select id,name,defaultid from gtfs_agencies";
+		
+			try {
+		        stmt = connection.createStatement();
+		        ResultSet rs = stmt.executeQuery(query); 
+		     
+		        
+		        while ( rs.next() ) {
+		        	Agencyselect a=new Agencyselect();
+		        	a.AgencyId=rs.getString("id");
+		        	a.Agencyname=rs.getString("name");
+		        	a.DefaultId=rs.getString("defaultid");
+		        	  r.put(a.Agencyname, a);     
+		        }
+				 rs.close();
+				 stmt.close(); 
+				 dropConnection(connection);
+	 
+		
+			
+			}
+			 catch ( Exception e ) {
+				 e.printStackTrace();
+			}
+			return r;	
+		}
 
 
 }

@@ -1331,7 +1331,10 @@ $mylist
 	        .appendTo(div2);
 		    div2.append(menucontent);
 		    div2.appendTo(titlebar);
-		    
+		  
+		    $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="openfeeds" type="button">FS</button></div>');
+
+ 
 		    // "Date Picker" button on the "Oregon Transit Agencies" dialog box
 		    var div3 = $("<div/>");	
 		    div3.addClass("ui-dialog-titlebar-other");		    
@@ -1345,6 +1348,88 @@ $mylist
 	        .appendTo(div3);
 		    div3.append('<div id="datepicker"><br></div>');
 		    div3.appendTo(titlebar);		    
+		    
+		    // select agencies button
+		    
+		    var div4 = $("<div>");			    
+		    var button4 = $( "<button/>" ).text( "Select GTFS Feeds" );	       
+	 
+		   // var feedmenucontent='<ul id="tree" class="dropdown-menu" role="menu" aria-labelledby="drop4">';
+		    var feedmenucontent='<div><table><th id="tree" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable" role="dialog" aria-describedby="flexRepDialog" aria-labelledby="ui-id-11">';
+
+		    $.ajax({
+		    	type: 'GET',
+				datatype: 'json',
+				url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex,
+				async: false,
+				
+		    	success: function(item){
+		    		console.log(item)
+		    		var na=0;
+		    		$.each(item, function(i,item){
+						if(item.feedname!='Overlap')
+							{
+		    	    	feedmenucontent+= '<tr><input type="checkbox"  name="feed" value='+item.AgencyId+'>'+item.Agencyname+'<br></tr>' ;
+							}
+		    	na[item.AgencyId]=item.Agencyname;
+		    		});
+		    		
+		    	 feedmenucontent+='<tr><br></tr><tr><textarea disabled id="chosenfeeds" rows="50" cols="100"></textarea></tr></th></table></div>';
+		    
+		    	}			
+		   
+		    });
+		   
+		      
+		    div4.append(feedmenucontent)
+		$("#dialogfeeds").append(feedmenucontent);
+		    
+		    $(function() {
+		       
+		    	$( "#dialogfeeds" ).dialog({
+		          autoOpen: false,
+		          resizable: true,
+		          maxHeight: 1000,
+		          maxWidth: 4000,
+		          buttons: {
+		              "Submit": function() {
+		            	  var allVals = [];
+		   		       var feeds= $("input[name=feed]:checked").map(
+		   		            		     function () {return this.value;}).get().join(",");   
+		   		    
+		   		         document.getElementById("chosenfeeds").value= feeds;
+		   		         console.log(allVals)
+		   		      $.ajax({
+					    	type: 'GET',
+							datatype: 'json',
+							url : '/TNAtoolAPI-Webapp/queries/transit/feedselect?&feeds='+feeds,
+							async: false,
+							
+					    	success: function(item){
+					    		console.log(item)
+					    		
+					    		
+					    
+					    
+					    	}			
+					   
+					    });
+		   		         
+		              },
+		    	"Close": function() {
+                    $(this).dialog("close");
+		          } 
+		          }
+		        });
+		    	$( "#dialogfeeds" ).dialog( "option", "title", "Select Agencies" );
+
+		        $( "#openfeeds" ).click(function() {
+		          $( "#dialogfeeds" ).dialog( "open" );
+		        });
+		     
+		         
+		   
+		    });
 		    
 		    // "Reports" button on the "Oregon Transit Agencies" dialog box
 		    document.getElementById('DB'+dbindex).innerHTML = '&#9989 '+document.getElementById('DB'+dbindex).innerHTML;

@@ -809,7 +809,7 @@ public class Queries {
 			@QueryParam("username") String username
 			) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
-			dbindex = default_dbindex;
+			dbindex = 1;
 		}
 		String[] fulldates = null;
 		String[] days = null;
@@ -4868,4 +4868,16 @@ public class Queries {
 		return PgisEventManager.daterange(dbindex);
 
 	}		
+	@GET
+	@Path("/Agencyget")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getAgency(@QueryParam("dbindex") Integer dbindex)
+			throws SQLException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
+		
+		return PgisEventManager.Agencyget(dbindex);
+
+	}		
+	
 }

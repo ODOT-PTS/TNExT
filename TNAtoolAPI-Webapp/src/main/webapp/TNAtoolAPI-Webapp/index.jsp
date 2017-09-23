@@ -37,7 +37,9 @@
 	<script type="text/javascript" src="resources/js/ShapefileGenerator.js"></script>
 	<script type="text/javascript" src="resources/js/FlexibleReporting.js"></script>
 	<script type="text/javascript" src="resources/js/Datadump.js"></script>
-	
+	 
+ 
+        <script type="text/javascript" src="js/bootstrap-multiselect/bootstrap-multiselect.js"></script>
 	<link rel="stylesheet" type="text/css" href="resources/css/client.css" />	
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.multidatespicker.css">
@@ -64,13 +66,56 @@
 	
 	  ga('create', 'UA-64807119-1', 'auto');
 	  ga('send', 'pageview');
-	</script>
+	var feeds;
+	var feed;
+
+	  $.ajax({
+	    	type: 'GET',
+			datatype: 'json',
+			url : '/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex,
+			async: false,
+			
+	    	success: function(item){
+	    		console.log(item)
+	    		$.each(item, function(i,item){
+				 feeds=feeds+item.feedname+",";
+				
+	    	    });
+	    		 feed = feeds.substring(0, feeds.length - 1);
+	  
+	    	}			
+	   
+	    });
+	 alert(feed);
+	    $.ajax({
+	    	type: 'GET',
+			datatype: 'json',
+			url : '/TNAtoolAPI-Webapp/queries/transit/feedselect?&feeds='+feed,
+			async: false,
+			
+	    	success: function(item){
+	    		console.log(item)
+	    		
+	    		
+	    
+	    
+	    	}			
+	   
+	    });
+	  </script>
+	 
 </head>
 <body style="display:none">
+	
 	<div id="overlay"></div>
 	<div id='list' class='list'>
 	</div>
-	
+<div id="dialogfeeds">
+    
+    </div>
+
+		 
+
 	<div id="connectedAgencies-form" title="On-Map Connected Agencies Report" style="text-size=50%">
 		<p style="font-size:80%"> Maximum Spatial Gap (miles) <input type="number" name="Sradius" id="Sradius" class="utbox" required min="0.1" value='0.1' step="0.1" onkeypress='return isNumber(event)'/>
 				    	<input id="submit" type="button" onclick="reloadConnectedAgenciesDialog(document.getElementById('Sradius').value)" title="Click submit to refresh the report"  value="Submit" class="button" /></p>		    			    	    	
@@ -78,7 +123,7 @@
 		<p id="displayConAgenciesTable"></p>
 		<img id="dialogPreLoader2" src="../resources/images/287.GIF" alt="Page Loading" width="85" height="85" style="margin:100px" >
 	</div>
-	
+		
 	<div id="dialog-form" title="On-Map Report">
 		<div style="width:100%; display:flex">
 			<div style="width:50%;margin-bottom: 13%;margin-top: 5.5%;">
@@ -98,7 +143,6 @@
 				</div>
 			</div>
 		</div>
-	  
 	  <div id="tabs">
 		  <ul>
 		    <li><a href="#transit">Transit Agencies</a></li>
@@ -340,7 +384,10 @@
     </div>
     <div id="dialogResults" title="Report Results">
 	</div>
-    <div id="map"> </div>
+    <div id="map">
+    
+     </div>
+    
     <div id="con-graph-dialog" title="Transit Connectivity Graph" style="min-height:350px"></div>
     <div id="flexRepDialog" title="Flexible Reporting Wizard" style="min-height:350px;">
     	<div id="FlexRepContainer">
@@ -361,5 +408,6 @@
     	<div style="clear:both;text-align:center;"><input type='submit' id='flexRepSubmit' value='Submit' onclick='openFlexRepTable()'></div>
     </div>
    	<script type="text/javascript" src="resources/js/client.js"></script>
+
 </body>
 </html>
