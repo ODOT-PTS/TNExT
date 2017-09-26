@@ -77,7 +77,7 @@
 	<div id="overlay"></div>
 	<div id='list' class='list'>
 	</div>
-<div id="dialogfeeds">
+<div id="dialogfeeds" class="d">
     
     </div>
 

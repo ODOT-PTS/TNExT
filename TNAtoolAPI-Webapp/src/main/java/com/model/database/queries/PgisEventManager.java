@@ -5102,10 +5102,11 @@ public class PgisEventManager {
 				+ "stopservices0 as (select stime.stop_agencyid as aid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips1.aid)*servicecount,0) as service "
 				+ "		from gtfs_stop_times stime JOIN trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid "
 				+ "		group by stime.stop_agencyid, stime.stop_id,servicecount), "
+				+"stopservices01 as (select aid,stopid, sum(service)as service from stopservices0 group by stopid,aid),"
 				+ "stopservices1 as (select stop_agencyid as aid, stop_agencyid||stop_id as stopid, 0 as service "
-				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices0) "
+				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices01) "
 				+ "		group by stop_agencyid, stop_id), "
-				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
+				+ "stopservices as (select * from stopservices01 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
 		System.out.print(mainquery);	
 		try{

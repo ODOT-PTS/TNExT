@@ -212,7 +212,7 @@ public class Queries {
 		}
  	   return results;	   
     }
-    
+   
     /**
 	 * Generates the shapefile of routes/stops, compresses the 
 	 * files into a zipfile on server and return the zipfile's path.
@@ -4879,5 +4879,21 @@ public class Queries {
 		return PgisEventManager.Agencyget(dbindex);
 
 	}		
-	
+	 //Sets a global variable with string of feeds selected
+    @SuppressWarnings("null")
+	@Path("/feedselect")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public static Object getfeeds(@QueryParam("feeds") String feeds)
+			throws SQLException, NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
+	Feed name = new Feed();
+	name.a=feeds;
+	String[] feedcount=name.a.split(",");
+	System.out.println(name.a);
+	name.Len=0;
+	name.Len=feedcount.length;
+	return name.Len;
+
+	}	
 }

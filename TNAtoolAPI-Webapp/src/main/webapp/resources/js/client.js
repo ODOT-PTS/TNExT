@@ -1374,7 +1374,7 @@ $mylist
 		    	na[item.AgencyId]=item.Agencyname;
 		    		});
 		    		
-		    	 feedmenucontent+='<tr><br></tr><tr><textarea disabled id="chosenfeeds" rows="50" cols="100"></textarea></tr></th></table></div>';
+		    	 feedmenucontent+='<tr><br></tr></th></table></div>';
 		    
 		    	}			
 		   
@@ -1389,7 +1389,7 @@ $mylist
 		    	$( "#dialogfeeds" ).dialog({
 		          autoOpen: false,
 		          resizable: true,
-		          maxHeight: 1000,
+		          maxHeight: 500,
 		          maxWidth: 4000,
 		          buttons: {
 		              "Submit": function() {
@@ -1397,8 +1397,8 @@ $mylist
 		   		       var feeds= $("input[name=feed]:checked").map(
 		   		            		     function () {return this.value;}).get().join(",");   
 		   		    
-		   		         document.getElementById("chosenfeeds").value= feeds;
 		   		         console.log(allVals)
+		   		       
 		   		      $.ajax({
 					    	type: 'GET',
 							datatype: 'json',
@@ -1406,7 +1406,7 @@ $mylist
 							async: false,
 							
 					    	success: function(item){
-					    		console.log(item)
+					    		alert("selected feeds:"+feeds+"Count"+item)
 					    		
 					    		
 					    
@@ -1427,7 +1427,7 @@ $mylist
 		          $( "#dialogfeeds" ).dialog( "open" );
 		        });
 		     
-		         
+		        
 		   
 		    });
 		    
