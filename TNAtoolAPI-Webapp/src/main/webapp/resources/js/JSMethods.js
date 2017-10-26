@@ -91,7 +91,8 @@ function loadDBList() {
 }
 
 /**
- * initializes the progress bar and checks for progress every 100ms
+ * initializes the progress bar and checks for progress every 5000ms
+ * Ed 2017-10-26: changed from 100ms to 5000ms 
  */
 function progressBar() {
 	var progressLabel = $(".progress-label");
@@ -118,7 +119,7 @@ function progressBar() {
 				progVal = parseInt(item.progVal);
 				if (progVal == 0) {
 					if(prog){
-						progVal=100;
+						progVal=5000;
 						clearTimeout(timeVar);
 					}else{
 						progVal=false;
@@ -129,11 +130,11 @@ function progressBar() {
 				$("#progressbar").progressbar("value", progVal);
 			}
 		});
-		if (progVal == 100) {
+		if (progVal == 5000) {
 			clearTimeout(timeVar);
 		}
 	}
-	timeVar = setInterval(progress, 100);
+	timeVar = setInterval(progress, 5000);
 }
 
 function pad(s) {
