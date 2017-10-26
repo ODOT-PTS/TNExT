@@ -541,7 +541,7 @@ function go(key){
 	  	}
 	} 
 	
-	timeVar = setInterval(progress, 100);
+	timeVar = setInterval(progress, 5000);
 	
 	//check if the selected dates are within the agency's start and end date.
 	/*var startDateUnion="";
@@ -673,7 +673,7 @@ function gos(key){
 	  	}
 	} 
 	
-	timeVar = setInterval(progress, 100);
+	timeVar = setInterval(progress, 5000);
 
 	//check if the selected dates are within the agency's start and end date.
 	/*if (typeof w_qstring == 'undefined') {
