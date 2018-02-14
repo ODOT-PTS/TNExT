@@ -113,7 +113,23 @@ public class PgisEventManager {
 	      }
 		return response;
 	}
-	
+
+	public static Connection makeConnectionByUrl(String url, String user, String pass) throws SQLException {
+		Connection response = null;
+		try {
+			Class.forName("org.postgresql.Driver");
+    } catch (ClassNotFoundException e) {
+      System.err.println("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver");
+    }
+		try {
+			response = DriverManager.getConnection(url, user, pass);
+		} catch ( SQLException e ) {
+			e.printStackTrace();
+			throw e;
+		}
+		return response;
+	}
+
 	/**
 	 * Drops the connection
 	 * @param connection
