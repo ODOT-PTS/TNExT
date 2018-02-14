@@ -89,6 +89,7 @@ import com.model.database.PDBerror;
 import com.model.database.UserInfo;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
+import com.model.database.queries.PgisEventManager;
 import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.DatabaseStatus;
 import com.model.database.queries.util.Hutil;
@@ -712,7 +713,7 @@ public class DbUpdate {
 
 		Connection c = null;
 		try {
-			c = DriverManager.getConnection(cURL, user, pass);
+			c = PgisEventManager.makeConnectionByUrl(cURL, user, pass);
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			b.DBError = e.getMessage();
