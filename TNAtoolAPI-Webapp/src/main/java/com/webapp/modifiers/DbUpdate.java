@@ -228,7 +228,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET activated = true;");
     } catch (SQLException e) {
@@ -268,7 +268,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET " + fieldName + " = " + b + ";");
     } catch (SQLException e) {
@@ -301,7 +301,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET activated = false;");
     } catch (SQLException e) {
@@ -981,7 +981,7 @@ public class DbUpdate {
     ResultSet rs = null;
     String[] dbInfo = db.split(",");
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT activated FROM database_status");
       rs.next();
@@ -1022,7 +1022,7 @@ public class DbUpdate {
     ResultSet rs = null;
     String[] dbInfo = db.split(",");
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM database_status");
       rs.next();
@@ -1195,7 +1195,7 @@ public class DbUpdate {
       statement.close();
       c.close();
 
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("CREATE EXTENSION postgis;");
       statement.executeUpdate("DROP TABLE IF EXISTS database_status;");
@@ -1360,7 +1360,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_feed_info limit 1;");
 
@@ -1402,7 +1402,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where updated=FALSE limit 1;");
 
@@ -1445,7 +1445,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror response = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery(
           "SELECT distinct(Left(blockid,2)) stateid from title_vi_blocks_float WHERE with_disability IS NOT NULL order by stateid;");
@@ -1499,7 +1499,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror response = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(Left(countyid,2)) stateid FROM parknride order by stateid;");
 
@@ -1550,7 +1550,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM parknride WHERE left(countyid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
@@ -1583,7 +1583,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM title_vi_blocks_float WHERE left(blockid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
@@ -1617,7 +1617,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       //			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
       statement.executeUpdate("DELETE FROM lodes_blocks_wac WHERE left(blockid,2)='" + stateid + "';");
@@ -1652,7 +1652,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       //			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
       statement.executeUpdate("DELETE FROM lodes_blocks_rac WHERE left(blockid,2)='" + stateid + "';");
@@ -1688,7 +1688,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM lodes_rac_projection_block WHERE left(blockid,2)='" + stateid + "';");
       statement.executeUpdate("DELETE FROM lodes_rac_projection_county WHERE left(countyid,2)='" + stateid + "';");
@@ -1723,7 +1723,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE census_blocks SET "
           + "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
@@ -1777,7 +1777,7 @@ public class DbUpdate {
     Statement statement = null;
     PDBerror response = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_blocks_wac order by stateid;");
       while (rs.next()) {
@@ -1848,7 +1848,7 @@ public class DbUpdate {
     Statement statement = null;
     PDBerror response = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement
           .executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_rac_projection_block order by stateid;");
@@ -1916,7 +1916,7 @@ public class DbUpdate {
     Integer value;
     PDBerror response = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
 
       //			rs = statement.executeQuery("SELECT population2040 FROM census_blocks where population2040 is null limit 1;");
@@ -2002,7 +2002,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror response = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
 
       rs = statement
@@ -2065,7 +2065,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
 
       rs = statement.executeQuery("SELECT * FROM census_blocks limit 1;");
@@ -2152,7 +2152,7 @@ public class DbUpdate {
     ResultSet rs = null;
     ArrayList<String> stateids = new ArrayList<String>();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT DISTINCT(stateid) states FROM census_states;");
       while (rs.next()) {
@@ -2179,7 +2179,7 @@ public class DbUpdate {
     }
     dbInfo = dbTo.split(",");
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       switch (section) {
       case "census":
@@ -2304,7 +2304,7 @@ public class DbUpdate {
     }
 
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
@@ -2347,7 +2347,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM census_states WHERE stateid = '" + stateid + "';");
@@ -2417,7 +2417,7 @@ public class DbUpdate {
     dbInfo[4] += dbURL[dbURL.length - 1];
     StateInits st = new StateInits();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       statement.executeUpdate("TRUNCATE TABLE census_states;");
@@ -2468,7 +2468,7 @@ public class DbUpdate {
 
     dbInfo = db.split(",");
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       statement.executeUpdate("DROP TABLE IF EXISTS census_states;");
@@ -2550,7 +2550,7 @@ public class DbUpdate {
     }
 
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       statement.executeUpdate("VACUUM;");
@@ -2691,7 +2691,7 @@ public class DbUpdate {
         { "gtfs_feed_info", "defaultid" } };
 
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
 
@@ -2942,7 +2942,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
 
@@ -3047,7 +3047,7 @@ public class DbUpdate {
     String agencyIds = "";
 
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
@@ -3153,7 +3153,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     //		ResultSet rs = null;
-    c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+    c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
     try {
       statement = c.createStatement();
       statement.executeUpdate("CREATE TABLE IF NOT EXISTS parknride(" + "pnrid integer NOT NULL, "
@@ -3704,7 +3704,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "title6");
       statement.executeUpdate("VACUUM");
@@ -3899,7 +3899,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "employment");
       statement.executeUpdate("VACUUM");
@@ -4052,7 +4052,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "future_emp");
       statement.executeUpdate("VACUUM");
@@ -4318,7 +4318,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "future_pop");
       statement.executeUpdate("VACUUM");
@@ -4440,7 +4440,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "region");
       statement.executeUpdate("VACUUM");
@@ -4506,7 +4506,7 @@ public class DbUpdate {
     Statement statement = null;
     String message = "done";
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
 
       System.out.println(agency);
@@ -4550,7 +4550,7 @@ public class DbUpdate {
     PDBerror lists = new PDBerror();
 
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       rs = statement.executeQuery(
           "SELECT gfi.defaultid agency, guf.feedname feed, guf.feedsize size FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
@@ -4668,7 +4668,7 @@ public class DbUpdate {
         { "gtfs_stops", "agencyid" }, { "gtfs_routes", "defaultid" }, { "gtfs_agencies", "defaultid" },
         { "gtfs_feed_info", "defaultid" } };
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
 
       for (int i = 0; i < defAgencyIds.length; i++) {
@@ -4711,7 +4711,7 @@ public class DbUpdate {
     Boolean b = true;
     PDBerror error = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_feed_info;");
@@ -4809,7 +4809,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror results = new PDBerror();
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks order by stateid;");
@@ -4868,7 +4868,7 @@ public class DbUpdate {
     }
     dbInfo[4] += dbURL[dbURL.length - 1];
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks_ref order by stateid;");
@@ -4929,7 +4929,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT feedname FROM gtfs_feed_info;");
