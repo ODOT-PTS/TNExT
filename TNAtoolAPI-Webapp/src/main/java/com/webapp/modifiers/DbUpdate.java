@@ -2277,32 +2277,14 @@ public class DbUpdate {
 
     String toHost = dbInfoTo[4].split(":")[2];
     toHost = toHost.substring(2);
-    String toUser = dbInfoTo[5];
-    String toPass = dbInfoTo[6];
-    fromHost = "localhost"; //to be deleted
-    toHost = "localhost"; //to be deleted
     //		batFile = batFile.substring(1, batFile.length());
 
-    //		test();
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + fromPass + "& " + "pg_dump -U " + fromUser + " -h " + fromHost + " " + tables
-          + " " + nameFrom + " > dump & " + "set PGPASSWORD=" + toPass + "& " + "psql -U " + toUser + " -h " + toHost
-          + " " + nameTo + " < dump & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
+    String[] tableArray = tables.trim().split("\\s+");
+    for (String tableName: tableArray) {
+      if (tableName == "-t") {
+        continue;
       }
-      pr.waitFor();
-    } catch (Exception e) {
-      e.printStackTrace();
+      copyTableUsingDblink(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
     }
 
     try {
@@ -2310,8 +2292,7 @@ public class DbUpdate {
       statement = c.createStatement();
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-
-      //			e.printStackTrace();
+      e.printStackTrace();
     } finally {
       if (statement != null)
         try {
@@ -2530,25 +2511,13 @@ public class DbUpdate {
 
     String tables = "-t census_blocks " + "-t census_states "
         + "-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + fromPass + "& " + "pg_dump -U " + fromUser + " -h " + fromHost + " " + tables
-          + " " + nameFrom + " > dump & " + "set PGPASSWORD=" + toPass + "& " + "psql -U " + toUser + " -h " + toHost
-          + " " + nameTo + " < dump & " + "exit";
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
+    String[] tableArray = tables.trim().split("\\s+");
+    for (String tableName: tableArray) {
+      if (tableName == "-t") {
+        continue;
       }
-      pr.waitFor();
-    } catch (Exception e) {
-      e.printStackTrace();
+      copyTableUsingDblink(tableName, dbInfo[4], fromUser, fromPass, nameFrom, nameTo);
     }
 
     try {
@@ -2588,6 +2557,12 @@ public class DbUpdate {
     String[] p;
     p = dbInfo[4].split("/");
     String name = p[p.length - 1];
+    
+    // FIXME: Drew looking into ways to fix this endpoint. Or maybe it's not even used?
+    // String[] tables = {"census_blocks","census_counties","census_congdist","census_places","census_tracts","census_urbans","gtfs_modified_feeds","gtfs_pg_users","gtfs_selected_feeds","gtfs_uploaded_feeds","lodes_blocks_rac","lodes_blocks_wac","lodes_rac_projection_block","lodes_rac_projection_county","parknride","title_vi_blocks_float"};
+    // for (String tableName: tables) {
+      // copyTableUsingDblink(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
+    // }
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     String batFile = path + "../../src/main/resources/admin/resources/restoreCensus.bat";
@@ -3885,7 +3860,7 @@ public class DbUpdate {
     String pass = dbInfo[6];
     
     try {
-      pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFunctions.bat", pass, usrn, name,
+      pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFbat", pass, usrn, name,
           psqlPath+"psql.exe",
           basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
       pb.redirectErrorStream(true);
@@ -4393,6 +4368,20 @@ public class DbUpdate {
   //   // 1.
   //   return true;
   // }
+
+  private static boolean copyTableUsingDblink(String tableName, String toDbConnectionUrl, String dbUser, String dbPassword, String fromDbName, String toDbName) {
+    try {
+      Connection toConnect = PgisEventManager.makeConnectionByUrl(toDbConnectionUrl, dbUser, dbPassword);
+      Statement statement = toConnect.createStatement();
+      statement.executeUpdate("CREATE EXTENSION dblink;");
+      statement.executeUpdate("TRUNCATE TABLE " + tableName);
+      statement.executeUpdate("INSERT INTO " + tableName + " SELECT * FROM dblink('dbname=" + fromDbName + " 'SELECT * FROM " + tableName + "')");
+      return true;
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+      return false;
+    }
+  }
 
   private static boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
       String dbPassword) {
