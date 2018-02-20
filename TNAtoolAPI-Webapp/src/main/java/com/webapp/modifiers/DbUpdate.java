@@ -40,7 +40,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+// import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -4371,6 +4371,7 @@ public class DbUpdate {
       sqlScanner.close();
     } catch (FileNotFoundException e) {
       System.out.println(String.format("runSqlFromFile: cannot find a file at %s", sqlFilePath));
+      return false;
     }
 
     try {
@@ -4382,15 +4383,16 @@ public class DbUpdate {
       statement.close();
       c.close();
     } catch (SQLException e) {
-      // TODO
+      System.out.println(e.getMessage());
+      return false;
     }
     return true;
   }
 
-  private boolean runPsqlCommand(Map<String, String> arguments) {
-    // 1.
-    return true;
-  }
+  // private boolean runPsqlCommand(Map<String, String> arguments) {
+  //   // 1.
+  //   return true;
+  // }
 
   private boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
       String dbPassword) {
