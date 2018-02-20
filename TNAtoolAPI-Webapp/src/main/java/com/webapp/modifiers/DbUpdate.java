@@ -877,7 +877,7 @@ public class DbUpdate {
     ClassLoader classLoader = getClass().getClassLoader();
     File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
     File tempFile = new File(path + "admin/resources/tmp.csv");
-    File dstfile = new File(path + "../../src/main/resources/admin/resources/dbInfo.csv");
+    File dstfile = new File(Databases.dbInfoCsvPath());
     //		File inputFile = new File(tmpPath + "dbInfo.csv");
 
     BufferedReader reader = new BufferedReader(new FileReader(inputFile));
@@ -1078,7 +1078,7 @@ public class DbUpdate {
     // Ed 2017-09-12
     File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
     File tempFile = new File(path + "admin/resources/tmp.csv");
-    File dstfile = new File(path + "../../src/main/resources/admin/resources/dbInfo.csv");
+    File dstfile = new File(Databases.dbInfoCsvPath());
     String[] dbInfo = db.split(",");
 
     String[] p = dbInfo[4].split("/");
@@ -1175,7 +1175,7 @@ public class DbUpdate {
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     ClassLoader classLoader = getClass().getClassLoader();
     File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    File dstfile = new File(path + "../../src/main/resources/admin/resources/dbInfo.csv");
+    File dstfile = new File(Databases.dbInfoCsvPath());
     String[] dbInfo = db.split(",");
     String[] p;
 
@@ -1230,13 +1230,13 @@ public class DbUpdate {
       file = new File(classLoader.getResource("admin/resources/censusDb.cfg.xml").getFile());
       dstfile = new File(path + dbInfo[2]);
       parseXmlFile(file, dstfile, dbInfo, true);
-      Files.copy(dstfile.toPath(), new File(path + "../../src/main/resources/" + dbInfo[2]).toPath(),
+      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[2]).toPath(),
           StandardCopyOption.REPLACE_EXISTING);
 
       file = new File(classLoader.getResource("admin/resources/gtfsDb.cfg.xml").getFile());
       dstfile = new File(path + dbInfo[3]);
       parseXmlFile(file, dstfile, dbInfo, false);
-      Files.copy(dstfile.toPath(), new File(path + "../../src/main/resources/" + dbInfo[3]).toPath(),
+      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[3]).toPath(),
           StandardCopyOption.REPLACE_EXISTING);
 
     } catch (SQLException e) {
@@ -1270,7 +1270,7 @@ public class DbUpdate {
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     ClassLoader classLoader = getClass().getClassLoader();
     File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    File dstfile = new File(path + "../../src/main/resources/admin/resources/dbInfo.csv");
+    File dstfile = new File(Databases.dbInfoCsvPath());
     String[] dbInfo = db.split(",");
     String[] p;
 
@@ -4362,7 +4362,7 @@ public class DbUpdate {
     }
   }
 
-  private boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+  public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
     // 1. read file
     String sql = "";
     try {
@@ -4394,7 +4394,7 @@ public class DbUpdate {
   //   return true;
   // }
 
-  private boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
+  private static boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
       String dbPassword) {
     try {
       Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
