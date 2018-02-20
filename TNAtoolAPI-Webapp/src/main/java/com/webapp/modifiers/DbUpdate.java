@@ -40,9 +40,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.Scanner;
 
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -696,27 +698,27 @@ public class DbUpdate {
    * @throws UnsupportedEncodingException
    * @throws NoSuchAlgorithmException
    *//*
-       @GET
-       @Path("/makePassKey")
-       @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-       public Object makePassKey(@QueryParam("pass") String password) 
-             throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException{
-       
-       byte[] passByte = password.getBytes("UTF-8");
-       MessageDigest md = MessageDigest.getInstance("MD5");
-       passByte = md.digest(passByte);
-       String pass = new String(passByte, "UTF-8");
-       
-       String root = new File(".").getAbsolutePath();
-          root = removeLastChar(root);
-          File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
-       BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
-       
-       writer.write(pass);
-       
-       writer.close();
-       return "";
-       }*/
+           @GET
+           @Path("/makePassKey")
+           @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+           public Object makePassKey(@QueryParam("pass") String password) 
+                 throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException{
+           
+           byte[] passByte = password.getBytes("UTF-8");
+           MessageDigest md = MessageDigest.getInstance("MD5");
+           passByte = md.digest(passByte);
+           String pass = new String(passByte, "UTF-8");
+           
+           String root = new File(".").getAbsolutePath();
+              root = removeLastChar(root);
+              File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+           BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
+           
+           writer.write(pass);
+           
+           writer.close();
+           return "";
+           }*/
 
   @GET
   @Path("/validateUser")
@@ -3188,35 +3190,10 @@ public class DbUpdate {
     String host = dbInfo[4].split(":")[2];
     host = host.substring(2);
     host = "localhost"; //to be deleted
-    Process pr;
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -c \"\\copy temp_01 (pnrid,lat,lon,lotName,location,city,zipcode,countyID,county,spaces,accessibleSpaces,"
-          + "bikeRackSpaces,bikeLockerSpaces,electricVehicleSpaces,carSharing,transitService,availability,timeLimit,"
-          + "restroom,benches,shelter,indoorWaitingArea,trashCan,lighting,securityCameras,sidewalks,pnrSignage,lotSurface,propertyOwner,localExpert) "
-          + "FROM '" + path + "' DELIMITER ',' CSV HEADER\"" + " & exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-      //			statement = c.createStatement();
-      //			statement.executeUpdate("COPY parknride "
-      //					+ "FROM '"+path+"' DELIMITER ',' CSV HEADER;");
-    } catch (InterruptedException ex) {
-      System.out.println(ex.getMessage());
-      message = ex.getMessage();
-      source.delete();
-      return message;
-    }
+    copySqlCommand("temp_01 (pnrid,lat,lon,lotName,location,city,zipcode,countyID,county,spaces,accessibleSpaces,"
+        + "bikeRackSpaces,bikeLockerSpaces,electricVehicleSpaces,carSharing,transitService,availability,timeLimit,"
+        + "restroom,benches,shelter,indoorWaitingArea,trashCan,lighting,securityCameras,sidewalks,pnrSignage,lotSurface,propertyOwner,localExpert) ",
+        path, dbInfo[4], dbInfo[5], dbInfo[6]);
     try {
       statement = c.createStatement();
       statement.executeUpdate("INSERT INTO parknride SELECT * FROM temp_01 ON CONFLICT DO NOTHING;");
@@ -3314,49 +3291,11 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     String[] fileNames = { "b03002", "b16004", "b17021", "b18101", "b19037" };
     String[] copyColumn = new String[5];
@@ -3409,293 +3348,50 @@ public class DbUpdate {
 
       sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_1.sql";
       sqlPath = sqlPath.substring(1, sqlPath.length());
-      try {
-        String[] cmdArray = new String[5];
-        cmdArray[0] = "cmd";
-        cmdArray[1] = "/c";
-        cmdArray[2] = "cmd";
-        cmdArray[3] = "/k";
-        cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-            + " -a -f " + sqlPath + " & " + "exit";
+      runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-        pr = Runtime.getRuntime().exec(cmdArray, null);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-        String str;
-        while ((str = reader.readLine()) != null) {
-          System.out.println(str);
-        }
-        pr.waitFor(5, TimeUnit.MINUTES);
-      } catch (Exception e) {
-        e.printStackTrace();
-        message += e.toString() + ",";
-      }
-
-      ////
-      try {
-        String[] cmdArray = new String[5];
-        cmdArray[0] = "cmd";
-        cmdArray[1] = "/c";
-        cmdArray[2] = "cmd";
-        cmdArray[3] = "/k";
-        cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-            + " -c \"\\copy " + copyColumn[i] + " " + "FROM '" + path + "' DELIMITER ',' CSV HEADER\"" + " & exit";
-
-        pr = Runtime.getRuntime().exec(cmdArray, null);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-        String str;
-        while ((str = reader.readLine()) != null) {
-          System.out.println(str);
-        }
-        pr.waitFor(5, TimeUnit.MINUTES);
-      } catch (InterruptedException ex) {
-        System.out.println(ex.getMessage());
-        message = ex.getMessage();
-        source.delete();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      ///
+      copySqlCommand(copyColumn[i], path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
       sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_2.sql";
       sqlPath = sqlPath.substring(1, sqlPath.length());
-      try {
-        String[] cmdArray = new String[5];
-        cmdArray[0] = "cmd";
-        cmdArray[1] = "/c";
-        cmdArray[2] = "cmd";
-        cmdArray[3] = "/k";
-        cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-            + " -a -f " + sqlPath + " & " + "exit";
-
-        pr = Runtime.getRuntime().exec(cmdArray, null);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-        String str;
-        while ((str = reader.readLine()) != null) {
-          System.out.println(str);
-        }
-        pr.waitFor(5, TimeUnit.MINUTES);
-      } catch (Exception e) {
-        e.printStackTrace();
-        message += e.toString() + ",";
-      }
+      runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
     }
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float31.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float4.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float5.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     if (message.equals("")) {
       message = "done";
@@ -3752,74 +3448,13 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
-    ////
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -c \"\\copy temp_01 " + "FROM '" + path + "' DELIMITER ',' CSV HEADER\"" + " & exit";
+    copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (InterruptedException ex) {
-      System.out.println(ex.getMessage());
-      message = ex.getMessage();
-      source.delete();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    ///
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     path = path + "../../src/main/webapp/resources/admin/uploads/emp/wac.csv";
@@ -3827,74 +3462,13 @@ public class DbUpdate {
     source = new File(path);
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
-    ////
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -c \"\\copy temp_01 " + "FROM '" + path + "' DELIMITER ',' CSV HEADER\"" + " & exit";
+    copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (InterruptedException ex) {
-      System.out.println(ex.getMessage());
-      message = ex.getMessage();
-      source.delete();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    ///
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     Connection c = null;
     Statement statement = null;
@@ -3952,102 +3526,20 @@ public class DbUpdate {
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
-
-    ////
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -c \"\\copy temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)  "
-          + "FROM '" + path + "' DELIMITER ',' CSV HEADER\"" + " & exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (InterruptedException ex) {
-      System.out.println(ex.getMessage());
-      message = ex.getMessage();
-      source.delete();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    ///
+    copySqlCommand("temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)", path,
+        dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message += e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     Connection c = null;
     Statement statement = null;
@@ -4104,216 +3596,39 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
-
-    ////
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -c \"\\copy counties_future_pop(countyid,population2015,population2020,population2025, "
-          + "population2030, population2035,population2040,population2045,population2050)  " + "FROM '" + path
-          + "' DELIMITER ',' CSV HEADER\"" + " & exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (InterruptedException ex) {
-      System.out.println(ex.getMessage());
-      message = ex.getMessage();
-      source.delete();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    ///
+    copySqlCommand(
+        "counties_future_pop(countyid,population2015,population2020,population2025,population2030,population2035,population2040,population2045,population2050)",
+        path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     Connection c = null;
     Statement statement = null;
@@ -4366,77 +3681,14 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
-
-    ////
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -c \"\\copy counties_regions(countyid,regionid,regionname)  " + "FROM '" + path
-          + "' DELIMITER ',' CSV HEADER\"" + " & exit";
-
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (InterruptedException ex) {
-      System.out.println(ex.getMessage());
-      message = ex.getMessage();
-      source.delete();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    ///
+    copySqlCommand("counties_regions(countyid,regionid,regionname)", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    try {
-      String[] cmdArray = new String[5];
-      cmdArray[0] = "cmd";
-      cmdArray[1] = "/c";
-      cmdArray[2] = "cmd";
-      cmdArray[3] = "/k";
-      cmdArray[4] = "set PGPASSWORD=" + dbInfo[6] + "& " + "psql -U " + dbInfo[5] + " -h " + host + " -d " + name
-          + " -a -f " + sqlPath + " & " + "exit";
+    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      pr = Runtime.getRuntime().exec(cmdArray, null);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;
-      while ((str = reader.readLine()) != null) {
-        System.out.println(str);
-      }
-      pr.waitFor(5, TimeUnit.MINUTES);
-    } catch (Exception e) {
-      e.printStackTrace();
-      message = e.toString() + ",";
-    }
     Connection c = null;
     Statement statement = null;
     try {
@@ -5110,4 +4362,46 @@ public class DbUpdate {
     }
   }
 
+  private boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+    // 1. read file
+    String sql = "";
+    try {
+      Scanner sqlScanner = new Scanner(new File(sqlFilePath));
+      sql = sqlScanner.useDelimiter("\\Z").next();
+      sqlScanner.close();
+    } catch (FileNotFoundException e) {
+      System.out.println(String.format("runSqlFromFile: cannot find a file at %s", sqlFilePath));
+    }
+
+    try {
+      // 2. open DB connection
+      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
+      Statement statement = c.createStatement();
+      // 3. run SQL statement
+      ResultSet rs = statement.executeQuery(sql);
+      statement.close();
+      c.close();
+    } catch (SQLException e) {
+      // TODO
+    }
+    return true;
+  }
+
+  private boolean runPsqlCommand(Map<String, String> arguments) {
+    // 1.
+    return true;
+  }
+
+  private boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
+      String dbPassword) {
+    try {
+      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
+      Statement statement = c.createStatement();
+      statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
+      return true;
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+      return false;
+    }
+  }
 }
