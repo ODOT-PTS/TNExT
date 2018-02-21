@@ -4338,6 +4338,7 @@ public class DbUpdate {
   }
 
   public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+    System.out.println("runSqlFromFile: " + sqlFilePath);
     // 1. read file
     String sql = "";
     try {
@@ -4370,6 +4371,7 @@ public class DbUpdate {
   // }
 
   private static boolean copyTableUsingDblink(String tableName, String toDbConnectionUrl, String dbUser, String dbPassword, String fromDbName, String toDbName) {
+    System.out.println("copyTableUsingDblink: " + tableName);
     try {
       Connection toConnect = PgisEventManager.makeConnectionByUrl(toDbConnectionUrl, dbUser, dbPassword);
       Statement statement = toConnect.createStatement();
@@ -4385,6 +4387,7 @@ public class DbUpdate {
 
   private static boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
       String dbPassword) {
+    System.out.println("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
     try {
       Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
       Statement statement = c.createStatement();
