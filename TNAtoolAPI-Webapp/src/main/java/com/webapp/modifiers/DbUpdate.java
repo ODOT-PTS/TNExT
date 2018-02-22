@@ -4348,19 +4348,62 @@ public class DbUpdate {
   //   return true;
   // }
 
-  private static boolean copyTableUsingDblink(String tableName, String toDbConnectionUrl, String dbUser, String dbPassword, String fromDbName, String toDbName) {
-    System.out.println("copyTableUsingDblink: " + tableName);
-    try {
-      Connection toConnect = PgisEventManager.makeConnectionByUrl(toDbConnectionUrl, dbUser, dbPassword);
-      Statement statement = toConnect.createStatement();
-      statement.executeUpdate("CREATE EXTENSION dblink;");
-      statement.executeUpdate("TRUNCATE TABLE " + tableName);
-      statement.executeUpdate("INSERT INTO " + tableName + " SELECT * FROM dblink('dbname=" + fromDbName + " 'SELECT * FROM " + tableName + "')");
-      return true;
-    } catch (SQLException e) {
-      System.out.println(e.getMessage());
+  private static boolean copyTable(String tableName, String fromDbConnectionUrl, String toDbConnectionUrl, String dbUser, String dbPassword) {
+    System.out.println("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);
+    // Parse connection urls...
+    String fromHost = fromDbConnectionUrl.split(":")[2];
+    fromHost = fromHost.substring(2);
+    String[] p;
+		p = fromDbConnectionUrl.split("/");
+		String fromName = p[p.length-1];
+
+    String toHost = toDbConnectionUrl.split(":")[2];
+    toHost = toHost.substring(2);
+		p = toDbConnectionUrl.split("/");
+		String toName = p[p.length-1];
+
+    // Dump
+    // Don't use pipes because it cannot be done in a portable way.
+    try{
+    	String[] cmd = {
+        "pg_dump",
+        "-U", dbUser,
+        "-h", fromHost,
+        "-f", "census.dump",
+        "-Fc",
+        "-t", tableName,
+        fromName
+      };
+      String[] envp = { "PGPASSWORD="+dbPassword };
+      System.out.println(Arrays.toString(cmd));
+      Process pr = Runtime.getRuntime().exec(cmd,envp);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+      String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+      pr.waitFor();
+    }catch(Exception e) {
+    	e.printStackTrace();
       return false;
     }
+    // Load
+    try{
+    	String[] cmd = {
+        "pg_restore",
+        "-U", dbUser,
+        "-h", toHost,
+        "-d", toName,
+        "census.dump"
+      };
+      String[] envp = { "PGPASSWORD="+dbPassword };
+      System.out.println(Arrays.toString(cmd));
+      Process pr = Runtime.getRuntime().exec(cmd,envp);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+      String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+      pr.waitFor();
+    }catch(Exception e) {
+    	e.printStackTrace();
+      return false;
+    }
+    return true;
   }
 
   private static boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
