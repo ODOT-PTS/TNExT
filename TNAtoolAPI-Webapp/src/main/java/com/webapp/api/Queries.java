@@ -245,15 +245,13 @@ public class Queries {
 
 		// get database parameters
 		// ian todo: database selector
-		BufferedReader reader = new BufferedReader(new FileReader(Databases.databaseParamsCsvPath()));
+		BufferedReader reader = new BufferedReader(new FileReader(Databases.dbInfoCsvPath()));
 		reader.readLine();
 		String[] params = reader.readLine().trim().split(",");
 		reader.close();
 
 		// Make temporary directory for shapefile export
-		// Path tmpdir = Files.createTempDirectory("shapefiles");
-		// File.createTempFile("shapefiles", Long.toString(System.nanoTime()));
-		File tmpdir = new File("/tmp", "shapefiles-"+Long.toString(System.nanoTime()));
+		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "shapefiles-"+Long.toString(System.nanoTime()));
 		tmpdir.mkdirs();
 		System.out.println("shapefile export to tmpdir: " + tmpdir);
 
