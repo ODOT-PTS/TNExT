@@ -1202,7 +1202,7 @@ public class DbUpdate {
 
       c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
-      statement.executeUpdate("CREATE EXTENSION postgis;");
+      statement.executeUpdate("CREATE EXTENSION IF NOT EXISTS postgis;");
       statement.executeUpdate("DROP TABLE IF EXISTS database_status;");
       statement.executeUpdate("CREATE TABLE database_status (" + "name character varying(255) NOT NULL,"
           + "activated boolean," + "gtfs_feeds boolean," + "census boolean," + "employment boolean,"
