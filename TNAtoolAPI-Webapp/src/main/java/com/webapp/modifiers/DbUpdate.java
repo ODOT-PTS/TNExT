@@ -1194,7 +1194,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(url, dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
       statement.executeUpdate("CREATE DATABASE " + name);
       statement.close();
