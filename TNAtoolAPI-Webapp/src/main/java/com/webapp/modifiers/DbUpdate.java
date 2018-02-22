@@ -2264,26 +2264,9 @@ public class DbUpdate {
       break;
     }
 
-    //		String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    //		String batFile = path+"../../src/main/resources/admin/resources/copyPnr.bat";
-    Process pr;
-    //		ProcessBuilder pb;
-
-    String fromHost = dbInfoFrom[4].split(":")[2];
-    fromHost = fromHost.substring(2);
-    String fromUser = dbInfoFrom[5];
-    String fromPass = dbInfoFrom[6];
-
-    String toHost = dbInfoTo[4].split(":")[2];
-    toHost = toHost.substring(2);
-    //		batFile = batFile.substring(1, batFile.length());
-
     String[] tableArray = tables.trim().split("\\s+");
     for (String tableName: tableArray) {
-      if (tableName == "-t") {
-        continue;
-      }
-      copyTableUsingDblink(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
+      copyTable(tableName, dbInfoFrom[4], dbInfoTo[4], dbInfo[5], dbInfo[6]);
     }
 
     try {
@@ -2508,15 +2491,11 @@ public class DbUpdate {
     fromHost = "localhost"; //to be deleted
     toHost = "localhost"; //to be deleted
 
-    String tables = "-t census_blocks " + "-t census_states "
-        + "-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
+    String tables = "census_blocks census_states census_congdists census_counties census_places census_tracts census_urbans";
 
     String[] tableArray = tables.trim().split("\\s+");
     for (String tableName: tableArray) {
-      if (tableName == "-t") {
-        continue;
-      }
-      copyTableUsingDblink(tableName, dbInfo[4], fromUser, fromPass, nameFrom, nameTo);
+      copyTable(tableName, dbInfo[4], dbInfo[4], dbInfo[5], dbInfo[6]);
     }
 
     try {
@@ -2560,7 +2539,7 @@ public class DbUpdate {
     // FIXME: Drew looking into ways to fix this endpoint. Or maybe it's not even used?
     // String[] tables = {"census_blocks","census_counties","census_congdist","census_places","census_tracts","census_urbans","gtfs_modified_feeds","gtfs_pg_users","gtfs_selected_feeds","gtfs_uploaded_feeds","lodes_blocks_rac","lodes_blocks_wac","lodes_rac_projection_block","lodes_rac_projection_county","parknride","title_vi_blocks_float"};
     // for (String tableName: tables) {
-      // copyTableUsingDblink(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
+      // copyTable(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
     // }
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
