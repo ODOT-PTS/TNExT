@@ -1227,20 +1227,17 @@ public class DbUpdate {
       }
       out.print(dbInfo[dbInfo.length - 1] + System.getProperty("line.separator"));
       out.close();
-
-      Files.copy(file.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      // Files.copy(file.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
       file = new File(classLoader.getResource("admin/resources/censusDb.cfg.xml").getFile());
       dstfile = new File(path + dbInfo[2]);
       parseXmlFile(file, dstfile, dbInfo, true);
-      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[2]).toPath(),
-          StandardCopyOption.REPLACE_EXISTING);
+      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[2]).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
       file = new File(classLoader.getResource("admin/resources/gtfsDb.cfg.xml").getFile());
       dstfile = new File(path + dbInfo[3]);
       parseXmlFile(file, dstfile, dbInfo, false);
-      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[3]).toPath(),
-          StandardCopyOption.REPLACE_EXISTING);
+      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[3]).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
     } catch (SQLException e) {
       System.out.println(e.getMessage());
