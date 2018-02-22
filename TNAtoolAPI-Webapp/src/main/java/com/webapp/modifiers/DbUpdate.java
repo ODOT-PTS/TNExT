@@ -1174,8 +1174,11 @@ public class DbUpdate {
   public Object addDB(@QueryParam("db") String db) {
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     ClassLoader classLoader = getClass().getClassLoader();
-    File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    File dstfile = new File(Databases.dbInfoCsvPath());
+    // File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
+    // File dstfile = new File(Databases.dbInfoCsvPath());
+    File file = new File(Databases.dbInfoCsvPath());
+    File dstfile; // = new File(Databases.dbInfoCsvPath());
+    
     String[] dbInfo = db.split(",");
     String[] p;
 
