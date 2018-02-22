@@ -2245,20 +2245,19 @@ public class DbUpdate {
     }
     switch (section) {
     case "census":
-      tables = "-t census_blocks " + "-t census_states "
-          + "-t census_congdists -t census_counties -t census_places -t census_tracts -t census_urbans";
+      tables = "census_blocks census_states census_congdists census_counties census_places census_tracts census_urbans";
       break;
     case "employment":
-      tables = "-t lodes_blocks_rac -t lodes_blocks_wac";
+      tables = "lodes_blocks_rac lodes_blocks_wac";
       break;
     case "parknride":
-      tables = "-t parknride";
+      tables = "parknride";
       break;
     case "title6":
-      tables = "-t title_vi_blocks_float";
+      tables = "title_vi_blocks_float";
       break;
     case "femployment":
-      tables = "-t lodes_rac_projection_block -t lodes_rac_projection_county";
+      tables = "lodes_rac_projection_block lodes_rac_projection_county";
       break;
     default:
       tables = "";
