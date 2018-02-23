@@ -74,6 +74,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
 import com.model.database.queries.FlexibleReportEventManager;
@@ -245,10 +246,7 @@ public class Queries {
 
 		// get database parameters
 		// ian todo: database selector
-		BufferedReader reader = new BufferedReader(new FileReader(Databases.dbInfoCsvPath()));
-		reader.readLine();
-		String[] params = reader.readLine().trim().split(",");
-		reader.close();
+		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
 
 		// Make temporary directory for shapefile export
 		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "shapefiles-"+Long.toString(System.nanoTime()));
@@ -281,7 +279,7 @@ public class Queries {
 						+ " WHERE trips.agencyid = '" + agencyId + "'");
 			} else if (flag.equals("stops")) {
 				// check if the number of records are larger than a threshold, split stops_times in to multiple shapefiles
-				Connection connection = PgisEventManager.makeConnection(dbIndex);
+				Connection connection = db.getConnection();
 			    Statement stmt = connection.createStatement();
 			    int THRESHOLD = 750000;
 			    ResultSet rs = stmt.executeQuery("SELECT count(gid) FROM gtfs_stop_times AS stoptimes WHERE stoptimes.trip_agencyid ='" + agencyId + "'");
@@ -373,11 +371,11 @@ public class Queries {
 				String[] cmd = {
 					"pgsql2shp",
 					"-f", shapePath,
-					"-h", params[0],
-					"-p",  params[1],
-					"-u", params[2],
-					"-P", params[3],
-					dbName,
+					"-h", db.getHost(),
+					"-p", db.getPort(),
+					"-u", db.getUsername(),
+					"-P", db.getPassword(),
+					db.getDatabase(),
 					query.get(j)
 				};
 				System.out.println(Arrays.toString(cmd));
