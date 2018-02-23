@@ -49,7 +49,6 @@ public class MainMap extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {		
-		setDatabaseParams();		
 		request.getRequestDispatcher("/TNAtoolAPI-Webapp/index.jsp").forward(request, response);
 		
 	}
@@ -66,104 +65,7 @@ public class MainMap extends HttpServlet {
         // I think it would be simpler and better to set up credentials using
         // either java properties, or environment variables if the Java JDBC
         // library provides a way to do that.
-        //
-		ClassLoader classLoader = getClass().getClassLoader();
-		//File databaseParamsFile = new File(classLoader.getResource("admin/resources/databaseParams.csv").getFile());
-		File databaseParamsFile = new File(Databases.databaseParamsCsvPath());
-		
-		BufferedReader reader = new BufferedReader(new FileReader(databaseParamsFile));
-		reader.readLine();
-		String[] params = reader.readLine().trim().split(",");
-		reader.close();
-		
-		//File connectionFolder = new File(classLoader.getResource("com/model/database/connections/spatial").getFile());
-		File connectionFolder = new File(Databases.dbSpatialConnectionFolder());
-		File[] listOfFiles = connectionFolder.listFiles();
-		String[] dbNames = new String[listOfFiles.length];
-	    for (int i = 0; i < listOfFiles.length; i++) {
-	      if (listOfFiles[i].isFile()) {
-	    	  dbNames[i] = listOfFiles[i].getName().split("\\.")[0];
-	    	  parseConnectionFiles(listOfFiles[i],params,dbNames[i]);
-	      }
-	    }
-	    //connectionFolder = new File(classLoader.getResource("com/model/database/connections/transit").getFile());
-		connectionFolder = new File(Databases.dbTransitConnectionFolder());
-
-	    listOfFiles = connectionFolder.listFiles();
-		dbNames = new String[listOfFiles.length];
-	    for (int i = 0; i < listOfFiles.length; i++) {
-	      if (listOfFiles[i].isFile()) {
-	    	  dbNames[i] = listOfFiles[i].getName().split("\\.")[0];
-	    	  parseConnectionFiles(listOfFiles[i],params,dbNames[i]);
-	      }
-	    }
-
-	    //File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-	    File inputFile = new File( Databases.dbInfoCsvPath());
-
-		//File tempFile = new File(classLoader.getResource("admin/resources").getPath()+"/dbInfoTmp.csv");
-		File tempFile = new File(Databases.dbInfoCsvPathTempFile());
-
-	    setDatabaseInfoFile(params, inputFile, tempFile);
-	}
-	
-	private void setDatabaseInfoFile(String[] params, File inputFile, File tempFile) throws IOException{
-		
-		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-		String currentLine;
-		writer.write(reader.readLine() + System.getProperty("line.separator"));
-		String[] line;
-		while((currentLine = reader.readLine()) != null) {
-			line = currentLine.split(",");
-			line[4] = "jdbc:postgresql://"+params[0]+":"+params[1]+"/"+line[4].split("/")[3];
-			line[5] = params[2];
-			line[6] = params[3];
-	    	currentLine = "";
-	    	for(int k=0;k<line.length-1;k++){
-    			currentLine+=line[k]+",";
-    		}
-    		currentLine+=line[line.length-1];
-    		writer.write(currentLine + System.getProperty("line.separator"));
-		}
-		writer.close(); 
-		reader.close(); 
-		inputFile.delete();
-		tempFile.renameTo(inputFile);
-	}
-	
-	private void parseConnectionFiles(File xmlFile, String[] params, String dbName){
-		
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder;
-        try {
-            dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-            doc.getDocumentElement().normalize();
-            
-            NodeList props = doc.getElementsByTagName("property");
-            Element prop = null;
-             
-            prop = (Element) props.item(1);
-            prop.getFirstChild().setNodeValue("jdbc:postgresql://"+params[0]+":"+params[1]+"/"+dbName);
-            prop = (Element) props.item(2);
-            prop.getFirstChild().setNodeValue(params[2]);
-            prop = (Element) props.item(3);
-            prop.getFirstChild().setNodeValue(params[3]);
-            
-            XMLSerializer serializer = new XMLSerializer();
-            serializer.setOutputCharStream(new java.io.FileWriter(xmlFile));
-            OutputFormat format = new OutputFormat();
-            format.setStandalone(true);
-            serializer.setOutputFormat(format);
-            serializer.serialize(doc);
-            
-        } catch(ParserConfigurationException pce) {
-			pce.printStackTrace();
-		}catch(SAXException se) {
-			se.printStackTrace();
-		}catch(IOException ioe) {
-			ioe.printStackTrace();
-		}
+		//
+		// Ian 2018-02-20 - Don't do this - config modifications *must* always be explicit.
 	}
 }
