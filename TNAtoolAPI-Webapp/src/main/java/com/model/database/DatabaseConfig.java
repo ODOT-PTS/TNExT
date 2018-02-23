@@ -18,6 +18,7 @@
 
 package com.model.database;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,10 +26,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.net.URI;
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,26 +44,42 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
     // Class methods
-    private static String lastPath;
     private static HashMap<String, DatabaseConfig> dbIndex;
 
-    public static String ConfigurationDirectory() {
-        return System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory");
+    private static String getPath(String...args) {
+        return Paths.get(getConfigurationDirectory(), args).toString();
+    }
+
+    public static String getConfigurationDirectory() {
+        return Paths.get(System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory")).toString();
+    }
+
+    public static String getUploadDirectory() {
+        return getPath("admin", "uploads");
+    }
+
+    public static String getDownloadDirectory() {
+        return getPath("admin", "downloadables");
+    }
+
+    public static String getDbInfoCsvPath() {
+        // To deprecate - direct access should not be allowed
+        return getPath("admin", "resources", "dbInfo.csv");
     }
 
     public static void loadDefault() {
-        String path = ConfigurationDirectory() + "/admin/resources/dbInfo.csv";
-        loadFromCsvPath(path);
+        File csvfile = new File(getDbInfoCsvPath());
+        loadFromCsv(csvfile);
     }
 
-    public static void loadFromCsvPath(String path) {
+    public static void loadFromCsv(File csvfile) {
         // discard existing
         dbIndex = new HashMap<String, DatabaseConfig>();
         // load csv
-        System.out.println("DatabaseConfig.loadFromCsvPath: " + path);
+        System.out.println("DatabaseConfig.loadFromCsvPath: " + csvfile.getPath());
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(path));
+            reader = new CSVReader(new FileReader(csvfile));
             String[] line;
             while ((line = reader.readNext()) != null) {
                 System.out.println("DatabaseConfig.loadFromCsvPath: read dbIndex: " + line[0] + " dbName: " + line[1]
@@ -70,12 +90,6 @@ public class DatabaseConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Save last path
-        lastPath = path;
-    }
-
-    public static void reload() {
-        loadFromCsvPath(lastPath);
     }
 
     public static DatabaseConfig getConfig(int index) {
@@ -83,7 +97,7 @@ public class DatabaseConfig {
     }
 
     public static DatabaseConfig getConfig(String index) {
-        if (lastPath == null) { loadDefault(); }
+        if (dbIndex == null) { loadDefault(); }
         return dbIndex.get(index);
     }
 
@@ -146,6 +160,11 @@ public class DatabaseConfig {
         setCensusMappingSource(row[7]);
         setGtfsMappingSource1(row[8]);
         setGtfsMappingSource2(row[9]);
+    }
+
+    // Config files
+    public File getSpatialConfigFile() {
+        return new File(getPath(getSpatialConfigPath()));
     }
 
     // For external clients
