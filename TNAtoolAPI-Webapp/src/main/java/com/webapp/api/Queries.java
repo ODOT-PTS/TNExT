@@ -44,6 +44,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import java.nio.file.Paths;
+
 import javax.swing.Timer;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -72,6 +74,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
 import com.model.database.queries.FlexibleReportEventManager;
@@ -242,36 +245,13 @@ public class Queries {
 		String feeds = "";
 
 		// get database parameters
-		String path = MainMap.class.getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
+		// ian todo: database selector
+		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
 
-		BufferedReader reader = new BufferedReader(
-				new FileReader(
-						path
-								+ "../../src/main/resources/admin/resources/databaseParams.csv"));
-		reader.readLine();
-		String[] params = reader.readLine().trim().split(",");
-		reader.close();
-		
-		//shapefile generator path
-		String generatorPath = path+"../../src/main/resources/com/model/shapefile/shapefilegenerator.bat";
-		generatorPath = generatorPath.substring(1, generatorPath.length());
-		// Creating shapefiles on the server
-		path = path + "../../src/main/webapp/downloadables/shapefiles";
-
-		// Making downloadables/shapefiles directory
-		File shapefiles = new File(path);
-		shapefiles.mkdirs();
-
-		// Making unique file names
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("hhmmss");
-		String uniqueString = ft.format(dNow);
-
-		// The folder that contains agencies shapefile folders.
-		String folderName = flag + "_shape_" + uniqueString;
-		File mainFolder = new File(path + "/" + folderName);
-		mainFolder.mkdir();
+		// Make temporary directory for shapefile export
+		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "shapefiles-"+Long.toString(System.nanoTime()));
+		tmpdir.mkdirs();
+		System.out.println("shapefile export to tmpdir: " + tmpdir);
 
 		// Getting hashmap of agencies (AgencyId -> AgencyName)
 		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
@@ -299,7 +279,7 @@ public class Queries {
 						+ " WHERE trips.agencyid = '" + agencyId + "'");
 			} else if (flag.equals("stops")) {
 				// check if the number of records are larger than a threshold, split stops_times in to multiple shapefiles
-				Connection connection = PgisEventManager.makeConnection(dbIndex);
+				Connection connection = db.getConnection();
 			    Statement stmt = connection.createStatement();
 			    int THRESHOLD = 750000;
 			    ResultSet rs = stmt.executeQuery("SELECT count(gid) FROM gtfs_stop_times AS stoptimes WHERE stoptimes.trip_agencyid ='" + agencyId + "'");
@@ -380,18 +360,26 @@ public class Queries {
 				rs.close();
 			}
 			// Folder that contains agency's shapefiles
-			String tempAgencyname = agenciesHashMap.get(agencyId).name
-					.replaceAll("[^a-zA-Z0-9\\-]", "");			
-			File agencyFolder = new File(path + "/" + flag + "_shape_"
-					+ uniqueString + "/" + tempAgencyname + "_" + flag);
+			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
+			File agencyFolder = new File(tmpdir, tempAgencyname + "_" + flag);
 			agencyFolder.mkdirs();
 
 			// Run the command to generate shapefiles for each agency
 			for ( int j = 0 ; j < query.size() ; j++ ){
-				ProcessBuilder pb = new ProcessBuilder("cmd", "/c", generatorPath,
-						agencyFolder.getAbsolutePath() + "\\" + tempAgencyname
-								+ "_" + flag + "_shape_" + j, "localhost" /*params[0]*/, params[2],
-						params[3], dbName, "\"" + query.get(j) + "\"", "pgsql2shp");
+				// pgsql2shp -f <outfile> -h <host> -p <port> -u <username> -P <password> <db> <query>
+				String shapePath = new File(agencyFolder, tempAgencyname + "_" + flag + "_shape_" + j).toString();
+				String[] cmd = {
+					"pgsql2shp",
+					"-f", shapePath,
+					"-h", db.getHost(),
+					"-p", db.getPort(),
+					"-u", db.getUsername(),
+					"-P", db.getPassword(),
+					db.getDatabase(),
+					query.get(j)
+				};
+				System.out.println(Arrays.toString(cmd));
+				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.redirectErrorStream(true);
 				Process pr = pb.start();
 				BufferedReader reader2 = new BufferedReader(new InputStreamReader(
@@ -399,26 +387,41 @@ public class Queries {
 				while (reader2.readLine() != null) {
 				}
 				pr.waitFor(5, TimeUnit.MINUTES);
-			}			
+				System.out.println("pgsql2shp done");
+			}
 		}
-		
+
 		// creating a zip-file to archive the shape files
+		File shapefilesPath = new File(Databases.DownloadablesDirectory(), "shapefiles");
+		shapefilesPath.mkdirs();
+
+		// Making unique file names
+		Date dNow = new Date();
+		SimpleDateFormat ft = new SimpleDateFormat("hhmmss");
+		String uniqueString = ft.format(dNow);
+		String folderName = flag + "_shape_" + uniqueString;
+
+		String zipFilePath = new File(shapefilesPath, folderName + ".zip").toString();
+		System.out.println("writing zip file: " + zipFilePath);
+
 		ZipParameters parameters = new ZipParameters();
 		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
 		parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
 		parameters.setIncludeRootFolder(false);
 
-		ZipFile zipF = new ZipFile(path + "/" + flag + "_shape_" + uniqueString
-				+ ".zip");
-		zipF.createZipFileFromFolder(mainFolder, parameters, false, 0);
-		
-		FileUtils.deleteDirectory(mainFolder);
+		ZipFile zipF = new ZipFile(zipFilePath);
+		zipF.createZipFileFromFolder(tmpdir, parameters, false, 0);
+
+		System.out.println("removing tmpdir");
+		FileUtils.deleteDirectory(tmpdir);
 
 		// delete the zip-file after 5 minutes.
+		System.out.println("setting 5 minute timer to remove zip file");
 		Timer timer;
 		ActionListener a = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("removing zip file: " + zipF.getFile().getName());
 				zipF.getFile().delete();
 			}
 		};
@@ -426,6 +429,7 @@ public class Queries {
 		timer.setRepeats(false);
 		timer.setInitialDelay(5 * 60000);
 		timer.start();
+		System.out.println("returning: " + "downloadables/shapefiles/" + zipF.getFile().getName());
 		return "downloadables/shapefiles/" + zipF.getFile().getName();
 	}
 
