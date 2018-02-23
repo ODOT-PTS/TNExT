@@ -40,12 +40,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
     // Class methods
-    private static final Map<String, DatabaseConfig> dbIndex = new HashMap<String, DatabaseConfig>();
-
-    static {
-        System.out.println("DatabaseConfig::static");
-        loadDefault();
-    }
+    private static String lastPath;
+    private static HashMap<String, DatabaseConfig> dbIndex;
 
     public static String ConfigurationDirectory() {
         return System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory");
@@ -57,6 +53,9 @@ public class DatabaseConfig {
     }
 
     public static void loadFromCsvPath(String path) {
+        // discard existing
+        dbIndex = new HashMap<String, DatabaseConfig>();
+        // load csv
         System.out.println("DatabaseConfig.loadFromCsvPath: " + path);
         CSVReader reader = null;
         try {
@@ -71,13 +70,20 @@ public class DatabaseConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // Save last path
+        lastPath = path;
+    }
+
+    public static void reload() {
+        loadFromCsvPath(lastPath);
     }
 
     public static DatabaseConfig getConfig(int index) {
-        return dbIndex.get(new Integer(index).toString());
+        return getConfig(Integer.toString(index));
     }
 
     public static DatabaseConfig getConfig(String index) {
+        if (lastPath == null) { loadDefault(); }
         return dbIndex.get(index);
     }
 
@@ -121,7 +127,7 @@ public class DatabaseConfig {
     }
     
     // to/from CSV
-    public String[] asArray() {
+    public String[] toArray() {
         // backwards compat
         String[] row = { getDatabaseIndex(), getDbName(), getSpatialConfigPath(), getConfigPath(), getConnectionUrl(),
                 getUsername(), getPassword(), getCensusMappingSource(), getGtfsMappingSource1(),
@@ -149,14 +155,14 @@ public class DatabaseConfig {
         return uri.getHost();
     }
 
-    public int getPort() {
+    public String getPort() {
         URI uri = URI.create(getConnectionUrl().replace("jdbc:",""));
-        return uri.getPort();        
+        return Integer.toString(uri.getPort());
     }
     
     public String getDatabase() {
         URI uri = URI.create(getConnectionUrl().replace("jdbc:",""));
-        return uri.getPath();        
+        return uri.getPath().substring(1);        
     }
 
     // Getters
