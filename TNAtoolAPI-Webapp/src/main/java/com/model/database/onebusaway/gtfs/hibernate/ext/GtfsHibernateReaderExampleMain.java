@@ -68,8 +68,9 @@ public class GtfsHibernateReaderExampleMain {
   static{
 	  for (int k=0; k<Databases.dbsize; k++){
           // Ed 2017-09-12 log so we can see who is using xml config paths.
-          System.err.format("GtfsHibernateReaderExampleMain::static{}, creating session factory from ConfigPath: %s\n", Databases.ConfigPaths[k]);
-		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k],k);
+          String p = Databases.ConfigurationDirectory() + Databases.ConfigPaths[k];
+          System.err.format("GtfsHibernateReaderExampleMain::static{}, creating session factory from ConfigPath: %s\n", p);
+		  factory[k] = createHibernateGtfsFactory(p,k);
 	  }	    
   }
   
@@ -80,8 +81,9 @@ public class GtfsHibernateReaderExampleMain {
 	  factory = new HibernateGtfsFactory[Databases.dbsize];
 	  sessions = new SessionFactory[Databases.dbsize];
 	  for (int k=0; k<Databases.dbsize; k++){
-          System.err.format("GtfsHibernateReaderExampleMain::updateSessions(), creating session factory from ConfigPath: %s\n", Databases.ConfigPaths[k]);
-		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k],k);
+      String p = Databases.ConfigurationDirectory() + Databases.ConfigPaths[k];
+      System.err.format("GtfsHibernateReaderExampleMain::updateSessions(), creating session factory from ConfigPath: %s\n", p);
+		  factory[k] = createHibernateGtfsFactory(p,k);
 	  }
   }
   

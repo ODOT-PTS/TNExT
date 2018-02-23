@@ -30,8 +30,9 @@ public class Hutil {
     		try {
                 // Create the SessionFactory from hibernate.cfg.xml
                 // Ed 2017-09-12 log so we can see who is using xml config paths.
-                System.err.format("Hutil::static{}, creating session factory from spatialConfigPath: %s\n", Databases.spatialConfigPaths[k]);
-                sessionFactory[k] = new Configuration().configure(Databases.spatialConfigPaths[k]).buildSessionFactory();
+                String p = Databases.ConfigurationDirectory() + Databases.spatialConfigPaths[k];
+                System.err.format("Hutil::static{}, creating session factory from spatialConfigPath: %s\n", p);
+                sessionFactory[k] = new Configuration().configure(p).buildSessionFactory();
             } catch (Throwable ex) {
                 // Make sure you log the exception, as it might be swallowed
                 System.err.println("Initial SessionFactory creation failed." + ex);
@@ -51,8 +52,9 @@ public class Hutil {
     		try {
                 // Create the SessionFactory from hibernate.cfg.xml
                 // Ed 2017-09-12 log so we can see who is using xml config paths.
-                System.err.format("Hutil::updateSessions(), creating session factory from spatialConfigPath: %s\n", Databases.spatialConfigPaths[k]);
-                sessionFactory[k] = new Configuration().configure(Databases.spatialConfigPaths[k]).buildSessionFactory();
+                String p = Databases.ConfigurationDirectory() + Databases.spatialConfigPaths[k];
+                System.err.format("Hutil::updateSessions(), creating session factory from spatialConfigPath: %s\n", p);
+                sessionFactory[k] = new Configuration().configure(p).buildSessionFactory();
                 
             } catch (Throwable ex) {
                 // Make sure you log the exception, as it might be swallowed
