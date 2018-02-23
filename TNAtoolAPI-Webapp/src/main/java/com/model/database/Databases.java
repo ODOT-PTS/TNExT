@@ -93,57 +93,7 @@ public class Databases {
     }
 
 	public static HashMap<String, String[]> getDbInfo() {
-
-		HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
-
-		try {
-			//path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-
-            // Ed 2017-09-12
-            //
-            // FIXME. this is set in getDbInfo(), but other methods may want
-            // access to this configuration directory.
-            //
-            // So this code only works if the users of this class call
-            // getDbInfo() before calling other methods which may use the
-            // configuration directory.
-            //
-            // It's probably reasonable to add this code instead to the static { } block for this class.
-            //
-            //
-            System.err.format("ConfigurationDirectory(): %s\n", ConfigurationDirectory());
-
-            System.err.println("Attempting to load dbInfo.csv from: " + dbInfoCsvPath() );
-
-			BufferedReader reader = null;
-
-            reader = new BufferedReader(new FileReader(dbInfoCsvPath()));
-            
-            String[] keys = reader.readLine().trim().split(",");
-			ArrayList<String[]> elem = new ArrayList<String[]>();
-			String line = reader.readLine();
-			while (line != null && !line.equals("")) {
-				elem.add(line.trim().split(","));
-				line = reader.readLine();
-			}
-			Collections.sort(elem, new Comparator<String[]>() {
-				public int compare(String[] l1, String[] l2) {
-					return Integer.parseInt(l1[0]) - Integer.parseInt(l2[0]);
-				}
-			});
-			reader.close();
-			for (int i = 0; i < keys.length; i++) {
-				String[] tmp = new String[elem.size()];
-				for (int j = 0; j < elem.size(); j++) {
-					tmp[j] = elem.get(j)[i];
-				}
-				infoMap.put(keys[i], tmp);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		HashMap<String, String[]> infoMap = DatabaseConfig.toInfoMap();
 		System.out.println("The number of databases in dbInfo.csv is is: " 
                 + String.valueOf(infoMap.get("databaseIndex").length));
 		return infoMap;
@@ -155,13 +105,6 @@ public class Databases {
 		dbsize = infoMap.get("databaseIndex").length;
 		spatialConfigPaths = infoMap.get("spatialConfigPaths");
 		ConfigPaths = infoMap.get("ConfigPaths");
-		if(b){
-			String connectionPath = ConfigurationDirectory(); // path + "../../src/main/resources/"; Ed 2017-09-12
-			for (int k=0; k<ConfigPaths.length; k++){
-				ConfigPaths[k] = connectionPath+ConfigPaths[k];
-			}
-		}
-			    
 		dbnames = infoMap.get("dbnames");
 		connectionURLs = infoMap.get("connectionURL");
 		usernames = infoMap.get("username");
@@ -185,20 +128,9 @@ public class Databases {
 	public static int dbsize = infoMap.get("databaseIndex").length;
 	public final static int defaultDBIndex = 0;
 	public static String[] spatialConfigPaths = infoMap.get("spatialConfigPaths");
-	public static String[] ConfigPaths        = infoMap.get("ConfigPaths");
-	static{
-        System.err.format("Databases::static{} called.\n"); //Ed 2017-09-12 for logging xml use.
-
-		String connectionPath = ConfigurationDirectory(); // path + "../../src/main/resources/"; // Ed 2017-09-12
-
-		for (int k=0; k<ConfigPaths.length; k++){
-			ConfigPaths[k] = connectionPath + ConfigPaths[k];
-            System.err.format("Databases::static{} ConfigPath[%d] is %s\n", k, ConfigPaths[k]); //Ed 2017-09-12 for logging xml use.
-		}	    
-	}		 
+	public static String[] ConfigPaths        = infoMap.get("ConfigPaths");	 
 	public static String[] dbnames = infoMap.get("dbnames");
 	public static String[] connectionURLs = infoMap.get("connectionURL");
 	public static String[] usernames = infoMap.get("username");
 	public static String[] passwords = infoMap.get("password");
-
 }
