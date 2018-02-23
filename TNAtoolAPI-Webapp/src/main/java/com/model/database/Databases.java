@@ -46,8 +46,21 @@ public class Databases {
 				return confdir;
     }
 
-    public static String dbInfoCsvPath() { 
-        String path = ConfigurationDirectory() + "admin/resources/dbInfo.csv";
+
+		public static String DownloadablesDirectory() {
+			System.err.format(
+							"Loading downloadables directory from property edu.oregonstate.tnatool.DownloadablesDirectory: %s, "
+							+  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/webapp/downloadables %s\n",
+							System.getProperty("edu.oregonstate.tnatool.DownloadablesDirectory"),
+							Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+			return
+					( System.getProperty("edu.oregonstate.tnatool.DownloadablesDirectory") != null )
+					? System.getProperty("edu.oregonstate.tnatool.DownloadablesDirectory") + '/'
+					: Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/webapp/downloadables";
+		}
+
+    public static String dbInfoCsvPath() {
+        String path = ConfigurationDirectory() + "/admin/resources/dbInfo.csv";
         System.err.format( "dbInfoCsvPath called, path is: %s \n", path);
         return path;
     }
