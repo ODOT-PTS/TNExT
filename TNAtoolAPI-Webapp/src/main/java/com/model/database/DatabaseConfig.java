@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -44,7 +45,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
     // Class methods
-    private static HashMap<String, DatabaseConfig> dbIndex;
+    private static TreeMap<Integer, DatabaseConfig> dbIndex;
+    private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
 
     private static String getPath(String...args) {
         return Paths.get(getConfigurationDirectory(), args).toString();
@@ -74,14 +76,16 @@ public class DatabaseConfig {
 
     public static void loadFromCsv(File csvfile) {
         // discard existing
-        dbIndex = new HashMap<String, DatabaseConfig>();
+        dbIndex = new TreeMap<Integer, DatabaseConfig>();
         // load csv
         System.out.println("DatabaseConfig.loadFromCsvPath: " + csvfile.getPath());
         CSVReader reader = null;
+        // todo: ian: load from map, ignore databaseIndex column?
         try {
             reader = new CSVReader(new FileReader(csvfile));
             String[] line;
             while ((line = reader.readNext()) != null) {
+                if (!tryParseInt(line[0])) { continue; }
                 System.out.println("DatabaseConfig.loadFromCsvPath: read dbIndex: " + line[0] + " dbName: " + line[1]
                         + " connectionUrl: " + line[4]);
                 DatabaseConfig d = new DatabaseConfig(line);
@@ -93,16 +97,40 @@ public class DatabaseConfig {
     }
 
     public static DatabaseConfig getConfig(int index) {
-        return getConfig(Integer.toString(index));
+        if (dbIndex == null) { loadDefault(); }
+        return getConfig(index);
     }
 
     public static DatabaseConfig getConfig(String index) {
-        if (dbIndex == null) { loadDefault(); }
-        return dbIndex.get(index);
+        return dbIndex.get(Integer.parseInt(index));
+    }
+
+    public static HashMap<String, String[]> toInfoMap() {
+        if (dbIndex == null) { loadDefault(); }        
+        int size = dbIndex.size();
+        HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
+        for (String s : fields) {
+            infoMap.put(s, new String[size]);
+        }
+        for (DatabaseConfig db : dbIndex.values()) {
+            HashMap<String, String> m = db.toMap();
+            for (String s : fields) {
+                infoMap.get(s)[db.getDatabaseIndex()] = m.get(s);
+            }
+        }
+        return infoMap;
+    }
+
+    private static boolean tryParseInt(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException nfe) {}
+        return false;
     }
 
     // Instance methods
-    private String databaseIndex;
+    private Integer databaseIndex;
     private String dbName;
     private String spatialConfigPath;
     private String configPath;
@@ -121,7 +149,7 @@ public class DatabaseConfig {
     }
 
     public String toString() {
-        return "<db index: " + getDatabaseIndex() + " name: " + getDbName() + " url: " + getConnectionUrl() + ">";
+        return "<db index: " + getDatabaseIndex().toString() + " name: " + getDbName() + " url: " + getConnectionUrl() + ">";
     }
 
     // Database connections
@@ -141,14 +169,6 @@ public class DatabaseConfig {
     }
     
     // to/from CSV
-    public String[] toArray() {
-        // backwards compat
-        String[] row = { getDatabaseIndex(), getDbName(), getSpatialConfigPath(), getConfigPath(), getConnectionUrl(),
-                getUsername(), getPassword(), getCensusMappingSource(), getGtfsMappingSource1(),
-                getGtfsMappingSource2() };
-        return row;
-    }
-
     public void fromArray(String[] row) {
         setDatabaseIndex(row[0]);
         setDbName(row[1]);
@@ -160,6 +180,35 @@ public class DatabaseConfig {
         setCensusMappingSource(row[7]);
         setGtfsMappingSource1(row[8]);
         setGtfsMappingSource2(row[9]);
+    }
+
+    public HashMap<String, String> toMap() {
+        HashMap<String, String> m = new HashMap<String, String>();
+        // "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
+        m.put("databaseIndex", getDatabaseIndex().toString());
+        m.put("dbnames", getDbName());
+        m.put("spatialConfigPaths", getSpatialConfigPath());
+        m.put("ConfigPaths", getConfigPath());
+        m.put("connectionURL", getConnectionUrl());
+        m.put("username", getUsername());
+        m.put("password", getPassword());
+        m.put("censusMappingSource", getCensusMappingSource());
+        m.put("gtfsMappingSource1", getGtfsMappingSource1());
+        m.put("gtfsMappingSource2", getGtfsMappingSource2());
+        return m;
+    }
+
+    public void fromMap(HashMap<String, String> m) {
+        setDatabaseIndex(m.get("databaseIndex"));
+        setDbName(m.get("dbnames"));
+        setSpatialConfigPath(m.get("spatialConfigPaths"));
+        setConfigPath(m.get("ConfigPaths"));
+        setConnectionUrl(m.get("connectionURL"));
+        setUsername(m.get("username"));
+        setPassword(m.get("password"));
+        setCensusMappingSource(m.get("censusMappingSource"));
+        setGtfsMappingSource1(m.get("gtfsMappingSource1"));
+        setGtfsMappingSource2(m.get("gtfsMappingSource2"));
     }
 
     // Config files
@@ -185,7 +234,7 @@ public class DatabaseConfig {
     }
 
     // Getters
-    public String getDatabaseIndex() {
+    public Integer getDatabaseIndex() {
         return databaseIndex;
     }
 
@@ -225,8 +274,11 @@ public class DatabaseConfig {
         return gtfsMappingSource2;
     }
 
-    public void setDatabaseIndex(String value) {
+    public void setDatabaseIndex(Integer value) {
         this.databaseIndex = value;
+    }
+    public void setDatabaseIndex(String value) {
+        setDatabaseIndex(Integer.parseInt(value));
     }
 
     public void setDbName(String value) {
