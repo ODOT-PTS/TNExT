@@ -33,65 +33,41 @@ import org.apache.commons.collections.iterators.EntrySetMapIterator;
 public class Databases {
 	public static HashMap<String, String[]> infoMap = getDbInfo();
 
-	// public static String path;
-    
     public static String ConfigurationDirectory()   {
-        System.err.format(
-                "Loading configuration directory from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
-                +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
-                System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
-                Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		return DatabaseConfig.getConfigurationDirectory() + '/';
+	}
 
-        return
-            ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
-            ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
-            : Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
-    }
-
-		public static String DownloadablesDirectory() {
-			System.err.format(
-							"Loading downloadables directory from property edu.oregonstate.tnatool.DownloadablesDirectory: %s, "
-							+  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/webapp/downloadables %s\n",
-							System.getProperty("edu.oregonstate.tnatool.DownloadablesDirectory"),
-							Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-			return
-					( System.getProperty("edu.oregonstate.tnatool.DownloadablesDirectory") != null )
-					? System.getProperty("edu.oregonstate.tnatool.DownloadablesDirectory") + '/'
-					: Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/webapp/downloadables";
-		}
+	public static String DownloadablesDirectory() {
+		return DatabaseConfig.getDownloadDirectory() + '/';
+	}
 
     public static String dbInfoCsvPath() {
-        String path = ConfigurationDirectory() + "/admin/resources/dbInfo.csv";
-        System.err.format( "dbInfoCsvPath called, path is: %s \n", path);
-        return path;
-    }
-
-    public static String dbInfoCsvPathTempFile() { 
-        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.tmp"; 
-    }
-
-    public static String dbInfoCsvPathBackupFile() { 
-        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.backup"; 
-    }
-
-    public static String databaseParamsCsvPath() {
-        return ConfigurationDirectory() + "admin/resources/databaseParams.csv"; 
+		return DatabaseConfig.getDbInfoCsvPath();
     }
 
     // For use by MainMap.java configuration-file auto-rewrite madness.
     // Ed 2017-09-12
-    public static String dbSpatialConnectionFolder() { 
-        String path = ConfigurationDirectory() + "com/model/database/connections/spatial"; 
-        System.err.format( "dbSpatialConnectionFolder called, path is: %s \n", path);
-        return path;
+    public static String dbInfoCsvPathTempFile() { 
+		return DatabaseConfig.getPath("admin", "resources", "dbInfo.csv.tmp");
+    }
+
+    public static String dbInfoCsvPathBackupFile() { 
+		return DatabaseConfig.getPath("admin", "resources", "dbInfo.csv.backup");
+    }
+
+    public static String databaseParamsCsvPath() {
+		return DatabaseConfig.getPath("admin", "resources", "databaseParams.csv.tmp");
+    }
+
+	public static String dbSpatialConnectionFolder() { 
+		return DatabaseConfig.getPath("com", "model", "database", "connections", "spatial");
     }
 
     public static String dbTransitConnectionFolder() { 
-        String path = ConfigurationDirectory() + "com/model/database/connections/transit"; 
-        System.err.format( "dbTransitConnectionFolder called, path is: %s \n", path);
-        return path;
-    }
+		return DatabaseConfig.getPath("com", "model", "database", "connections", "transit");
+	}
 
+	// getDbInfo
 	public static HashMap<String, String[]> getDbInfo() {
 		HashMap<String, String[]> infoMap = DatabaseConfig.toInfoMap();
 		System.out.println("The number of databases in dbInfo.csv is is: " 
@@ -101,7 +77,6 @@ public class Databases {
 	
 	public static void updateDbInfo(boolean b) {
         System.err.format("Databases::updateDbInfo() called.\n"); //Ed 2017-09-12 for logging xml use.
-
 		dbsize = infoMap.get("databaseIndex").length;
 		spatialConfigPaths = infoMap.get("spatialConfigPaths");
 		ConfigPaths = infoMap.get("ConfigPaths");
@@ -112,6 +87,7 @@ public class Databases {
 	}
 
 	public static void deactivateDB(int i){
+		// todo ian: remove from DatabaseConfig and call getDbInfo again
 		String[] newElement;
 		for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
 			newElement = new String[entry.getValue().length-1];

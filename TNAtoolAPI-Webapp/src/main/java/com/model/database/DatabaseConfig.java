@@ -48,12 +48,21 @@ public class DatabaseConfig {
     private static TreeMap<Integer, DatabaseConfig> dbIndex;
     private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
 
-    private static String getPath(String...args) {
+    // ian todo: make private
+    public static String getPath(String...args) {
         return Paths.get(getConfigurationDirectory(), args).toString();
     }
 
     public static String getConfigurationDirectory() {
-        return Paths.get(System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory")).toString();
+        String path = System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory");
+        if ( path != null) {
+            path = Paths.get(path).toString();
+            System.err.format("Configuration directory property: %s", path);
+        } else {
+            path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            System.err.format("Configuration directory fallback: %s", path);
+        }
+        return path;
     }
 
     public static String getUploadDirectory() {
@@ -61,7 +70,8 @@ public class DatabaseConfig {
     }
 
     public static String getDownloadDirectory() {
-        return getPath("admin", "downloadables");
+        return Paths.get("admin", "downloadables").toString();
+        // return getPath("admin", "downloadables");
     }
 
     public static String getDbInfoCsvPath() {
