@@ -78,8 +78,6 @@ public class Databases {
 	public static void updateDbInfo(boolean b) {
         System.err.format("Databases::updateDbInfo() called.\n"); //Ed 2017-09-12 for logging xml use.
 		dbsize = infoMap.get("databaseIndex").length;
-		spatialConfigPaths = infoMap.get("spatialConfigPaths");
-		ConfigPaths = infoMap.get("ConfigPaths");
 		dbnames = infoMap.get("dbnames");
 		connectionURLs = infoMap.get("connectionURL");
 		usernames = infoMap.get("username");
@@ -103,8 +101,6 @@ public class Databases {
 	
 	public static int dbsize = infoMap.get("databaseIndex").length;
 	public final static int defaultDBIndex = 0;
-	public static String[] spatialConfigPaths = infoMap.get("spatialConfigPaths");
-	public static String[] ConfigPaths        = infoMap.get("ConfigPaths");	 
 	public static String[] dbnames = infoMap.get("dbnames");
 	public static String[] connectionURLs = infoMap.get("connectionURL");
 	public static String[] usernames = infoMap.get("username");
