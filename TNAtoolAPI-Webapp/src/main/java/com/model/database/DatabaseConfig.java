@@ -108,15 +108,16 @@ public class DatabaseConfig {
 
     public static DatabaseConfig getConfig(int index) {
         if (dbConfigs == null) { loadDefault(); }
-        return getConfig(index);
+        return dbConfigs.get(index);
     }
 
     public static DatabaseConfig getConfig(String index) {
+        if (dbConfigs == null) { loadDefault(); }
         return dbConfigs.get(Integer.parseInt(index));
     }
 
-    public static TreeMap<Integer, DatabaseConfig> getConfigs() {
-        return dbConfigs;
+    public static DatabaseConfig[] getConfigs() {
+        return dbConfigs.values().toArray(new DatabaseConfig[0]);
     }
 
     public static int getConfigSize() {
