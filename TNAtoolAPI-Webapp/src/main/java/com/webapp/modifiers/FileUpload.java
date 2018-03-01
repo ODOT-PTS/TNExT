@@ -69,6 +69,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.model.database.*;
+import com.model.database.DatabaseConfig;
 import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.AddRemoveFeed;
 import com.model.database.queries.objects.UserSession;
@@ -81,10 +82,13 @@ public class FileUpload extends HttpServlet {
 	private final static String basePath = "C:/Users/Administrator/git/TNAsoftware/";
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
-	private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length-1];
-	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];
-	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];
-	private static final int DBINDEX = Databases.dbsize-1;
+	private static final DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
+	// private static final String dbRL = db.getConnectionUrl(); 
+	// private static final String dbUSER = db.getUsername();
+	// private static final String dbPASS = db.getPassword();
+	// private static final int DBINDEX = db.getDatabaseIndex();
+
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -140,7 +144,7 @@ public class FileUpload extends HttpServlet {
 			
 			Boolean b = true;
 			try {
-				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				c = dbConfig.getConnection();
 				
 				statement = c.createStatement();
 				rs = statement.executeQuery("SELECT feedname, feedsize "
@@ -189,7 +193,7 @@ public class FileUpload extends HttpServlet {
 			String URLpath  = request.getRequestURL().toString();
 	        int i = URLpath.indexOf(request.getServletPath());
 	        URLpath = URLpath.substring(0, i);
-			URLpath += ","+DBINDEX;
+			URLpath += ","+dbConfig.getDatabaseIndex();
 			
 			try {
     			obj.put("URLpath", URLpath);
@@ -202,7 +206,7 @@ public class FileUpload extends HttpServlet {
 			  if (session != null) {
 				  String esu = (String) session.getAttribute("username");
 				  try {
-						c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+						c = dbConfig.getConnection();
 						
 						statement = c.createStatement();
 						
@@ -285,7 +289,7 @@ public class FileUpload extends HttpServlet {
 			
 			Boolean b = true;
 			try {
-				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				c = dbConfig.getConnection();
 				
 				statement = c.createStatement();
 				rs = statement.executeQuery("SELECT * FROM gtfs_feed_info "
@@ -326,7 +330,7 @@ public class FileUpload extends HttpServlet {
 			
 			Boolean b = true;
 			try {
-				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				c = dbConfig.getConnection();
 				
 				statement = c.createStatement();
 				rs = statement.executeQuery("SELECT gtfs_uploaded_feeds.username, gtfs_uploaded_feeds.feedname, agencynames, firstname, lastname, startdate, enddate FROM gtfs_feed_info "
@@ -384,7 +388,7 @@ public class FileUpload extends HttpServlet {
 			
 			Boolean b = true;
 			try {
-				c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+				c = dbConfig.getConnection();
 				
 				statement = c.createStatement();
 				rs = statement.executeQuery("SELECT gtfs_uploaded_feeds.feedname, agencynames, ispublic, startdate, enddate "
@@ -511,7 +515,7 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds WHERE feedname='"+feedname+"';");
 			if ( rs.next() ) {
@@ -533,7 +537,7 @@ public class FileUpload extends HttpServlet {
 		Statement statement = null;
 		String filename = "";
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds WHERE feedname='"+feedname+"';");
 			if ( rs.next() ) {
@@ -559,7 +563,7 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			statement.executeUpdate("INSERT INTO gtfs_modified_feeds"
 								  + " (username,feedname,feedsize,deleted,added,filename)"
@@ -581,7 +585,7 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			statement.executeUpdate("INSERT INTO gtfs_modified_feeds"
 								  + " (username,feedname,feedsize,deleted,added,filename)"
@@ -611,7 +615,7 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
 			if ( rs.next() ) {
@@ -665,7 +669,7 @@ public class FileUpload extends HttpServlet {
 		Statement statement = null;
 		List<String> names = new ArrayList<String>();
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT gtfs_feed_info.feedname FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
 					+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
@@ -708,9 +712,9 @@ public class FileUpload extends HttpServlet {
 		}
 		
 		args[0] = "--driverClass=\"org.postgresql.Driver\"";
-		args[1] = "--url=\""+dbURL+"\"";
-		args[2] = "--username=\""+dbUSER+"\"";
-		args[3] = "--password=\""+dbPASS+"\"";
+		args[1] = "--url=\""+dbConfig.getConnectionUrl()+"\"";
+		args[2] = "--username=\""+dbConfig.getUsername()+"\"";
+		args[3] = "--password=\""+dbConfig.getPassword()+"\"";
 		args[4] = feed;
 		
 		boolean b = true;
@@ -732,7 +736,7 @@ public class FileUpload extends HttpServlet {
 		String agencyIds = "";
 		
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			
 			statement = c.createStatement();
 			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
@@ -949,7 +953,7 @@ public class FileUpload extends HttpServlet {
 		List<String> names;
 		String name;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
 					+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
@@ -986,7 +990,7 @@ public class FileUpload extends HttpServlet {
 		String usedspace="";
 		long us;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT SUM(feedsize) FROM gtfs_uploaded_feeds where username = '"+username+"';");
 			if ( rs.next() ) {
@@ -1017,15 +1021,12 @@ public class FileUpload extends HttpServlet {
 		}
 	}
 	
-	public static String updateFeeds(){
-		
+	public static String updateFeeds() {
 		Process pr;
 		ProcessBuilder pb;
-		String[] dbname = dbURL.split("/");
-		String name = dbname[dbname.length-1];
 		boolean bz = true;
 		try {
-			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", dbPASS, dbUSER, name,
+			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", dbConfig.getPassword(), dbConfig.getUsername(), dbConfig.getDatabase(),
 					psqlPath+"psql.exe",
 					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
 			pb.redirectErrorStream(true);
@@ -1062,7 +1063,7 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			ResultSet rs = statement.executeQuery("SELECT * FROM gtfs_modified_feeds gmf"
 					+ " inner join gtfs_pg_users gpu on gmf.username=gpu.username;");
@@ -1242,7 +1243,7 @@ public class FileUpload extends HttpServlet {
 									{"gtfs_feed_info","defaultid"}};
 		
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			
 			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedDel+"';");
