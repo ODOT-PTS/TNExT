@@ -6,16 +6,17 @@ ENV JAVA_OPTS="-Xmx2G"
 ENV CATALINA_BASE=/var/lib/tomcat8
 ENV CATALINA_HOME=/usr/share/tomcat8
 
-# tnast config
-WORKDIR /app
-RUN mkdir -p /app/conf
-RUN echo "edu.oregonstate.tnatool.ConfigurationDirectory = /app/conf/" >> ${CATALINA_BASE}/conf/catalina.properties
-RUN echo "edu.oregonstate.tnatool.DownloadablesDirectory = /var/lib/tomcat8/webapps/ROOT/downloadables/" >> ${CATALINA_BASE}/conf/catalina.properties
-
 # copy application WAR (with libraries inside)
 RUN rm -rf ${CATALINA_BASE}/webapps
 RUN mkdir -p ${CATALINA_BASE}/webapps
 COPY target/TNAtoolAPI-Webapp-0.0.1-SNAPSHOT.war ${CATALINA_BASE}/webapps/ROOT.war
+
+# tnast config
+ENV CONFDIR /app/conf
+RUN mkdir -p $CONFDIR/admin/resources
+RUN echo "edu.oregonstate.tnatool.ConfigurationDirectory = $CONFDIR/" >> ${CATALINA_BASE}/conf/catalina.properties
+RUN echo "edu.oregonstate.tnatool.DownloadablesDirectory = /var/lib/tomcat8/webapps/ROOT/downloadables/" >> ${CATALINA_BASE}/conf/catalina.properties
+COPY src/main/resources/admin/resources/dbInfoTemplate.csv $CONFDIR/admin/resources/dbInfo.csv
 
 # specify default command
 EXPOSE 8080
