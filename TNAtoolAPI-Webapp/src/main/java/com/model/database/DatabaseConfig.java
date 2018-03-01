@@ -14,10 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Creates a static hashmap of all the databases' required connection information from dbinfo.csv
-
 package com.model.database;
-
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -124,6 +121,10 @@ public class DatabaseConfig {
         return dbConfigs.size();
     }
 
+    public static DatabaseConfig getLastConfig() {
+        return dbConfigs.lastEntry().getValue();
+    }
+
     public static HashMap<String, String[]> toInfoMap() {
         if (dbConfigs == null) { loadDefault(); }        
         int size = dbConfigs.size();
@@ -228,11 +229,6 @@ public class DatabaseConfig {
         setCensusMappingSource(m.get("censusMappingSource"));
         setGtfsMappingSource1(m.get("gtfsMappingSource1"));
         setGtfsMappingSource2(m.get("gtfsMappingSource2"));
-    }
-
-    // Config files
-    public File getSpatialConfigFile() {
-        return new File(getPath(getSpatialConfigPath()));
     }
 
     // For external clients
