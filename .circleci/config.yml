@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8
+    steps:
+      - checkout
+      - run: mvn clean install
+      - run: |
+          mkdir -p /tmp/artifacts
+          cp TNAtoolAPI-Webapp/target/*.war /tmp/artifacts/ROOT.war
+      - store_artifacts:
+          path: /tmp/artifacts
+          destination: build
