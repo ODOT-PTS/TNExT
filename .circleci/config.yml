@@ -14,7 +14,7 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/postgres:9.4
 
-    working_directory: ~/repo/TNAtoolAPI-Webapp
+    working_directory: ~/repo
 
     environment:
       # Customize the JVM maximum heap limit
@@ -26,24 +26,31 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
+          - v1-dependencies-{{ checksum "TNAtoolAPI-Webapp/pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: mvn dependency:go-offline
+      - run: 
+          name: install Maven dependencies
+          command: mvn dependency:go-offline
+          working_directory: ~/repo/TNAtoolAPI-Webapp
 
       - save_cache:
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
+          key: v1-dependencies-{{ checksum "TNAtoolAPI-Webapp/pom.xml" }}
         
       # run tests!
       # - run: mvn integration-test
 
-      - run: mvn clean install
+      - run: 
+          name: Maven build
+          command: mvn clean install
+          working_directory: ~/repo/TNAtoolAPI-Webapp
+
       - run: |
           mkdir -p /tmp/artifacts
-          cp target/*.war /tmp/artifacts/ROOT.war
+          cp ~/repo/TNAtoolAPI-Webapp/target/*.war /tmp/artifacts/ROOT.war
       - store_artifacts:
           path: /tmp/artifacts
           destination: build
