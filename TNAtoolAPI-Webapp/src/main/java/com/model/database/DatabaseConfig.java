@@ -141,6 +141,24 @@ public class DatabaseConfig {
         return infoMap;
     }
 
+	public static void deactivateDb(int i){
+		// String[] newElement;
+		// for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
+		// 	newElement = new String[entry.getValue().length-1];
+		// 	for(int j=0;j<i;j++){
+		// 		newElement[j] = entry.getValue()[j];
+		// 	}
+		// 	for(int j=i;j<entry.getValue().length-1;j++){
+		// 		newElement[j] = entry.getValue()[j+1];
+		// 	}
+		// 	infoMap.put(entry.getKey(), newElement);
+		// }
+	}
+
+    public static void activateDb() {
+        // pass
+    }
+
     private static boolean tryParseInt(String str) {
         try {
             Integer.parseInt(str);
