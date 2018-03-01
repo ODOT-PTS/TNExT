@@ -6,6 +6,7 @@ volumes:
 
 services:
   db:
+    restart: always
     image: mdillon/postgis:9.5
     command: postgres --log_statement=all
     environment:
@@ -18,6 +19,7 @@ services:
 
   tnast:
     build: .
+    restart: always
     volumes:
       - conf:/app/conf
     ports:
