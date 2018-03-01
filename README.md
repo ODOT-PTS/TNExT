@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/ODOT-PTS/TNAST_MAVEN.svg?style=svg)](https://circleci.com/gh/ODOT-PTS/TNAST_MAVEN)
+
 # TNAST
 The Transit Network Analysis Software Tool (TNAST) is a web-based software tool developed for the visualization, analysis, and reporting of regional and statewide transit networks in the state of Oregon. 
 The TNA software tool has been developed using open source tools.

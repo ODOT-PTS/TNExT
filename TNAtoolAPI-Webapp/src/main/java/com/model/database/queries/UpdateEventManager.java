@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
+import com.webapp.modifiers.DbUpdate;
 
 public class UpdateEventManager {
     
@@ -697,28 +698,7 @@ public class UpdateEventManager {
 		host = host.substring(2);
 		host = "localhost"; //to be deleted
 
-		String[] p;
-		p = dbInfo[4].split("/");
-		String name = p[p.length-1];
-		Process pr;
-
-		try{
-			String[] cmdArray = new String[5];
-		   cmdArray[0] = "cmd";
-		   cmdArray[1] = "/c";
-		   cmdArray[2] = "cmd";
-		   cmdArray[3] = "/k";
-		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+path+" & "
-		   		+ "exit";
-		   
-		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-		   while ((reader.readLine()) != null) {}
-		   pr.waitFor(5,TimeUnit.MINUTES);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}	      
+		DbUpdate.runSqlFromFile(path, dbInfo[4], dbInfo[5], dbInfo[6]);
 	}
 	
 	/**
