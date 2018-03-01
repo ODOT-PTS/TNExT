@@ -23,12 +23,6 @@
 <hibernate-configuration>
 
     <session-factory>
-
-        <!-- Database connection settings -->
-        <!--<property name="connection.driver_class">com.mysql.jdbc.Driver</property>-->
-        <!--<property name="connection.url">jdbc:mysql://localhost:3306/gtfsdb</property>-->
-        <!--<property name="connection.username">root</property>-->
-        <!--<property name="connection.password">123123</property>-->
 		<property name="connection.driver_class">org.postgresql.Driver</property>
 		<property name="connection.url"></property>
 		<property name="connection.username"></property>
