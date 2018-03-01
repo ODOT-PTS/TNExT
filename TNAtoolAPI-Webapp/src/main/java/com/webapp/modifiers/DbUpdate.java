@@ -698,8 +698,14 @@ public class DbUpdate {
     		@QueryParam("user") String user, @QueryParam("pass") String pass, @QueryParam("oldURL") String oldURL, @QueryParam("olddbname") String olddbname) throws IOException{
 		PDBerror b = new PDBerror();
 		b.DBError = "true";
-		List<String> dbnames = Arrays.asList(Databases.dbnames);
-		List<String> urls = Arrays.asList(Databases.connectionURLs);
+		List<String> dbnames = new ArrayList<String>(); 
+		List<String> urls = new ArrayList<String>();
+		for (DatabaseConfig dbc : DatabaseConfig.getConfigs()) {
+			dbnames.add(dbc.getDbName());
+			urls.add(dbc.getConnectionUrl());
+		}
+		// List<String> dbnames = Arrays.asList(Databases.dbnames);
+		// List<String> urls = Arrays.asList(Databases.connectionURLs);
 		if(!olddbname.equals(dbname) && dbnames.contains(dbname)){
 			b.DBError = "Database display name \""+dbname+"\" already exists.";
 		}else if(!oldURL.equals(cURL+db) && urls.contains(cURL+db)){
