@@ -33,55 +33,15 @@ import org.apache.commons.collections.iterators.EntrySetMapIterator;
 public class Databases {
 	public static HashMap<String, String[]> infoMap = getDbInfo();
 
-    public static String ConfigurationDirectory()   {
-		return DatabaseConfig.getConfigurationDirectory() + '/';
-	}
-
-	public static String DownloadablesDirectory() {
-		return DatabaseConfig.getDownloadDirectory() + '/';
-	}
-
-    public static String dbInfoCsvPath() {
-		return DatabaseConfig.getDbInfoCsvPath();
-    }
-
-    // For use by MainMap.java configuration-file auto-rewrite madness.
-    // Ed 2017-09-12
-    public static String dbInfoCsvPathTempFile() { 
-		return DatabaseConfig.getPath("admin", "resources", "dbInfo.csv.tmp");
-    }
-
-    public static String dbInfoCsvPathBackupFile() { 
-		return DatabaseConfig.getPath("admin", "resources", "dbInfo.csv.backup");
-    }
-
-    public static String databaseParamsCsvPath() {
-		return DatabaseConfig.getPath("admin", "resources", "databaseParams.csv.tmp");
-    }
-
-	public static String dbSpatialConnectionFolder() { 
-		return DatabaseConfig.getPath("com", "model", "database", "connections", "spatial");
-    }
-
-    public static String dbTransitConnectionFolder() { 
-		return DatabaseConfig.getPath("com", "model", "database", "connections", "transit");
-	}
-
 	// getDbInfo
 	public static HashMap<String, String[]> getDbInfo() {
 		HashMap<String, String[]> infoMap = DatabaseConfig.toInfoMap();
-		System.out.println("The number of databases in dbInfo.csv is is: " 
-                + String.valueOf(infoMap.get("databaseIndex").length));
+		System.out.println("The number of databases in dbInfo.csv is is: " + String.valueOf(infoMap.get("databaseIndex").length));
 		return infoMap;
 	}
 	
 	public static void updateDbInfo(boolean b) {
-        System.err.format("Databases::updateDbInfo() called.\n"); //Ed 2017-09-12 for logging xml use.
-		dbsize = infoMap.get("databaseIndex").length;
-		dbnames = infoMap.get("dbnames");
-		connectionURLs = infoMap.get("connectionURL");
-		usernames = infoMap.get("username");
-		passwords = infoMap.get("password");		
+  	System.err.format("Databases::updateDbInfo() called.\n"); //Ed 2017-09-12 for logging xml use.
 	}
 
 	public static void deactivateDB(int i){
@@ -98,11 +58,4 @@ public class Databases {
 			infoMap.put(entry.getKey(), newElement);
 		}
 	}
-	
-	public static int dbsize = infoMap.get("databaseIndex").length;
-	public final static int defaultDBIndex = 0;
-	public static String[] dbnames = infoMap.get("dbnames");
-	public static String[] connectionURLs = infoMap.get("connectionURL");
-	public static String[] usernames = infoMap.get("username");
-	public static String[] passwords = infoMap.get("password");
 }
