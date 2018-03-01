@@ -19,6 +19,7 @@
  */
 package com.model.database.onebusaway.gtfs.hibernate.ext;
 
+import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
