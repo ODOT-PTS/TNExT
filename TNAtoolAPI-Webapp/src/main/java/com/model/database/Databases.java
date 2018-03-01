@@ -36,19 +36,18 @@ public class Databases {
 	// public static String path;
     
     public static String ConfigurationDirectory()   {
-        System.err.format(
-                "Loading configuration directory from property edu.oregonstate.tnatool.ConfigurationDirectory: %s, "
-                +  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/resources/ %s\n", 
-                System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory"),
-                Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-
-        return
-            ( System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) 
-            ? System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") + '/'
-            : Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
+				String confdir;
+				if (System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory") != null ) {
+					confdir = System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory");
+				} else {
+					confdir = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "../../src/main/resources/";
+				}
+				System.err.format("Configuration directory: %s \n", confdir);
+				return confdir;
     }
 
-		public static String DownloadablesDirectory() {
+
+	public static String DownloadablesDirectory() {
 			System.err.format(
 							"Loading downloadables directory from property edu.oregonstate.tnatool.DownloadablesDirectory: %s, "
 							+  "or falling back to getProtectionDomain().getCodeSource().getLocation().getPath() + ../../src/main/webapp/downloadables %s\n",
@@ -67,15 +66,21 @@ public class Databases {
     }
 
     public static String dbInfoCsvPathTempFile() { 
-        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.tmp"; 
+				String path = ConfigurationDirectory() + "admin/resources/dbInfo.csv.tmp"; 
+				System.err.format( "dbInfoCsvPathTempFile called, path is: %s \n", path);
+        return path;
     }
 
     public static String dbInfoCsvPathBackupFile() { 
-        return ConfigurationDirectory() + "/admin/resources/dbInfo.csv.backup"; 
+        String path = ConfigurationDirectory() + "admin/resources/dbInfo.csv.backup"; 
+				System.err.format( "dbInfoCsvPathBackupFile called, path is: %s \n", path);
+        return path;
     }
 
     public static String databaseParamsCsvPath() {
-        return ConfigurationDirectory() + "admin/resources/databaseParams.csv"; 
+        String path = ConfigurationDirectory() + "admin/resources/databaseParams.csv"; 
+				System.err.format( "databaseParamsCsvPath called, path is: %s \n", path);
+        return path;				
     }
 
     // For use by MainMap.java configuration-file auto-rewrite madness.

@@ -1024,15 +1024,27 @@ public class FileUpload extends HttpServlet {
 		String[] dbname = dbURL.split("/");
 		String name = dbname[dbname.length-1];
 		boolean bz = true;
-		try {
-			pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", dbPASS, dbUSER, name,
-					psqlPath+"psql.exe",
-					basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
-			pb.redirectErrorStream(true);
-			pr = pb.start();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+		
+		String[] sqlFiles = {
+			"Functions.sql",
+			"Tripstableupdator_pgsql.sql",
+			"Stops_AddGeolocation.sql",
+			"StopsGeoCoder_PGSQL.sql",
+			"Stops-For-Route-query_pgsql.sql",
+			"servedStopsSelector-2.sql",
+			"gtfs_trip_stops.sql",
+			"Counties_trip_pgsql.sql",
+			"Tracts_trip_pgsql.sql",
+			"Urbans_trip_pgsql.sql",
+			"Places_trip_pgsql.sql",
+			"Congdists_trip_pgsql.sql",
+			"calendar_range_finder.sql",
+			"adminFeeds.sql"
+		};
+		for(String sqlFileName: sqlFiles) {
+			String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			path = path + "../../../../webapp/resources/admin/Development/PGSQL/" + sqlFileName;
+			DbUpdate.runSqlFromFile(path, dbURL, dbUSER, dbPASS);
 		}
 		
 		return "Feed updated";
