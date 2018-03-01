@@ -55,45 +55,26 @@ import com.model.database.onebusaway.gtfs.hibernate.ext.HibernateGtfsRelationalD
 import org.onebusaway.gtfs.model.*;
 
 
-public class GtfsHibernateReaderExampleMain {
-
-  private static final String KEY_CLASSPATH = "classpath:";
-
-  private static final String KEY_FILE = "file:";
-  
+public class GtfsHibernateReaderExampleMain { 
   private GtfsMutableRelationalDao dao;
-  
   public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[DatabaseConfig.getConfigSize()];
-  
   public static SessionFactory[] sessions = new SessionFactory[DatabaseConfig.getConfigSize()];
   
   static{
     for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
-      System.out.println("GtfsHibernateReaderExampleMain::static{}: "+db.toString());
-      System.out.println("GtfsHibernateReaderExampleMain::static{}: "+db.getSpatialConfigFile().getPath());
-      Integer index = db.getDatabaseIndex();
-      String path = db.getSpatialConfigFile().getPath();
-      factory[index] = createHibernateGtfsFactory(path, index);
+      factory[db.getDatabaseIndex()] = createHibernateGtfsFactory(db);
     }
-	  // for (int k=0; k<Databases.dbsize; k++){
-    //       // Ed 2017-09-12 log so we can see who is using xml config paths.
-    //       String p = Databases.ConfigurationDirectory() + Databases.ConfigPaths[k];
-    //       System.err.format("GtfsHibernateReaderExampleMain::static{}, creating session factory from ConfigPath: %s\n", p);
-		//   factory[k] = createHibernateGtfsFactory(p,k);
-	  // }	    
   }
   
   public static void updateSessions(){
 	  for (SessionFactory s: sessions){
 		  s.close();
 	  }
-	  factory = new HibernateGtfsFactory[Databases.dbsize];
-	  sessions = new SessionFactory[Databases.dbsize];
-	  for (int k=0; k<Databases.dbsize; k++){
-      String p = Databases.ConfigurationDirectory() + Databases.ConfigPaths[k];
-      System.err.format("GtfsHibernateReaderExampleMain::updateSessions(), creating session factory from ConfigPath: %s\n", p);
-		  factory[k] = createHibernateGtfsFactory(p,k);
-	  }
+	  factory = new HibernateGtfsFactory[DatabaseConfig.getConfigSize()];
+	  sessions = new SessionFactory[DatabaseConfig.getConfigSize()];
+    for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+      factory[db.getDatabaseIndex()] = createHibernateGtfsFactory(db);
+    }
   }
   
   public static Agency QueryAgencybyid(String id, int dbindex){
@@ -302,8 +283,8 @@ public class GtfsHibernateReaderExampleMain {
     return a.compareTo(b) <= 0 ? b : a;
   }
 
-  private static HibernateGtfsFactory createHibernateGtfsFactory(String resource, int k) {
-    DatabaseConfig db = DatabaseConfig.getConfig(k);
+  private static HibernateGtfsFactory createHibernateGtfsFactory(DatabaseConfig db) {
+    System.out.println("GtfsHibernateReaderExampleMain::createHibernateGtfsFactory: "+db.toString());
     URL url = GtfsHibernateReaderExampleMain.class.getClassLoader().getResource("admin/resources/gtfsDb.cfg.xml");
     File inputFile = new File(url.getFile());
     Configuration config = new Configuration();
@@ -312,7 +293,7 @@ public class GtfsHibernateReaderExampleMain {
     config.setProperty("hibernate.connection.username", db.getUsername());
     config.setProperty("hibernate.connection.password", db.getUsername());
     SessionFactory sessionFactory = config.buildSessionFactory();
-    sessions[k] = sessionFactory;
+    sessions[db.getDatabaseIndex()] = sessionFactory;
     return new HibernateGtfsFactory(sessionFactory);
   }
 }
