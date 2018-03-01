@@ -45,7 +45,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
     // Class methods
-    private static TreeMap<Integer, DatabaseConfig> dbIndex;
+    private static TreeMap<Integer, DatabaseConfig> dbConfigs;
     private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
 
     // ian todo: make private
@@ -59,7 +59,7 @@ public class DatabaseConfig {
             path = Paths.get(path).toString();
             System.err.format("Configuration directory property: %s", path);
         } else {
-            path = Databases.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            path = DatabaseConfig.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             System.err.format("Configuration directory fallback: %s", path);
         }
         return path;
@@ -86,7 +86,7 @@ public class DatabaseConfig {
 
     public static void loadFromCsv(File csvfile) {
         // discard existing
-        dbIndex = new TreeMap<Integer, DatabaseConfig>();
+        dbConfigs = new TreeMap<Integer, DatabaseConfig>();
         // load csv
         System.out.println("DatabaseConfig.loadFromCsvPath: " + csvfile.getPath());
         CSVReader reader = null;
@@ -96,10 +96,10 @@ public class DatabaseConfig {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (!tryParseInt(line[0])) { continue; }
-                System.out.println("DatabaseConfig.loadFromCsvPath: read dbIndex: " + line[0] + " dbName: " + line[1]
+                System.out.println("DatabaseConfig.loadFromCsvPath: read dbConfigs: " + line[0] + " dbName: " + line[1]
                         + " connectionUrl: " + line[4]);
                 DatabaseConfig d = new DatabaseConfig(line);
-                dbIndex.put(d.getDatabaseIndex(), d);
+                dbConfigs.put(d.getDatabaseIndex(), d);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,22 +107,30 @@ public class DatabaseConfig {
     }
 
     public static DatabaseConfig getConfig(int index) {
-        if (dbIndex == null) { loadDefault(); }
+        if (dbConfigs == null) { loadDefault(); }
         return getConfig(index);
     }
 
     public static DatabaseConfig getConfig(String index) {
-        return dbIndex.get(Integer.parseInt(index));
+        return dbConfigs.get(Integer.parseInt(index));
+    }
+
+    public static TreeMap<Integer, DatabaseConfig> getConfigs() {
+        return dbConfigs;
+    }
+
+    public static int getConfigSize() {
+        return dbConfigs.size();
     }
 
     public static HashMap<String, String[]> toInfoMap() {
-        if (dbIndex == null) { loadDefault(); }        
-        int size = dbIndex.size();
+        if (dbConfigs == null) { loadDefault(); }        
+        int size = dbConfigs.size();
         HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
         for (String s : fields) {
             infoMap.put(s, new String[size]);
         }
-        for (DatabaseConfig db : dbIndex.values()) {
+        for (DatabaseConfig db : dbConfigs.values()) {
             HashMap<String, String> m = db.toMap();
             for (String s : fields) {
                 infoMap.get(s)[db.getDatabaseIndex()] = m.get(s);
