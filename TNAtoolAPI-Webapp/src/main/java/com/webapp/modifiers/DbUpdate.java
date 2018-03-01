@@ -82,6 +82,7 @@ import org.xml.sax.SAXException;
 
 import com.goebl.simplify.Point;
 import com.goebl.simplify.Simplify;
+import com.model.database.DatabaseConfig;
 import com.model.database.Databases;
 import com.model.database.FeedNames;
 import com.model.database.GtfsDatabaseLoaderMain;
@@ -102,10 +103,7 @@ import com.webapp.api.Queries;
 public class DbUpdate {
 	private final static int USER_COUNT = 10;
 	private final static int QUOTA = 10000000;
-	private static final String dbURL  = Databases.connectionURLs[Databases.connectionURLs.length-1];
-	private static final String dbUSER = Databases.usernames[Databases.usernames.length-1];
-	private static final String dbPASS = Databases.passwords[Databases.passwords.length-1];
-//	private static final int DBINDEX = Databases.dbsize-1;
+	private static final DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
 	public final static String VERSION = "V4.16.07";
 	public static boolean gtfsUpload = false;
 	public static String gtfsMessage="";
@@ -116,7 +114,7 @@ public class DbUpdate {
 		Statement statement = null;
 		ResultSet rs = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			/*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
 					+ "JOIN gtfs_selected_feeds "
@@ -145,7 +143,7 @@ public class DbUpdate {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getDefaultDbIndex(){
 		PDBerror b = new PDBerror();
-		b.DBError = (Databases.dbsize-1)+"";
+		b.DBError = (DatabaseConfig.getLastConfig().getDatabaseIndex())+"";
 		return b;
 	}
 	
@@ -175,8 +173,7 @@ public class DbUpdate {
     @Path("/readDBinfo")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object readDBinfo() throws IOException{
-		File inputFile = new File( Databases.dbInfoCsvPath() ); // Ed 2017-09-12
-		
+		File inputFile = new File( DatabaseConfig.getDbInfoCsvPath() ); // Ed 2017-09-12
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String dbInfo = reader.readLine();
 		String line;
@@ -193,8 +190,7 @@ public class DbUpdate {
     @Path("/getIndex")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     public Object getIndex() throws IOException{
-		File inputFile = new File( Databases.dbInfoCsvPath() ); // Ed 2017-09-12
-		
+		File inputFile = new File( DatabaseConfig.getDbInfoCsvPath() ); // Ed 2017-09-12
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		int j=0;
 		reader.readLine();
@@ -202,7 +198,6 @@ public class DbUpdate {
 			j++;
 		} 
 		reader.close();
-		
 		return j+"";
 	}
 	
@@ -298,7 +293,7 @@ public class DbUpdate {
 		error.DBError = "true";
 		ResultSet rs = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
 			rs = statement.executeQuery("select * from gtfs_pg_users;");
 			rs.last();
@@ -333,7 +328,7 @@ public class DbUpdate {
 		Statement statement = null;
 		ResultSet rs = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='"+username+"';");
 			if ( rs.next() ) {
@@ -449,7 +444,7 @@ public class DbUpdate {
 		UserInfo userInfo = new UserInfo();
 		ResultSet rs = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			rs = statement.executeQuery("select * from gtfs_pg_users where username='"+user+"' or email='"+user+"';");
 			if ( rs.next() ) {
@@ -481,7 +476,7 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.prepareStatement("select * from gtfs_pg_users where username=? or email=?;");
 			statement.setString(1, user);
 			statement.setString(2, user);
@@ -513,7 +508,7 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "";
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			statement.executeUpdate("UPDATE gtfs_uploaded_feeds SET ispublic = '"+p+"' WHERE feedname = '"+feedname+"';");
 			
@@ -539,7 +534,7 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			rs = statement.executeQuery("SELECT * FROM gtfs_pg_users WHERE username = '"+username+"';");
 			if(rs.next()){
@@ -627,7 +622,7 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "false";
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.prepareStatement("SELECT * FROM gtfs_pg_users WHERE (username = ? or email = ?) and password = ?;");
 			statement.setString(1, user);
 			statement.setString(2, user);
@@ -670,7 +665,7 @@ public class DbUpdate {
 		PDBerror error = new PDBerror();
 		error.DBError = "";
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.prepareStatement("INSERT INTO gtfs_pg_users (username,password,email,firstname,lastname,quota,usedspace,active,key) "
 					+ "VALUES (?,?,?,?,?,?,?,?,?);");
 			statement.setString(1, user);
@@ -2351,7 +2346,7 @@ public class DbUpdate {
     public Object deleteUploadedGTFS() throws IOException{
 		//String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		//File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
-        File gtfsFolder = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs" );
+        File gtfsFolder = new File( DatabaseConfig.getPath("admin","uploads","gtfs") );
 		File[] files = gtfsFolder.listFiles();
 //		System.out.println(files.length);
 	    if(files!=null) { 
@@ -2536,10 +2531,10 @@ public class DbUpdate {
 		
 		//String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		//File source = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs/"+feedname);
-		File source = new File( Databases.ConfigurationDirectory() + "/admin/uploads/gtfs/" + feedname );
+		File source = new File( DatabaseConfig.getPath("admin", "uploads", "gtfs", feedname) );
 		//String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
         // Include dbInfo[0] which is the index number -- this way we save an archive of each file as it's used.
-        String feed = Databases.ConfigurationDirectory() + "/admin/processFiles/gtfs/" + dbInfo[0] + "/"  + feedname;
+        String feed = DatabaseConfig.getPath("admin", "processFiles", "gtfs", dbInfo[0], feedname);
 
 		File target = new File(feed);
         target.mkdirs(); // FIXME, catch any error here and log. Ed 2017-09-18
@@ -4174,7 +4169,7 @@ public class DbUpdate {
 		Statement statement = null;
 		ResultSet rs = null;
 		try {
-			c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '"+username+"';");
 					
