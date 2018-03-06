@@ -3758,58 +3758,6 @@ public class DbUpdate {
     return lists;
   }
 
-  /*@GET
-    @Path("/updateFeeds")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object updateFeeds(@QueryParam("db") String db, @QueryParam("folder") String folder){
-    
-    String[] dbInfo = db.split(",");
-    Process pr;
-    ProcessBuilder pb;
-    String[] dbname = dbInfo[4].split("/");
-    String name = dbname[dbname.length-1];
-    String usrn = dbInfo[5];
-    String pass = dbInfo[6];
-    
-    try {
-      pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", pass, usrn, name,
-          psqlPath+"psql.exe",
-          basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
-      pb.redirectErrorStream(true);
-      pr = pb.start();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    
-    return "done";
-  }*/
-
-  /*@GET
-    @Path("/addPsqlFunctions")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object addPsqlFunctions(@QueryParam("db") String db){
-    
-    String[] dbInfo = db.split(",");
-    Process pr;
-    ProcessBuilder pb;
-    String[] dbname = dbInfo[4].split("/");
-    String name = dbname[dbname.length-1];
-    String usrn = dbInfo[5];
-    String pass = dbInfo[6];
-    
-    try {
-      pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFbat", pass, usrn, name,
-          psqlPath+"psql.exe",
-          basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
-      pb.redirectErrorStream(true);
-      pr = pb.start();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    
-    return "done";
-  }*/
-
   @GET
   @Path("/addIndex")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
