@@ -2530,49 +2530,6 @@ public class DbUpdate {
     return message;
   }
 
-  @GET
-  @Path("/restoreCensus")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object restoreCensus(@QueryParam("db") String db) {
-    String[] dbInfo = db.split(",");
-    String[] p;
-    p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    
-    // FIXME: Drew looking into ways to fix this endpoint. Or maybe it's not even used?
-    // String[] tables = {"census_blocks","census_counties","census_congdist","census_places","census_tracts","census_urbans","gtfs_modified_feeds","gtfs_pg_users","gtfs_selected_feeds","gtfs_uploaded_feeds","lodes_blocks_rac","lodes_blocks_wac","lodes_rac_projection_block","lodes_rac_projection_county","parknride","title_vi_blocks_float"};
-    // for (String tableName: tables) {
-      // copyTable(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
-    // }
-
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    String batFile = path + "../../src/main/resources/admin/resources/restoreCensus.bat";
-    Process pr;
-    ProcessBuilder pb;
-    dbInfo[6] = "123123";
-    dbInfo[5] = "postgres";
-    name = "testdb";
-    batFile = batFile.substring(1, batFile.length());
-    try {
-      pb = new ProcessBuilder("cmd", "/c", batFile, dbInfo[6], dbInfo[5], name,
-          "C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe", "C:/Program Files/PostgreSQL/9.3/bin/psql.exe");
-      //			pb.redirectErrorStream(true);
-      pr = pb.start();
-      pr.waitFor(5, TimeUnit.MINUTES);
-      System.out.println("done adding");
-      /*BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-        String line;
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
-      */
-    } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
-    }
-
-    return "done";
-  }
-
   private void parseXmlFile(File xmlFile, File dstFile, String[] dbInfo, boolean b) {
 
     //		File xmlFile = new File(srcFile);
