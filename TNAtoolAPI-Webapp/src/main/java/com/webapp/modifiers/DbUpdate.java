@@ -187,17 +187,13 @@ public class DbUpdate {
   @Path("/readDBinfo")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object readDBinfo() throws IOException {
-    File inputFile = new File(DatabaseConfig.getDbInfoCsvPath()); // Ed 2017-09-12
-
-    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-    String dbInfo = reader.readLine();
-    String line;
-    //		int j=0;
-    //		reader.readLine();
-    while ((line = reader.readLine()) != null) {
-      dbInfo += "#$#" + line;
+    int dbsize = DatabaseConfig.getConfigSize();
+    String[][] dbInfo = new String[dbsize+1][];
+    dbInfo[0] = DatabaseConfig.getFields();
+    DatabaseConfig[] ds = DatabaseConfig.getConfigs();
+    for (int i=0; i < ds.length; i++) {
+      dbInfo[i+1] = ds[i].toArray();
     }
-    reader.close();
     return dbInfo;
   }
 
