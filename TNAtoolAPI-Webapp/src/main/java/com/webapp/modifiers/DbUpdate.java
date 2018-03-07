@@ -15,6 +15,7 @@
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
 // Includes all the methods used for the creation, modification, maintenance, and deletion of databases
+
 package com.webapp.modifiers;
 
 import java.io.BufferedReader;
@@ -84,7 +85,9 @@ import org.xml.sax.SAXException;
 
 import com.goebl.simplify.Point;
 import com.goebl.simplify.Simplify;
+import com.model.database.DatabaseConfig;
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 import com.model.database.FeedNames;
 import com.model.database.GtfsDatabaseLoaderMain;
 import com.model.database.PDBerror;
@@ -103,10 +106,7 @@ import com.webapp.api.Queries;
 public class DbUpdate {
   private final static int USER_COUNT = 10;
   private final static int QUOTA = 10000000;
-  private static final String dbURL = Databases.connectionURLs[Databases.connectionURLs.length - 1];
-  private static final String dbUSER = Databases.usernames[Databases.usernames.length - 1];
-  private static final String dbPASS = Databases.passwords[Databases.passwords.length - 1];
-  //	private static final int DBINDEX = Databases.dbsize-1;
+  private final static DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
   public final static String VERSION = "V4.16.07";
   public static boolean gtfsUpload = false;
   public static String gtfsMessage = "";
@@ -117,7 +117,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       /*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
           + "JOIN gtfs_selected_feeds "
@@ -158,7 +158,7 @@ public class DbUpdate {
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object getDefaultDbIndex() {
     PDBerror b = new PDBerror();
-    b.DBError = (Databases.dbsize - 1) + "";
+    b.DBError = (dbConfig.getDatabaseIndex()) + "";
     return b;
   }
 
@@ -172,11 +172,11 @@ public class DbUpdate {
     return b;
   }
 
+  // ian: unused?
   @POST
   @Path("/correctAjax")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object tests(@QueryParam("x") String x) {
-
     PDBerror b = new PDBerror();
     b.DBError = x;
     System.out.println(x);
@@ -188,17 +188,13 @@ public class DbUpdate {
   @Path("/readDBinfo")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object readDBinfo() throws IOException {
-    File inputFile = new File(Databases.dbInfoCsvPath()); // Ed 2017-09-12
-
-    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-    String dbInfo = reader.readLine();
-    String line;
-    //		int j=0;
-    //		reader.readLine();
-    while ((line = reader.readLine()) != null) {
-      dbInfo += "#$#" + line;
+    int dbsize = DatabaseConfig.getConfigSize();
+    String[][] dbInfo = new String[dbsize+1][];
+    dbInfo[0] = DatabaseConfig.getFields();
+    DatabaseConfig[] ds = DatabaseConfig.getConfigs();
+    for (int i=0; i < ds.length; i++) {
+      dbInfo[i+1] = ds[i].toArray();
     }
-    reader.close();
     return dbInfo;
   }
 
@@ -206,24 +202,13 @@ public class DbUpdate {
   @Path("/getIndex")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object getIndex() throws IOException {
-    File inputFile = new File(Databases.dbInfoCsvPath()); // Ed 2017-09-12
-
-    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-    int j = 0;
-    reader.readLine();
-    while (reader.readLine() != null) {
-      j++;
-    }
-    reader.close();
-
-    return j + "";
+    return DatabaseConfig.getLastConfig().getDatabaseIndex() + 1;
   }
 
   @GET
   @Path("/activateDBs")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object activateDBs(@QueryParam("db") String db) throws IOException {
-    Databases.infoMap = Databases.getDbInfo();
     updateDatabaseStaticInfo(true);
 
     String[] dbInfo = db.split(",");
@@ -248,12 +233,10 @@ public class DbUpdate {
         } catch (SQLException e) {
         }
     }
-
     return "done";
   }
 
   public void updateDatabaseStaticInfo(boolean b) {
-    Databases.updateDbInfo(b);
     Queries.updateDefaultDBindex();
     GtfsHibernateReaderExampleMain.updateSessions();
     Hutil.updateSessions();
@@ -296,7 +279,7 @@ public class DbUpdate {
   @Path("/deactivateDBs")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object deactivateDBs(@QueryParam("db") String db, @QueryParam("index") int index) throws IOException {
-    Databases.deactivateDB(index);
+    DatabaseConfig.deactivateDb(index);
     updateDatabaseStaticInfo(false);
 
     String[] dbInfo = db.split(",");
@@ -325,6 +308,7 @@ public class DbUpdate {
     return "done";
   }
 
+  // ian: unused?
   @GET
   @Path("/userCount")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -336,7 +320,7 @@ public class DbUpdate {
     error.DBError = "true";
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
       rs = statement.executeQuery("select * from gtfs_pg_users;");
       rs.last();
@@ -384,7 +368,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT key FROM gtfs_pg_users WHERE username='" + username + "';");
       if (rs.next()) {
@@ -505,6 +489,7 @@ public class DbUpdate {
     return b;
   }*/
 
+  // ian: unused?
   @GET
   @Path("/getUserInfo")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -514,7 +499,7 @@ public class DbUpdate {
     UserInfo userInfo = new UserInfo();
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       rs = statement.executeQuery("select * from gtfs_pg_users where username='" + user + "' or email='" + user + "';");
       if (rs.next()) {
@@ -548,6 +533,7 @@ public class DbUpdate {
     return userInfo;
   }
 
+  // ian: unused?
   @GET
   @Path("/checkUser")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -558,7 +544,7 @@ public class DbUpdate {
     PDBerror error = new PDBerror();
     error.DBError = "false";
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.prepareStatement("select * from gtfs_pg_users where username=? or email=?;");
       statement.setString(1, user);
       statement.setString(2, user);
@@ -593,6 +579,7 @@ public class DbUpdate {
     return error;
   }
 
+  // ian: unused?
   @GET
   @Path("/changePublic")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -602,7 +589,7 @@ public class DbUpdate {
     PDBerror error = new PDBerror();
     error.DBError = "";
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       statement
           .executeUpdate("UPDATE gtfs_uploaded_feeds SET ispublic = '" + p + "' WHERE feedname = '" + feedname + "';");
@@ -627,6 +614,7 @@ public class DbUpdate {
     return error;
   }
 
+  // ian: unused?
   @GET
   @Path("/isActive")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -637,7 +625,7 @@ public class DbUpdate {
     PDBerror error = new PDBerror();
     error.DBError = "false";
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_pg_users WHERE username = '" + username + "';");
       if (rs.next()) {
@@ -668,28 +656,6 @@ public class DbUpdate {
     return error;
   }
 
-  /*@POST
-    @Path("/uploadfeed")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.MULTIPART_FORM_DATA })
-    public Object uploadFeed(RequestContext request){
-    boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-    FileItemFactory factory = new DiskFileItemFactory();
-    ServletFileUpload upload = new ServletFileUpload(factory);
-    try {
-      List<FileItem> items = upload.parseRequest(request);
-      System.out.println(items.size());
-    }catch (FileUploadException e) {
-      e.printStackTrace();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    System.out.println(request);
-  
-    PDBerror error = new PDBerror();
-    
-    
-    return error;
-  }*/
 
   /**
    * Changes the playground passkey. Delete this method from the server!!
@@ -697,29 +663,33 @@ public class DbUpdate {
    * @return
    * @throws UnsupportedEncodingException
    * @throws NoSuchAlgorithmException
-   *//*
-           @GET
-           @Path("/makePassKey")
-           @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-           public Object makePassKey(@QueryParam("pass") String password) 
-                 throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException{
-           
-           byte[] passByte = password.getBytes("UTF-8");
-           MessageDigest md = MessageDigest.getInstance("MD5");
-           passByte = md.digest(passByte);
-           String pass = new String(passByte, "UTF-8");
-           
-           String root = new File(".").getAbsolutePath();
-              root = removeLastChar(root);
-              File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
-           BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
-           
-           writer.write(pass);
-           
-           writer.close();
-           return "";
-           }*/
+   */
+  // ian: unused?
+   /*
+  @GET
+  @Path("/makePassKey")
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+  public Object makePassKey(@QueryParam("pass") String password) 
+        throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException{
+  
+  byte[] passByte = password.getBytes("UTF-8");
+  MessageDigest md = MessageDigest.getInstance("MD5");
+  passByte = md.digest(passByte);
+  String pass = new String(passByte, "UTF-8");
+  
+  String root = new File(".").getAbsolutePath();
+    root = removeLastChar(root);
+    File passFile = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/pass.txt");
+  BufferedWriter writer = new BufferedWriter(new FileWriter(passFile));
+  
+  writer.write(pass);
+  
+  writer.close();
+  return "";
+  }
+  */
 
+  // ian: unused?
   @GET
   @Path("/validateUser")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -737,7 +707,7 @@ public class DbUpdate {
     PDBerror error = new PDBerror();
     error.DBError = "false";
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.prepareStatement("SELECT * FROM gtfs_pg_users WHERE (username = ? or email = ?) and password = ?;");
       statement.setString(1, user);
       statement.setString(2, user);
@@ -773,6 +743,7 @@ public class DbUpdate {
     return error;
   }
 
+  // ian: unused?
   @GET
   @Path("/addUser")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -792,7 +763,7 @@ public class DbUpdate {
     PDBerror error = new PDBerror();
     error.DBError = "";
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.prepareStatement(
           "INSERT INTO gtfs_pg_users (username,password,email,firstname,lastname,quota,usedspace,active,key) "
               + "VALUES (?,?,?,?,?,?,?,?,?);");
@@ -835,8 +806,12 @@ public class DbUpdate {
       @QueryParam("oldURL") String oldURL, @QueryParam("olddbname") String olddbname) throws IOException {
     PDBerror b = new PDBerror();
     b.DBError = "true";
-    List<String> dbnames = Arrays.asList(Databases.dbnames);
-    List<String> urls = Arrays.asList(Databases.connectionURLs);
+    List<String> dbnames = new ArrayList<String>(); 
+    List<String> urls = new ArrayList<String>();
+    for (DatabaseConfig dbc : DatabaseConfig.getConfigs()) {
+      dbnames.add(dbc.getDbName());
+      urls.add(dbc.getConnectionUrl());
+    }
     if (!olddbname.equals(dbname) && dbnames.contains(dbname)) {
       b.DBError = "Database display name \"" + dbname + "\" already exists.";
     } else if (!oldURL.equals(cURL + db) && urls.contains(cURL + db)) {
@@ -864,90 +839,30 @@ public class DbUpdate {
   @Path("/deleteDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object deleteDB(@QueryParam("index") String i) throws IOException {
-
-    // FIXME. Change to use Databases.dbInfoCsvPath() 
-    // 
-    // It will be a little tricky to do this properly, not deleting our
-    // config file, without any testing on OSU server.
-    //
-    // Ed 2017-09-12
-
-    //		String tmpPath = basePath+"TNAtoolAPI-Webapp/WebContent/admin/";
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    ClassLoader classLoader = getClass().getClassLoader();
-    File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    File tempFile = new File(path + "admin/resources/tmp.csv");
-    File dstfile = new File(Databases.dbInfoCsvPath());
-    //		File inputFile = new File(tmpPath + "dbInfo.csv");
-
-    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-    BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-    String currentLine;
-    String index;
-    String[] elems = new String[10];
-    String[] elemsIndex = new String[10];
-    int j = 0;
-    while ((currentLine = reader.readLine()) != null) {
-      elemsIndex = currentLine.split(",");
-      index = elemsIndex[0];
-      if (!index.equals(i)) {
-        if (!index.equals("databaseIndex")) {
-          elemsIndex[0] = j + "";
-          j++;
-          currentLine = "";
-          for (int k = 0; k < elemsIndex.length - 1; k++) {
-            currentLine += elemsIndex[k] + ",";
-          }
-          currentLine += elemsIndex[elemsIndex.length - 1];
-        }
-        writer.write(currentLine + System.getProperty("line.separator"));
-      } else {
-        elems = elemsIndex;
-      }
-    }
-    writer.close();
-    reader.close();
-    inputFile.delete();
-    tempFile.renameTo(inputFile);
-    Files.copy(inputFile.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-    inputFile = new File(path + elems[2]);
-    inputFile.delete();
-    dstfile = new File(path + "../../src/main/resources/" + elems[2]);
-    dstfile.delete();
-    /*String censusPath = basePath+"library-hibernate-spatial/src/main/resources/";
-    String gtfsPath = basePath+"onebusaway-gtfs-hibernate/src/test/resources/org/onebusaway/gtfs/examples/";
-    File f = new File(censusPath+elems[2]);
-    f.delete();*/
-
-    inputFile = new File(path + elems[3]);
-    inputFile.delete();
-    dstfile = new File(path + "../../src/main/resources/" + elems[3]);
-    dstfile.delete();
-    /*f = new File(gtfsPath+element[element.length-1]);
-    f.delete();*/
-
+    DatabaseConfig dbConfig = DatabaseConfig.getConfig(i);
     PDBerror b = new PDBerror();
     b.DBError = "";
-    String[] element = elems[4].split("/");
-    String url = "";
-    for (int k = 0; k < element.length - 1; k++) {
-      url += element[k] + "/";
-    }
     Connection c = null;
     Statement statement = null;
     ResultSet rs = null;
-    try {
-      c = DriverManager.getConnection(url, elems[5], elems[6]);
-      statement = c.createStatement();
-      rs = statement.executeQuery(
-          "select pg_terminate_backend(pid) from pg_stat_activity where datname='" + element[element.length - 1] + "'");
 
-      statement.executeUpdate("DROP DATABASE " + element[element.length - 1]);
+    String name = dbConfig.getDatabase();
+    String dropurl = "jdbc:postgresql://" + dbConfig.getHost() + ":" + dbConfig.getPort() + "/";
+    try {
+      c = PgisEventManager.makeConnectionByUrl(dropurl, dbConfig.getUsername(), dbConfig.getPassword());
+      statement = c.createStatement();
+      rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='" + name + "'");
+      statement.executeUpdate("DROP DATABASE " + name);
       b.DBError = "Database was successfully deleted";
+      // remove config
+      DatabaseConfig.removeConfig(i);
+      DatabaseConfig.saveDbInfo();  
     } catch (SQLException e) {
       System.out.println(e.getMessage());
       b.DBError = e.getMessage();
+    } catch (IOException e) {
+      // ian todo: fatal error
+      e.printStackTrace();
     } finally {
       if (rs != null)
         try {
@@ -966,10 +881,7 @@ public class DbUpdate {
         }
     }
     System.out.println(b.DBError);
-
-    Databases.infoMap = Databases.getDbInfo();
     updateDatabaseStaticInfo(true);
-
     return b;
   }
 
@@ -1067,18 +979,6 @@ public class DbUpdate {
   public Object updateDB(@QueryParam("db") String db, @QueryParam("oldName") String oldName,
       @QueryParam("oldcfgSpatial") String oldcfgSpatial, @QueryParam("oldcfgTransit") String oldcfgTransit)
       throws IOException {
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    ClassLoader classLoader = getClass().getClassLoader();
-
-    // FIXME. Change to use Databases.dbInfoCsvPath()
-    // 
-    // It will be a little tricky to do this properly, not deleting our
-    // config file, without any testing on OSU server.
-    //
-    // Ed 2017-09-12
-    File inputFile = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    File tempFile = new File(path + "admin/resources/tmp.csv");
-    File dstfile = new File(Databases.dbInfoCsvPath());
     String[] dbInfo = db.split(",");
 
     String[] p = dbInfo[4].split("/");
@@ -1099,50 +999,7 @@ public class DbUpdate {
           .executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='" + oldName + "'");
       statement.executeUpdate("ALTER DATABASE " + oldName + " RENAME TO " + name);
       error.DBError = "Database was successfully updated";
-
-      BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-      BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-      String currentLine;
-      String index;
-      while ((currentLine = reader.readLine()) != null) {
-        index = currentLine.split(",")[0];
-        if (index.equals(dbInfo[0])) {
-          currentLine = "";
-          for (int k = 0; k < dbInfo.length - 1; k++) {
-            currentLine += dbInfo[k] + ",";
-          }
-          currentLine += dbInfo[dbInfo.length - 1];
-        }
-        writer.write(currentLine + System.getProperty("line.separator"));
-      }
-      writer.close();
-      reader.close();
-      inputFile.delete();
-      tempFile.renameTo(inputFile);
-      Files.copy(inputFile.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-      inputFile = new File(path + oldcfgSpatial);
-      inputFile.delete();
-      dstfile = new File(path + "../../src/main/resources/" + oldcfgSpatial);
-      dstfile.delete();
-
-      inputFile = new File(path + oldcfgTransit);
-      inputFile.delete();
-      dstfile = new File(path + "../../src/main/resources/" + oldcfgTransit);
-      dstfile.delete();
-
-      inputFile = new File(classLoader.getResource("admin/resources/censusDb.cfg.xml").getFile());
-      dstfile = new File(path + dbInfo[2]);
-      parseXmlFile(inputFile, dstfile, dbInfo, true);
-      Files.copy(dstfile.toPath(), new File(path + "../../src/main/resources/" + dbInfo[2]).toPath(),
-          StandardCopyOption.REPLACE_EXISTING);
-
-      inputFile = new File(classLoader.getResource("admin/resources/gtfsDb.cfg.xml").getFile());
-      dstfile = new File(path + dbInfo[3]);
-      parseXmlFile(inputFile, dstfile, dbInfo, false);
-      Files.copy(dstfile.toPath(), new File(path + "../../src/main/resources/" + dbInfo[3]).toPath(),
-          StandardCopyOption.REPLACE_EXISTING);
-
+      // ian: todo: update config
     } catch (SQLException e) {
       System.out.println(e.getMessage());
       e.printStackTrace();
@@ -1172,35 +1029,28 @@ public class DbUpdate {
   @Path("/addDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object addDB(@QueryParam("db") String db) {
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    ClassLoader classLoader = getClass().getClassLoader();
-    // File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    // File dstfile = new File(Databases.dbInfoCsvPath());
-    File file = new File(Databases.dbInfoCsvPath());
-    File dstfile; // = new File(Databases.dbInfoCsvPath());
-    
     String[] dbInfo = db.split(",");
-    String[] p;
-
     PDBerror error = new PDBerror();
     error.DBError = "";
+    DatabaseConfig dbConfig = new DatabaseConfig();
+    dbConfig.setDatabaseIndex(dbInfo[0]);
+    dbConfig.setDbName(dbInfo[1]);
+    dbConfig.setConnectionUrl(dbInfo[4]);
+    dbConfig.setUsername(dbInfo[5]);
+    dbConfig.setPassword(dbInfo[6]);
+    String name = dbConfig.getDatabase();
+    String createurl = "jdbc:postgresql://" + dbConfig.getHost() + ":" + dbConfig.getPort() + "/";
 
-    p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    String url = "";
-    for (int k = 0; k < p.length - 1; k++) {
-      url += p[k] + "/";
-    }
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(url, dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(createurl, dbConfig.getUsername(), dbConfig.getPassword());
       statement = c.createStatement();
       statement.executeUpdate("CREATE DATABASE " + name);
       statement.close();
       c.close();
 
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       statement.executeUpdate("CREATE EXTENSION IF NOT EXISTS postgis;");
       statement.executeUpdate("DROP TABLE IF EXISTS database_status;");
@@ -1221,24 +1071,8 @@ public class DbUpdate {
 
       error.DBError = "Database was successfully added";
 
-      PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-      for (int i = 0; i < dbInfo.length - 1; i++) {
-        out.print(dbInfo[i] + ",");
-      }
-      out.print(dbInfo[dbInfo.length - 1] + System.getProperty("line.separator"));
-      out.close();
-      // Files.copy(file.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-      file = new File(classLoader.getResource("admin/resources/censusDb.cfg.xml").getFile());
-      dstfile = new File(path + dbInfo[2]);
-      parseXmlFile(file, dstfile, dbInfo, true);
-      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[2]).toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-      file = new File(classLoader.getResource("admin/resources/gtfsDb.cfg.xml").getFile());
-      dstfile = new File(path + dbInfo[3]);
-      parseXmlFile(file, dstfile, dbInfo, false);
-      Files.copy(dstfile.toPath(), new File(Databases.ConfigurationDirectory() + dbInfo[3]).toPath(), StandardCopyOption.REPLACE_EXISTING);
-
+      DatabaseConfig.addConfig(dbConfig);
+      DatabaseConfig.saveDbInfo();      
     } catch (SQLException e) {
       System.out.println(e.getMessage());
       e.printStackTrace();
@@ -1258,8 +1092,8 @@ public class DbUpdate {
         } catch (SQLException e) {
         }
     }
-    System.out.println(error.DBError);
 
+    System.out.println(error.DBError);
     return error;
   }
 
@@ -1267,10 +1101,6 @@ public class DbUpdate {
   @Path("/addExistingDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object addExistingDB(@QueryParam("db") String db) {
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    ClassLoader classLoader = getClass().getClassLoader();
-    File file = new File(classLoader.getResource("admin/resources/dbInfo.csv").getFile());
-    File dstfile = new File(Databases.dbInfoCsvPath());
     String[] dbInfo = db.split(",");
     String[] p;
 
@@ -1299,37 +1129,13 @@ public class DbUpdate {
           DBError = "Database " + name + " could not be found.";
         }
       }
-
-      statement.close();
-      c.close();
-
-      PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-      for (int i = 0; i < dbInfo.length - 1; i++) {
-        out.print(dbInfo[i] + ",");
-      }
-      out.print(dbInfo[dbInfo.length - 1] + System.getProperty("line.separator"));
-      out.close();
-
-      Files.copy(file.toPath(), dstfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-      file = new File(classLoader.getResource("admin/resources/censusDb.cfg.xml").getFile());
-      dstfile = new File(path + dbInfo[2]);
-      parseXmlFile(file, dstfile, dbInfo, true);
-      Files.copy(dstfile.toPath(), new File(path + "../../src/main/resources/" + dbInfo[2]).toPath(),
-          StandardCopyOption.REPLACE_EXISTING);
-
-      file = new File(classLoader.getResource("admin/resources/gtfsDb.cfg.xml").getFile());
-      dstfile = new File(path + dbInfo[3]);
-      parseXmlFile(file, dstfile, dbInfo, false);
-      Files.copy(dstfile.toPath(), new File(path + "../../src/main/resources/" + dbInfo[3]).toPath(),
-          StandardCopyOption.REPLACE_EXISTING);
-
+      // ian: todo: update config
     } catch (SQLException e) {
       System.out.println(e.getMessage());
       e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    // } catch (IOException e) {
+    //   // TODO Auto-generated catch block
+    //   e.printStackTrace();
     } finally {
       if (rs != null)
         try {
@@ -2527,49 +2333,6 @@ public class DbUpdate {
     return message;
   }
 
-  @GET
-  @Path("/restoreCensus")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object restoreCensus(@QueryParam("db") String db) {
-    String[] dbInfo = db.split(",");
-    String[] p;
-    p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    
-    // FIXME: Drew looking into ways to fix this endpoint. Or maybe it's not even used?
-    // String[] tables = {"census_blocks","census_counties","census_congdist","census_places","census_tracts","census_urbans","gtfs_modified_feeds","gtfs_pg_users","gtfs_selected_feeds","gtfs_uploaded_feeds","lodes_blocks_rac","lodes_blocks_wac","lodes_rac_projection_block","lodes_rac_projection_county","parknride","title_vi_blocks_float"};
-    // for (String tableName: tables) {
-      // copyTable(tableName, dbInfoFrom[4], fromUser, fromPass, nameFrom, nameTo);
-    // }
-
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    String batFile = path + "../../src/main/resources/admin/resources/restoreCensus.bat";
-    Process pr;
-    ProcessBuilder pb;
-    dbInfo[6] = "123123";
-    dbInfo[5] = "postgres";
-    name = "testdb";
-    batFile = batFile.substring(1, batFile.length());
-    try {
-      pb = new ProcessBuilder("cmd", "/c", batFile, dbInfo[6], dbInfo[5], name,
-          "C:/Program Files/PostgreSQL/9.3/bin/pg_dump.exe", "C:/Program Files/PostgreSQL/9.3/bin/psql.exe");
-      //			pb.redirectErrorStream(true);
-      pr = pb.start();
-      pr.waitFor(5, TimeUnit.MINUTES);
-      System.out.println("done adding");
-      /*BufferedReader in = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-        String line;
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
-      */
-    } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
-    }
-
-    return "done";
-  }
-
   private void parseXmlFile(File xmlFile, File dstFile, String[] dbInfo, boolean b) {
 
     //		File xmlFile = new File(srcFile);
@@ -2754,7 +2517,7 @@ public class DbUpdate {
   public Object deleteUploadedGTFS() throws IOException {
     //String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     //File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
-    File gtfsFolder = new File(Databases.ConfigurationDirectory() + "/admin/uploads/gtfs");
+    File gtfsFolder = new File(DatabaseConfig.getPath("admin", "uploads", "gtfs"));
     File[] files = gtfsFolder.listFiles();
     //		System.out.println(files.length);
     if (files != null) {
@@ -2951,10 +2714,10 @@ public class DbUpdate {
 
     //String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     //File source = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs/"+feedname);
-    File source = new File(Databases.ConfigurationDirectory() + "/admin/uploads/gtfs/" + feedname);
+    File source = new File(DatabaseConfig.getPath("admin", "uploads", "gtfs", feedname));
     //String feed = path+"../../src/main/webapp/resources/admin/processFiles/gtfs/"+feedname;
     // Include dbInfo[0] which is the index number -- this way we save an archive of each file as it's used.
-    String feed = Databases.ConfigurationDirectory() + "/admin/processFiles/gtfs/" + dbInfo[0] + "/" + feedname;
+    String feed = DatabaseConfig.getPath("admin", "processFiles", "gtfs", dbInfo[0], feedname);
 
     File target = new File(feed);
     target.mkdirs(); // FIXME, catch any error here and log. Ed 2017-09-18
@@ -3798,58 +3561,6 @@ public class DbUpdate {
     return lists;
   }
 
-  /*@GET
-    @Path("/updateFeeds")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object updateFeeds(@QueryParam("db") String db, @QueryParam("folder") String folder){
-    
-    String[] dbInfo = db.split(",");
-    Process pr;
-    ProcessBuilder pb;
-    String[] dbname = dbInfo[4].split("/");
-    String name = dbname[dbname.length-1];
-    String usrn = dbInfo[5];
-    String pass = dbInfo[6];
-    
-    try {
-      pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/dbUpdate.bat", pass, usrn, name,
-          psqlPath+"psql.exe",
-          basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
-      pb.redirectErrorStream(true);
-      pr = pb.start();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    
-    return "done";
-  }*/
-
-  /*@GET
-    @Path("/addPsqlFunctions")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object addPsqlFunctions(@QueryParam("db") String db){
-    
-    String[] dbInfo = db.split(",");
-    Process pr;
-    ProcessBuilder pb;
-    String[] dbname = dbInfo[4].split("/");
-    String name = dbname[dbname.length-1];
-    String usrn = dbInfo[5];
-    String pass = dbInfo[6];
-    
-    try {
-      pb = new ProcessBuilder("cmd", "/c", "start", basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/addFbat", pass, usrn, name,
-          psqlPath+"psql.exe",
-          basePath+"TNAtoolAPI-Webapp/WebContent/admin/Development/PGSQL/");
-      pb.redirectErrorStream(true);
-      pr = pb.start();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    
-    return "done";
-  }*/
-
   @GET
   @Path("/addIndex")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -3970,7 +3681,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = DriverManager.getConnection(dbURL, dbUSER, dbPASS);
+      c = dbConfig.getConnection();
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '" + username + "';");
 
@@ -4167,6 +3878,7 @@ public class DbUpdate {
     return fn;
   }
 
+  // ian: unused?
   @GET
   @Path("/simplify")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
@@ -4342,11 +4054,6 @@ public class DbUpdate {
     }
     return true;
   }
-
-  // private boolean runPsqlCommand(Map<String, String> arguments) {
-  //   // 1.
-  //   return true;
-  // }
 
   private static boolean copyTable(String tableName, String fromDbConnectionUrl, String toDbConnectionUrl, String dbUser, String dbPassword) {
     System.out.println("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);

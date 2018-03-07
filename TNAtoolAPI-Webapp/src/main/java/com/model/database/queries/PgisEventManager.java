@@ -50,6 +50,7 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 import com.model.database.queries.objects.AgencyRoute;
 import com.model.database.queries.objects.AgencyRouteList;
 import com.model.database.queries.objects.AgencySR;
@@ -102,16 +103,7 @@ public class PgisEventManager {
 	 * @return Connection
 	 */
 	public static Connection makeConnection(int dbindex){
-		Connection response = null;
-		try {
-		Class.forName("org.postgresql.Driver");
-		response = DriverManager
-           .getConnection(Databases.connectionURLs[dbindex],
-           Databases.usernames[dbindex], Databases.passwords[dbindex]);
-		}catch ( Exception e ) {
-	        e.printStackTrace();	         
-	      }
-		return response;
+		return DatabaseConfig.getConfig(dbindex).getConnection();
 	}
 
 	public static Connection makeConnectionByUrl(String url, String user, String pass) throws SQLException {
