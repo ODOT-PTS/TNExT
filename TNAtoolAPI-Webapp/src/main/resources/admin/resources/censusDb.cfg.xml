@@ -29,7 +29,7 @@
         <property name="show_sql">false</property>
 
         <!-- Drop and re-create the database schema on startup -->
-        <property name="hbm2ddl.auto">validate</property>
+        <property name="hbm2ddl.auto">update</property>
 
         <mapping resource="com/model/database/connections/spatial/mapping/mapping.hbm.xml"/>
 

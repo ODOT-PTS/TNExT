@@ -36,8 +36,9 @@
 		<!-- Drop and re-create the database schema on startup -->
 		<property name="hbm2ddl.auto">update</property>
 
-		<mapping resource="com/model/database/connections/spatial/mapping/mapping.hbm.xml"/>
-
+		<mapping resource="com/model/database/connections/transit/mapping/GtfsMapping.hibernate.xml"/>
+		<mapping resource="com/model/database/connections/transit/mapping/HibernateGtfsRelationalDaoImpl.hibernate.xml"/>
+		
 	</session-factory>
 
 </hibernate-configuration>
