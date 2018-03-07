@@ -1,0 +1,8 @@
+---
+- config:
+    - testset: "TNAST API integration tests against september17 database"
+
+- test:
+    - group: "Overview Map"
+    - name: "List agencies"
+    - url: "/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex=0"

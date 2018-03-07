@@ -1,0 +1,2 @@
+databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2
+0,september17,com/model/database/connections/spatial/september17.cfg.xml,com/model/database/connections/transit/september17.cfg.xml,jdbc:postgresql://db:5432/september17,postgres,postgres,com/model/database/connections/spatial/mapping/mapping.hbm.xml,com/model/database/connections/transit/mapping/GtfsMapping.hibernate.xml,com/model/database/connections/transit/mapping/HibernateGtfsRelationalDaoImpl.hibernate.xml
