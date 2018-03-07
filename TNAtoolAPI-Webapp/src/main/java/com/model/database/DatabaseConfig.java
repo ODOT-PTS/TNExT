@@ -41,10 +41,14 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
-    // Class methods
     private static TreeMap<Integer, DatabaseConfig> dbConfigs;
     private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
 
+    static {
+        if (dbConfigs == null) { loadDefault(); }
+    }
+
+    // Class methods
     // ian todo: make private
     public static String getPath(String...args) {
         return Paths.get(getConfigurationDirectory(), args).toString();
@@ -77,6 +81,7 @@ public class DatabaseConfig {
     }
 
     public static void loadDefault() {
+        System.err.println("DatabaseConfigs.loadDefault()");
         File csvfile = new File(getDbInfoCsvPath());
         loadFromCsv(csvfile);
     }
@@ -85,7 +90,7 @@ public class DatabaseConfig {
         // discard existing
         dbConfigs = new TreeMap<Integer, DatabaseConfig>();
         // load csv
-        System.out.println("DatabaseConfig.loadFromCsvPath: " + csvfile.getPath());
+        System.err.println("DatabaseConfig.loadFromCsvPath: " + csvfile.getPath());
         CSVReader reader = null;
         // todo: ian: load from map, ignore databaseIndex column?
         try {
@@ -93,23 +98,23 @@ public class DatabaseConfig {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (!tryParseInt(line[0])) { continue; }
-                System.out.println("DatabaseConfig.loadFromCsvPath: read dbConfigs: " + line[0] + " dbName: " + line[1]
+                System.err.println("DatabaseConfig.loadFromCsvPath: read dbConfigs: " + line[0] + 
+                        " dbName: " + line[1]
                         + " connectionUrl: " + line[4]);
                 DatabaseConfig d = new DatabaseConfig(line);
                 dbConfigs.put(d.getDatabaseIndex(), d);
-            }
+            }    
         } catch (IOException e) {
+            System.err.println("DatabaseConfig.loadFromCsv: Error reading file");
             e.printStackTrace();
         }
     }
 
     public static DatabaseConfig getConfig(int index) {
-        if (dbConfigs == null) { loadDefault(); }
         return dbConfigs.get(index);
     }
 
     public static DatabaseConfig getConfig(String index) {
-        if (dbConfigs == null) { loadDefault(); }
         return dbConfigs.get(Integer.parseInt(index));
     }
 
