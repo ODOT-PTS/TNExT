@@ -52,20 +52,4 @@ public class MainMap extends HttpServlet {
 		request.getRequestDispatcher("/TNAtoolAPI-Webapp/index.jsp").forward(request, response);
 		
 	}
-	
-	public void setDatabaseParams() throws IOException{		
-        // Ed 2017-09-12
-        //
-        // Note:
-        //
-        // This appears to automatically "rewrite" the dbInfo.csv file and
-        // hibernate xml files based on credentials provided in the
-        // databaseParams.csv file.
-        //
-        // I think it would be simpler and better to set up credentials using
-        // either java properties, or environment variables if the Java JDBC
-        // library provides a way to do that.
-		//
-		// Ian 2018-02-20 - Don't do this - config modifications *must* always be explicit.
-	}
 }
