@@ -20,7 +20,7 @@ RUN mkdir -p ${CONFDIR}/admin/resources
 RUN echo "edu.oregonstate.tnatool.ConfigurationDirectory = ${CONFDIR}/" >> ${CATALINA_BASE}/conf/catalina.properties
 RUN echo "edu.oregonstate.tnatool.DownloadablesDirectory = ${CATALINA_BASE}/ROOT/downloadables/" >> ${CATALINA_BASE}/conf/catalina.properties
 COPY ${TOMCAT_USERS_XML} ${CATALINA_BASE}/conf/tomcat-users.xml
-COPY ${DBINFO_CSV} $CONFDIR/admin/resources/dbInfo.csv
+COPY ${DBINFO_CSV} ${CONFDIR}/admin/resources/dbInfo.csv
 
 # specify default command
 EXPOSE 8080

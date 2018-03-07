@@ -2013,20 +2013,16 @@ $(document).ready(function(){
         type: "GET",
         //url: "../resources/admin/dbInfo.csv",
         url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/readDBinfo",
-        dataType: "text",
+        dataType: "json",
         async: false,
         success: function(data) {
-//        	var lines = data.split(/\r\n|\n/);
-        	var lines = data.split('#$#');
-        	var connection = [];
-        	for(var i=0; i<lines.length; i++){
-        		if(lines[i].split(',').length>1){
-        			dbInfo[i] = lines[i].split(',');
-        		}
-        	}
+			// ian: includes header as dbInfo[0]
+			for (var i=0; i<data.length; i++) {
+				dbInfo[i] = data[i];
+			}
         	var html="<div id='dbAccordion'>";
         	for(var i=dbInfo.length-1; i>0; i--){
-        		html += "<h3>Database #"+i+": <i>"+dbInfo[i][1]+"</i></h3><div>";
+        		html += "<h3>Database #"+dbInfo[i][0]+": <i>"+dbInfo[i][1]+"</i></h3><div>";
         		html += "<table class='databaseOuterTable' cellpadding='0'><tr><td style='padding:0px'>";
         		html += "<div class='databaseDivs'>";
         		html += "<table>";

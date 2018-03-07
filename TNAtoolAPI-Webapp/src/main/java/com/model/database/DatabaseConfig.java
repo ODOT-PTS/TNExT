@@ -14,10 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
 
-// Creates a static hashmap of all the databases' required connection information from dbinfo.csv
-
 package com.model.database;
-
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,6 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.net.URI;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -37,81 +37,216 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
+    private static TreeMap<Integer, DatabaseConfig> dbConfigs;
+    private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
+    static {
+        try {
+            loadDbInfo(); 
+        } catch (IOException e) {
+            System.err.format("DatabaseConfig load: fatal error, could not read dbInfo.csv\n");
+            e.printStackTrace();
+        }
+    }
+
     // Class methods
-    private static HashMap<String, DatabaseConfig> dbIndex;
 
-    private static String getPath(String...args) {
+    // ian todo: make private
+    public static String getPath(String...args) {
         return Paths.get(getConfigurationDirectory(), args).toString();
-    }
-
-    public static String getConfigurationDirectory() {
-        return Paths.get(System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory")).toString();
-    }
-
-    public static String getUploadDirectory() {
-        return getPath("admin", "uploads");
     }
 
     public static String getDownloadDirectory() {
         return getPath("admin", "downloadables");
     }
 
+    public static void loadDbInfo() throws IOException {
+        System.err.format("DatabaseConfigs.loadDbInfo()\n");
+        File csvfile = new File(getDbInfoCsvPath());
+        try { 
+            loadFromCsv(csvfile);
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    public static void saveDbInfo() throws IOException {
+        System.err.format("DatabaseConfigs.saveDbInfo()\n");
+        File csvfile = new File(getDbInfoCsvPath());
+        try {
+            writeToCsv(csvfile);
+        } catch (IOException e) { 
+            throw e;
+        }
+    }
+
+    public static DatabaseConfig getConfig(int index) {
+        return dbConfigs.get(index);
+    }
+
+    public static DatabaseConfig getConfig(String index) {
+        return dbConfigs.get(Integer.parseInt(index));
+    }
+
+    public static DatabaseConfig[] getConfigs() {
+        return dbConfigs.values().toArray(new DatabaseConfig[0]);
+    }
+
+    public static int getConfigSize() {
+        return dbConfigs.size();
+    }
+
+    public static DatabaseConfig getLastConfig() {
+        return dbConfigs.lastEntry().getValue();
+    }
+
+    public static String[] getFields() {
+        return fields;
+    }
+
+    public static void updateConfig(DatabaseConfig dbConfig) {
+
+    }
+
+    public static void addConfig(DatabaseConfig dbConfig) {
+        // ian: todo: validate
+        int i = dbConfig.getDatabaseIndex();
+        if (dbConfigs.containsKey(i)) {
+            System.out.format("dBconfig.addConfig(): index already exists: %s\n", i);
+        } else {
+            dbConfigs.put(i, dbConfig);
+        }
+    }
+
+    public static void removeConfig(String index) {
+        removeConfig(Integer.parseInt(index));
+    }
+
+    public static void removeConfig(int index) {
+        if (dbConfigs.containsKey(index)) { 
+            dbConfigs.remove(index);
+        } else {
+            System.out.format("dBconfig.removeConfig(): index does not exist: %s\n", index);
+        }
+    }
+
+	public static void deactivateDb(int i) {
+		// String[] newElement;
+		// for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
+		// 	newElement = new String[entry.getValue().length-1];
+		// 	for(int j=0;j<i;j++){
+		// 		newElement[j] = entry.getValue()[j];
+		// 	}
+		// 	for(int j=i;j<entry.getValue().length-1;j++){
+		// 		newElement[j] = entry.getValue()[j+1];
+		// 	}
+		// 	infoMap.put(entry.getKey(), newElement);
+		// }
+	}
+
+    public static void activateDb() {
+        // pass
+    }
+
+    /* private methods */
+
     public static String getDbInfoCsvPath() {
         // To deprecate - direct access should not be allowed
         return getPath("admin", "resources", "dbInfo.csv");
     }
 
-    public static void loadDefault() {
-        File csvfile = new File(getDbInfoCsvPath());
-        loadFromCsv(csvfile);
+    private static String getConfigurationDirectory() {
+        String path = System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory");
+        if ( path != null) {
+            path = Paths.get(path).toString();
+            System.err.format("Configuration directory property: %s\n", path);
+        } else {
+            path = DatabaseConfig.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            System.err.format("Configuration directory fallback: %s\n", path);
+        }
+        return path;
     }
 
-    public static void loadFromCsv(File csvfile) {
+    private static void loadFromCsv(File csvfile) throws IOException {
         // discard existing
-        dbIndex = new HashMap<String, DatabaseConfig>();
+        dbConfigs = new TreeMap<Integer, DatabaseConfig>();
         // load csv
-        System.out.println("DatabaseConfig.loadFromCsvPath: " + csvfile.getPath());
+        System.err.format("DatabaseConfig.loadFromCsv: %s\n", csvfile.getPath());
         CSVReader reader = null;
+        // todo: ian: load from map, ignore databaseIndex column?
         try {
             reader = new CSVReader(new FileReader(csvfile));
             String[] line;
             while ((line = reader.readNext()) != null) {
-                System.out.println("DatabaseConfig.loadFromCsvPath: read dbIndex: " + line[0] + " dbName: " + line[1]
-                        + " connectionUrl: " + line[4]);
+                if (!tryParseInt(line[0])) { continue; }
+                System.err.format("DatabaseConfig.loadFromCsv: read dbConfigs: " + line[0] + 
+                        " dbName: " + line[1]
+                        + " connectionUrl: " + line[4] + "\n");
                 DatabaseConfig d = new DatabaseConfig(line);
-                dbIndex.put(d.getDatabaseIndex(), d);
-            }
+                dbConfigs.put(d.getDatabaseIndex(), d);
+            }    
         } catch (IOException e) {
+            System.err.format("DatabaseConfig.loadFromCsv: Error reading file\n");
             e.printStackTrace();
+            throw e;
         }
     }
 
-    public static DatabaseConfig getConfig(int index) {
-        return getConfig(Integer.toString(index));
+    private static void writeToCsv(File csvfile) throws IOException {
+        System.err.format("DatabaseConfig.writeToCsv: %s\n", csvfile.getPath());
+        BufferedWriter bw;
+        try {
+            FileWriter fw = new FileWriter(csvfile);
+            bw = new BufferedWriter(fw);
+            CSVWriter csvWriter = new CSVWriter(bw,
+                    CSVWriter.DEFAULT_SEPARATOR,
+                    CSVWriter.NO_QUOTE_CHARACTER,
+                    CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                    CSVWriter.DEFAULT_LINE_END);
+
+            System.err.format("DatabaseConfig.writeToCsv: writing header: %s", fields.toString());
+            csvWriter.writeNext(fields);
+            for (DatabaseConfig db : getConfigs()) {
+                System.err.format("DatabaseConfig.writeToCsv: writing index %s: %s", db.getDatabaseIndex(), db.toArray().toString());
+                csvWriter.writeNext(db.toArray());
+            }
+            bw.close();
+        } catch (IOException e) {
+            System.err.format("DatabaseConfig.writeToCsv: Error writing file");
+            e.printStackTrace();
+            throw e;
+        }
     }
 
-    public static DatabaseConfig getConfig(String index) {
-        if (dbIndex == null) { loadDefault(); }
-        return dbIndex.get(index);
+    private static boolean tryParseInt(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException nfe) {}
+        return false;
     }
+
+    /* ************************************************** */
+    /* ************************************************** */
+    /* ************************************************** */
 
     // Instance methods
-    private String databaseIndex;
-    private String dbName;
-    private String spatialConfigPath;
-    private String configPath;
-    private String connectionUrl;
-    private String username;
-    private String password;
-    private String censusMappingSource;
-    private String gtfsMappingSource1;
-    private String gtfsMappingSource2;
+    private Integer databaseIndex = -1;
+    private String dbName = "";
+    private String spatialConfigPath = "";
+    private String configPath = "";
+    private String connectionUrl = "";
+    private String username = "";
+    private String password = "";
+    private String censusMappingSource = "";
+    private String gtfsMappingSource1 = "";
+    private String gtfsMappingSource2 = "";
 
     public DatabaseConfig() {
     }
@@ -121,7 +256,7 @@ public class DatabaseConfig {
     }
 
     public String toString() {
-        return "<db index: " + getDatabaseIndex() + " name: " + getDbName() + " url: " + getConnectionUrl() + ">";
+        return "<db index: " + getDatabaseIndex().toString() + " name: " + getDbName() + " url: " + getConnectionUrl() + ">";
     }
 
     // Database connections
@@ -130,7 +265,7 @@ public class DatabaseConfig {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver");
+            System.err.format("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver\n");
         }
         try {
             response = DriverManager.getConnection(getConnectionUrl(), getUsername(), getPassword());
@@ -141,14 +276,6 @@ public class DatabaseConfig {
     }
     
     // to/from CSV
-    public String[] toArray() {
-        // backwards compat
-        String[] row = { getDatabaseIndex(), getDbName(), getSpatialConfigPath(), getConfigPath(), getConnectionUrl(),
-                getUsername(), getPassword(), getCensusMappingSource(), getGtfsMappingSource1(),
-                getGtfsMappingSource2() };
-        return row;
-    }
-
     public void fromArray(String[] row) {
         setDatabaseIndex(row[0]);
         setDbName(row[1]);
@@ -162,9 +289,41 @@ public class DatabaseConfig {
         setGtfsMappingSource2(row[9]);
     }
 
-    // Config files
-    public File getSpatialConfigFile() {
-        return new File(getPath(getSpatialConfigPath()));
+    public String[] toArray() {
+        String[] row = new String[fields.length];
+        HashMap<String, String> map = toMap();
+        for (int i=0; i < fields.length; i++) {
+            row[i] = map.get(fields[i]);
+        }
+        return row;
+    }
+
+    public HashMap<String, String> toMap() {
+        HashMap<String, String> m = new HashMap<String, String>();
+        m.put("databaseIndex", getDatabaseIndex().toString());
+        m.put("dbnames", getDbName());
+        m.put("spatialConfigPaths", getSpatialConfigPath());
+        m.put("ConfigPaths", getConfigPath());
+        m.put("connectionURL", getConnectionUrl());
+        m.put("username", getUsername());
+        m.put("password", getPassword());
+        m.put("censusMappingSource", getCensusMappingSource());
+        m.put("gtfsMappingSource1", getGtfsMappingSource1());
+        m.put("gtfsMappingSource2", getGtfsMappingSource2());
+        return m;
+    }
+
+    public void fromMap(HashMap<String, String> m) {
+        setDatabaseIndex(m.get("databaseIndex"));
+        setDbName(m.get("dbnames"));
+        setSpatialConfigPath(m.get("spatialConfigPaths"));
+        setConfigPath(m.get("ConfigPaths"));
+        setConnectionUrl(m.get("connectionURL"));
+        setUsername(m.get("username"));
+        setPassword(m.get("password"));
+        setCensusMappingSource(m.get("censusMappingSource"));
+        setGtfsMappingSource1(m.get("gtfsMappingSource1"));
+        setGtfsMappingSource2(m.get("gtfsMappingSource2"));
     }
 
     // For external clients
@@ -185,7 +344,7 @@ public class DatabaseConfig {
     }
 
     // Getters
-    public String getDatabaseIndex() {
+    public Integer getDatabaseIndex() {
         return databaseIndex;
     }
 
@@ -225,8 +384,11 @@ public class DatabaseConfig {
         return gtfsMappingSource2;
     }
 
-    public void setDatabaseIndex(String value) {
+    public void setDatabaseIndex(Integer value) {
         this.databaseIndex = value;
+    }
+    public void setDatabaseIndex(String value) {
+        setDatabaseIndex(Integer.parseInt(value));
     }
 
     public void setDbName(String value) {

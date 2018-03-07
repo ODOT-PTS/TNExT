@@ -1,3 +1,0 @@
-set PGPASSWORD=%1
-%4 -U %2 -h localhost -t census_blocks -t census_counties -t census_congdist -t census_places -t census_tracts -t census_urbans -t gtfs_modified_feeds -t gtfs_pg_users -t gtfs_selected_feeds -t gtfs_uploaded_feeds -t lodes_blocks_rac -t lodes_blocks_wac -t lodes_rac_projection_block -t lodes_rac_projection_county -t parknride -t title_vi_blocks_float census | %5 -U %2 -h localhost %3
-exit

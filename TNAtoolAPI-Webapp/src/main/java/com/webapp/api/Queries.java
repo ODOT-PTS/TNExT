@@ -73,7 +73,6 @@ import org.onebusaway.gtfs.model.Trip;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import com.model.database.Databases;
 import com.model.database.DatabaseConfig;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
@@ -154,17 +153,16 @@ public class Queries {
 	
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
-	private static int default_dbindex = Databases.dbsize-1;
-	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
-	static int dbsize = Databases.dbsize;	
+	private static int default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
+	static AgencyRouteList[] menuResponse = new AgencyRouteList[DatabaseConfig.getConfigSize()];
+	static int dbsize = DatabaseConfig.getConfigSize();	
 	
 	/**
 	 * updates attributes to point to the latest database index 
 	 */
 	public static void updateDefaultDBindex() {
-		default_dbindex = Databases.dbsize - 1;
-		dbsize = Databases.dbsize;
-		menuResponse = new AgencyRouteList[Databases.dbsize];
+		default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
+		menuResponse = new AgencyRouteList[DatabaseConfig.getConfigSize()];
 	}
 	
 	/**
@@ -177,17 +175,11 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getDBList() throws JSONException {
-		String[] DBNames = Databases.dbnames;
-		String[] DBIds = Databases.connectionURLs.clone();
-		for (int i = 0 ; i < DBIds.length ; i++){
-			String[] temp = DBIds[i].split("/");
-			DBIds[i] = temp[temp.length-1];;
-		}	
 		DBList response = new DBList();
-		for (int s = 0; s < dbsize; s++) {
-			response.DBelement.add(DBNames[s]);
-			response.DBid.add(DBIds[s]);
-		}
+        for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+			response.DBelement.add(db.getDbName());
+			response.DBid.add(db.getDatabase());
+        }       
 		return response;
 	}
 	
@@ -392,7 +384,7 @@ public class Queries {
 		}
 
 		// creating a zip-file to archive the shape files
-		File shapefilesPath = new File(Databases.DownloadablesDirectory(), "shapefiles");
+		File shapefilesPath = new File(DatabaseConfig.getDownloadDirectory(), "shapefiles");
 		shapefilesPath.mkdirs();
 
 		// Making unique file names
@@ -1416,7 +1408,7 @@ public class Queries {
 			if (routeid == null) { // agency
 				response.metadata = "Report Type:Transit Stops Report for Agency;Report Date:"
 						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
-						+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+						+ "Selected Database:" + DatabaseConfig.getConfig(dbindex).getDatabase() + ";Population Search Radius(miles):"
 						+ String.valueOf(x) + ";Selected Transit Agency:" + agency + ";" + DbUpdate.VERSION;
 				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34,dbindex, popYear,-1,null,rc,stime,etime);
 				index++;
@@ -1427,7 +1419,7 @@ public class Queries {
 								.format(Calendar.getInstance().getTime())
 						+ ";"
 						+ "Selected Database:"
-						+ Databases.dbnames[dbindex]
+						+ DatabaseConfig.getConfig(dbindex).getDatabase()
 						+ ";Population Search Radius(miles):"
 						+ String.valueOf(x)
 						+ ";Selected Transit Agency:"
@@ -1461,7 +1453,7 @@ public class Queries {
 							+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 									.format(Calendar.getInstance().getTime())
 							+ ";" + "Selected Database:"
-							+ Databases.dbnames[dbindex]
+							+ DatabaseConfig.getConfig(dbindex).getDatabase()
 							+ ";Population Search Radius(miles):"
 							+ String.valueOf(x) + ";Selected Geographic Area:"
 							+ areaid + ";" + DbUpdate.VERSION;
@@ -1489,7 +1481,7 @@ public class Queries {
 							+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 									.format(Calendar.getInstance().getTime())
 							+ ";" + "Selected Database:"
-							+ Databases.dbnames[dbindex]
+							+ DatabaseConfig.getConfig(dbindex).getDatabase()
 							+ ";Population Search Radius(miles):"
 							+ String.valueOf(x) + ";Selected Geographic Area:"
 							+ areaid + ";Selected Transit Agency:" + agency
@@ -1518,7 +1510,7 @@ public class Queries {
 						+ ";Report Date:"
 						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 								.format(Calendar.getInstance().getTime()) + ";"
-						+ "Selected Database:" + Databases.dbnames[dbindex]
+						+ "Selected Database:" + DatabaseConfig.getConfig(dbindex).getDatabase()
 						+ ";Population Search Radius(miles):"
 						+ String.valueOf(x) + ";Selected Geographic Area:"
 						+ areaid + ";Selected Transit Agency:" + agency
@@ -1607,7 +1599,7 @@ public class Queries {
 					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 							.format(Calendar.getInstance().getTime())
 					+ ";Selected Database:"
-					+ Databases.dbnames[dbindex]
+					+ DatabaseConfig.getConfig(dbindex).getDatabase()
 					+ ";"
 					+ DbUpdate.VERSION;
 			response.areaName = instance.getName();
@@ -1621,7 +1613,7 @@ public class Queries {
 							.format(Calendar.getInstance().getTime())
 					+ ";"
 					+ "Selected Database:"
-					+ Databases.dbnames[dbindex]
+					+ DatabaseConfig.getConfig(dbindex).getDatabase()
 					+ ";"
 					+ DbUpdate.VERSION;
 		}
@@ -1887,7 +1879,7 @@ public class Queries {
 						.getInstance().getTime())
 				+ ";"
 				+ "Selected Database:"
-				+ Databases.dbnames[dbindex]
+				+ DatabaseConfig.getConfig(dbindex).getDatabase()
 				+ ";Selected Date(s):"
 				+ date
 				+ ";Selected Transit Agency:"
@@ -2190,7 +2182,7 @@ public class Queries {
 				+ " Employment Report;Report Date:"
 				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar
 						.getInstance().getTime()) + ";" + "Selected Database:"
-				+ Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+				+ DatabaseConfig.getConfig(dbindex).getDatabase() + ";" + DbUpdate.VERSION;
 		return results;
 	}
 
@@ -2227,7 +2219,7 @@ public class Queries {
 				+ " Title VI Report;Report Date:"
 				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar
 						.getInstance().getTime()) + ";" + "Selected Database:"
-				+ Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+				+ DatabaseConfig.getConfig(dbindex).getDatabase() + ";" + DbUpdate.VERSION;
 		return results;
 	}
 
