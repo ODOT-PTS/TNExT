@@ -157,16 +157,16 @@ public class DatabaseConfig {
     }
 
     // Instance methods
-    private Integer databaseIndex;
-    private String dbName;
-    private String spatialConfigPath;
-    private String configPath;
-    private String connectionUrl;
-    private String username;
-    private String password;
-    private String censusMappingSource;
-    private String gtfsMappingSource1;
-    private String gtfsMappingSource2;
+    private Integer databaseIndex = -1;
+    private String dbName = "";
+    private String spatialConfigPath = "";
+    private String configPath = "";
+    private String connectionUrl = "";
+    private String username = "";
+    private String password = "";
+    private String censusMappingSource = "";
+    private String gtfsMappingSource1 = "";
+    private String gtfsMappingSource2 = "";
 
     public DatabaseConfig() {
     }
