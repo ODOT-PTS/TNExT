@@ -130,6 +130,10 @@ public class DatabaseConfig {
         return dbConfigs.lastEntry().getValue();
     }
 
+    public static String[] getFields() {
+        return fields;
+    }
+
 	public static void deactivateDb(int i){
 		// String[] newElement;
 		// for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
