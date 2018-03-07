@@ -125,22 +125,6 @@ public class DatabaseConfig {
         return dbConfigs.lastEntry().getValue();
     }
 
-    public static HashMap<String, String[]> toInfoMap() {
-        if (dbConfigs == null) { loadDefault(); }        
-        int size = dbConfigs.size();
-        HashMap<String, String[]> infoMap = new HashMap<String, String[]>();
-        for (String s : fields) {
-            infoMap.put(s, new String[size]);
-        }
-        for (DatabaseConfig db : dbConfigs.values()) {
-            HashMap<String, String> m = db.toMap();
-            for (String s : fields) {
-                infoMap.get(s)[db.getDatabaseIndex()] = m.get(s);
-            }
-        }
-        return infoMap;
-    }
-
 	public static void deactivateDb(int i){
 		// String[] newElement;
 		// for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
@@ -218,6 +202,15 @@ public class DatabaseConfig {
         setCensusMappingSource(row[7]);
         setGtfsMappingSource1(row[8]);
         setGtfsMappingSource2(row[9]);
+    }
+
+    public String[] toArray() {
+        String[] row = new String[fields.length];
+        HashMap<String, String> map = toMap();
+        for (int i=0; i < fields.length; i++) {
+            row[i] = map.get(fields[i]);
+        }
+        return row;
     }
 
     public HashMap<String, String> toMap() {
