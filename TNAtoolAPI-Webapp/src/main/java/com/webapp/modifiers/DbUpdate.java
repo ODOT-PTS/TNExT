@@ -4002,6 +4002,35 @@ public class DbUpdate {
     return true;
   }
 
+  public static boolean runSqlFromResource(String resourcePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+    logger.info("runSqlFromResource: "+resourcePath);
+    // 1. read file
+    File f = DatabaseConfig.getResource(resourcePath);
+    String sql = "";
+    try {
+      Scanner sqlScanner = new Scanner(f);
+      sql = sqlScanner.useDelimiter("\\Z").next();
+      sqlScanner.close();
+    } catch (FileNotFoundException e) {
+      logger.error(e);
+      return false;
+    }
+
+    try {
+      // 2. open DB connection
+      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
+      Statement statement = c.createStatement();
+      // 3. run SQL statement
+      ResultSet rs = statement.executeQuery(sql);
+      statement.close();
+      c.close();
+    } catch (SQLException e) {
+      logger.error(e);
+      return false;
+    }
+    return true;    
+  }
+
   private static boolean copyTable(String tableName, String fromDbConnectionUrl, String toDbConnectionUrl, String dbUser, String dbPassword) {
     logger.info("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);
     // Parse connection urls...

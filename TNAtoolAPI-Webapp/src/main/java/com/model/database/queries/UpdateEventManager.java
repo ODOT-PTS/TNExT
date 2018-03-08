@@ -691,17 +691,8 @@ public class UpdateEventManager {
 	 * @param dbInfo
 	 */
 	public static void addFunction(Connection connection, String[] dbInfo){
-        // Ed 2017-09-18
-        // FIXME: we want this to evaluate to:
-        // /var/lib/tomcat/webapps-development/ROOT/resources/admin/ + resources/Functions.sql
-		String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		path = path+"../../src/main/resources/admin/resources/Functions.sql";
-		path = path.substring(1, path.length());
-		String host = dbInfo[4].split(":")[2];
-		host = host.substring(2);
-		host = "localhost"; //to be deleted
-
-		DbUpdate.runSqlFromFile(path, dbInfo[4], dbInfo[5], dbInfo[6]);
+		logger.info("addFunction");
+		DbUpdate.runSqlFromResource("admin/resources/Functions.sql", dbInfo[4], dbInfo[5], dbInfo[6]);
 	}
 	
 	/**
