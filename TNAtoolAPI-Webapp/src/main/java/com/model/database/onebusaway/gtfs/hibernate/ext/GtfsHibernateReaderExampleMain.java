@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 //import org.onebusaway.gtfs.model.Agency;
@@ -56,6 +58,7 @@ import org.onebusaway.gtfs.model.*;
 
 
 public class GtfsHibernateReaderExampleMain { 
+  final static Logger logger = Logger.getLogger(GtfsHibernateReaderExampleMain.class);
   private GtfsMutableRelationalDao dao;
   public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[DatabaseConfig.getConfigSize()];
   public static SessionFactory[] sessions = new SessionFactory[DatabaseConfig.getConfigSize()];
@@ -284,7 +287,7 @@ public class GtfsHibernateReaderExampleMain {
   }
 
   private static HibernateGtfsFactory createHibernateGtfsFactory(DatabaseConfig db) {
-    System.out.println("GtfsHibernateReaderExampleMain::createHibernateGtfsFactory: "+db.toString());
+    logger.debug("GtfsHibernateReaderExampleMain::createHibernateGtfsFactory: "+db.toString());
     URL url = GtfsHibernateReaderExampleMain.class.getClassLoader().getResource("admin/resources/gtfsDb.cfg.xml");
     File inputFile = new File(url.getFile());
     Configuration config = new Configuration();

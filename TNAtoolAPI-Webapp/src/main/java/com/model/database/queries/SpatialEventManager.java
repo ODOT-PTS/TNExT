@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.onebusaway.gtfs.model.*;
 
 //import com.model.database.onebusaway.gtfs.hibernate.objects.ext.StopExt;
@@ -50,6 +52,7 @@ import com.model.database.queries.objects.ParknRide;
 import com.model.database.queries.objects.TransitConnection;
 
 public class SpatialEventManager {
+	final static Logger logger = Logger.getLogger(SpatialEventManager.class);
 
 	/**
 	 * returns a list of park and rides that are located within
@@ -397,14 +400,14 @@ public class SpatialEventManager {
 		query = query.concat("'') ORDER BY price");
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
-		System.out.println(query);
+		logger.debug(query);
 		ResultSet rs = stmt.executeQuery(query);
 		int medianIndex = (int) Math.ceil(FareCount/2); // the number that points to the median row in "gtfs_fare_attributes" table.
 		int counter = 0;
 		while(rs.next()){
 			if (counter++ == medianIndex){
 				output = (float) rs.getDouble("price");
-				System.out.println(counter);
+				logger.debug(counter);
 			}
 		}
 		return output;

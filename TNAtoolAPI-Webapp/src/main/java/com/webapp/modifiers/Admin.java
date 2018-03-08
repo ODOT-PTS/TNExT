@@ -65,7 +65,7 @@ public class Admin extends HttpServlet {
 //		String error = "";
 		String data = "";
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-		//System.out.println(System.currentTimeMillis());
+		//logger.debug(System.currentTimeMillis());
         if (isMultipart) {
 	        FileItemFactory factory = new DiskFileItemFactory();
 	

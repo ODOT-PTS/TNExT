@@ -39,6 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.CRS;
@@ -94,8 +96,10 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class PgisEventManager {
+	final static Logger logger = Logger.getLogger(PgisEventManager.class);	
+
 	//public static Connection connection;
-	
+
 	/**
 	 * makes a connection to a database based on the database index
 	 * 
@@ -2877,11 +2881,11 @@ public class PgisEventManager {
 		String [] et=etime.split(":");
 		int stime1=0;
 		int etime1=0;
-		System.out.println(etime+"="+et[0]+et[1]);
-		System.out.println(stime+"="+st[0]+st[1]);
+		logger.debug(etime+"="+et[0]+et[1]);
+		logger.debug(stime+"="+st[0]+st[1]);
 		stime1=(Integer.parseInt(st[0])*100)+Integer.parseInt(st[1]);
 		etime1=(Integer.parseInt(et[0])*100)+Integer.parseInt(et[1]);
-		System.out.println(stime1+"-"+etime1);
+		logger.debug(stime1+"-"+etime1);
 		String agencyDefaultID = new String();
 		if (agency != null) {agencyDefaultID = getDefaultAgencyID(agency, dbindex);}
 		HashMap<String, Integer> stopsVisits = new HashMap<String, Integer>();
@@ -3018,7 +3022,7 @@ public class PgisEventManager {
 						+ "	LEFT JOIN census_counties ON census_counties.countyid = LEFT(result.blockid,5)";
 				
 		}
-		System.out.println(mainquery);
+		logger.debug(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
@@ -4029,7 +4033,7 @@ public class PgisEventManager {
     				  }
     	  }
      double[] results = new double[9];
-    System.out.println(querytext);
+    logger.debug(querytext);
      try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
@@ -5085,7 +5089,7 @@ public class PgisEventManager {
 		HashMap<String, Integer> response = new HashMap<String, Integer>();
 		Connection connection = makeConnection(dbindex);
 		String agencyFilter = "";
-		System.out.println(stime+"-"+etime);
+		logger.debug(stime+"-"+etime);
 		if (agency != null){
 			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
 		}
@@ -5116,7 +5120,6 @@ public class PgisEventManager {
 				+ "		group by stop_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices01 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
-		System.out.print(mainquery);	
 		try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -6467,7 +6470,7 @@ public class PgisEventManager {
 						  +"totalAgencies as (select count(distinct agencyid) as total from  gtfs_trips )," 
 						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
 						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
-				System.out.println(query);
+				logger.debug(query);
 				  try {
 					  stmt = connection.createStatement();
 					  ResultSet rs = stmt.executeQuery(query);
