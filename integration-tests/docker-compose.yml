@@ -1,51 +1,34 @@
-version: "3"
+db:
+  image: mdillon/postgis
+  command: postgres --log_statement=all
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+  volumes:
+    - pgdata:/var/lib/postgresql/data
+  ports:
+    - "5432:5432"
 
-# volumes:
-#   - pgdata
+tnast:
+  build: ../TNAtoolAPI-Webapp/
+  volumes:
+    - tnastm2:/root/.m2
+    - "./scripts:/scripts"
+    - "./data:/data"
+    - "./conf:/app/conf"
+  ports:
+    - "8080:8080"
+  links:
+    - db
 
-services:
-  db:
-    image: mdillon/postgis
-    command: postgres --log_statement=all
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-
-  tnast:
-    build: ../TNAtoolAPI-Webapp/
-    volumes:
-      - "./scripts:/scripts"
-      - "./data:/data"
-      - "./conf:/app/conf"
-      - "./webapps:/var/lib/tomcat8/webapps"
-      - "./temp:/var/lib/tomcat8/temp"
-    ports:
-      - "8080:8080"
-    links:
-      - db
-    # healthcheck:
-    #   test: ["CMD-SHELL", "pg_isready -U postgres"]
-    #   interval: 30s
-    #   timeout: 30s
-    #   retries: 3
-
-  pyresttest:
-    build: ./api-tests/
-    environment:
-      TNAST_HOST: "tnast:8080"
-    volumes:
-      - "./api-tests:/api-tests"
-    links:
-      - tnast
-    depends_on:
-      - db
-      - tnast
+pyresttest:
+  build: ./api-tests/
+  environment:
+    TNAST_HOST: "tnast:8080"
+  volumes:
+    - "./api-tests:/api-tests"
+    - "./scripts:/scripts"
+    - "./data:/data"
+  links:
+    - tnast
+    - db

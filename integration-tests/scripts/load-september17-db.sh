@@ -1,1 +1,0 @@
-PGHOST=db PGUSER=postgres PGPASSWORD=postgres pg_restore --dbname=postgres --create /data/september17.backup

@@ -1,0 +1,2 @@
+pyresttest ~= 1.7.1
+pycurl ~= 7.43.0 --global-option="--with-openssl"
