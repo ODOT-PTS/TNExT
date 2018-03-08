@@ -3786,7 +3786,7 @@ public class DbUpdate {
         }
       }
     } catch (NullPointerException e) {
-      System.err.println("IndexOutOfBoundsException: " + e.getMessage());
+      logger.error("IndexOutOfBoundsException: ", e);
     }
 
     String[] dbInfo = db.split(",");

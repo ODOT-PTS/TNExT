@@ -115,7 +115,7 @@ public class PgisEventManager {
 		try {
 			Class.forName("org.postgresql.Driver");
     } catch (ClassNotFoundException e) {
-      System.err.println("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver");
+      logger.error("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver");
     }
 		try {
 			response = DriverManager.getConnection(url, user, pass);

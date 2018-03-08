@@ -111,7 +111,7 @@ public class GtfsDatabaseLoaderMain {
       Parser parser = new PosixParser();
       return parser.parse(options, args);
     } catch (ParseException e) {
-      System.err.println(e.getMessage());
+      logger.error(e);
       printUsage();
       System.exit(-1);
       return null;
@@ -144,7 +144,7 @@ public class GtfsDatabaseLoaderMain {
       reader = new BufferedReader(new InputStreamReader(in));
       String line = null;
       while ((line = reader.readLine()) != null) {
-        System.err.println(line);
+        logger.debug(line);
       }
     } catch (IOException ex) {
       _log.error("error reading usage.txt resource", ex);

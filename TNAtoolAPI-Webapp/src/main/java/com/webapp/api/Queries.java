@@ -4405,8 +4405,7 @@ public class Queries {
 					i.centralized = e.getValue().centralized;
 					response.list.add(i);
 				}catch(NullPointerException error){
-					System.err.println("Angecy ID " + e.getKey() + " does not have any service.");
-					error.printStackTrace();
+					logger.error("Angecy ID " + e.getKey() + " does not have any service.", error);
 				}
 			} else {
 				ConGraphAgencyGraph i = SpatialEventManager.getAgencyCentroids(
