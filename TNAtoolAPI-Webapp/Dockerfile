@@ -1,6 +1,6 @@
-FROM ubuntu:16.04
+FROM ubuntu:17.10
 RUN apt-get update -y
-RUN apt-get install awscli openjdk-8-jdk maven tomcat8 libpq-dev postgresql-client postgis libgeos-dev python-psycopg2 -y
+RUN apt-get install awscli openjdk-8-jdk maven tomcat8 libpq-dev postgresql-client-9.6 postgis libgeos-dev python-psycopg2 -y
 
 ARG DBINFO_CSV="src/main/resources/admin/resources/dbInfo.template.csv"
 ARG TOMCAT_USERS_XML="src/main/resources/admin/resources/tomcat-users.template.xml"
