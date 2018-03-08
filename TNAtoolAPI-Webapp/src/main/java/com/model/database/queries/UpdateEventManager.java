@@ -435,34 +435,33 @@ public class UpdateEventManager {
 	 * @param agencyId
 	 */
 	public static void updateTables(Connection connection, String agencyId){	
-		  logger.debug("Updating gtfs_trips");
+		  logger.info("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
-		  logger.debug("Updating gtfs_stops");
+		  logger.info("Updating gtfs_stops");
 		  updateStopsAddGeolocation(connection, agencyId);
 		  updateGtfsStopsGeoCoder(connection, agencyId);
-		  logger.debug("Updating gtfs_stop_route_map");
+		  logger.info("Updating gtfs_stop_route_map");
 		  updateGtfsStopRouteMap(connection, agencyId);
-		  logger.debug("Updating gtfs_stop_service_map");
+		  logger.info("Updating gtfs_stop_service_map");
 		  updateGtfsStopServiceMap(connection, agencyId);
-		  logger.debug("Updating gtfs_trip_stops");
+		  logger.info("Updating gtfs_trip_stops");
 		  updateGtfsTripStops(connection, agencyId);
-		  logger.debug("Updating census_counties_trip_map");
+		  logger.info("Updating census_counties_trip_map");
 		  updateCountyTripMap(connection, agencyId);
-		  logger.debug("Updating census_states_trip_map");
+		  logger.info("Updating census_states_trip_map");
 		  updateStateTripMap(connection, agencyId);
-		  logger.debug("Updating census_tracts_trip_map");
+		  logger.info("Updating census_tracts_trip_map");
 		  updateTractTripMap(connection, agencyId);
-		  logger.debug("Updating census_urbans_trip_map");
+		  logger.info("Updating census_urbans_trip_map");
 		  updateUrbanTripMap(connection, agencyId);
-		  logger.debug("Updating census_places_trip_map");
+		  logger.info("Updating census_places_trip_map");
 		  updatePlaceTripMap(connection, agencyId);
-		  logger.debug("Updating census_congdists_trip_map");
+		  logger.info("Updating census_congdists_trip_map");
 		  updateCongdistTripMap(connection, agencyId);
-		  logger.debug("Updating gtfs_agencies");
+		  logger.info("Updating gtfs_agencies");
 		  updateGtfsAgencies(connection, agencyId);
-		  logger.debug("Updating agencymapping");
+		  logger.info("Updating agencymapping");
 		  updateAgencyMapping(connection, agencyId);
-		  
 //		  dropConnection(connection);
 	}
 	
