@@ -61,8 +61,9 @@ public class DatabaseConfig {
 
     // ian todo: make private
     public static String getPath(String...args) {
-        logger.debug("getPath: ");
-        return Paths.get(getConfigurationDirectory(), args).toString();
+        String path = Paths.get(getConfigurationDirectory(), args).toString();
+        logger.info(String.format("getPath: resolved -> %s", args, path));
+        return path;
     }
 
     public static String getDownloadDirectory() {

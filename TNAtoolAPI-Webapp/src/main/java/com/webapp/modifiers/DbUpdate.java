@@ -2694,7 +2694,7 @@ public class DbUpdate {
       gtfsUpload = false;
       message = gtfsMessage;
       gtfsMessage = "";
-      logger.debug(target.delete());
+      target.delete();
       return feedname + "%%" + message;
     }
     gtfsMessage = "";
@@ -3975,7 +3975,7 @@ public class DbUpdate {
   }
 
   public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
-    logger.debug("runSqlFromFile: " + sqlFilePath);
+    logger.info("runSqlFromFile: " + sqlFilePath);
     // 1. read file
     String sql = "";
     try {
@@ -4003,7 +4003,7 @@ public class DbUpdate {
   }
 
   private static boolean copyTable(String tableName, String fromDbConnectionUrl, String toDbConnectionUrl, String dbUser, String dbPassword) {
-    logger.debug("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);
+    logger.info("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);
     // Parse connection urls...
     String fromHost = fromDbConnectionUrl.split(":")[2];
     fromHost = fromHost.substring(2);
@@ -4060,7 +4060,7 @@ public class DbUpdate {
 
   private static boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
       String dbPassword) {
-    logger.debug("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
+    logger.info("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
     try {
       Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
       Statement statement = c.createStatement();
