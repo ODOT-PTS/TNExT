@@ -3,6 +3,7 @@ version: "3"
 volumes:
   pgdata:
   conf:
+  tnastm2:
 
 services:
   db:
