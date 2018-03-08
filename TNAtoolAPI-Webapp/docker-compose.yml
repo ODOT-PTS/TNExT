@@ -7,8 +7,8 @@ volumes:
 services:
   db:
     restart: always
-    image: mdillon/postgis:9.5
     command: postgres --log_statement=all
+    image: mdillon/postgis:9.6
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -21,6 +21,8 @@ services:
     build: .
     restart: always
     volumes:
+      - tnastm2:/root/.m2
+      - ./data:/data
       - ./conf:/app/conf
       - ./conf/temp:/var/lib/tomcat8/temp
     ports:
