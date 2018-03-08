@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.net.URI;
+import java.net.URL;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Writer;
@@ -64,6 +65,12 @@ public class DatabaseConfig {
         String path = Paths.get(getConfigurationDirectory(), args).toString();
         logger.info(String.format("getPath: resolved -> %s", args, path));
         return path;
+    }
+
+    public static File getResource(String path) {
+        URL url = DatabaseConfig.class.getClassLoader().getResource(path);
+        File f = new File(url.getFile());
+        return f;
     }
 
     public static String getDownloadDirectory() {
