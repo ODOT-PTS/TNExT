@@ -40,18 +40,20 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
+    final static Logger logger = Logger.getLogger(DatabaseConfig.class);    
     private static TreeMap<Integer, DatabaseConfig> dbConfigs;
     private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
     static {
         try {
             loadDbInfo(); 
         } catch (IOException e) {
-            System.err.format("DatabaseConfig load: fatal error, could not read dbInfo.csv\n");
-            e.printStackTrace();
+            logger.error("Fatal error, could not read dbInfo.csv", e);
         }
     }
 
@@ -59,7 +61,9 @@ public class DatabaseConfig {
 
     // ian todo: make private
     public static String getPath(String...args) {
-        return Paths.get(getConfigurationDirectory(), args).toString();
+        String path = Paths.get(getConfigurationDirectory(), args).toString();
+        logger.info(String.format("getPath: resolved -> %s", args, path));
+        return path;
     }
 
     public static String getDownloadDirectory() {
@@ -67,7 +71,6 @@ public class DatabaseConfig {
     }
 
     public static void loadDbInfo() throws IOException {
-        System.err.format("DatabaseConfigs.loadDbInfo()\n");
         File csvfile = new File(getDbInfoCsvPath());
         try { 
             loadFromCsv(csvfile);
@@ -77,7 +80,6 @@ public class DatabaseConfig {
     }
 
     public static void saveDbInfo() throws IOException {
-        System.err.format("DatabaseConfigs.saveDbInfo()\n");
         File csvfile = new File(getDbInfoCsvPath());
         try {
             writeToCsv(csvfile);
@@ -118,8 +120,9 @@ public class DatabaseConfig {
         // ian: todo: validate
         int i = dbConfig.getDatabaseIndex();
         if (dbConfigs.containsKey(i)) {
-            System.out.format("dBconfig.addConfig(): index already exists: %s\n", i);
+            logger.warn(String.format("addConfig: index already exists: %s", i));
         } else {
+            logger.info(String.format("addConfig: adding dbConfig: %s", dbConfig.toString()));
             dbConfigs.put(i, dbConfig);
         }
     }
@@ -131,8 +134,9 @@ public class DatabaseConfig {
     public static void removeConfig(int index) {
         if (dbConfigs.containsKey(index)) { 
             dbConfigs.remove(index);
+            logger.info(String.format("removeConfig: removing index: %s", index));
         } else {
-            System.out.format("dBconfig.removeConfig(): index does not exist: %s\n", index);
+            logger.warn(String.format("removeConfig: index does not exist: %s", index));
         }
     }
 
@@ -156,7 +160,7 @@ public class DatabaseConfig {
 
     /* private methods */
 
-    public static String getDbInfoCsvPath() {
+    private static String getDbInfoCsvPath() {
         // To deprecate - direct access should not be allowed
         return getPath("admin", "resources", "dbInfo.csv");
     }
@@ -165,10 +169,10 @@ public class DatabaseConfig {
         String path = System.getProperty("edu.oregonstate.tnatool.ConfigurationDirectory");
         if ( path != null) {
             path = Paths.get(path).toString();
-            System.err.format("Configuration directory property: %s\n", path);
+            logger.info(String.format("ConfigurationDirectory property: %s", path));
         } else {
             path = DatabaseConfig.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            System.err.format("Configuration directory fallback: %s\n", path);
+            logger.info(String.format("ConfigurationDirectory fallback: %s", path));
         }
         return path;
     }
@@ -177,7 +181,7 @@ public class DatabaseConfig {
         // discard existing
         dbConfigs = new TreeMap<Integer, DatabaseConfig>();
         // load csv
-        System.err.format("DatabaseConfig.loadFromCsv: %s\n", csvfile.getPath());
+        logger.info(String.format("Reading dbInfo.csv: %s", csvfile.getPath()));
         CSVReader reader = null;
         // todo: ian: load from map, ignore databaseIndex column?
         try {
@@ -185,21 +189,18 @@ public class DatabaseConfig {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (!tryParseInt(line[0])) { continue; }
-                System.err.format("DatabaseConfig.loadFromCsv: read dbConfigs: " + line[0] + 
-                        " dbName: " + line[1]
-                        + " connectionUrl: " + line[4] + "\n");
-                DatabaseConfig d = new DatabaseConfig(line);
-                dbConfigs.put(d.getDatabaseIndex(), d);
+                DatabaseConfig dbConfig = new DatabaseConfig(line);
+                logger.info(String.format("Read dbConfig: %s", dbConfig.toString()));
+                dbConfigs.put(dbConfig.getDatabaseIndex(), dbConfig);
             }    
         } catch (IOException e) {
-            System.err.format("DatabaseConfig.loadFromCsv: Error reading file\n");
-            e.printStackTrace();
+            logger.error("Error reading dbInfo.csv", e);
             throw e;
         }
     }
 
     private static void writeToCsv(File csvfile) throws IOException {
-        System.err.format("DatabaseConfig.writeToCsv: %s\n", csvfile.getPath());
+        logger.info(String.format("Writing dbInfo.csv: %s", csvfile.getPath()));
         BufferedWriter bw;
         try {
             FileWriter fw = new FileWriter(csvfile);
@@ -210,16 +211,15 @@ public class DatabaseConfig {
                     CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                     CSVWriter.DEFAULT_LINE_END);
 
-            System.err.format("DatabaseConfig.writeToCsv: writing header: %s", fields.toString());
+            logger.info(String.format("Writing header: %s", fields.toString()));
             csvWriter.writeNext(fields);
             for (DatabaseConfig db : getConfigs()) {
-                System.err.format("DatabaseConfig.writeToCsv: writing index %s: %s", db.getDatabaseIndex(), db.toArray().toString());
+                logger.info(String.format("Writing index %s: %s", db.getDatabaseIndex(), db.toArray().toString()));
                 csvWriter.writeNext(db.toArray());
             }
             bw.close();
         } catch (IOException e) {
-            System.err.format("DatabaseConfig.writeToCsv: Error writing file");
-            e.printStackTrace();
+            logger.error("Error writing dbInfo.csv", e);
             throw e;
         }
     }
@@ -265,7 +265,7 @@ public class DatabaseConfig {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
-            System.err.format("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver\n");
+            logger.error("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver");
         }
         try {
             response = DriverManager.getConnection(getConnectionUrl(), getUsername(), getPassword());

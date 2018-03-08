@@ -21,7 +21,8 @@ services:
     build: .
     restart: always
     volumes:
-      - conf:/app/conf
+      - ./conf:/app/conf
+      - ./conf/temp:/var/lib/tomcat8/temp
     ports:
       - "8080:8080"
     links:

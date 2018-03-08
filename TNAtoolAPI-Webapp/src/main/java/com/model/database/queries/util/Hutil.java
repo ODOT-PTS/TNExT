@@ -19,6 +19,8 @@ package com.model.database.queries.util;
 import java.net.URL;
 import java.io.File;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.*;
 import org.hibernate.cfg.*;
 
@@ -26,6 +28,7 @@ import com.model.database.Databases;
 import com.model.database.DatabaseConfig;
 
 public class Hutil {
+    final static Logger logger = Logger.getLogger(Hutil.class);
 	private static SessionFactory[] sessionFactory = new SessionFactory[DatabaseConfig.getConfigSize()];	
 
     static {
@@ -49,7 +52,7 @@ public class Hutil {
     }
     
     private static SessionFactory createSessionFactory(DatabaseConfig db) {
-        System.out.println("Hutil::SessionFactory: "+db.toString());
+        logger.debug("Hutil::SessionFactory: "+db.toString());
         URL url = Hutil.class.getClassLoader().getResource("admin/resources/censusDb.cfg.xml");
         File inputFile = new File(url.getFile());
         Configuration config = new Configuration();

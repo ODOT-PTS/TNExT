@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -47,6 +49,8 @@ import com.model.database.DatabaseConfig;
 
 @WebServlet(urlPatterns = "/TNAtoolAPI-Webapp/admin")
 public class Admin extends HttpServlet {
+	final static Logger logger = Logger.getLogger(Admin.class);
+	
 	// GET
 	@Override
 	protected void doGet(HttpServletRequest request,
@@ -65,7 +69,7 @@ public class Admin extends HttpServlet {
 //		String error = "";
 		String data = "";
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-		//System.out.println(System.currentTimeMillis());
+		//logger.debug(System.currentTimeMillis());
         if (isMultipart) {
 	        FileItemFactory factory = new DiskFileItemFactory();
 	
@@ -85,7 +89,7 @@ public class Admin extends HttpServlet {
 			                String fileName = item.getName();
 			                //String path = Admin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			                File loc = new File( DatabaseConfig.getPath("admin", "uploads", "gtfs"));
-                            System.err.println("Uploading gtfs to " + loc);
+                            logger.info("Uploading gtfs to " + loc);
 			                if (!loc.exists()) {
 			                	boolean status = loc.mkdirs();
 			                }

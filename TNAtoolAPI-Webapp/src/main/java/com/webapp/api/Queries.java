@@ -59,6 +59,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.onebusaway.gtfs.model.Agency;
@@ -150,7 +152,7 @@ import com.webapp.modifiers.DbUpdate;
 @Path("/transit")
 @XmlRootElement
 public class Queries {
-	
+	final static Logger logger = Logger.getLogger(Queries.class);
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
 	private static int default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
@@ -243,7 +245,7 @@ public class Queries {
 		// Make temporary directory for shapefile export
 		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "shapefiles-"+Long.toString(System.nanoTime()));
 		tmpdir.mkdirs();
-		System.out.println("shapefile export to tmpdir: " + tmpdir);
+		logger.debug("shapefile export to tmpdir: " + tmpdir);
 
 		// Getting hashmap of agencies (AgencyId -> AgencyName)
 		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
@@ -370,7 +372,7 @@ public class Queries {
 					db.getDatabase(),
 					query.get(j)
 				};
-				System.out.println(Arrays.toString(cmd));
+				logger.debug(Arrays.toString(cmd));
 				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.redirectErrorStream(true);
 				Process pr = pb.start();
@@ -379,7 +381,7 @@ public class Queries {
 				while (reader2.readLine() != null) {
 				}
 				pr.waitFor(5, TimeUnit.MINUTES);
-				System.out.println("pgsql2shp done");
+				logger.debug("pgsql2shp done");
 			}
 		}
 
@@ -394,7 +396,7 @@ public class Queries {
 		String folderName = flag + "_shape_" + uniqueString;
 
 		String zipFilePath = new File(shapefilesPath, folderName + ".zip").toString();
-		System.out.println("writing zip file: " + zipFilePath);
+		logger.debug("writing zip file: " + zipFilePath);
 
 		ZipParameters parameters = new ZipParameters();
 		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
@@ -404,16 +406,16 @@ public class Queries {
 		ZipFile zipF = new ZipFile(zipFilePath);
 		zipF.createZipFileFromFolder(tmpdir, parameters, false, 0);
 
-		System.out.println("removing tmpdir");
+		logger.debug("removing tmpdir");
 		FileUtils.deleteDirectory(tmpdir);
 
 		// delete the zip-file after 5 minutes.
-		System.out.println("setting 5 minute timer to remove zip file");
+		logger.debug("setting 5 minute timer to remove zip file");
 		Timer timer;
 		ActionListener a = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("removing zip file: " + zipF.getFile().getName());
+				logger.debug("removing zip file: " + zipF.getFile().getName());
 				zipF.getFile().delete();
 			}
 		};
@@ -421,7 +423,7 @@ public class Queries {
 		timer.setRepeats(false);
 		timer.setInitialDelay(5 * 60000);
 		timer.start();
-		System.out.println("returning: " + "downloadables/shapefiles/" + zipF.getFile().getName());
+		logger.debug("returning: " + "downloadables/shapefiles/" + zipF.getFile().getName());
 		return "downloadables/shapefiles/" + zipF.getFile().getName();
 	}
 
@@ -735,7 +737,7 @@ public class Queries {
 		MapStop mapPnrStop;
 		MapRoute mapPnrRoute;
 		List<String> agencyList = DbUpdate.getSelectedAgencies(username);
-		System.out.println(agencyList);
+		logger.debug(agencyList);
 		List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 		List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
 		try {
@@ -1735,7 +1737,7 @@ public class Queries {
 				+ "	WHERE times.arrivaltime > 0 "
 				+ "	GROUP BY times.trip_agencyid, times.trip_id "
 				+ "	ORDER BY MIN(arrivaltime)";
-		// System.out.println(query);
+		// logger.debug(query);
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
 			TripTime t = new TripTime();
@@ -1888,7 +1890,7 @@ public class Queries {
 				+ routeid + ";" + DbUpdate.VERSION;
 		String[] dates = date.split(",");
 		int[][] days = daysOfWeek(dates);
-		// System.out.println(days[0][0]);
+		// logger.debug(days[0][0]);
 		AgencyAndId routeId = new AgencyAndId(agency, routeid);
 		response.Agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(
 				agency, dbindex).getName()
@@ -2011,15 +2013,15 @@ public class Queries {
 						&& trip.getDirectionId().equals("1")) {
 					if (ts.stoptimes.size() > maxSize[1]) {
 						response.directions[1].stops = ts.stoptimes;
-						// System.out.println(response.stops.get(0).StopId);
+						// logger.debug(response.stops.get(0).StopId);
 						maxSize[1] = ts.stoptimes.size();
 					}
 					response.directions[1].schedules.add(ts);
 				} else {
 					if (ts.stoptimes.size() > maxSize[0]) {
-						// System.out.println(ts.stoptimes.size());
+						// logger.debug(ts.stoptimes.size());
 						response.directions[0].stops = ts.stoptimes;
-						// System.out.println(response.stops.get(0).StopId);
+						// logger.debug(response.stops.get(0).StopId);
 						maxSize[0] = ts.stoptimes.size();
 					}
 					response.directions[0].schedules.add(ts);
@@ -4075,7 +4077,7 @@ public class Queries {
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
 								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray CROSS JOIN rac CROSS JOIN wac";
-						// System.out.println("this one"+query+"-------------");
+						// logger.debug("this one"+query+"-------------");
 
 						ResultSet rs = stmt.executeQuery(query);
 
@@ -4361,7 +4363,7 @@ public class Queries {
 				+ " select a1id, a1name, a2id, a2name, COUNT(dist) AS connections"
 				+ "	FROM a2stops "
 				+ "	GROUP BY a1id, a1name, a2id, a2name";
-//		System.out.println(query);
+//		logger.debug(query);
 		ResultSet rs = stmt.executeQuery(query);
 		rs.next();
 		double connections = rs.getInt("connections");
@@ -4403,8 +4405,7 @@ public class Queries {
 					i.centralized = e.getValue().centralized;
 					response.list.add(i);
 				}catch(NullPointerException error){
-					System.err.println("Angecy ID " + e.getKey() + " does not have any service.");
-					error.printStackTrace();
+					logger.error("Angecy ID " + e.getKey() + " does not have any service.", error);
 				}
 			} else {
 				ConGraphAgencyGraph i = SpatialEventManager.getAgencyCentroids(
@@ -4886,7 +4887,7 @@ public class Queries {
 	Feed name = new Feed();
 	name.a=feeds;
 	String[] feedcount=name.a.split(",");
-	System.out.println(name.a);
+	logger.debug(name.a);
 	name.Len=0;
 	name.Len=feedcount.length;
 	return name.Len;

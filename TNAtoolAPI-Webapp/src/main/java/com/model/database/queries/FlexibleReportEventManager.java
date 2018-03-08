@@ -291,7 +291,7 @@ public class FlexibleReportEventManager {
 						+ "		LEFT JOIN route_miles USING (areaid,agencyid) "
 						+ "		LEFT JOIN svc_hours USING (areaid,agencyid) "
 						+ "		LEFT JOIN svc_stops USING (areaid,agencyid)";
-//				System.out.println(query);
+//				logger.debug(query);
 				ResultSet rs = stmt.executeQuery(query);
 				
 				// get the size of the result set
@@ -790,7 +790,7 @@ public class FlexibleReportEventManager {
 						+ "	LEFT JOIN emp_served_cumulated_rac USING (areaid,agencyid) "
 						+ "	LEFT JOIN emp_los_cumulated_rac USING (areaid,agencyid) ";
 			}
-//			System.out.println(query);
+//			logger.debug(query);
 			ResultSet rs = stmt.executeQuery(query);
 			
 			// get the size of the result set
@@ -1023,7 +1023,7 @@ public class FlexibleReportEventManager {
 						+ "		LEFT JOIN t6_served_cumulated USING (areaid,agencyid) "
 						+ "		LEFT JOIN t6_los_cumulated USING (areaid,agencyid) ";
 			
-//			System.out.println(query);
+//			logger.debug(query);
 			rs = stmt.executeQuery(query);
 
 			// get the size of the result set

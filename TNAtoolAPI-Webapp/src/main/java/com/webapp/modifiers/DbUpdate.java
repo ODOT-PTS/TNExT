@@ -73,6 +73,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tomcat.util.http.fileupload.FileDeleteStrategy;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.apache.xml.serialize.OutputFormat;
@@ -104,6 +106,7 @@ import com.webapp.api.Queries;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
+  final static Logger logger = Logger.getLogger(DbUpdate.class);
   private final static int USER_COUNT = 10;
   private final static int QUOTA = 10000000;
   private final static DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
@@ -129,7 +132,7 @@ public class DbUpdate {
         selectedAgencies.add(rs.getString("agency_id"));
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -166,7 +169,6 @@ public class DbUpdate {
   @Path("/getVersion")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public static Object getVersion() {
-
     PDBerror b = new PDBerror();
     b.DBError = VERSION;
     return b;
@@ -179,8 +181,7 @@ public class DbUpdate {
   public Object tests(@QueryParam("x") String x) {
     PDBerror b = new PDBerror();
     b.DBError = x;
-    System.out.println(x);
-
+    logger.debug(x);
     return b;
   }
 
@@ -219,8 +220,7 @@ public class DbUpdate {
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET activated = true;");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -257,8 +257,7 @@ public class DbUpdate {
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET " + fieldName + " = " + b + ";");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -290,8 +289,7 @@ public class DbUpdate {
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET activated = false;");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -330,8 +328,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
       error.DBError = "error";
     } finally {
       if (rs != null)
@@ -376,9 +373,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
-
+      logger.error(e);
     }
 
     String email = "";
@@ -397,7 +392,7 @@ public class DbUpdate {
         }
 
       } catch (SQLException e) {
-        System.out.println(e.getMessage());
+        logger.error(e);
       } finally {
         if (rs != null)
           try {
@@ -435,7 +430,7 @@ public class DbUpdate {
     //properties.put("mail.smtp.EnableSSL.enable", "true");
 
     Session session = Session.getInstance(properties, null);
-    System.out.println("Port: " + session.getProperty("mail.smtp.port"));
+    logger.info("Port: " + session.getProperty("mail.smtp.port"));
 
     Transport trans = null;
 
@@ -510,8 +505,7 @@ public class DbUpdate {
         userInfo.Usedspace = rs.getString("usedspace");
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -555,8 +549,7 @@ public class DbUpdate {
         error.DBError = "false";
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
       error.DBError = "error";
     } finally {
       if (rs != null)
@@ -595,8 +588,7 @@ public class DbUpdate {
           .executeUpdate("UPDATE gtfs_uploaded_feeds SET ispublic = '" + p + "' WHERE feedname = '" + feedname + "';");
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
       error.DBError = "error";
     } finally {
       if (statement != null)
@@ -632,8 +624,7 @@ public class DbUpdate {
         error.DBError = rs.getString("active");
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
       error.DBError = "error";
     } finally {
       if (rs != null)
@@ -719,8 +710,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
       error.DBError = e.getMessage();
     } finally {
       if (rs != null)
@@ -779,8 +769,7 @@ public class DbUpdate {
       statement.executeUpdate();
       error.DBError = "true";
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
+      logger.error(e);
       error.DBError = e.getMessage();
     } finally {
       if (statement != null)
@@ -822,7 +811,7 @@ public class DbUpdate {
     try {
       c = PgisEventManager.makeConnectionByUrl(cURL, user, pass);
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       b.DBError = e.getMessage();
     } finally {
       if (c != null)
@@ -858,7 +847,7 @@ public class DbUpdate {
       DatabaseConfig.removeConfig(i);
       DatabaseConfig.saveDbInfo();  
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       b.DBError = e.getMessage();
     } catch (IOException e) {
       // ian todo: fatal error
@@ -880,7 +869,7 @@ public class DbUpdate {
         } catch (SQLException e) {
         }
     }
-    System.out.println(b.DBError);
+    logger.debug(b.DBError);
     updateDatabaseStaticInfo(true);
     return b;
   }
@@ -904,7 +893,7 @@ public class DbUpdate {
         b = "true";
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -951,7 +940,7 @@ public class DbUpdate {
       dbstat.Updated = rs.getBoolean("update_process");
       dbstat.Region = rs.getBoolean("region");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1001,8 +990,7 @@ public class DbUpdate {
       error.DBError = "Database was successfully updated";
       // ian: todo: update config
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
       error.DBError = e.getMessage();
     } finally {
       if (rs != null)
@@ -1074,8 +1062,7 @@ public class DbUpdate {
       DatabaseConfig.addConfig(dbConfig);
       DatabaseConfig.saveDbInfo();      
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      logger.error(e);
       error.DBError = e.getMessage();
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -1093,7 +1080,7 @@ public class DbUpdate {
         }
     }
 
-    System.out.println(error.DBError);
+    logger.debug(error.DBError);
     return error;
   }
 
@@ -1131,9 +1118,8 @@ public class DbUpdate {
       }
       // ian: todo: update config
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    // } catch (IOException e) {
+      logger.error(e);
+      // } catch (IOException e) {
     //   // TODO Auto-generated catch block
     //   e.printStackTrace();
     } finally {
@@ -1153,7 +1139,7 @@ public class DbUpdate {
         } catch (SQLException e) {
         }
     }
-    System.out.println(DBError);
+    logger.debug(DBError);
     return DBError;
   }
 
@@ -1176,8 +1162,7 @@ public class DbUpdate {
         response = "true";
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkGTFSstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1218,8 +1203,7 @@ public class DbUpdate {
         response = "true";
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkUpdatestatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1272,8 +1256,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkT6status method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1325,8 +1308,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkPNRstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1363,7 +1345,7 @@ public class DbUpdate {
       statement.executeUpdate("DELETE FROM parknride WHERE left(countyid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: deletePNR method");
+      logger.error(e);
       message = e.getMessage();
     } finally {
       if (statement != null)
@@ -1396,9 +1378,8 @@ public class DbUpdate {
       statement.executeUpdate("DELETE FROM title_vi_blocks_float WHERE left(blockid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: deleteT6 method");
+      logger.error(e);
       message = e.getMessage();
-      //			e.printStackTrace();
     } finally {
       if (statement != null)
         try {
@@ -1431,9 +1412,8 @@ public class DbUpdate {
       statement.executeUpdate("DELETE FROM lodes_blocks_wac WHERE left(blockid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: deleteEmpWac method");
+      logger.error(e);
       message = e.getMessage();
-      //			e.printStackTrace();
     } finally {
       if (statement != null)
         try {
@@ -1467,9 +1447,8 @@ public class DbUpdate {
       statement.executeUpdate("VACUUM");
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: deleteEmpRac method");
+      logger.error(e);
       message = e.getMessage();
-      //			e.printStackTrace();
     } finally {
       if (statement != null)
         try {
@@ -1502,9 +1481,8 @@ public class DbUpdate {
       statement.executeUpdate("DELETE FROM lodes_rac_projection_county WHERE left(countyid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: deletefEmp method");
+      logger.error(e);
       message = e.getMessage();
-      //			e.printStackTrace();
     } finally {
       if (statement != null)
         try {
@@ -1553,7 +1531,7 @@ public class DbUpdate {
           + "population2035 = NULL, population2040 = NULL, population2045 = NULL, population2050 = NULL;");
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: deletefPop method");
+      logger.error(e);
       message = e.getMessage();
       //			e.printStackTrace();
     } finally {
@@ -1616,8 +1594,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkEmpstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1678,8 +1655,7 @@ public class DbUpdate {
       //				rac = true;
       //			}
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkfEmpstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1773,8 +1749,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkFpopstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1829,8 +1804,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkRegionstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1911,8 +1885,7 @@ public class DbUpdate {
         census_urbans = true;
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: checkCensusstatus method");
-      //			e.printStackTrace();
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -1967,7 +1940,7 @@ public class DbUpdate {
         stateids.add(rs.getString("states"));
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: copyCensus method 1");
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -2036,7 +2009,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage() + ", from: copyCensus method 2");
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -2132,7 +2105,7 @@ public class DbUpdate {
       statement.executeUpdate("VACUUM;");
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message = e.getMessage();
     } finally {
       if (rs != null)
@@ -2217,7 +2190,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message += e.getMessage();
     } finally {
       if (rs != null)
@@ -2255,7 +2228,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message += e.getMessage();
     } finally {
       if (rs != null)
@@ -2311,7 +2284,7 @@ public class DbUpdate {
       statement.executeUpdate("VACUUM;");
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -2431,7 +2404,7 @@ public class DbUpdate {
       agencyIdList = agencyIds.split(",");
       //			
       for (int i = 0; i < defAgencyIds.length; i++) {
-        System.out.println(defAgencyIds[i][0]);
+        logger.debug(defAgencyIds[i][0]);
         try {
           if (defAgencyIds[i][0].startsWith("temp")) {
             statement.executeUpdate(
@@ -2445,7 +2418,7 @@ public class DbUpdate {
           }
 
         } catch (SQLException e) {
-          System.out.println(e.getMessage());
+          logger.error(e);
         }
       }
 
@@ -2465,7 +2438,7 @@ public class DbUpdate {
         agencyIdList = agencyIds.split(",");
         //				
         for (int i = 0; i < defAgencyIds.length; i++) {
-          System.out.println(defAgencyIds[i][0]);
+          logger.debug(defAgencyIds[i][0]);
           try {
             if (defAgencyIds[i][0].startsWith("temp")) {
               statement.executeUpdate(
@@ -2479,16 +2452,16 @@ public class DbUpdate {
             }
 
           } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.error(e);
           }
         }
       }
 
-      System.out.println("vacuum start");
+      logger.debug("vacuum start");
       statement.executeUpdate("VACUUM");
-      System.out.println("vacuum finish");
+      logger.debug("vacuum finish");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message = e.getMessage();
     } finally {
       if (rs != null)
@@ -2519,7 +2492,6 @@ public class DbUpdate {
     //File gtfsFolder = new File(path+"../../src/main/webapp/resources/admin/uploads/gtfs");
     File gtfsFolder = new File(DatabaseConfig.getPath("admin", "uploads", "gtfs"));
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2533,10 +2505,8 @@ public class DbUpdate {
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object deleteUploadedPNR() throws IOException {
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/uploads/pnr");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2550,10 +2520,8 @@ public class DbUpdate {
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object deleteUploadedT6() throws IOException {
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/uploads/t6");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2570,7 +2538,6 @@ public class DbUpdate {
 
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/uploads/emp");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2587,7 +2554,6 @@ public class DbUpdate {
 
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/uploads/femp");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2604,7 +2570,6 @@ public class DbUpdate {
 
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/uploads/fpop");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2621,7 +2586,6 @@ public class DbUpdate {
 
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/uploads/region");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2638,7 +2602,6 @@ public class DbUpdate {
 
     File gtfsFolder = new File(path + "../../src/main/webapp/resources/admin/processFiles/gtfs");
     File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     if (files != null) {
       for (File f : files) {
         f.delete();
@@ -2669,8 +2632,7 @@ public class DbUpdate {
         b = "true";
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -2721,10 +2683,7 @@ public class DbUpdate {
 
     File target = new File(feed);
     target.mkdirs(); // FIXME, catch any error here and log. Ed 2017-09-18
-    //		File[] files = gtfsFolder.listFiles();
-    //		System.out.println(files.length);
     Files.move(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    //    	System.out.println(source.delete());
     String message = "done";
     args[4] = feed;
     for (int i = 0; i < 4; i++) {
@@ -2735,7 +2694,7 @@ public class DbUpdate {
       gtfsUpload = false;
       message = gtfsMessage;
       gtfsMessage = "";
-      System.out.println(target.delete());
+      target.delete();
       return feedname + "%%" + message;
     }
     gtfsMessage = "";
@@ -2744,7 +2703,7 @@ public class DbUpdate {
       GtfsDatabaseLoaderMain.main(args);	
     }catch(Exception e){
       message = e.getMessage();
-      System.out.println(target.delete());
+      logger.debug(target.delete());
       
     //			try{
     //				FileDeleteStrategy.FORCE.delete(target);
@@ -2827,7 +2786,7 @@ public class DbUpdate {
 
       //UpdateEventManager.updateTables(To BE DELETED, defaultId);
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message = e.getMessage();
     } finally {
       if (rs != null)
@@ -2851,7 +2810,7 @@ public class DbUpdate {
       // target.delete();
     }
 
-    //		System.out.println("done");
+    //		logger.debug("done");
     //		return new TransitError(feedname +"Has been added to the database");
     return feedname + "%%" + message;
   }
@@ -2886,7 +2845,7 @@ public class DbUpdate {
           + ");");
       statement.executeUpdate("ALTER TABLE parknride" + "  OWNER TO postgres;");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     }
 
     try {
@@ -2894,10 +2853,9 @@ public class DbUpdate {
       statement.executeUpdate("ALTER TABLE parknride DROP COLUMN IF EXISTS geom;");
       statement.executeUpdate("DROP TABLE IF EXISTS temp_01;");
       statement.executeUpdate("CREATE TABLE temp_01 as (SELECT * FROM parknride LIMIT 1);");
-
       statement.executeUpdate("TRUNCATE TABLE temp_01;");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     }
 
     String[] p;
@@ -2914,22 +2872,21 @@ public class DbUpdate {
       statement = c.createStatement();
       statement.executeUpdate("INSERT INTO parknride SELECT * FROM temp_01 ON CONFLICT DO NOTHING;");
       statement.executeUpdate("DROP TABLE IF EXISTS temp_01;");
-
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     }
     try {
       statement = c.createStatement();
       statement.executeUpdate("ALTER TABLE parknride " + "ADD COLUMN IF NOT EXISTS geom geometry(Point, 2993);");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     }
     try {
       statement = c.createStatement();
       statement.executeUpdate(
           "UPDATE parknride " + "SET geom = ST_transform(ST_setsrid(ST_MakePoint(lon, lat),4326), 2993);");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     }
     try {
       statement = c.createStatement();
@@ -2957,7 +2914,7 @@ public class DbUpdate {
       statement.executeUpdate("UPDATE parknride SET propertyowner='N/A' WHERE propertyowner IS NULL;");
       statement.executeUpdate("UPDATE parknride SET localexpert='N/A' WHERE localexpert IS NULL;");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message = e.getMessage();
     } finally {
       source.delete();
@@ -2968,7 +2925,7 @@ public class DbUpdate {
       addMetadata(stateid, metadata, c, "parknride");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -2993,7 +2950,7 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String message = "";
-    System.out.println(message);
+    logger.debug(message);
 
     String host = dbInfo[4].split(":")[2];
     host = host.substring(2);
@@ -3121,7 +3078,7 @@ public class DbUpdate {
       addMetadata(stateid, metadata, c, "title6");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -3150,7 +3107,7 @@ public class DbUpdate {
     path = path.substring(1, path.length());
     File source = new File(path);
     String message = "";
-    //		System.out.println(message);
+    //		logger.debug(message);
 
     String host = dbInfo[4].split(":")[2];
     host = host.substring(2);
@@ -3194,7 +3151,7 @@ public class DbUpdate {
       addMetadata(stateid, metadata, c, "employment");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -3227,7 +3184,7 @@ public class DbUpdate {
     path = path.substring(1, path.length());
     File source = new File(path);
     String message = "";
-    //		System.out.println(message);
+    //		logger.debug(message);
 
     String host = dbInfo[4].split(":")[2];
     host = host.substring(2);
@@ -3265,7 +3222,7 @@ public class DbUpdate {
       addMetadata(stateid, metadata, c, "future_emp");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -3298,7 +3255,7 @@ public class DbUpdate {
     path = path.substring(1, path.length());
     File source = new File(path);
     String message = "done";
-    //		System.out.println(message);
+    //		logger.debug(message);
 
     String host = dbInfo[4].split(":")[2];
     host = host.substring(2);
@@ -3354,7 +3311,7 @@ public class DbUpdate {
       addMetadata(stateid, metadata, c, "future_pop");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -3383,7 +3340,7 @@ public class DbUpdate {
     path = path.substring(1, path.length());
     File source = new File(path);
     String message = "done";
-    //		System.out.println(message);
+    //		logger.debug(message);
 
     String host = dbInfo[4].split(":")[2];
     host = host.substring(2);
@@ -3413,7 +3370,7 @@ public class DbUpdate {
       addMetadata(stateid, metadata, c, "region");
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -3453,13 +3410,13 @@ public class DbUpdate {
         defaultId = rs.getString("defaultId");
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       //e.printStackTrace();
     } finally {
       if (statement != null) try { statement.close(); } catch (SQLException e) {}
       if (c != null) try { c.close(); } catch (SQLException e) {}
     }
-    System.out.println(defaultId);
+    logger.debug(defaultId);
     UpdateEventManager.updateTables(dbindex, defaultId);
     return "done";
   }*/
@@ -3477,17 +3434,17 @@ public class DbUpdate {
       c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();
 
-      System.out.println(agency);
+      logger.debug(agency);
       UpdateEventManager.updateTables(c, agency);
       statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='" + feed
           + "' AND username = '" + username + "';");
-      System.out.println("vacuum start");
+      logger.debug("vacuum start");
       statement.executeUpdate("VACUUM");
-      System.out.println("vacuum finish");
+      logger.debug("vacuum finish");
 
       statement.close();
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       message = e.getMessage();
     } finally {
       if (statement != null)
@@ -3529,17 +3486,17 @@ public class DbUpdate {
         lists.sizes.add("size");
       }
       /*for(int i=0; i<feeds.size();i++){
-        System.out.println(agencies.get(i));
+        logger.debug(agencies.get(i));
         UpdateEventManager.updateTables(c, agencies.get(i));
         statement.executeUpdate("UPDATE gtfs_uploaded_feeds set updated=True WHERE feedname='"+feeds.get(i)+"' AND username = '"+username+"';");
-        System.out.println("vacuum start");
+        logger.debug("vacuum start");
         statement.executeUpdate("VACUUM");
-        System.out.println("vacuum finish");
+        logger.debug("vacuum finish");
       }*/
 
       statement.close();
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -3588,17 +3545,16 @@ public class DbUpdate {
       statement = c.createStatement();
 
       for (int i = 0; i < defAgencyIds.length; i++) {
-        System.out.println("creating index for table: " + defAgencyIds[i][0]);
+        logger.debug("creating index for table: " + defAgencyIds[i][0]);
         try {
           statement.executeUpdate(
               "CREATE INDEX defaid" + i + " ON " + defAgencyIds[i][0] + " (" + defAgencyIds[i][1] + ");");
         } catch (SQLException e) {
-          System.out.println(e.getMessage());
+          logger.error(e);
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-
+      logger.error(e);
     } finally {
       if (statement != null)
         try {
@@ -3640,9 +3596,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
-
+      logger.error(e);
       error.DBError = e.getMessage();
       b = false;
 
@@ -3692,8 +3646,7 @@ public class DbUpdate {
       statement.executeUpdate("update gtfs_selected_feeds " + "set agency_id = gtfs_feed_info.defaultid "
           + "from gtfs_feed_info " + "where gtfs_selected_feeds.feedname = gtfs_feed_info.feedname;");
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -3743,9 +3696,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
-
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -3798,9 +3749,7 @@ public class DbUpdate {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
-
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -3837,7 +3786,7 @@ public class DbUpdate {
         }
       }
     } catch (NullPointerException e) {
-      System.err.println("IndexOutOfBoundsException: " + e.getMessage());
+      logger.error("IndexOutOfBoundsException: ", e);
     }
 
     String[] dbInfo = db.split(",");
@@ -3854,9 +3803,7 @@ public class DbUpdate {
       }
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      //e.printStackTrace();
-
+      logger.error(e);
     } finally {
       if (rs != null)
         try {
@@ -3933,7 +3880,7 @@ public class DbUpdate {
     parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
     zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
     folder.delete();
-    System.out.println("Done modifying feed shapes");
+    logger.debug("Done modifying feed shapes");
     return null;
   }
 
@@ -3988,7 +3935,7 @@ public class DbUpdate {
     parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
     zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
     folder.delete();
-    System.out.println("Done modifying feed shapes");
+    logger.debug("Done modifying feed shapes");
   }
 
   private static class ShapeRecord implements Point {
@@ -4028,7 +3975,7 @@ public class DbUpdate {
   }
 
   public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
-    System.out.println("runSqlFromFile: " + sqlFilePath);
+    logger.info("runSqlFromFile: " + sqlFilePath);
     // 1. read file
     String sql = "";
     try {
@@ -4036,7 +3983,7 @@ public class DbUpdate {
       sql = sqlScanner.useDelimiter("\\Z").next();
       sqlScanner.close();
     } catch (FileNotFoundException e) {
-      System.out.println(String.format("runSqlFromFile: cannot find a file at %s", sqlFilePath));
+      logger.error(e);
       return false;
     }
 
@@ -4049,14 +3996,14 @@ public class DbUpdate {
       statement.close();
       c.close();
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       return false;
     }
     return true;
   }
 
   private static boolean copyTable(String tableName, String fromDbConnectionUrl, String toDbConnectionUrl, String dbUser, String dbPassword) {
-    System.out.println("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);
+    logger.info("copyTable: " + tableName + " from: " + fromDbConnectionUrl + " to: " + toDbConnectionUrl);
     // Parse connection urls...
     String fromHost = fromDbConnectionUrl.split(":")[2];
     fromHost = fromHost.substring(2);
@@ -4082,10 +4029,9 @@ public class DbUpdate {
         fromName
       };
       String[] envp = { "PGPASSWORD="+dbPassword };
-      System.out.println(Arrays.toString(cmd));
       Process pr = Runtime.getRuntime().exec(cmd,envp);
       BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+      String str;while ((str=reader.readLine()) != null) {}
       pr.waitFor();
     }catch(Exception e) {
     	e.printStackTrace();
@@ -4101,10 +4047,9 @@ public class DbUpdate {
         "census.dump"
       };
       String[] envp = { "PGPASSWORD="+dbPassword };
-      System.out.println(Arrays.toString(cmd));
       Process pr = Runtime.getRuntime().exec(cmd,envp);
       BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-      String str;while ((str=reader.readLine()) != null) {System.out.println(str);}
+      String str;while ((str=reader.readLine()) != null) {}
       pr.waitFor();
     }catch(Exception e) {
     	e.printStackTrace();
@@ -4115,14 +4060,14 @@ public class DbUpdate {
 
   private static boolean copySqlCommand(String copyCommand, String fromFile, String dbConnectionUrl, String dbUser,
       String dbPassword) {
-    System.out.println("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
+    logger.info("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
     try {
       Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
       Statement statement = c.createStatement();
       statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
       return true;
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e);
       return false;
     }
   }
