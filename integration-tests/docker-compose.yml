@@ -7,10 +7,10 @@ db:
   volumes:
     - pgdata:/var/lib/postgresql/data
   ports:
-    - "5432:5432"
+    - "5432"
 
 tnast:
-  build: ../TNAtoolAPI-Webapp/
+  build: ../
   volumes:
     - tnastm2:/root/.m2
     - "./scripts:/scripts"
