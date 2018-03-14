@@ -475,7 +475,7 @@ function getVersion(){
 	var version = "";
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getVersion",
+        url: "/TNAtoolAPI-Webapp/queries/transit/getVersion",
         dataType: "json",
         async: false,
         success: function(d) {
@@ -845,7 +845,7 @@ function getDefaultDbIndex(){
 	var dbindex = -1;
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/getDefaultDbIndex",
+        url: "/TNAtoolAPI-Webapp/queries/transit/getDefaultDbIndex",
         dataType: "json",
         async: false,
         success: function(d) {
