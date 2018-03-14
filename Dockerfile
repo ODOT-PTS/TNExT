@@ -23,7 +23,6 @@ RUN cp /app/target/TNAtoolAPI-Webapp-0.0.1-SNAPSHOT.war ${CATALINA_BASE}/webapps
 ENV CONFDIR /app/conf
 RUN mkdir -p ${CONFDIR}/admin/resources
 RUN echo "edu.oregonstate.tnatool.ConfigurationDirectory = ${CONFDIR}/" >> ${CATALINA_BASE}/conf/catalina.properties
-RUN echo "edu.oregonstate.tnatool.DownloadablesDirectory = ${CATALINA_BASE}/ROOT/downloadables/" >> ${CATALINA_BASE}/conf/catalina.properties
 COPY ${TOMCAT_USERS_XML} ${CATALINA_BASE}/conf/tomcat-users.xml
 COPY ${DBINFO_CSV} ${CONFDIR}/admin/resources/dbInfo.csv
 
