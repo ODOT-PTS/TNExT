@@ -3,9 +3,18 @@ version: "3"
 volumes:
   pgdata:
   conf:
-  tnastm2:
 
 services:
+
+  nginx:
+    restart: always
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./conf/htpasswd:/etc/nginx/htpasswd
+    ports:
+      - "8080:8080"
+
   db:
     restart: always
     command: postgres --log_statement=all
@@ -22,11 +31,10 @@ services:
     build: .
     restart: always
     volumes:
-      - tnastm2:/root/.m2
       - ./data:/data
       - ./conf:/app/conf
-      - ./conf/temp:/var/lib/tomcat8/temp
     ports:
-      - "8080:8080"
+      - "8080"
     links:
       - db
+      - nginx

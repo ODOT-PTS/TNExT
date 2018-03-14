@@ -75,6 +75,8 @@ import org.onebusaway.gtfs.model.Trip;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+
+import com.model.database.PDBerror;
 import com.model.database.DatabaseConfig;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
@@ -185,6 +187,25 @@ public class Queries {
 		return response;
 	}
 	
+
+	@GET
+	@Path("/getDefaultDbIndex")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getDefaultDbIndex() {
+	  PDBerror b = new PDBerror();
+	  b.DBError = (DatabaseConfig.getLastConfig().getDatabaseIndex()) + "";
+	  return b;
+	}
+  
+	@GET
+	@Path("/getVersion")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public static Object getVersion() {
+	  PDBerror b = new PDBerror();
+	  b.DBError = DbUpdate.VERSION;
+	  return b;
+	}
+	  
 	  /**
      * Lists stops within a certain distance of a 
      * given stop while filtering the agencies.
