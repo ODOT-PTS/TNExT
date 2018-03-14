@@ -3,7 +3,6 @@ version: "3"
 volumes:
   pgdata:
   conf:
-  tnastm2:
 
 services:
 
@@ -32,7 +31,6 @@ services:
     build: .
     restart: always
     volumes:
-      - tnastm2:/root/.m2
       - ./data:/data
       - ./conf:/app/conf
     ports:
