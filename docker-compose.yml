@@ -12,6 +12,7 @@ services:
     image: nginx:alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./conf/htpasswd:/etc/nginx/htpasswd
     ports:
       - "8080:8080"
 
