@@ -3659,7 +3659,7 @@ public class PgisEventManager {
 			  +"from gtfs_trips trip  where trip.agencyid='"+agencyId+"' order by routeid,length DESC,shape,id), "
 			  + "rrtmiles AS (SELECT SUM(ST_Length(ST_Transform(ST_Intersection(gtfs_trip_segments.shape, census_blocks.shape), 2993))) / 1609.34 as rrtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id INNER JOIN census_blocks ON ST_Intersects(gtfs_trip_segments.shape, census_blocks.shape) WHERE census_blocks.poptype = 'R'),"
 			  + "urtmiles AS (SELECT SUM(ST_Length(ST_Transform(ST_Intersection(gtfs_trip_segments.shape, census_blocks.shape), 2993))) / 1609.34 as urtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id INNER JOIN census_blocks ON ST_Intersects(gtfs_trip_segments.shape, census_blocks.shape) WHERE census_blocks.poptype = 'U'),"
-			  + "rtmiles AS (SELECT SUM(ST_Length(ST_Transform(gtfs_trip_segments.shape, 2993))) / 1609.34 as rtmiles FROM routes INNR JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id)"		  
+			  + "rtmiles AS (SELECT SUM(ST_Length(ST_Transform(gtfs_trip_segments.shape, 2993))) / 1609.34 as rtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id)"		  
 			  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
 		      + "	COALESCE(rpop,0) as ruralpop,coalesce(employment,0) as rac,coalesce(employees,0) as wac, COALESCE(rtmiles,0) as rtmiles, COALESCE(urtmiles,0) as urtmiles ,COALESCE(rrtmiles,0) as rrtmiles "
 		      + "	from urbanpop inner join ruralpop on true "
