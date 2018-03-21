@@ -467,6 +467,8 @@ public class UpdateEventManager {
 	public static void updateTables(Connection connection, String agencyId){	
 		  logger.info("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
+		  logger.info("Update gtfs_trip_segments");
+		  updateGtfsTripSegments(connection, agencyId);
 		  logger.info("Updating gtfs_stops");
 		  updateStopsAddGeolocation(connection, agencyId);
 		  updateGtfsStopsGeoCoder(connection, agencyId);
@@ -651,8 +653,7 @@ public class UpdateEventManager {
 		  create_gtfs_trip_segments(connection);
 	      try {
 	        stmt = connection.createStatement();
-			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments DISABLE TRIGGER ALL;");
-			
+			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments DISABLE TRIGGER ALL;");			
 			stmt.executeUpdate("DELETE FROM gtfs_trip_segments WHERE agencyid = '"+agencyId+"';");
 			stmt.executeUpdate(""
 				+ "INSERT INTO gtfs_trip_segments (uid, agencyid, id, seg_id, shape)"
