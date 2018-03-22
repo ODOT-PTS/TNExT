@@ -438,21 +438,19 @@ public class UpdateEventManager {
 	      try {
 	        stmt = connection.createStatement();
 			stmt.executeUpdate(""
-				+ "CREATE TABLE IF NOT EXISTS gtfs_trip_segments AS"
-				+ "  SELECT ROW_NUMBER() OVER() AS uid,"
-				+ "         a.id AS id,"
-				+ "         agencyid character varying(255),"
-				+ "         n - 1 AS seg_id,"
-				+ "         ST_SetSRID(ST_MakeLine(ST_PointN(a.shape, n - 1), ST_PointN(a.shape, n)), 4326) AS shape"
-				+ "  FROM gtfs_trips AS a"
-				+ "  CROSS JOIN generate_series(2, ST_NPoints(a.shape)) AS n;"				
+				+ "CREATE TABLE IF NOT EXISTS gtfs_trip_segments ("
+				+ "  uid bigint,"
+				+ "  agencyid character varying(255),"
+				+ "  id character varying(255),"
+				+ "  seg_id integer,"
+				+ "  shape geometry"
+				+ ") WITH (OIDS=false);"				
 			);
-			stmt.executeUpdate("CREATE INDEX gtfs_trip_segments_shape_idx ON gtfs_trip_segments USING gist (shape);");
-			stmt.executeUpdate("VACUUM ANALYZE gtfs_trip_segments;");
+			stmt.executeUpdate("CREATE INDEX IF NOT EXISTS gtfs_trip_segments_shape_idx ON gtfs_trip_segments USING gist (shape);");
 	        stmt.executeUpdate("ALTER TABLE gtfs_stop_route_map OWNER TO postgres;");
 	        stmt.close();
 	    } catch ( Exception e ) {
-	    	e.printStackTrace();
+	    	logger.error(e);
 	    }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -640,19 +638,9 @@ public class UpdateEventManager {
 
 	public static void updateGtfsTripSegments(Connection connection, String agencyId) {
 		Statement stmt = null;  
-		try{
+		create_gtfs_trip_segments(connection);
+		try {
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM gtfs_trip_segments LIMIT 1");
-			if(!rs.next()){
-				stmt.executeUpdate("DROP TABLE gtfs_trip_segments;");
-			}
-		  }catch ( Exception e ) {
-		  }finally{
-	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
-	      }
-		  create_gtfs_trip_segments(connection);
-	      try {
-	        stmt = connection.createStatement();
 			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments DISABLE TRIGGER ALL;");			
 			stmt.executeUpdate("DELETE FROM gtfs_trip_segments WHERE agencyid = '"+agencyId+"';");
 			stmt.executeUpdate(""
@@ -666,13 +654,13 @@ public class UpdateEventManager {
 				+ "  CROSS JOIN generate_series(2, ST_NPoints(a.shape)) AS n"
 				+ "  WHERE a.agencyid = '"+agencyId+"';"
 			);
-	        stmt.executeUpdate("ALTER TABLE gtfs_trip_segments ENABLE TRIGGER ALL;");
-	        stmt.close();
-	      } catch ( Exception e ) {
-	    	  e.printStackTrace();
-	      }finally{
-	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
-	      }		
+			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments ENABLE TRIGGER ALL;");
+			stmt.close();
+		} catch ( Exception e ) {
+			logger.error(e);
+		} finally {
+			if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+		}		
 	}
 
 	/**
