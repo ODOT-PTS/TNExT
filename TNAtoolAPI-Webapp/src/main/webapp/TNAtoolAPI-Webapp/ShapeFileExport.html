@@ -58,7 +58,10 @@
 					<td valign="top" id="flag">
 					<form >
 					  	<input  type="radio" class="flagRadio" name="flag" id="routesCheckbox" value="routes" onchange="if (this.checked) $('#submitButton').attr('disabled', false)">Routes<br>
+					  	<input  type="radio" class="flagRadio" name="flag" id="routesOnDateCheckbox" value="routes_on_date" onchange="if (this.checked) $('#submitButton').attr('disabled', false)">Routes active on date<br>
 					  	<input  type="radio" class="flagRadio" name="flag" id="stopsCheckbox" value="stops" onchange="if (this.checked) $('#submitButton').attr('disabled', false)">Stops<br>
+					  	<input  type="radio" class="flagRadio" name="flag" id="stopsOnDateCheckbox" value="stops_on_date" onchange="if (this.checked) $('#submitButton').attr('disabled', false)">Stops visited on date<br>
+						<input type="text" name="date" id="onDate" value="" placeholder="YYYY-MM-DD" />
 					</form>
 					</td>
 				</tr>
