@@ -227,7 +227,7 @@ public class Queries {
     	try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
  	   return results;	   
     }
@@ -418,6 +418,7 @@ public class Queries {
 				String shapePath = new File(agencyFolder, tempAgencyname + "_" + flag + "_shape_" + j).toString();
 				String[] cmd = {
 					"pgsql2shp",
+					"-r",
 					"-f", shapePath,
 					"-h", db.getHost(),
 					"-p", db.getPort(),
@@ -499,7 +500,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -535,7 +536,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -574,10 +575,10 @@ public class Queries {
 			centroids = EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		CensusList response = new CensusList();
 		// Census C;
@@ -617,20 +618,20 @@ public class Queries {
 			response = EventManager.getpop(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		List<Census> centroids = new ArrayList<Census>();
 		try {
 			centroids = EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		long sum = 0;
 		for (Census centroid : centroids) {
@@ -834,10 +835,10 @@ public class Queries {
 			}
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return response;
 	}
@@ -1187,7 +1188,7 @@ public class Queries {
 			try {
 				calendar.setTime(sdf.parse(dates[i]));
 			} catch (ParseException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			days[1][i] = calendar.get(Calendar.DAY_OF_WEEK);
 		}
@@ -1213,7 +1214,7 @@ public class Queries {
 			try {
 				calendar.setTime(sdf.parse(dates[i]));
 			} catch (ParseException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			days[1][i] = weekdays[calendar.get(Calendar.DAY_OF_WEEK) - 1];
 		}
@@ -1235,7 +1236,7 @@ public class Queries {
 				result[i] = tdf.format(sdf.parse(dates[i]));
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return result;
@@ -1380,7 +1381,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1590,7 +1591,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1681,7 +1682,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1896,7 +1897,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2087,7 +2088,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2195,7 +2196,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2358,7 +2359,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2449,7 +2450,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2534,7 +2535,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2640,7 +2641,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		each.waterArea = String
@@ -2827,7 +2828,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2939,7 +2940,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3090,7 +3091,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3141,7 +3142,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3211,7 +3212,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3288,7 +3289,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3352,7 +3353,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3525,7 +3526,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3761,7 +3762,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3967,7 +3968,7 @@ public class Queries {
 				stmt.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
@@ -4235,7 +4236,7 @@ public class Queries {
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e);
 				}
 
 				PgisEventManager.dropConnection(connection);
@@ -4270,7 +4271,7 @@ public class Queries {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
@@ -4490,7 +4491,7 @@ public class Queries {
 		try {
 			response = SpatialEventManager.getAllAgencies(username, dbindex);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return response;
 	}
@@ -4530,7 +4531,7 @@ public class Queries {
 				sedlist.SEDList.add(seDates);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();			
+			logger.error(e);			
 		}
 		return sedlist;
 	}
