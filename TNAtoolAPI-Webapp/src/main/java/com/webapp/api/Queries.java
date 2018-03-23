@@ -251,6 +251,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getShapeFile(@QueryParam("agencyids") String agencyIDs,
 			@QueryParam("flag") String flag,
+			@QueryParam("date") String date,
 			@QueryParam("dbName") String dbName,
 			@QueryParam("dbIndex") Integer dbIndex,
 			@QueryParam("username") String username) throws SQLException,
@@ -272,6 +273,14 @@ public class Queries {
 		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
 				.getAllAgencies(username, dbIndex);
 
+		// Filtering by date
+		String[] dates = date.split(",");
+		String[][] datedays = daysOfWeekString(dates);
+		String fdate = datedays[0][0];
+		String dow = datedays[1][0];
+		int THRESHOLD = 750000;				
+
+		// Run query for each agency
 		for (int i = 0; i < agencies.length; i++) {
 			String agencyId = agencies[i];
 			ArrayList<String> query = new ArrayList<String>();
