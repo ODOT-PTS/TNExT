@@ -261,7 +261,6 @@ public class Queries {
 		String feeds = "";
 
 		// get database parameters
-		// ian todo: database selector
 		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
 
 		// Make temporary directory for shapefile export
@@ -290,6 +289,7 @@ public class Queries {
 					+ agencyId + "' || '%')";
 
 			if (flag.equals("routes")) {
+				String q = "";
 				query.add("SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
 						+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
 						+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
@@ -302,87 +302,110 @@ public class Queries {
 						+ " AS feeds ON feeds.aid = routes.agencyid "
 						+ " WHERE trips.agencyid = '" + agencyId + "'");
 			} else if (flag.equals("stops")) {
+				String q = "" +
+					"WITH  " +
+					"svcids AS ( " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendars gc  " +
+					"	WHERE  " +
+					"		startdate::int <= ?::int AND  " +
+					"		enddate::int >= ?::int AND  " +
+					"		" + dow + " = 1 AND " +
+					"		serviceid_agencyid||serviceid_id NOT IN ( " +
+					"			SELECT serviceid_agencyid||serviceid_id  " +
+					"			FROM gtfs_calendar_dates  " +
+					"			WHERE date = ?  " +
+					"			AND exceptiontype = 2 " +
+					"		)  " +
+					"	UNION  " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendar_dates gcd  " +
+					"	WHERE  " +
+					"		date = ? and exceptiontype = 1 " +
+					"), " +
+					"serviced_trips AS ( " +
+					"	SELECT  " +
+					"		gtfs_trips.id, " +
+					"		gtfs_trips.agencyid, " +
+					"		gtfs_trips.serviceid_id " +
+					"	FROM gtfs_trips " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"), " +
+					"stop_visits AS ( " +
+					"	SELECT  " +
+					"		gtfs_agencies.name AS PRVDR_NM,  " +
+					"		gtfs_stops.id AS stop_id,  " +
+					"		gtfs_stops.name AS stop_name,  " +
+					"		gtfs_stops.agencyid AS stop_agencyid, " +
+					"		gtfs_stops.lat AS stop_lat,  " +
+					"		gtfs_stops.lon AS stop_lon,  " +
+					"		gtfs_stops.url AS stop_url, " +
+					"		feeds.startdate AS efct_dt_start,  " +
+					"		feeds.enddate AS efct_dt_end, " +
+					"		CASE  " +
+					"			WHEN gtfs_stop_times.arrivaltime > 86400 THEN TO_CHAR((gtfs_stop_times.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time  " +
+					"			WHEN gtfs_stop_times.arrivaltime = -999 THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time " +
+					"			ELSE TO_CHAR((gtfs_stop_times.arrivaltime||' second')::interval, 'HH24:MI:SS')::time  " +
+					"		END AS arrival_time, " +
+					"		CASE  " +
+					"			WHEN gtfs_stop_times.departuretime > 86400 THEN TO_CHAR((gtfs_stop_times.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time  " +
+					"			WHEN gtfs_stop_times.departuretime = -999  THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time  " +
+					"			ELSE TO_CHAR((gtfs_stop_times.departuretime||' second')::interval, 'HH24:MI:SS')::time  " +
+					"		END AS departure_time, " +
+					"		gtfs_stop_times.trip_id AS trip_id, " +
+					"		gtfs_stop_times.stopsequence AS stop_sequence, " +
+					"		gtfs_stops.location AS shape " +
+					"	FROM gtfs_stops  " +
+					"		INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def " +
+					"		INNER JOIN gtfs_stop_times ON gtfs_stops.id = gtfs_stop_times.stop_id AND gtfs_stops.agencyid = gtfs_stop_times.stop_agencyid " +
+					"		INNER JOIN gtfs_agencies ON gtfs_agencies.id = ? " +
+					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = map.agencyid " +
+					"		INNER JOIN serviced_trips ON gtfs_stop_times.trip_id = serviced_trips.id AND gtfs_stop_times.trip_agencyid = serviced_trips.agencyid " +
+					"		WHERE map.agencyid = ? " +
+					") " +
+					"";
+
 				// check if the number of records are larger than a threshold, split stops_times in to multiple shapefiles
 				Connection connection = db.getConnection();
-			    Statement stmt = connection.createStatement();
-			    int THRESHOLD = 750000;
-			    ResultSet rs = stmt.executeQuery("SELECT count(gid) FROM gtfs_stop_times AS stoptimes WHERE stoptimes.trip_agencyid ='" + agencyId + "'");
+				PreparedStatement ps = null;
+				ps = connection.prepareStatement(q + " SELECT COUNT(*) as count FROM stop_visits;");
+				ps.setString(1, fdate);
+				ps.setString(2, fdate);
+				ps.setString(3, fdate);
+				ps.setString(4, fdate);
+				ps.setString(5, agencyId);
+				ps.setString(6, agencyId);
+				ps.setString(7, agencyId);
+				ps.setString(8, agencyId);
+				ResultSet rs = ps.executeQuery();
 			    rs.next();
-			    int numOfRows = rs.getInt("count");
-				if ( numOfRows < THRESHOLD){
-					query.add("SELECT agencies.name AS PRVDR_NM, "
-							+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
-							+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
-							+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
-							+ "		CASE "
-							+ "         WHEN stoptimes.arrivaltime > 86400 "
-							+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "         WHEN stoptimes.arrivaltime = -999 "
-							+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
-							+ "		  	ELSE "
-							+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS arrival_time,"
-							+ "		CASE "
-							+ "         	WHEN stoptimes.departuretime > 86400 "
-							+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "             WHEN stoptimes.departuretime = -999 "
-							+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
-							+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS departure_time,"
-							+ "		stoptimes.stopsequence AS stop_sequence,"
-							+ "		stops.location AS shape"
-							+ "		FROM gtfs_stops AS stops"
-							+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
-							+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
-							+ "		INNER JOIN  (SELECT '"
-							+ agencyId
-							+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-							+ agencyId
-							+ "' || '%') AS feeds ON feeds.aid = map.agencyid"
-							+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
-							+ "		WHERE map.agencyid ='" + agencyId
-							+ "' ORDER BY stop_id");
-				}else{
-					int counter = 0;
-					while (counter <= numOfRows){
-						query.add("SELECT agencies.name AS PRVDR_NM, "
-							+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
-							+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
-							+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
-							+ "		CASE "
-							+ "         WHEN stoptimes.arrivaltime > 86400 "
-							+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "         WHEN stoptimes.arrivaltime = -999 "
-							+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
-							+ "		  	ELSE "
-							+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS arrival_time,"
-							+ "		CASE "
-							+ "         	WHEN stoptimes.departuretime > 86400 "
-							+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "             WHEN stoptimes.departuretime = -999 "
-							+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
-							+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS departure_time,"
-							+ "		stoptimes.stopsequence AS stop_sequence,"
-							+ "		stops.location AS shape"
-							+ "		FROM gtfs_stops AS stops"
-							+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
-							+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
-							+ "		INNER JOIN  (SELECT '"
-							+ agencyId
-							+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-							+ agencyId
-							+ "' || '%') AS feeds ON feeds.aid = map.agencyid"
-							+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
-							+ "		WHERE map.agencyid ='" + agencyId
-							+ "' ORDER BY stop_id LIMIT " + THRESHOLD + " OFFSET " + counter);
-						counter += THRESHOLD;
-					}
-				}	
+				int numOfRows = rs.getInt("count");
+				logger.info("shapefile export: expecting rows: " +numOfRows);
+				ps.close();
+
+				// break into chunks				
+				int counter = 0;
+				while (counter <= numOfRows){
+					ps = connection.prepareStatement("SELECT * FROM (" + q + " SELECT * FROM stop_visits ORDER BY (stop_id, trip_id, stop_sequence) LIMIT " + THRESHOLD + " OFFSET " + counter + ") AS pgsql2shp;");
+					ps.setString(1, fdate);
+					ps.setString(2, fdate);
+					ps.setString(3, fdate);
+					ps.setString(4, fdate);
+					ps.setString(5, agencyId);
+					ps.setString(6, agencyId);						
+					ps.setString(7, agencyId);
+					ps.setString(8, agencyId);						
+					query.add(ps.toString());
+					counter += THRESHOLD;
+					ps.close();
+				}
 				connection.close();
-				rs.close();
 			}
+
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
 			File agencyFolder = new File(tmpdir, tempAgencyname + "_" + flag);
