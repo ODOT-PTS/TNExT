@@ -30,6 +30,10 @@ services:
   tnast:
     build: .
     restart: always
+    environment:
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: db
     volumes:
       - ./data:/data
       - ./conf:/app/conf
