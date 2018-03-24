@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -226,7 +227,7 @@ public class Queries {
     	try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
  	   return results;	   
     }
@@ -251,6 +252,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getShapeFile(@QueryParam("agencyids") String agencyIDs,
 			@QueryParam("flag") String flag,
+			@QueryParam("date") String date,
 			@QueryParam("dbName") String dbName,
 			@QueryParam("dbIndex") Integer dbIndex,
 			@QueryParam("username") String username) throws SQLException,
@@ -260,7 +262,6 @@ public class Queries {
 		String feeds = "";
 
 		// get database parameters
-		// ian todo: database selector
 		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
 
 		// Make temporary directory for shapefile export
@@ -272,108 +273,215 @@ public class Queries {
 		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
 				.getAllAgencies(username, dbIndex);
 
+		// Filtering by date
+		String fdate = "0";
+		String dow = "monday"; // default
+		if (date != null && !date.isEmpty()) {
+			String[] dates = date.split(",");
+			String[][] datedays = daysOfWeekString(dates);
+			fdate = datedays[0][0];
+			dow = datedays[1][0];
+		} else {
+			date = null;
+		}
+
+		int THRESHOLD = 750000;				
+		PreparedStatement ps = null;
+		Connection connection = db.getConnection();
+
+		// Run query for each agency
 		for (int i = 0; i < agencies.length; i++) {
 			String agencyId = agencies[i];
 			ArrayList<String> query = new ArrayList<String>();
-			feeds = "(SELECT '"
-					+ agencyId
-					+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-					+ agencyId + "' || '%')";
-
 			if (flag.equals("routes")) {
-				query.add("SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
-						+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
-						+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
-						+ " shape AS trip_shape "
-						+ "	FROM gtfs_routes AS routes "
-						+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
-						+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
-						+ " INNER JOIN "
-						+ feeds
-						+ " AS feeds ON feeds.aid = routes.agencyid "
-						+ " WHERE trips.agencyid = '" + agencyId + "'");
+				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
+				String q = "" +
+					"WITH  " +
+					"svcids AS ( " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendars gc  " +
+					"	WHERE  " +
+					"		startdate::int <= ?::int AND  " +
+					"		enddate::int >= ?::int AND  " +
+					"		" + dow + " = 1 AND " +
+					"		serviceid_agencyid||serviceid_id NOT IN ( " +
+					"			SELECT serviceid_agencyid||serviceid_id  " +
+					"			FROM gtfs_calendar_dates  " +
+					"			WHERE date = ?  " +
+					"			AND exceptiontype = 2 " +
+					"		)  " +
+					"	UNION  " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendar_dates gcd  " +
+					"	WHERE  " +
+					"		date = ? and exceptiontype = 1 " +
+					"), " +
+					"serviced_trips AS ( " +
+					"	SELECT  " +
+					"		gtfs_trips.id, " +
+					"		gtfs_trips.agencyid, " +
+					"		gtfs_trips.serviceid_id " +
+					"	FROM gtfs_trips " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"), " +
+					"routes AS ( " +
+					"	SELECT  " +
+					"		agencies.name AS PRVDR_NM,  " +
+					"		routes.id AS route_id,  " +
+					"		routes.shortname AS route_shor,  " +
+					"		routes.longname AS route_long, 	 " +
+					"		routes.description AS route_desc,  " +
+					"		routes.url AS route_url,  " +
+					"		trips.tripshortname,  " +
+					"		tripheadsign AS trip_headsign,  " +
+					"		length AS trip_length,  " +
+					"		estlength AS trip_estLength,  " +
+					"		feeds.startdate AS efct_dt_start,  " +
+					"		feeds.enddate AS efct_dt_end,   " +
+					"		shape AS trip_shape, " +
+					"		trips.id AS trip_id,	 " +
+					"       trips.agencyid as trip_agencyid " +
+					"	FROM gtfs_routes AS routes 	 " +
+					"	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id 	 " +
+					"	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id   " +
+					"	INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = routes.agencyid  " +
+					"	WHERE trips.agencyid = ? " +
+					") ";
+				String qShape = "SELECT * FROM (" + q + " SELECT * FROM routes ORDER BY (route_id)) AS pgsql2shp;";
+				if (date != null) {
+					qShape = "SELECT * FROM (" + q + " SELECT * FROM routes INNER JOIN serviced_trips ON routes.trip_id = serviced_trips.id AND routes.trip_agencyid = serviced_trips.agencyid ORDER BY (route_id)) AS pgsql2shp;";
+				}
+				ps = connection.prepareStatement(qShape);
+				ps.setString(1, fdate);
+				ps.setString(2, fdate);
+				ps.setString(3, fdate);
+				ps.setString(4, fdate);
+				ps.setString(5, agencyId);
+				ps.setString(6, agencyId);						
+				ps.setString(7, agencyId);
+				logger.info("shapefile export query:\n "+ ps.toString());
+				query.add(ps.toString());
+				ps.close();					
 			} else if (flag.equals("stops")) {
+				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
+				String q = "" +
+					"WITH  " +
+					"svcids AS ( " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendars gc  " +
+					"	WHERE  " +
+					"		startdate::int <= ?::int AND  " +
+					"		enddate::int >= ?::int AND  " +
+					"		" + dow + " = 1 AND " +
+					"		serviceid_agencyid||serviceid_id NOT IN ( " +
+					"			SELECT serviceid_agencyid||serviceid_id  " +
+					"			FROM gtfs_calendar_dates  " +
+					"			WHERE date = ?  " +
+					"			AND exceptiontype = 2 " +
+					"		)  " +
+					"	UNION  " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendar_dates gcd  " +
+					"	WHERE  " +
+					"		date = ? and exceptiontype = 1 " +
+					"), " +
+					"serviced_trips AS ( " +
+					"	SELECT  " +
+					"		gtfs_trips.id, " +
+					"		gtfs_trips.agencyid, " +
+					"		gtfs_trips.serviceid_id " +
+					"	FROM gtfs_trips " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"), " +
+					"stop_visits AS ( " +
+					"	SELECT  " +
+					"		gtfs_agencies.name AS PRVDR_NM,  " +
+					"		gtfs_stops.id AS stop_id,  " +
+					"		gtfs_stops.name AS stop_name,  " +
+					"		gtfs_stops.agencyid AS stop_agencyid, " +
+					"		gtfs_stops.lat AS stop_lat,  " +
+					"		gtfs_stops.lon AS stop_lon,  " +
+					"		gtfs_stops.url AS stop_url, " +
+					"		feeds.startdate AS efct_dt_start,  " +
+					"		feeds.enddate AS efct_dt_end, " +
+					"		CASE  " +
+					"			WHEN gtfs_stop_times.arrivaltime > 86400 THEN TO_CHAR((gtfs_stop_times.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time  " +
+					"			WHEN gtfs_stop_times.arrivaltime = -999 THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time " +
+					"			ELSE TO_CHAR((gtfs_stop_times.arrivaltime||' second')::interval, 'HH24:MI:SS')::time  " +
+					"		END AS arrival_time, " +
+					"		CASE  " +
+					"			WHEN gtfs_stop_times.departuretime > 86400 THEN TO_CHAR((gtfs_stop_times.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time  " +
+					"			WHEN gtfs_stop_times.departuretime = -999  THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time  " +
+					"			ELSE TO_CHAR((gtfs_stop_times.departuretime||' second')::interval, 'HH24:MI:SS')::time  " +
+					"		END AS departure_time, " +
+					"		gtfs_stop_times.trip_id AS trip_id, " +
+					"		gtfs_stop_times.stopsequence AS stop_sequence, " +
+					"		gtfs_stops.location AS shape, " +
+					"       gtfs_stop_times.trip_agencyid AS trip_agencyid " +
+					"	FROM gtfs_stops  " +
+					"		INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def " +
+					"		INNER JOIN gtfs_stop_times ON gtfs_stops.id = gtfs_stop_times.stop_id AND gtfs_stops.agencyid = gtfs_stop_times.stop_agencyid " +
+					"		INNER JOIN gtfs_agencies ON gtfs_agencies.id = ? " +
+					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = map.agencyid " +					
+					"		WHERE map.agencyid = ? " +
+					") " +
+					"";
+		
 				// check if the number of records are larger than a threshold, split stops_times in to multiple shapefiles
-				Connection connection = db.getConnection();
-			    Statement stmt = connection.createStatement();
-			    int THRESHOLD = 750000;
-			    ResultSet rs = stmt.executeQuery("SELECT count(gid) FROM gtfs_stop_times AS stoptimes WHERE stoptimes.trip_agencyid ='" + agencyId + "'");
+				String qCount = q + " SELECT COUNT(*) as count FROM stop_visits;";
+				if (date != null) {
+					qCount = q + " SELECT COUNT(*) as count FROM stop_visits INNER JOIN serviced_trips ON stop_visits.trip_id = serviced_trips.id AND stop_visits.trip_agencyid = serviced_trips.agencyid;";
+				}
+				ps = connection.prepareStatement(qCount);
+				ps.setString(1, fdate);
+				ps.setString(2, fdate);
+				ps.setString(3, fdate);
+				ps.setString(4, fdate);
+				ps.setString(5, agencyId);
+				ps.setString(6, agencyId);
+				ps.setString(7, agencyId);
+				ps.setString(8, agencyId);
+				logger.info("shapefile count query:\n "+ ps.toString());
+				ResultSet rs = ps.executeQuery();
 			    rs.next();
-			    int numOfRows = rs.getInt("count");
-				if ( numOfRows < THRESHOLD){
-					query.add("SELECT agencies.name AS PRVDR_NM, "
-							+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
-							+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
-							+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
-							+ "		CASE "
-							+ "         WHEN stoptimes.arrivaltime > 86400 "
-							+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "         WHEN stoptimes.arrivaltime = -999 "
-							+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
-							+ "		  	ELSE "
-							+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS arrival_time,"
-							+ "		CASE "
-							+ "         	WHEN stoptimes.departuretime > 86400 "
-							+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "             WHEN stoptimes.departuretime = -999 "
-							+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
-							+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS departure_time,"
-							+ "		stoptimes.stopsequence AS stop_sequence,"
-							+ "		stops.location AS shape"
-							+ "		FROM gtfs_stops AS stops"
-							+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
-							+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
-							+ "		INNER JOIN  (SELECT '"
-							+ agencyId
-							+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-							+ agencyId
-							+ "' || '%') AS feeds ON feeds.aid = map.agencyid"
-							+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
-							+ "		WHERE map.agencyid ='" + agencyId
-							+ "' ORDER BY stop_id");
-				}else{
-					int counter = 0;
-					while (counter <= numOfRows){
-						query.add("SELECT agencies.name AS PRVDR_NM, "
-							+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
-							+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
-							+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
-							+ "		CASE "
-							+ "         WHEN stoptimes.arrivaltime > 86400 "
-							+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "         WHEN stoptimes.arrivaltime = -999 "
-							+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
-							+ "		  	ELSE "
-							+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS arrival_time,"
-							+ "		CASE "
-							+ "         	WHEN stoptimes.departuretime > 86400 "
-							+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "             WHEN stoptimes.departuretime = -999 "
-							+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
-							+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS departure_time,"
-							+ "		stoptimes.stopsequence AS stop_sequence,"
-							+ "		stops.location AS shape"
-							+ "		FROM gtfs_stops AS stops"
-							+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
-							+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
-							+ "		INNER JOIN  (SELECT '"
-							+ agencyId
-							+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-							+ agencyId
-							+ "' || '%') AS feeds ON feeds.aid = map.agencyid"
-							+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
-							+ "		WHERE map.agencyid ='" + agencyId
-							+ "' ORDER BY stop_id LIMIT " + THRESHOLD + " OFFSET " + counter);
-						counter += THRESHOLD;
+				int numOfRows = rs.getInt("count");
+				logger.info("shapefile count query: " +numOfRows);
+				ps.close();
+
+				// break into chunks				
+				int counter = 0;
+				while (counter <= numOfRows){
+					String qShape = "SELECT * FROM (" + q + " SELECT * FROM stop_visits ORDER BY (stop_id, trip_id, stop_sequence) LIMIT ? OFFSET ?) AS pgsql2shp;";
+					if (date != null) {
+						qShape = "SELECT * FROM (" + q + " SELECT * FROM stop_visits INNER JOIN serviced_trips ON stop_visits.trip_id = serviced_trips.id AND stop_visits.trip_agencyid = serviced_trips.agencyid ORDER BY (stop_id, trip_id, stop_sequence) LIMIT ? OFFSET ?) AS pgsql2shp;";
 					}
-				}	
-				connection.close();
-				rs.close();
+					ps = connection.prepareStatement(qShape);
+					ps.setString(1, fdate);
+					ps.setString(2, fdate);
+					ps.setString(3, fdate);
+					ps.setString(4, fdate);
+					ps.setString(5, agencyId);
+					ps.setString(6, agencyId);						
+					ps.setString(7, agencyId);
+					ps.setString(8, agencyId);
+					ps.setInt(9, THRESHOLD);
+					ps.setInt(10, counter);
+					logger.info("shapefile export query:\n "+ ps.toString());
+					query.add(ps.toString());
+					counter += THRESHOLD;
+					ps.close();
+				}
 			}
+			connection.close();
+
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
 			File agencyFolder = new File(tmpdir, tempAgencyname + "_" + flag);
@@ -385,6 +493,7 @@ public class Queries {
 				String shapePath = new File(agencyFolder, tempAgencyname + "_" + flag + "_shape_" + j).toString();
 				String[] cmd = {
 					"pgsql2shp",
+					"-r",
 					"-f", shapePath,
 					"-h", db.getHost(),
 					"-p", db.getPort(),
@@ -466,7 +575,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -502,7 +611,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -541,10 +650,10 @@ public class Queries {
 			centroids = EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		CensusList response = new CensusList();
 		// Census C;
@@ -584,20 +693,20 @@ public class Queries {
 			response = EventManager.getpop(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		List<Census> centroids = new ArrayList<Census>();
 		try {
 			centroids = EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		long sum = 0;
 		for (Census centroid : centroids) {
@@ -801,10 +910,10 @@ public class Queries {
 			}
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return response;
 	}
@@ -1154,7 +1263,7 @@ public class Queries {
 			try {
 				calendar.setTime(sdf.parse(dates[i]));
 			} catch (ParseException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			days[1][i] = calendar.get(Calendar.DAY_OF_WEEK);
 		}
@@ -1180,7 +1289,7 @@ public class Queries {
 			try {
 				calendar.setTime(sdf.parse(dates[i]));
 			} catch (ParseException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			days[1][i] = weekdays[calendar.get(Calendar.DAY_OF_WEEK) - 1];
 		}
@@ -1202,7 +1311,7 @@ public class Queries {
 				result[i] = tdf.format(sdf.parse(dates[i]));
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return result;
@@ -1347,7 +1456,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1557,7 +1666,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1648,7 +1757,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1863,7 +1972,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2054,7 +2163,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2162,7 +2271,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2325,7 +2434,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2416,7 +2525,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2501,7 +2610,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2607,7 +2716,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		each.waterArea = String
@@ -2794,7 +2903,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2906,7 +3015,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3057,7 +3166,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3108,7 +3217,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3178,7 +3287,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3255,7 +3364,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3319,7 +3428,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3492,7 +3601,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3728,7 +3837,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3934,7 +4043,7 @@ public class Queries {
 				stmt.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
@@ -4202,7 +4311,7 @@ public class Queries {
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e);
 				}
 
 				PgisEventManager.dropConnection(connection);
@@ -4237,7 +4346,7 @@ public class Queries {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
@@ -4457,7 +4566,7 @@ public class Queries {
 		try {
 			response = SpatialEventManager.getAllAgencies(username, dbindex);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return response;
 	}
@@ -4497,7 +4606,7 @@ public class Queries {
 				sedlist.SEDList.add(seDates);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();			
+			logger.error(e);			
 		}
 		return sedlist;
 	}
