@@ -274,35 +274,100 @@ public class Queries {
 				.getAllAgencies(username, dbIndex);
 
 		// Filtering by date
-		String[] dates = date.split(",");
-		String[][] datedays = daysOfWeekString(dates);
-		String fdate = datedays[0][0];
-		String dow = datedays[1][0];
+		String fdate = "0";
+		String dow = "monday"; // default
+		if (date != null && !date.isEmpty()) {
+			String[] dates = date.split(",");
+			String[][] datedays = daysOfWeekString(dates);
+			fdate = datedays[0][0];
+			dow = datedays[1][0];
+		} else {
+			date = null;
+		}
+
 		int THRESHOLD = 750000;				
+		PreparedStatement ps = null;
+		Connection connection = db.getConnection();
 
 		// Run query for each agency
 		for (int i = 0; i < agencies.length; i++) {
 			String agencyId = agencies[i];
 			ArrayList<String> query = new ArrayList<String>();
-			feeds = "(SELECT '"
-					+ agencyId
-					+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-					+ agencyId + "' || '%')";
-
 			if (flag.equals("routes")) {
-				String q = "";
-				query.add("SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
-						+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
-						+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
-						+ " shape AS trip_shape "
-						+ "	FROM gtfs_routes AS routes "
-						+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
-						+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
-						+ " INNER JOIN "
-						+ feeds
-						+ " AS feeds ON feeds.aid = routes.agencyid "
-						+ " WHERE trips.agencyid = '" + agencyId + "'");
+				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
+				String q = "" +
+					"WITH  " +
+					"svcids AS ( " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendars gc  " +
+					"	WHERE  " +
+					"		startdate::int <= ?::int AND  " +
+					"		enddate::int >= ?::int AND  " +
+					"		" + dow + " = 1 AND " +
+					"		serviceid_agencyid||serviceid_id NOT IN ( " +
+					"			SELECT serviceid_agencyid||serviceid_id  " +
+					"			FROM gtfs_calendar_dates  " +
+					"			WHERE date = ?  " +
+					"			AND exceptiontype = 2 " +
+					"		)  " +
+					"	UNION  " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendar_dates gcd  " +
+					"	WHERE  " +
+					"		date = ? and exceptiontype = 1 " +
+					"), " +
+					"serviced_trips AS ( " +
+					"	SELECT  " +
+					"		gtfs_trips.id, " +
+					"		gtfs_trips.agencyid, " +
+					"		gtfs_trips.serviceid_id " +
+					"	FROM gtfs_trips " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"), " +
+					"routes AS ( " +
+					"	SELECT  " +
+					"		agencies.name AS PRVDR_NM,  " +
+					"		routes.id AS route_id,  " +
+					"		routes.shortname AS route_shor,  " +
+					"		routes.longname AS route_long, 	 " +
+					"		routes.description AS route_desc,  " +
+					"		routes.url AS route_url,  " +
+					"		trips.tripshortname,  " +
+					"		tripheadsign AS trip_headsign,  " +
+					"		length AS trip_length,  " +
+					"		estlength AS trip_estLength,  " +
+					"		feeds.startdate AS efct_dt_start,  " +
+					"		feeds.enddate AS efct_dt_end,   " +
+					"		shape AS trip_shape, " +
+					"		trips.id AS trip_id,	 " +
+					"       trips.agencyid as trip_agencyid " +
+					"	FROM gtfs_routes AS routes 	 " +
+					"	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id 	 " +
+					"	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id   " +
+					"	INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = routes.agencyid  " +
+					"	WHERE trips.agencyid = ? " +
+					") ";
+				String qShape = "SELECT * FROM (" + q + " SELECT * FROM routes ORDER BY (route_id)) AS pgsql2shp;";
+				if (date != null) {
+					qShape = "SELECT * FROM (" + q + " SELECT * FROM routes INNER JOIN serviced_trips ON routes.trip_id = serviced_trips.id AND routes.trip_agencyid = serviced_trips.agencyid ORDER BY (route_id)) AS pgsql2shp;";
+				}
+				ps = connection.prepareStatement(qShape);
+				ps.setString(1, fdate);
+				ps.setString(2, fdate);
+				ps.setString(3, fdate);
+				ps.setString(4, fdate);
+				ps.setString(5, agencyId);
+				ps.setString(6, agencyId);						
+				ps.setString(7, agencyId);
+				logger.info("shapefile export query:\n "+ ps.toString());
+				query.add(ps.toString());
+				ps.close();					
 			} else if (flag.equals("stops")) {
+				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
 				String q = "" +
 					"WITH  " +
 					"svcids AS ( " +
@@ -359,21 +424,23 @@ public class Queries {
 					"		END AS departure_time, " +
 					"		gtfs_stop_times.trip_id AS trip_id, " +
 					"		gtfs_stop_times.stopsequence AS stop_sequence, " +
-					"		gtfs_stops.location AS shape " +
+					"		gtfs_stops.location AS shape, " +
+					"       gtfs_stop_times.trip_agencyid AS trip_agencyid " +
 					"	FROM gtfs_stops  " +
 					"		INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def " +
 					"		INNER JOIN gtfs_stop_times ON gtfs_stops.id = gtfs_stop_times.stop_id AND gtfs_stops.agencyid = gtfs_stop_times.stop_agencyid " +
 					"		INNER JOIN gtfs_agencies ON gtfs_agencies.id = ? " +
-					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = map.agencyid " +
-					"		INNER JOIN serviced_trips ON gtfs_stop_times.trip_id = serviced_trips.id AND gtfs_stop_times.trip_agencyid = serviced_trips.agencyid " +
+					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = map.agencyid " +					
 					"		WHERE map.agencyid = ? " +
 					") " +
 					"";
-
+		
 				// check if the number of records are larger than a threshold, split stops_times in to multiple shapefiles
-				Connection connection = db.getConnection();
-				PreparedStatement ps = null;
-				ps = connection.prepareStatement(q + " SELECT COUNT(*) as count FROM stop_visits;");
+				String qCount = q + " SELECT COUNT(*) as count FROM stop_visits;";
+				if (date != null) {
+					qCount = q + " SELECT COUNT(*) as count FROM stop_visits INNER JOIN serviced_trips ON stop_visits.trip_id = serviced_trips.id AND stop_visits.trip_agencyid = serviced_trips.agencyid;";
+				}
+				ps = connection.prepareStatement(qCount);
 				ps.setString(1, fdate);
 				ps.setString(2, fdate);
 				ps.setString(3, fdate);
@@ -382,16 +449,21 @@ public class Queries {
 				ps.setString(6, agencyId);
 				ps.setString(7, agencyId);
 				ps.setString(8, agencyId);
+				logger.info("shapefile count query:\n "+ ps.toString());
 				ResultSet rs = ps.executeQuery();
 			    rs.next();
 				int numOfRows = rs.getInt("count");
-				logger.info("shapefile export: expecting rows: " +numOfRows);
+				logger.info("shapefile count query: " +numOfRows);
 				ps.close();
 
 				// break into chunks				
 				int counter = 0;
 				while (counter <= numOfRows){
-					ps = connection.prepareStatement("SELECT * FROM (" + q + " SELECT * FROM stop_visits ORDER BY (stop_id, trip_id, stop_sequence) LIMIT " + THRESHOLD + " OFFSET " + counter + ") AS pgsql2shp;");
+					String qShape = "SELECT * FROM (" + q + " SELECT * FROM stop_visits ORDER BY (stop_id, trip_id, stop_sequence) LIMIT ? OFFSET ?) AS pgsql2shp;";
+					if (date != null) {
+						qShape = "SELECT * FROM (" + q + " SELECT * FROM stop_visits INNER JOIN serviced_trips ON stop_visits.trip_id = serviced_trips.id AND stop_visits.trip_agencyid = serviced_trips.agencyid ORDER BY (stop_id, trip_id, stop_sequence) LIMIT ? OFFSET ?) AS pgsql2shp;";
+					}
+					ps = connection.prepareStatement(qShape);
 					ps.setString(1, fdate);
 					ps.setString(2, fdate);
 					ps.setString(3, fdate);
@@ -399,13 +471,16 @@ public class Queries {
 					ps.setString(5, agencyId);
 					ps.setString(6, agencyId);						
 					ps.setString(7, agencyId);
-					ps.setString(8, agencyId);						
+					ps.setString(8, agencyId);
+					ps.setInt(9, THRESHOLD);
+					ps.setInt(10, counter);
+					logger.info("shapefile export query:\n "+ ps.toString());
 					query.add(ps.toString());
 					counter += THRESHOLD;
 					ps.close();
 				}
-				connection.close();
 			}
+			connection.close();
 
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
