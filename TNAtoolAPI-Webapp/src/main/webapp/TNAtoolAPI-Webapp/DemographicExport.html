@@ -45,7 +45,10 @@
 		</div>
 		<br><br>
 		<input id="submitButton" disabled style="margin: 3px;width: 20%;height: 35px;cursor: pointer;" type="submit" value="Export CSV" onclick="createCSV()">
-		<div style="height:95vh; border-style: solid; overflow:scroll;">
+
+        <div>Note: Excel may have difficulty opening large CSV files (e.g. &gt; 100 MB). If this happens, please select fewer counties.</div>
+
+        <div style="height:95vh; border-style: solid; overflow:scroll;">
 			<table class="csvTable" style="height:80vh;" border=1>
 				<tr style="height: 3em;"> 
 					<th>Database</th>
@@ -57,10 +60,6 @@
 				</tr>
 			</table>
 		</div>
-
-        <div>Note: Excel may have difficulty opening large CSV files (e.g. &gt; 100 MB). If this happens, you may need to select fewer counties.</div>
-
-        <div>[Documentation]</div>
     </div>
     
 
