@@ -1479,7 +1479,8 @@ $mylist
 		    			'<li role="presentation"><a id="DDRPT" href="#"><b>Data Dump Report</b></a></li>'+
 		    			'<li role="presentation"><a id="FLXRPT" href="#"><b>Flexible Reporting Wizard</b></a></li>'+
 		    			'<li role="presentation"><a id="SHPFL" href="#"><b>Shapefile Generator</b></a></li>'+
-		    			'<li role="presentation"><a id="HMP" href="#"><b>Heat Map</b></a></li>'+
+		    			'<li role="presentation"><a id="CSVEX" href="#"><b>Demographics export</b></a></li>'+
+						'<li role="presentation"><a id="HMP" href="#"><b>Heat Map</b></a></li>'+
 			    		
 		    			'</ul>'+
 	    			'</li>');
@@ -1584,7 +1585,9 @@ $mylist
 			    }else if(casestring=="FLXRPT"){
 			    	flexRepDialog();
 			    }else if(casestring=="SHPFL"){
-			    	ShapeFileExpStart();
+					ShapeFileExpStart();
+				}else if(casestring=="CSVEX") {
+					window.open('/TNAtoolAPI-Webapp/DemographicExport.html');
 			    }else if(casestring=="DDRPT"){
 			    	openDatadumpRep();
 			    }
