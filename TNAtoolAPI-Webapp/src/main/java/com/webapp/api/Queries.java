@@ -418,11 +418,11 @@ public class Queries {
 		}
 
 		int THRESHOLD = 750000;				
-		PreparedStatement ps = null;
-		Connection connection = db.getConnection();
 
 		// Run query for each agency
 		for (int i = 0; i < agencies.length; i++) {
+			Connection connection = db.getConnection();
+			PreparedStatement ps = null;
 			String agencyId = agencies[i];
 			ArrayList<String> query = new ArrayList<String>();
 			if (flag.equals("routes")) {
