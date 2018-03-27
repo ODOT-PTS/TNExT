@@ -33,6 +33,8 @@ services:
       PGUSER: postgres
       PGPASSWORD: postgres
       PGHOST: db
+    volumes:
+      - conf:/app/conf
     ports:
       - "8080"
     links:
