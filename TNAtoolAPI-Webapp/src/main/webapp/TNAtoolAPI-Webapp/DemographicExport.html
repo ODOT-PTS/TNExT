@@ -46,7 +46,14 @@
 		<br><br>
 		<input id="submitButton" disabled style="margin: 3px;width: 20%;height: 35px;cursor: pointer;" type="submit" value="Export CSV" onclick="createCSV()">
 
-        <div>Note: Excel may have difficulty opening large CSV files (e.g. &gt; 100 MB). If this happens, please select fewer counties.</div>
+		<p><strong>Export demographics information to CSV</strong>. This tool will select all demographics information in the database for the census blocks in the selected counties. 
+			Each row contains the basic details of a census block in the initial columns, and details of the associated census tract, census place, urban region, county, state, and congressional district. 
+			The header in each of the columns is prefixed with the source table, e.g. "<em>census_tracts</em>_population2050". Data includes census geographic IDs, land and water areas, the current population, projected future populations,
+			and a central latitude &amp; longitude for each area. The next set of columns is all associated Title VI data for each census block.
+			The last set columns includes LODES data (RAC &amp; WAC) for each block, followed by LODES RAC projections for the block and associated county.
+		</p>
+
+        <p><strong>Note:</strong> Excel may have difficulty opening large CSV files (e.g. &gt; 100 MB). If this happens, please select fewer counties.</p>
 
         <div style="height:95vh; border-style: solid; overflow:scroll;">
 			<table class="csvTable" style="height:80vh;" border=1>

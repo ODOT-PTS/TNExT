@@ -274,17 +274,17 @@ public class Queries {
 		// Generate query
 		String[][] joins  = {
 			{"census_blocks", ""},
-			{"census_places", "placeid"},
-			{"census_congdists", "congdistid"},
-			{"census_urbans", "urbanid"},
-			{"census_states", "stateid"},
-			{"census_counties", "countyid"},
 			{"census_tracts", "tractid"},
+			{"census_places", "placeid"},
+			{"census_urbans", "urbanid"},
+			{"census_counties", "countyid"},
+			{"census_states", "stateid"},
+			{"census_congdists", "congdistid"},
+			{"title_vi_blocks_float", "blockid"},
 			{"lodes_blocks_rac", "blockid"},
 			{"lodes_blocks_wac", "blockid"},
 			{"lodes_rac_projection_block", "blockid"},
-			{"lodes_rac_projection_county", "countyid"},
-			{"title_vi_blocks_float", "blockid"}	
+			{"lodes_rac_projection_county", "countyid"}
 		};
 		ArrayList<String> ascolumns = new ArrayList<String>();
 		ArrayList<String> asjoins = new ArrayList<String>();
