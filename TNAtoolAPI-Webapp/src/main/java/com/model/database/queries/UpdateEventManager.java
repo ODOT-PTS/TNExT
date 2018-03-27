@@ -429,6 +429,34 @@ public class UpdateEventManager {
 	}
 	
 	/**
+	 * creates gtfs_stop_route_map table
+	 * 
+	 * @param connection
+	 */
+	public static void create_gtfs_trip_segments(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+			stmt.executeUpdate(""
+				+ "CREATE TABLE IF NOT EXISTS gtfs_trip_segments ("
+				+ "  uid bigint,"
+				+ "  agencyid character varying(255),"
+				+ "  id character varying(255),"
+				+ "  seg_id integer,"
+				+ "  shape geometry"
+				+ ") WITH (OIDS=false);"				
+			);
+			stmt.executeUpdate("CREATE INDEX IF NOT EXISTS gtfs_trip_segments_shape_idx ON gtfs_trip_segments USING gist (shape);");
+	        stmt.executeUpdate("ALTER TABLE gtfs_stop_route_map OWNER TO postgres;");
+	        stmt.close();
+	    } catch ( Exception e ) {
+	    	logger.error(e);
+	    }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
 	 * Updates all the additional tables. This is called every time a new feed is added to the database
 	 * 
 	 * @param connection
@@ -437,6 +465,8 @@ public class UpdateEventManager {
 	public static void updateTables(Connection connection, String agencyId){	
 		  logger.info("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
+		  logger.info("Update gtfs_trip_segments");
+		  updateGtfsTripSegments(connection, agencyId);
 		  logger.info("Updating gtfs_stops");
 		  updateStopsAddGeolocation(connection, agencyId);
 		  updateGtfsStopsGeoCoder(connection, agencyId);
@@ -606,6 +636,32 @@ public class UpdateEventManager {
 	      }
 	}
 
+	public static void updateGtfsTripSegments(Connection connection, String agencyId) {
+		Statement stmt = null;  
+		create_gtfs_trip_segments(connection);
+		try {
+			stmt = connection.createStatement();
+			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments DISABLE TRIGGER ALL;");			
+			stmt.executeUpdate("DELETE FROM gtfs_trip_segments WHERE agencyid = '"+agencyId+"';");
+			stmt.executeUpdate(""
+				+ "INSERT INTO gtfs_trip_segments (uid, agencyid, id, seg_id, shape)"
+				+ "SELECT ROW_NUMBER() OVER() AS uid,"
+				+ "		a.agencyid as agencyid,"
+				+ "		a.id AS id,"
+				+ "		n - 1 AS seg_id,"
+				+ "		ST_SetSRID(ST_MakeLine(ST_PointN(a.shape, n - 1), ST_PointN(a.shape, n)), 4326) AS shape"
+				+ "  FROM gtfs_trips AS a"
+				+ "  CROSS JOIN generate_series(2, ST_NPoints(a.shape)) AS n"
+				+ "  WHERE a.agencyid = '"+agencyId+"';"
+			);
+			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments ENABLE TRIGGER ALL;");
+			stmt.close();
+		} catch ( Exception e ) {
+			logger.error(e);
+		} finally {
+			if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+		}		
+	}
 
 	/**
 	 * Updates gtfs_stop_service_map table
@@ -756,15 +812,14 @@ public class UpdateEventManager {
 	    	  		+ "and stop_agencyid='"+agencyId+"' group by trip_id, trip_agencyid) "
 	    	  		+ "update gtfs_trips trips set tlength=tripfinish-tripstart from tempetriptimes result where result.tripid = trips.id and result.agencyid = trips.agencyid;");
 	    	  stmt.executeUpdate("update gtfs_trips set tlength=0 where tlength isnull or tlength<0;");
-	    	  
+
 	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips ENABLE TRIGGER ALL;");
 	    	  stmt.close();
 	      }catch ( Exception e ) {
 	    	  e.printStackTrace();
 	      }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
-	      }
-	      
+	      }     
 	}
 	
 	/**
