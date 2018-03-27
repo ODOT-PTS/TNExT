@@ -23,11 +23,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +46,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 
 import java.nio.file.Paths;
 
@@ -76,6 +79,8 @@ import org.onebusaway.gtfs.model.Trip;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import org.postgresql.core.BaseConnection;
+import org.postgresql.copy.CopyManager;
 
 import com.model.database.PDBerror;
 import com.model.database.DatabaseConfig;
@@ -230,8 +235,135 @@ public class Queries {
 			logger.error(e);
 		}
  	   return results;	   
-    }
-   
+	}
+	
+	/**
+	 * Generates a CSV export of demographics for census blocks in selected counties
+	 * @param countyids
+	 * @param dbIndex
+	 * @return String - zipfile path
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 */
+    @GET
+	@Path("/getdemographics")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getDemographics(
+		@QueryParam("countyids") String cids,
+		@QueryParam("dbIndex") Integer dbIndex)
+		throws SQLException, IOException, IllegalArgumentException {
+
+		// counties
+		String[] counties = cids.split(",");
+		if (counties.length == 0) {
+			throw new IllegalArgumentException("At least 1 countyids required");
+		}
+
+		// get database parameters
+		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
+
+		// Make temporary directory for demographics export
+		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "csv-"+Long.toString(System.nanoTime()));
+		tmpdir.mkdirs();
+		logger.debug("csv export to tmpdir: " + tmpdir);
+
+		Connection connection = db.getConnection();
+
+		// Generate query
+		String[][] joins  = {
+			{"census_blocks", ""},
+			{"census_places", "placeid"},
+			{"census_congdists", "congdistid"},
+			{"census_urbans", "urbanid"},
+			{"census_states", "stateid"},
+			{"census_counties", "countyid"},
+			{"census_tracts", "tractid"},
+			{"lodes_blocks_rac", "blockid"},
+			{"lodes_blocks_wac", "blockid"},
+			{"lodes_rac_projection_block", "blockid"},
+			{"lodes_rac_projection_county", "countyid"},
+			{"title_vi_blocks_float", "blockid"}	
+		};
+		ArrayList<String> ascolumns = new ArrayList<String>();
+		ArrayList<String> asjoins = new ArrayList<String>();
+		for (int i = 0; i < joins.length; i++) {
+			String table = joins[i][0];
+			String fkey = joins[i][1];
+
+			// skip census_blocks
+			if (!fkey.isEmpty()) {
+				asjoins.add("LEFT JOIN " + table + " ON census_blocks." + fkey + "=" + table + "."+fkey);
+			}
+
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 0");
+			ResultSetMetaData rsmd = rs.getMetaData();
+			for (int j = 1; j <= rsmd.getColumnCount(); j++) {
+				// for each table, alias the column name to <table>_<column>
+				String name = rsmd.getColumnName(j);
+				if (!name.endsWith("shape") && !name.endsWith("location")) {
+					ascolumns.add(table + "." + name + " as " + table + "_" + name);
+				}
+			}
+		}
+
+		// Copy to CSV
+		// see https://javachannel.org/posts/using-sqls-in-in-jdbc/
+		String q = "" +
+			"SELECT " +
+			StringUtils.join(ascolumns, ", ") + " " +
+			"FROM  " +
+			"census_blocks " +
+			StringUtils.join(asjoins, " ") + " " +
+			"WHERE census_blocks.countyid = ANY(?) " +
+			"";
+		PreparedStatement ps = connection.prepareStatement(q);
+		ps.setArray(1, connection.createArrayOf("VARCHAR", counties));
+		String qExport = "COPY ("+ps.toString()+") TO STDOUT WITH CSV HEADER DELIMITER ','";
+		ps.close();
+		logger.info("CSV export query:");
+		logger.info(q);
+
+		// Create output file
+		File csvDir = new File(DatabaseConfig.getDownloadDirectory(), "csv");
+		csvDir.mkdirs();
+
+		File tempFile = File.createTempFile("demographics-", ".csv", csvDir);
+		String csvName = tempFile.getName();
+		String csvPath = tempFile.getPath();
+		tempFile.delete();
+		
+
+		// Run query
+		logger.info("Writing CSV to: "+csvPath);
+		FileWriter f = new FileWriter(csvPath);
+		CopyManager copy = new CopyManager((BaseConnection) connection);
+		copy.copyOut(qExport, f);
+		connection.close();
+
+		// delete the file after 5 minutes.
+		logger.debug("setting 5 minute timer to remove file");
+		Timer timer;
+		ActionListener a = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.debug("removing file: " + csvPath);
+				new File(csvPath).delete();
+			}
+		};
+		timer = new Timer(1, a);
+		timer.setRepeats(false);
+		timer.setInitialDelay(5 * 60000);
+		timer.start();
+
+		// Return
+		String ret = "downloadables/csv/" + csvName;
+		logger.info("Returning: "+ret);
+		return ret;
+	}
+
     /**
 	 * Generates the shapefile of routes/stops, compresses the 
 	 * files into a zipfile on server and return the zipfile's path.
