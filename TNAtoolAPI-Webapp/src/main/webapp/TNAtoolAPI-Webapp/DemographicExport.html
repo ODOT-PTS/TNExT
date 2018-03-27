@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Transit Network Analysis Software Tool - Demographic Export</title>
+	
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+	<script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+	<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+	<script src="../resources/js/date.js"></script>
+	<script src="../resources/data/Datasources.js"></script>
+	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+	<script src="../resources/js/JSMethods.js"></script>
+	<script src="../resources/js/csvExport.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+		getDatabases();
+		$('#overlay').hide();
+	});
+	</script>
+</head>
+<body>
+<div id="container" style="width: 100%; height: 100%; position: relative;">
+	<div id="report" style=" height:100%; width:100%;position:absolute;top:0; left:0">
+		<div style="border:1; background-color:#a6a6a6;  height: 2em; width:100%" class="headerL">
+			<h1>Transit Network Analysis Software Tool - Demographic Export</h1>
+		</div>
+		<br><br>
+		<input id="submitButton" disabled style="margin: 3px;width: 20%;height: 35px;cursor: pointer;" type="submit" value="Export CSV" onclick="createCSV()">
+
+		<p><strong>Export demographics information to CSV</strong>. This tool will export all demographics information in the database for the census blocks in the selected counties. 
+			Each row contains the basic details of a census block in the initial columns, followed by the details of the associated census tract, census place, urban region, county, state, and congressional district. 
+			The header in each of the columns is prefixed with the source table, e.g. "<em>census_tracts</em>_population2050". Data for each area includes census geographic IDs and place names, land and water areas, the current population, projected future populations,
+			and a central latitude &amp; longitude. The next set of columns is all associated Title VI data for each census block.
+			The last set columns includes LODES data (RAC &amp; WAC) for each block, followed by LODES RAC projections for the block and associated county.
+		</p>
+
+        <p><strong>Note:</strong> Excel may have difficulty opening large CSV files (e.g. &gt; 100 MB). If this happens, please select fewer counties.</p>
+
+        <div style="height:95vh; border-style: solid; overflow:scroll;">
+			<table class="csvTable" style="height:80vh;" border=1>
+				<tr style="height: 3em;"> 
+					<th>Database</th>
+					<th>Counties</th>
+				</tr>
+				<tr>
+					<td valign="top" id="databases"></td>
+					<td valign="top" id="counties"></td>
+				</tr>
+			</table>
+		</div>
+    </div>
+    
+
+	<div hidden="true" id="overlay" 
+	style="display: table;
+	position:absolute;
+	top:0; left:0;
+	z-index:10; 
+	background-color:rgba(230, 230, 230, .5);
+    width:100%;
+    height:100vh;">
+    	<img style="
+    		height: 60px;
+    		position:absolute;
+    		margin:auto;
+    		top: -90px;
+    		left:0;
+    		right:0;
+    		bottom:0;" alt="Loading..." src="../resources/images/287.GIF"><br>
+    	<span style="
+    		display: table-cell;
+    		vertical-align: middle;
+    		text-align: center;">Generating CSV...</span>
+	</div>
+</div>
+</body>
+</html>
