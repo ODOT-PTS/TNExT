@@ -1,0 +1,42 @@
+version: "3"
+
+volumes:
+  pgdata:
+  conf:
+
+services:
+
+  nginx:
+    restart: always
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080"
+
+  db:
+    restart: always
+    command: postgres
+    image: mdillon/postgis:9.6
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432"
+
+  tnast:
+    build: .
+    restart: always
+    environment:
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: db
+    volumes:
+      - conf:/app/conf
+    ports:
+      - "8080"
+    links:
+      - db
+      - nginx

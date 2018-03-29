@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.log4j.Logger;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -35,14 +37,10 @@ import org.hibernate.cfg.Configuration;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.gtfs.services.HibernateGtfsFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webapp.modifiers.DbUpdate;
 
 public class GtfsDatabaseLoaderMain {
-
-  private static Logger _log = LoggerFactory.getLogger(GtfsDatabaseLoaderMain.class);
+  final static Logger logger = Logger.getLogger(GtfsDatabaseLoaderMain.class);
 
   private static final String ARG_DRIVER_CLASS = "driverClass";
 
@@ -111,7 +109,7 @@ public class GtfsDatabaseLoaderMain {
       Parser parser = new PosixParser();
       return parser.parse(options, args);
     } catch (ParseException e) {
-      System.err.println(e.getMessage());
+      logger.error(e);
       printUsage();
       System.exit(-1);
       return null;
@@ -135,7 +133,7 @@ public class GtfsDatabaseLoaderMain {
   protected void printUsage() {
     InputStream in = getClass().getResourceAsStream("usage.txt");
     if (in == null) {
-      _log.error("could not find usage.txt resource");
+      logger.error("could not find usage.txt resource");
       System.exit(-1);
     }
     BufferedReader reader = null;
@@ -144,17 +142,17 @@ public class GtfsDatabaseLoaderMain {
       reader = new BufferedReader(new InputStreamReader(in));
       String line = null;
       while ((line = reader.readLine()) != null) {
-        System.err.println(line);
+        logger.debug(line);
       }
     } catch (IOException ex) {
-      _log.error("error reading usage.txt resource", ex);
+      logger.error("error reading usage.txt resource", ex);
       System.exit(-1);
     } finally {
       if (reader != null) {
         try {
           reader.close();
         } catch (IOException ex) {
-          _log.error("error closing usage.txt resource", ex);
+          logger.error("error closing usage.txt resource", ex);
           System.exit(-1);
         }
       }

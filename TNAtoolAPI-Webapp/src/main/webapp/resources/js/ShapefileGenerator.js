@@ -114,6 +114,7 @@ function createShapeFiles() {
 	$('#overlay').show();
 	var dbName = document.querySelector('input[class="dbCheckbox"]:checked').name;
 	var flag = document.querySelector('input[class="flagRadio"]:checked').value;
+	var date = document.querySelector('input[id="onDate"]').value;
 	var agencies = [];
 	$('.agencyCheckbox').each(function(index, item) {
 		if (item.checked)
@@ -125,7 +126,7 @@ function createShapeFiles() {
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/getshapefile?agencyids='
 				+ agencies + '&flag=' + flag + '&dbName=' + dbName
-				+ '&username=' + getSession() + '&dbIndex=' + selectedDB,
+				+ '&username=' + getSession() + '&dbIndex=' + selectedDB + '&date=' + date, 
 		async : true,
 		success : function(d) {
 			console.log(d);

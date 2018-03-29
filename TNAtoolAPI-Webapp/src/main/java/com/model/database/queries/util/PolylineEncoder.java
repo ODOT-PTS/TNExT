@@ -57,9 +57,7 @@ public class PolylineEncoder {
 
 		}
 
-		System.out.println("listSize: " + listSize + " step: " + step
-				+ " counter: " + counter);		
-
+		// logger.debug("listSize: " + listSize + " step: " + step + " counter: " + counter);		
 		return encodedPoints.toString();
 	}
 	
@@ -107,16 +105,16 @@ public class PolylineEncoder {
 			}
 		}
 
-		// System.out.println("createEncodings(" + track.getTrackpoints().size()
+		// logger.debug("createEncodings(" + track.getTrackpoints().size()
 		// + "," + dists.length + ")");
 		encodedPoints = createEncodings(points, dists);
-		// System.out.println("encodedPoints \t\t: " + encodedPoints);
+		// logger.debug("encodedPoints \t\t: " + encodedPoints);
 		// encodedPoints.replace("\\","\\\\");
 		encodedPoints = replace(encodedPoints, "\\", "\\\\");
-		//System.out.println("encodedPoints slashy?\t\t: " + encodedPoints);
+		//logger.debug("encodedPoints slashy?\t\t: " + encodedPoints);
 
 		//encodedLevels = encodeLevels(track.getTrackpoints(), dists, absMaxDist);
-		//System.out.println("encodedLevels: " + encodedLevels);
+		//logger.debug("encodedLevels: " + encodedLevels);
 
 		//HashMap<String, String> hm = new HashMap<String, String>();
 		//hm.put("encodedPoints", encodedPoints);

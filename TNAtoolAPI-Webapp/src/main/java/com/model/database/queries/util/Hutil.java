@@ -16,54 +16,51 @@
 
 package com.model.database.queries.util;
 
+import java.net.URL;
+import java.io.File;
+
+import org.apache.log4j.Logger;
+
 import org.hibernate.*;
 import org.hibernate.cfg.*;
 
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 
 public class Hutil {
-	private static SessionFactory[] sessionFactory = new SessionFactory[Databases.dbsize];	
+    final static Logger logger = Logger.getLogger(Hutil.class);
+	private static SessionFactory[] sessionFactory = new SessionFactory[DatabaseConfig.getConfigSize()];	
 
     static {
-    	for (int k=0; k<Databases.dbsize; k++)
-    	{
-    		try {
-                // Create the SessionFactory from hibernate.cfg.xml
-                // Ed 2017-09-12 log so we can see who is using xml config paths.
-                System.err.format("Hutil::static{}, creating session factory from spatialConfigPath: %s\n", Databases.spatialConfigPaths[k]);
-                sessionFactory[k] = new Configuration().configure(Databases.spatialConfigPaths[k]).buildSessionFactory();
-            } catch (Throwable ex) {
-                // Make sure you log the exception, as it might be swallowed
-                System.err.println("Initial SessionFactory creation failed." + ex);
-                throw new ExceptionInInitializerError(ex);
-            }
-    	}
-        
+        for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+            sessionFactory[db.getDatabaseIndex()] = createSessionFactory(db);
+        }       
     }
     
     public static void updateSessions(){
     	for (SessionFactory s: sessionFactory){
   		  s.close();
   	    }
-    	sessionFactory = new SessionFactory[Databases.dbsize];	
-    	for (int k=0; k<Databases.dbsize; k++)
-    	{
-    		try {
-                // Create the SessionFactory from hibernate.cfg.xml
-                // Ed 2017-09-12 log so we can see who is using xml config paths.
-                System.err.format("Hutil::updateSessions(), creating session factory from spatialConfigPath: %s\n", Databases.spatialConfigPaths[k]);
-                sessionFactory[k] = new Configuration().configure(Databases.spatialConfigPaths[k]).buildSessionFactory();
-                
-            } catch (Throwable ex) {
-                // Make sure you log the exception, as it might be swallowed
-                System.err.println("Initial SessionFactory creation failed." + ex);
-                throw new ExceptionInInitializerError(ex);
-            }
-    	}
+    	sessionFactory = new SessionFactory[DatabaseConfig.getConfigSize()];	
+        for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+            sessionFactory[db.getDatabaseIndex()] = createSessionFactory(db);
+        }
     }
 
     public static SessionFactory[] getSessionFactory() {
         return sessionFactory;
     }
     
+    private static SessionFactory createSessionFactory(DatabaseConfig db) {
+        logger.debug("Hutil::SessionFactory: "+db.toString());
+        URL url = Hutil.class.getClassLoader().getResource("admin/resources/censusDb.cfg.xml");
+        File inputFile = new File(url.getFile());
+        Configuration config = new Configuration();
+        config = config.configure(inputFile);
+        config.setProperty("hibernate.connection.url", db.getConnectionUrl());
+        config.setProperty("hibernate.connection.username", db.getUsername());
+        config.setProperty("hibernate.connection.password", db.getUsername());
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        return sessionFactory;
+    }
 }

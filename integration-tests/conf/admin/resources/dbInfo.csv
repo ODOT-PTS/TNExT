@@ -1,0 +1,2 @@
+databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2
+0,september17,,,jdbc:postgresql://db:5432/september17,postgres,postgres,,,

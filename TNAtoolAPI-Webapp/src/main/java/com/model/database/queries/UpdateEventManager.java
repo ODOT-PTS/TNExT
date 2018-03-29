@@ -28,9 +28,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
+import com.webapp.modifiers.DbUpdate;
 
 public class UpdateEventManager {
-    
+	final static Logger logger = Logger.getLogger(UpdateEventManager.class);	
+
 	/**
 	 *Adds additional spatial methods to the current database
 	 * @param connection
@@ -425,40 +429,69 @@ public class UpdateEventManager {
 	}
 	
 	/**
+	 * creates gtfs_stop_route_map table
+	 * 
+	 * @param connection
+	 */
+	public static void create_gtfs_trip_segments(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+			stmt.executeUpdate(""
+				+ "CREATE TABLE IF NOT EXISTS gtfs_trip_segments ("
+				+ "  uid bigint,"
+				+ "  agencyid character varying(255),"
+				+ "  id character varying(255),"
+				+ "  seg_id integer,"
+				+ "  shape geometry"
+				+ ") WITH (OIDS=false);"				
+			);
+			stmt.executeUpdate("CREATE INDEX IF NOT EXISTS gtfs_trip_segments_shape_idx ON gtfs_trip_segments USING gist (shape);");
+	        stmt.executeUpdate("ALTER TABLE gtfs_stop_route_map OWNER TO postgres;");
+	        stmt.close();
+	    } catch ( Exception e ) {
+	    	logger.error(e);
+	    }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
 	 * Updates all the additional tables. This is called every time a new feed is added to the database
 	 * 
 	 * @param connection
 	 * @param agencyId
 	 */
 	public static void updateTables(Connection connection, String agencyId){	
-		  System.out.println("Updating gtfs_trips");
+		  logger.info("Updating gtfs_trips");
 		  updateTrip(connection, agencyId);
-		  System.out.println("Updating gtfs_stops");
+		  logger.info("Update gtfs_trip_segments");
+		  updateGtfsTripSegments(connection, agencyId);
+		  logger.info("Updating gtfs_stops");
 		  updateStopsAddGeolocation(connection, agencyId);
 		  updateGtfsStopsGeoCoder(connection, agencyId);
-		  System.out.println("Updating gtfs_stop_route_map");
+		  logger.info("Updating gtfs_stop_route_map");
 		  updateGtfsStopRouteMap(connection, agencyId);
-		  System.out.println("Updating gtfs_stop_service_map");
+		  logger.info("Updating gtfs_stop_service_map");
 		  updateGtfsStopServiceMap(connection, agencyId);
-		  System.out.println("Updating gtfs_trip_stops");
+		  logger.info("Updating gtfs_trip_stops");
 		  updateGtfsTripStops(connection, agencyId);
-		  System.out.println("Updating census_counties_trip_map");
+		  logger.info("Updating census_counties_trip_map");
 		  updateCountyTripMap(connection, agencyId);
-		  System.out.println("Updating census_states_trip_map");
+		  logger.info("Updating census_states_trip_map");
 		  updateStateTripMap(connection, agencyId);
-		  System.out.println("Updating census_tracts_trip_map");
+		  logger.info("Updating census_tracts_trip_map");
 		  updateTractTripMap(connection, agencyId);
-		  System.out.println("Updating census_urbans_trip_map");
+		  logger.info("Updating census_urbans_trip_map");
 		  updateUrbanTripMap(connection, agencyId);
-		  System.out.println("Updating census_places_trip_map");
+		  logger.info("Updating census_places_trip_map");
 		  updatePlaceTripMap(connection, agencyId);
-		  System.out.println("Updating census_congdists_trip_map");
+		  logger.info("Updating census_congdists_trip_map");
 		  updateCongdistTripMap(connection, agencyId);
-		  System.out.println("Updating gtfs_agencies");
+		  logger.info("Updating gtfs_agencies");
 		  updateGtfsAgencies(connection, agencyId);
-		  System.out.println("Updating agencymapping");
+		  logger.info("Updating agencymapping");
 		  updateAgencyMapping(connection, agencyId);
-		  
 //		  dropConnection(connection);
 	}
 	
@@ -478,7 +511,7 @@ public class UpdateEventManager {
 					+ "contained_agencies text[], "
 					+ "PRIMARY KEY( agencyID ));");
 		}catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		}finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -493,7 +526,7 @@ public class UpdateEventManager {
 					+ "INSERT INTO agencymapping(agencyID, contained_agencies) "
 					+ "SELECT id1,ca FROM tempy;");
 		}catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		}finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -502,7 +535,7 @@ public class UpdateEventManager {
 			stmt = connection.createStatement();
 			stmt.executeUpdate("ALTER TABLE agencymapping ADD COLUMN centralized boolean;");
 		}catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		}finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -514,7 +547,7 @@ public class UpdateEventManager {
 					+ "SET centralized = (select centralized from temp1 "
 					+ "WHERE agencyid=id)");
 		}catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		}finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -576,7 +609,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE gtfs_trip_stops;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -603,6 +636,32 @@ public class UpdateEventManager {
 	      }
 	}
 
+	public static void updateGtfsTripSegments(Connection connection, String agencyId) {
+		Statement stmt = null;  
+		create_gtfs_trip_segments(connection);
+		try {
+			stmt = connection.createStatement();
+			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments DISABLE TRIGGER ALL;");			
+			stmt.executeUpdate("DELETE FROM gtfs_trip_segments WHERE agencyid = '"+agencyId+"';");
+			stmt.executeUpdate(""
+				+ "INSERT INTO gtfs_trip_segments (uid, agencyid, id, seg_id, shape)"
+				+ "SELECT ROW_NUMBER() OVER() AS uid,"
+				+ "		a.agencyid as agencyid,"
+				+ "		a.id AS id,"
+				+ "		n - 1 AS seg_id,"
+				+ "		ST_SetSRID(ST_MakeLine(ST_PointN(a.shape, n - 1), ST_PointN(a.shape, n)), 4326) AS shape"
+				+ "  FROM gtfs_trips AS a"
+				+ "  CROSS JOIN generate_series(2, ST_NPoints(a.shape)) AS n"
+				+ "  WHERE a.agencyid = '"+agencyId+"';"
+			);
+			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments ENABLE TRIGGER ALL;");
+			stmt.close();
+		} catch ( Exception e ) {
+			logger.error(e);
+		} finally {
+			if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+		}		
+	}
 
 	/**
 	 * Updates gtfs_stop_service_map table
@@ -619,7 +678,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE gtfs_stop_service_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -661,7 +720,7 @@ public class UpdateEventManager {
 	        stmt.executeUpdate("CLUSTER ids_location ON gtfs_stops;");
 	        stmt.close();
 	      } catch ( Exception e ) {
-	    	  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+	    	  //logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 	      }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }	      
@@ -687,38 +746,8 @@ public class UpdateEventManager {
 	 * @param dbInfo
 	 */
 	public static void addFunction(Connection connection, String[] dbInfo){
-        // Ed 2017-09-18
-        // FIXME: we want this to evaluate to:
-        // /var/lib/tomcat/webapps-development/ROOT/resources/admin/ + resources/Functions.sql
-		String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		path = path+"../../src/main/resources/admin/resources/Functions.sql";
-		path = path.substring(1, path.length());
-		String host = dbInfo[4].split(":")[2];
-		host = host.substring(2);
-		host = "localhost"; //to be deleted
-
-		String[] p;
-		p = dbInfo[4].split("/");
-		String name = p[p.length-1];
-		Process pr;
-
-		try{
-			String[] cmdArray = new String[5];
-		   cmdArray[0] = "cmd";
-		   cmdArray[1] = "/c";
-		   cmdArray[2] = "cmd";
-		   cmdArray[3] = "/k";
-		   cmdArray[4] = "set PGPASSWORD="+dbInfo[6]+"& "
-		   		+ "psql -U "+dbInfo[5]+" -h "+host+" -d "+name+" -a -f "+path+" & "
-		   		+ "exit";
-		   
-		   pr = Runtime.getRuntime().exec(cmdArray,null);
-		   BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-		   while ((reader.readLine()) != null) {}
-		   pr.waitFor(5,TimeUnit.MINUTES);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}	      
+		logger.info("addFunction");
+		DbUpdate.runSqlFromResource("admin/resources/Functions.sql", dbInfo[4], dbInfo[5], dbInfo[6]);
 	}
 	
 	/**
@@ -734,7 +763,7 @@ public class UpdateEventManager {
 			stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT AddGeometryColumn( 'public', 'gtfs_trips', 'shape', 4326, 'linestring', 2 );");
 		}catch ( Exception e ) {
-			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  //logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		}finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -742,7 +771,7 @@ public class UpdateEventManager {
 			stmt = connection.createStatement();
 			stmt.executeUpdate("ALTER TABLE gtfs_trips ALTER COLUMN uid TYPE varchar(1000);");
 		}catch ( Exception e ) {
-			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  //logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		}finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -753,7 +782,7 @@ public class UpdateEventManager {
 			stmt.executeUpdate("DROP INDEX IF EXISTS tripids");
 			stmt.executeUpdate("create unique index tripids on gtfs_trips (agencyid,id);");			
 		  }catch ( Exception e ) {
-			  //System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  //logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -783,15 +812,14 @@ public class UpdateEventManager {
 	    	  		+ "and stop_agencyid='"+agencyId+"' group by trip_id, trip_agencyid) "
 	    	  		+ "update gtfs_trips trips set tlength=tripfinish-tripstart from tempetriptimes result where result.tripid = trips.id and result.agencyid = trips.agencyid;");
 	    	  stmt.executeUpdate("update gtfs_trips set tlength=0 where tlength isnull or tlength<0;");
-	    	  
+
 	    	  stmt.executeUpdate("ALTER TABLE gtfs_trips ENABLE TRIGGER ALL;");
 	    	  stmt.close();
 	      }catch ( Exception e ) {
 	    	  e.printStackTrace();
 	      }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
-	      }
-	      
+	      }     
 	}
 	
 	/**
@@ -809,7 +837,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE gtfs_stop_route_map;");
 			}
 		  }catch ( Exception e ) {
-			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -878,7 +906,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_congdists_trip_map;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -1012,7 +1040,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_states_trip_map;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -1079,7 +1107,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_tracts_trip_map;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -1146,7 +1174,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_places_trip_map;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
@@ -1213,7 +1241,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_urbans_trip_map;");
 			}
 		  }catch ( Exception e ) {
-//			  System.out.println( e.getClass().getName()+": "+ e.getMessage() );
+//			  logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }

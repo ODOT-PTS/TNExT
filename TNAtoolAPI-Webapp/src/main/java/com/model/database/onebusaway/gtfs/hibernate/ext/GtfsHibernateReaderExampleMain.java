@@ -19,12 +19,15 @@
  */
 package com.model.database.onebusaway.gtfs.hibernate.ext;
 
+import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -48,41 +51,33 @@ import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 import com.model.database.onebusaway.gtfs.hibernate.ext.HibernateGtfsRelationalDaoImplExt;
 //import com.model.database.onebusaway.gtfs.hibernate.objects.ext.*;
 import org.onebusaway.gtfs.model.*;
 
 
-public class GtfsHibernateReaderExampleMain {
-
-  private static final String KEY_CLASSPATH = "classpath:";
-
-  private static final String KEY_FILE = "file:";
-  
+public class GtfsHibernateReaderExampleMain { 
+  final static Logger logger = Logger.getLogger(GtfsHibernateReaderExampleMain.class);
   private GtfsMutableRelationalDao dao;
-  
-  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[Databases.dbsize];
-  
-  public static SessionFactory[] sessions = new SessionFactory[Databases.dbsize];
+  public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[DatabaseConfig.getConfigSize()];
+  public static SessionFactory[] sessions = new SessionFactory[DatabaseConfig.getConfigSize()];
   
   static{
-	  for (int k=0; k<Databases.dbsize; k++){
-          // Ed 2017-09-12 log so we can see who is using xml config paths.
-          System.err.format("GtfsHibernateReaderExampleMain::static{}, creating session factory from ConfigPath: %s\n", Databases.ConfigPaths[k]);
-		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k],k);
-	  }	    
+    for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+      factory[db.getDatabaseIndex()] = createHibernateGtfsFactory(db);
+    }
   }
   
   public static void updateSessions(){
 	  for (SessionFactory s: sessions){
 		  s.close();
 	  }
-	  factory = new HibernateGtfsFactory[Databases.dbsize];
-	  sessions = new SessionFactory[Databases.dbsize];
-	  for (int k=0; k<Databases.dbsize; k++){
-          System.err.format("GtfsHibernateReaderExampleMain::updateSessions(), creating session factory from ConfigPath: %s\n", Databases.ConfigPaths[k]);
-		  factory[k] = createHibernateGtfsFactory(Databases.ConfigPaths[k],k);
-	  }
+	  factory = new HibernateGtfsFactory[DatabaseConfig.getConfigSize()];
+	  sessions = new SessionFactory[DatabaseConfig.getConfigSize()];
+    for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+      factory[db.getDatabaseIndex()] = createHibernateGtfsFactory(db);
+    }
   }
   
   public static Agency QueryAgencybyid(String id, int dbindex){
@@ -291,26 +286,17 @@ public class GtfsHibernateReaderExampleMain {
     return a.compareTo(b) <= 0 ? b : a;
   }
 
-  private static HibernateGtfsFactory createHibernateGtfsFactory(String resource, int k) {
-
+  private static HibernateGtfsFactory createHibernateGtfsFactory(DatabaseConfig db) {
+    logger.debug("GtfsHibernateReaderExampleMain::createHibernateGtfsFactory: "+db.toString());
+    URL url = GtfsHibernateReaderExampleMain.class.getClassLoader().getResource("admin/resources/gtfsDb.cfg.xml");
+    File inputFile = new File(url.getFile());
     Configuration config = new Configuration();
-
-    System.err.format("HibernateGtfsFactory::createHibernateGtfsFactory, resource is: %s\n", resource); // Ed 2017-09-12
-
-    if (resource.startsWith(KEY_CLASSPATH)) {
-      resource = resource.substring(KEY_CLASSPATH.length());
-      config = config.configure(resource);
-    } else if (resource.startsWith(KEY_FILE)) {
-      resource = resource.substring(KEY_FILE.length());
-      config = config.configure(new File(resource));
-    } else {
-      config = config.configure(new File(resource));
-    }
-
-    
+    config = config.configure(inputFile);
+    config.setProperty("hibernate.connection.url", db.getConnectionUrl());
+    config.setProperty("hibernate.connection.username", db.getUsername());
+    config.setProperty("hibernate.connection.password", db.getUsername());
     SessionFactory sessionFactory = config.buildSessionFactory();
-    sessions[k] = sessionFactory;
+    sessions[db.getDatabaseIndex()] = sessionFactory;
     return new HibernateGtfsFactory(sessionFactory);
   }
-
 }

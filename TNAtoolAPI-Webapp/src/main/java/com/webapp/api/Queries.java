@@ -23,10 +23,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +47,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+
+import java.nio.file.Paths;
+
 import javax.swing.Timer;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -56,6 +62,8 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
+
+import org.apache.log4j.Logger;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.codehaus.jettison.json.JSONException;
@@ -71,7 +79,11 @@ import org.onebusaway.gtfs.model.Trip;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import com.model.database.Databases;
+import org.postgresql.core.BaseConnection;
+import org.postgresql.copy.CopyManager;
+
+import com.model.database.PDBerror;
+import com.model.database.DatabaseConfig;
 import com.model.database.onebusaway.gtfs.hibernate.ext.GtfsHibernateReaderExampleMain;
 import com.model.database.queries.EventManager;
 import com.model.database.queries.FlexibleReportEventManager;
@@ -148,20 +160,19 @@ import com.webapp.modifiers.DbUpdate;
 @Path("/transit")
 @XmlRootElement
 public class Queries {
-	
+	final static Logger logger = Logger.getLogger(Queries.class);
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
-	private static int default_dbindex = Databases.dbsize-1;
-	static AgencyRouteList[] menuResponse = new AgencyRouteList[Databases.dbsize];
-	static int dbsize = Databases.dbsize;	
+	private static int default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
+	static AgencyRouteList[] menuResponse = new AgencyRouteList[DatabaseConfig.getConfigSize()];
+	static int dbsize = DatabaseConfig.getConfigSize();	
 	
 	/**
 	 * updates attributes to point to the latest database index 
 	 */
 	public static void updateDefaultDBindex() {
-		default_dbindex = Databases.dbsize - 1;
-		dbsize = Databases.dbsize;
-		menuResponse = new AgencyRouteList[Databases.dbsize];
+		default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
+		menuResponse = new AgencyRouteList[DatabaseConfig.getConfigSize()];
 	}
 	
 	/**
@@ -174,20 +185,33 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getDBList() throws JSONException {
-		String[] DBNames = Databases.dbnames;
-		String[] DBIds = Databases.connectionURLs.clone();
-		for (int i = 0 ; i < DBIds.length ; i++){
-			String[] temp = DBIds[i].split("/");
-			DBIds[i] = temp[temp.length-1];;
-		}	
 		DBList response = new DBList();
-		for (int s = 0; s < dbsize; s++) {
-			response.DBelement.add(DBNames[s]);
-			response.DBid.add(DBIds[s]);
-		}
+        for(DatabaseConfig db : DatabaseConfig.getConfigs()) {
+			response.DBelement.add(db.getDbName());
+			response.DBid.add(db.getDatabase());
+        }       
 		return response;
 	}
 	
+
+	@GET
+	@Path("/getDefaultDbIndex")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getDefaultDbIndex() {
+	  PDBerror b = new PDBerror();
+	  b.DBError = (DatabaseConfig.getLastConfig().getDatabaseIndex()) + "";
+	  return b;
+	}
+  
+	@GET
+	@Path("/getVersion")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public static Object getVersion() {
+	  PDBerror b = new PDBerror();
+	  b.DBError = DbUpdate.VERSION;
+	  return b;
+	}
+	  
 	  /**
      * Lists stops within a certain distance of a 
      * given stop while filtering the agencies.
@@ -208,11 +232,138 @@ public class Queries {
     	try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
  	   return results;	   
-    }
-   
+	}
+	
+	/**
+	 * Generates a CSV export of demographics for census blocks in selected counties
+	 * @param countyids
+	 * @param dbIndex
+	 * @return String - zipfile path
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 */
+    @GET
+	@Path("/getdemographics")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getDemographics(
+		@QueryParam("countyids") String cids,
+		@QueryParam("dbIndex") Integer dbIndex)
+		throws SQLException, IOException, IllegalArgumentException {
+
+		// counties
+		String[] counties = cids.split(",");
+		if (counties.length == 0) {
+			throw new IllegalArgumentException("At least 1 countyids required");
+		}
+
+		// get database parameters
+		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
+
+		// Make temporary directory for demographics export
+		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "csv-"+Long.toString(System.nanoTime()));
+		tmpdir.mkdirs();
+		logger.debug("csv export to tmpdir: " + tmpdir);
+
+		Connection connection = db.getConnection();
+
+		// Generate query
+		String[][] joins  = {
+			{"census_blocks", ""},
+			{"census_tracts", "tractid"},
+			{"census_places", "placeid"},
+			{"census_urbans", "urbanid"},
+			{"census_counties", "countyid"},
+			{"census_states", "stateid"},
+			{"census_congdists", "congdistid"},
+			{"title_vi_blocks_float", "blockid"},
+			{"lodes_blocks_rac", "blockid"},
+			{"lodes_blocks_wac", "blockid"},
+			{"lodes_rac_projection_block", "blockid"},
+			{"lodes_rac_projection_county", "countyid"}
+		};
+		ArrayList<String> ascolumns = new ArrayList<String>();
+		ArrayList<String> asjoins = new ArrayList<String>();
+		for (int i = 0; i < joins.length; i++) {
+			String table = joins[i][0];
+			String fkey = joins[i][1];
+
+			// skip census_blocks
+			if (!fkey.isEmpty()) {
+				asjoins.add("LEFT JOIN " + table + " ON census_blocks." + fkey + "=" + table + "."+fkey);
+			}
+
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 0");
+			ResultSetMetaData rsmd = rs.getMetaData();
+			for (int j = 1; j <= rsmd.getColumnCount(); j++) {
+				// for each table, alias the column name to <table>_<column>
+				String name = rsmd.getColumnName(j);
+				if (!name.endsWith("shape") && !name.endsWith("location")) {
+					ascolumns.add(table + "." + name + " as " + table + "_" + name);
+				}
+			}
+		}
+
+		// Copy to CSV
+		// see https://javachannel.org/posts/using-sqls-in-in-jdbc/
+		String q = "" +
+			"SELECT " +
+			StringUtils.join(ascolumns, ", ") + " " +
+			"FROM  " +
+			"census_blocks " +
+			StringUtils.join(asjoins, " ") + " " +
+			"WHERE census_blocks.countyid = ANY(?) " +
+			"";
+		PreparedStatement ps = connection.prepareStatement(q);
+		ps.setArray(1, connection.createArrayOf("VARCHAR", counties));
+		String qExport = "COPY ("+ps.toString()+") TO STDOUT WITH CSV HEADER DELIMITER ','";
+		ps.close();
+		logger.info("CSV export query:");
+		logger.info(q);
+
+		// Create output file
+		File csvDir = new File(DatabaseConfig.getDownloadDirectory(), "csv");
+		csvDir.mkdirs();
+
+		File tempFile = File.createTempFile("demographics-", ".csv", csvDir);
+		String csvName = tempFile.getName();
+		String csvPath = tempFile.getPath();
+		tempFile.delete();
+		
+
+		// Run query
+		logger.info("Writing CSV to: "+csvPath);
+		FileWriter f = new FileWriter(csvPath);
+		CopyManager copy = new CopyManager((BaseConnection) connection);
+		copy.copyOut(qExport, f);
+		connection.close();
+
+		// delete the file after 5 minutes.
+		logger.debug("setting 5 minute timer to remove file");
+		Timer timer;
+		ActionListener a = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.debug("removing file: " + csvPath);
+				new File(csvPath).delete();
+			}
+		};
+		timer = new Timer(1, a);
+		timer.setRepeats(false);
+		timer.setInitialDelay(5 * 60000);
+		timer.start();
+
+		// Return
+		String ret = "downloadables/csv/" + csvName;
+		logger.info("Returning: "+ret);
+		return ret;
+	}
+
     /**
 	 * Generates the shapefile of routes/stops, compresses the 
 	 * files into a zipfile on server and return the zipfile's path.
@@ -233,6 +384,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getShapeFile(@QueryParam("agencyids") String agencyIDs,
 			@QueryParam("flag") String flag,
+			@QueryParam("date") String date,
 			@QueryParam("dbName") String dbName,
 			@QueryParam("dbIndex") Integer dbIndex,
 			@QueryParam("username") String username) throws SQLException,
@@ -242,156 +394,248 @@ public class Queries {
 		String feeds = "";
 
 		// get database parameters
-		String path = MainMap.class.getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
+		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
 
-		BufferedReader reader = new BufferedReader(
-				new FileReader(
-						path
-								+ "../../src/main/resources/admin/resources/databaseParams.csv"));
-		reader.readLine();
-		String[] params = reader.readLine().trim().split(",");
-		reader.close();
-		
-		//shapefile generator path
-		String generatorPath = path+"../../src/main/resources/com/model/shapefile/shapefilegenerator.bat";
-		generatorPath = generatorPath.substring(1, generatorPath.length());
-		// Creating shapefiles on the server
-		path = path + "../../src/main/webapp/downloadables/shapefiles";
-
-		// Making downloadables/shapefiles directory
-		File shapefiles = new File(path);
-		shapefiles.mkdirs();
-
-		// Making unique file names
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("hhmmss");
-		String uniqueString = ft.format(dNow);
-
-		// The folder that contains agencies shapefile folders.
-		String folderName = flag + "_shape_" + uniqueString;
-		File mainFolder = new File(path + "/" + folderName);
-		mainFolder.mkdir();
+		// Make temporary directory for shapefile export
+		File tmpdir = new File(System.getProperty("java.io.tmpdir"), "shapefiles-"+Long.toString(System.nanoTime()));
+		tmpdir.mkdirs();
+		logger.debug("shapefile export to tmpdir: " + tmpdir);
 
 		// Getting hashmap of agencies (AgencyId -> AgencyName)
 		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
 				.getAllAgencies(username, dbIndex);
 
+		// Filtering by date
+		String fdate = "0";
+		String dow = "monday"; // default
+		if (date != null && !date.isEmpty()) {
+			String[] dates = date.split(",");
+			String[][] datedays = daysOfWeekString(dates);
+			fdate = datedays[0][0];
+			dow = datedays[1][0];
+		} else {
+			date = null;
+		}
+
+		int THRESHOLD = 750000;				
+
+		// Run query for each agency
 		for (int i = 0; i < agencies.length; i++) {
+			Connection connection = db.getConnection();
+			PreparedStatement ps = null;
 			String agencyId = agencies[i];
 			ArrayList<String> query = new ArrayList<String>();
-			feeds = "(SELECT '"
-					+ agencyId
-					+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-					+ agencyId + "' || '%')";
-
 			if (flag.equals("routes")) {
-				query.add("SELECT agencies.name AS PRVDR_NM, routes.id AS route_id, routes.shortname AS route_shor, routes.longname AS route_long, "
-						+ "	routes.description AS route_desc, routes.url AS route_url, trips.tripshortname, tripheadsign AS trip_headsign,"
-						+ " length AS trip_length, estlength AS trip_estLength, feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end, "
-						+ " shape AS trip_shape "
-						+ "	FROM gtfs_routes AS routes "
-						+ "	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id "
-						+ "	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id "
-						+ " INNER JOIN "
-						+ feeds
-						+ " AS feeds ON feeds.aid = routes.agencyid "
-						+ " WHERE trips.agencyid = '" + agencyId + "'");
+				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
+				String q = "" +
+					"WITH  " +
+					"svcids AS ( " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendars gc  " +
+					"	WHERE  " +
+					"		startdate::int <= ?::int AND  " +
+					"		enddate::int >= ?::int AND  " +
+					"		" + dow + " = 1 AND " +
+					"		serviceid_agencyid||serviceid_id NOT IN ( " +
+					"			SELECT serviceid_agencyid||serviceid_id  " +
+					"			FROM gtfs_calendar_dates  " +
+					"			WHERE date = ?  " +
+					"			AND exceptiontype = 2 " +
+					"		)  " +
+					"	UNION  " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendar_dates gcd  " +
+					"	WHERE  " +
+					"		date = ? and exceptiontype = 1 " +
+					"), " +
+					"serviced_trips AS ( " +
+					"	SELECT  " +
+					"		gtfs_trips.id, " +
+					"		gtfs_trips.agencyid, " +
+					"		gtfs_trips.serviceid_id " +
+					"	FROM gtfs_trips " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"), " +
+					"routes AS ( " +
+					"	SELECT  " +
+					"		agencies.name AS PRVDR_NM,  " +
+					"		routes.id AS route_id,  " +
+					"		routes.shortname AS route_shor,  " +
+					"		routes.longname AS route_long, 	 " +
+					"		routes.description AS route_desc,  " +
+					"		routes.url AS route_url,  " +
+					"		trips.tripshortname,  " +
+					"		tripheadsign AS trip_headsign,  " +
+					"		length AS trip_length,  " +
+					"		estlength AS trip_estLength,  " +
+					"		feeds.startdate AS efct_dt_start,  " +
+					"		feeds.enddate AS efct_dt_end,   " +
+					"		shape AS trip_shape, " +
+					"		trips.id AS trip_id,	 " +
+					"       trips.agencyid as trip_agencyid " +
+					"	FROM gtfs_routes AS routes 	 " +
+					"	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id 	 " +
+					"	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id   " +
+					"	INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = routes.agencyid  " +
+					"	WHERE trips.agencyid = ? " +
+					") ";
+				String qShape = "SELECT * FROM (" + q + " SELECT * FROM routes ORDER BY (route_id)) AS pgsql2shp;";
+				if (date != null) {
+					qShape = "SELECT * FROM (" + q + " SELECT * FROM routes INNER JOIN serviced_trips ON routes.trip_id = serviced_trips.id AND routes.trip_agencyid = serviced_trips.agencyid ORDER BY (route_id)) AS pgsql2shp;";
+				}
+				ps = connection.prepareStatement(qShape);
+				ps.setString(1, fdate);
+				ps.setString(2, fdate);
+				ps.setString(3, fdate);
+				ps.setString(4, fdate);
+				ps.setString(5, agencyId);
+				ps.setString(6, agencyId);						
+				ps.setString(7, agencyId);
+				logger.info("shapefile export query:\n "+ ps.toString());
+				query.add(ps.toString());
+				ps.close();					
 			} else if (flag.equals("stops")) {
+				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
+				String q = "" +
+					"WITH  " +
+					"svcids AS ( " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendars gc  " +
+					"	WHERE  " +
+					"		startdate::int <= ?::int AND  " +
+					"		enddate::int >= ?::int AND  " +
+					"		" + dow + " = 1 AND " +
+					"		serviceid_agencyid||serviceid_id NOT IN ( " +
+					"			SELECT serviceid_agencyid||serviceid_id  " +
+					"			FROM gtfs_calendar_dates  " +
+					"			WHERE date = ?  " +
+					"			AND exceptiontype = 2 " +
+					"		)  " +
+					"	UNION  " +
+					"	SELECT  " +
+					"		serviceid_agencyid,  " +
+					"		serviceid_id " +
+					"	FROM gtfs_calendar_dates gcd  " +
+					"	WHERE  " +
+					"		date = ? and exceptiontype = 1 " +
+					"), " +
+					"serviced_trips AS ( " +
+					"	SELECT  " +
+					"		gtfs_trips.id, " +
+					"		gtfs_trips.agencyid, " +
+					"		gtfs_trips.serviceid_id " +
+					"	FROM gtfs_trips " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"), " +
+					"stop_visits AS ( " +
+					"	SELECT  " +
+					"		gtfs_agencies.name AS PRVDR_NM,  " +
+					"		gtfs_stops.id AS stop_id,  " +
+					"		gtfs_stops.name AS stop_name,  " +
+					"		gtfs_stops.agencyid AS stop_agencyid, " +
+					"		gtfs_stops.lat AS stop_lat,  " +
+					"		gtfs_stops.lon AS stop_lon,  " +
+					"		gtfs_stops.url AS stop_url, " +
+					"		feeds.startdate AS efct_dt_start,  " +
+					"		feeds.enddate AS efct_dt_end, " +
+					"		CASE  " +
+					"			WHEN gtfs_stop_times.arrivaltime > 86400 THEN TO_CHAR((gtfs_stop_times.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time  " +
+					"			WHEN gtfs_stop_times.arrivaltime = -999 THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time " +
+					"			ELSE TO_CHAR((gtfs_stop_times.arrivaltime||' second')::interval, 'HH24:MI:SS')::time  " +
+					"		END AS arrival_time, " +
+					"		CASE  " +
+					"			WHEN gtfs_stop_times.departuretime > 86400 THEN TO_CHAR((gtfs_stop_times.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time  " +
+					"			WHEN gtfs_stop_times.departuretime = -999  THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time  " +
+					"			ELSE TO_CHAR((gtfs_stop_times.departuretime||' second')::interval, 'HH24:MI:SS')::time  " +
+					"		END AS departure_time, " +
+					"		gtfs_stop_times.trip_id AS trip_id, " +
+					"		gtfs_stop_times.stopsequence AS stop_sequence, " +
+					"		gtfs_stops.location AS shape, " +
+					"       gtfs_stop_times.trip_agencyid AS trip_agencyid " +
+					"	FROM gtfs_stops  " +
+					"		INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def " +
+					"		INNER JOIN gtfs_stop_times ON gtfs_stops.id = gtfs_stop_times.stop_id AND gtfs_stops.agencyid = gtfs_stop_times.stop_agencyid " +
+					"		INNER JOIN gtfs_agencies ON gtfs_agencies.id = ? " +
+					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = map.agencyid " +					
+					"		WHERE map.agencyid = ? " +
+					") " +
+					"";
+		
 				// check if the number of records are larger than a threshold, split stops_times in to multiple shapefiles
-				Connection connection = PgisEventManager.makeConnection(dbIndex);
-			    Statement stmt = connection.createStatement();
-			    int THRESHOLD = 750000;
-			    ResultSet rs = stmt.executeQuery("SELECT count(gid) FROM gtfs_stop_times AS stoptimes WHERE stoptimes.trip_agencyid ='" + agencyId + "'");
+				String qCount = q + " SELECT COUNT(*) as count FROM stop_visits;";
+				if (date != null) {
+					qCount = q + " SELECT COUNT(*) as count FROM stop_visits INNER JOIN serviced_trips ON stop_visits.trip_id = serviced_trips.id AND stop_visits.trip_agencyid = serviced_trips.agencyid;";
+				}
+				ps = connection.prepareStatement(qCount);
+				ps.setString(1, fdate);
+				ps.setString(2, fdate);
+				ps.setString(3, fdate);
+				ps.setString(4, fdate);
+				ps.setString(5, agencyId);
+				ps.setString(6, agencyId);
+				ps.setString(7, agencyId);
+				ps.setString(8, agencyId);
+				logger.info("shapefile count query:\n "+ ps.toString());
+				ResultSet rs = ps.executeQuery();
 			    rs.next();
-			    int numOfRows = rs.getInt("count");
-				if ( numOfRows < THRESHOLD){
-					query.add("SELECT agencies.name AS PRVDR_NM, "
-							+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
-							+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
-							+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
-							+ "		CASE "
-							+ "         WHEN stoptimes.arrivaltime > 86400 "
-							+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "         WHEN stoptimes.arrivaltime = -999 "
-							+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
-							+ "		  	ELSE "
-							+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS arrival_time,"
-							+ "		CASE "
-							+ "         	WHEN stoptimes.departuretime > 86400 "
-							+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "             WHEN stoptimes.departuretime = -999 "
-							+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
-							+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS departure_time,"
-							+ "		stoptimes.stopsequence AS stop_sequence,"
-							+ "		stops.location AS shape"
-							+ "		FROM gtfs_stops AS stops"
-							+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
-							+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
-							+ "		INNER JOIN  (SELECT '"
-							+ agencyId
-							+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-							+ agencyId
-							+ "' || '%') AS feeds ON feeds.aid = map.agencyid"
-							+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
-							+ "		WHERE map.agencyid ='" + agencyId
-							+ "' ORDER BY stop_id");
-				}else{
-					int counter = 0;
-					while (counter <= numOfRows){
-						query.add("SELECT agencies.name AS PRVDR_NM, "
-							+ "		stops.id AS stop_id, stops.name AS stop_name, stops.agencyid AS stop_agencyid,"
-							+ "		stops.lat AS stop_lat, stops.lon AS stop_lon, stops.url AS stop_url,"
-							+ "		feeds.startdate AS efct_dt_start, feeds.enddate AS efct_dt_end,"
-							+ "		CASE "
-							+ "         WHEN stoptimes.arrivaltime > 86400 "
-							+ "				THEN TO_CHAR((stoptimes.arrivaltime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "         WHEN stoptimes.arrivaltime = -999 "
-							+ "				THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time"
-							+ "		  	ELSE "
-							+ "				TO_CHAR((stoptimes.arrivaltime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS arrival_time,"
-							+ "		CASE "
-							+ "         	WHEN stoptimes.departuretime > 86400 "
-							+ "			THEN TO_CHAR((stoptimes.departuretime-86400||' second')::interval, 'HH24:MI:SS')::time "
-							+ "             WHEN stoptimes.departuretime = -999 "
-							+ "			THEN TO_CHAR(('0 second')::interval, 'HH24:MI:SS')::time "
-							+ "		  ELSE TO_CHAR((stoptimes.departuretime||' second')::interval, 'HH24:MI:SS')::time "
-							+ "		END AS departure_time,"
-							+ "		stoptimes.stopsequence AS stop_sequence,"
-							+ "		stops.location AS shape"
-							+ "		FROM gtfs_stops AS stops"
-							+ "		INNER JOIN gtfs_stop_service_map AS map ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def"
-							+ "		INNER JOIN gtfs_agencies AS agencies ON map.agencyid=agencies.id"
-							+ "		INNER JOIN  (SELECT '"
-							+ agencyId
-							+ "'::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || '"
-							+ agencyId
-							+ "' || '%') AS feeds ON feeds.aid = map.agencyid"
-							+ "		INNER JOIN gtfs_stop_times AS stoptimes ON stops.id = stoptimes.stop_id AND stops.agencyid = stoptimes.stop_agencyid"
-							+ "		WHERE map.agencyid ='" + agencyId
-							+ "' ORDER BY stop_id LIMIT " + THRESHOLD + " OFFSET " + counter);
-						counter += THRESHOLD;
+				int numOfRows = rs.getInt("count");
+				logger.info("shapefile count query: " +numOfRows);
+				ps.close();
+
+				// break into chunks				
+				int counter = 0;
+				while (counter <= numOfRows){
+					String qShape = "SELECT * FROM (" + q + " SELECT * FROM stop_visits ORDER BY (stop_id, trip_id, stop_sequence) LIMIT ? OFFSET ?) AS pgsql2shp;";
+					if (date != null) {
+						qShape = "SELECT * FROM (" + q + " SELECT * FROM stop_visits INNER JOIN serviced_trips ON stop_visits.trip_id = serviced_trips.id AND stop_visits.trip_agencyid = serviced_trips.agencyid ORDER BY (stop_id, trip_id, stop_sequence) LIMIT ? OFFSET ?) AS pgsql2shp;";
 					}
-				}	
-				connection.close();
-				rs.close();
+					ps = connection.prepareStatement(qShape);
+					ps.setString(1, fdate);
+					ps.setString(2, fdate);
+					ps.setString(3, fdate);
+					ps.setString(4, fdate);
+					ps.setString(5, agencyId);
+					ps.setString(6, agencyId);						
+					ps.setString(7, agencyId);
+					ps.setString(8, agencyId);
+					ps.setInt(9, THRESHOLD);
+					ps.setInt(10, counter);
+					logger.info("shapefile export query:\n "+ ps.toString());
+					query.add(ps.toString());
+					counter += THRESHOLD;
+					ps.close();
+				}
 			}
+			connection.close();
+
 			// Folder that contains agency's shapefiles
-			String tempAgencyname = agenciesHashMap.get(agencyId).name
-					.replaceAll("[^a-zA-Z0-9\\-]", "");			
-			File agencyFolder = new File(path + "/" + flag + "_shape_"
-					+ uniqueString + "/" + tempAgencyname + "_" + flag);
+			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
+			File agencyFolder = new File(tmpdir, tempAgencyname + "_" + flag);
 			agencyFolder.mkdirs();
 
 			// Run the command to generate shapefiles for each agency
 			for ( int j = 0 ; j < query.size() ; j++ ){
-				ProcessBuilder pb = new ProcessBuilder("cmd", "/c", generatorPath,
-						agencyFolder.getAbsolutePath() + "\\" + tempAgencyname
-								+ "_" + flag + "_shape_" + j, "localhost" /*params[0]*/, params[2],
-						params[3], dbName, "\"" + query.get(j) + "\"", "pgsql2shp");
+				// pgsql2shp -f <outfile> -h <host> -p <port> -u <username> -P <password> <db> <query>
+				String shapePath = new File(agencyFolder, tempAgencyname + "_" + flag + "_shape_" + j).toString();
+				String[] cmd = {
+					"pgsql2shp",
+					"-r",
+					"-f", shapePath,
+					"-h", db.getHost(),
+					"-p", db.getPort(),
+					"-u", db.getUsername(),
+					"-P", db.getPassword(),
+					db.getDatabase(),
+					query.get(j)
+				};
+				logger.debug(Arrays.toString(cmd));
+				ProcessBuilder pb = new ProcessBuilder(cmd);
 				pb.redirectErrorStream(true);
 				Process pr = pb.start();
 				BufferedReader reader2 = new BufferedReader(new InputStreamReader(
@@ -399,26 +643,41 @@ public class Queries {
 				while (reader2.readLine() != null) {
 				}
 				pr.waitFor(5, TimeUnit.MINUTES);
-			}			
+				logger.debug("pgsql2shp done");
+			}
 		}
-		
+
 		// creating a zip-file to archive the shape files
+		File shapefilesPath = new File(DatabaseConfig.getDownloadDirectory(), "shapefiles");
+		shapefilesPath.mkdirs();
+
+		// Making unique file names
+		Date dNow = new Date();
+		SimpleDateFormat ft = new SimpleDateFormat("hhmmss");
+		String uniqueString = ft.format(dNow);
+		String folderName = flag + "_shape_" + uniqueString;
+
+		String zipFilePath = new File(shapefilesPath, folderName + ".zip").toString();
+		logger.debug("writing zip file: " + zipFilePath);
+
 		ZipParameters parameters = new ZipParameters();
 		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
 		parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
 		parameters.setIncludeRootFolder(false);
 
-		ZipFile zipF = new ZipFile(path + "/" + flag + "_shape_" + uniqueString
-				+ ".zip");
-		zipF.createZipFileFromFolder(mainFolder, parameters, false, 0);
-		
-		FileUtils.deleteDirectory(mainFolder);
+		ZipFile zipF = new ZipFile(zipFilePath);
+		zipF.createZipFileFromFolder(tmpdir, parameters, false, 0);
+
+		logger.debug("removing tmpdir");
+		FileUtils.deleteDirectory(tmpdir);
 
 		// delete the zip-file after 5 minutes.
+		logger.debug("setting 5 minute timer to remove zip file");
 		Timer timer;
 		ActionListener a = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				logger.debug("removing zip file: " + zipF.getFile().getName());
 				zipF.getFile().delete();
 			}
 		};
@@ -426,6 +685,7 @@ public class Queries {
 		timer.setRepeats(false);
 		timer.setInitialDelay(5 * 60000);
 		timer.start();
+		logger.debug("returning: " + "downloadables/shapefiles/" + zipF.getFile().getName());
 		return "downloadables/shapefiles/" + zipF.getFile().getName();
 	}
 
@@ -447,7 +707,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -483,7 +743,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -522,10 +782,10 @@ public class Queries {
 			centroids = EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		CensusList response = new CensusList();
 		// Census C;
@@ -565,20 +825,20 @@ public class Queries {
 			response = EventManager.getpop(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		List<Census> centroids = new ArrayList<Census>();
 		try {
 			centroids = EventManager.getcentroids(x, lat, lon, dbindex);
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		long sum = 0;
 		for (Census centroid : centroids) {
@@ -739,7 +999,7 @@ public class Queries {
 		MapStop mapPnrStop;
 		MapRoute mapPnrRoute;
 		List<String> agencyList = DbUpdate.getSelectedAgencies(username);
-		System.out.println(agencyList);
+		logger.debug(agencyList);
 		List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 		List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
 		try {
@@ -782,10 +1042,10 @@ public class Queries {
 			}
 		} catch (FactoryException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		} catch (TransformException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return response;
 	}
@@ -1135,7 +1395,7 @@ public class Queries {
 			try {
 				calendar.setTime(sdf.parse(dates[i]));
 			} catch (ParseException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			days[1][i] = calendar.get(Calendar.DAY_OF_WEEK);
 		}
@@ -1161,7 +1421,7 @@ public class Queries {
 			try {
 				calendar.setTime(sdf.parse(dates[i]));
 			} catch (ParseException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			days[1][i] = weekdays[calendar.get(Calendar.DAY_OF_WEEK) - 1];
 		}
@@ -1183,7 +1443,7 @@ public class Queries {
 				result[i] = tdf.format(sdf.parse(dates[i]));
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return result;
@@ -1328,7 +1588,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1412,7 +1672,7 @@ public class Queries {
 			if (routeid == null) { // agency
 				response.metadata = "Report Type:Transit Stops Report for Agency;Report Date:"
 						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()) + ";"
-						+ "Selected Database:" + Databases.dbnames[dbindex] + ";Population Search Radius(miles):"
+						+ "Selected Database:" + DatabaseConfig.getConfig(dbindex).getDatabase() + ";Population Search Radius(miles):"
 						+ String.valueOf(x) + ";Selected Transit Agency:" + agency + ";" + DbUpdate.VERSION;
 				report = PgisEventManager.stopGeosr(username, 0, fulldates, days, null, agency, null, x * 1609.34,dbindex, popYear,-1,null,rc,stime,etime);
 				index++;
@@ -1423,7 +1683,7 @@ public class Queries {
 								.format(Calendar.getInstance().getTime())
 						+ ";"
 						+ "Selected Database:"
-						+ Databases.dbnames[dbindex]
+						+ DatabaseConfig.getConfig(dbindex).getDatabase()
 						+ ";Population Search Radius(miles):"
 						+ String.valueOf(x)
 						+ ";Selected Transit Agency:"
@@ -1457,7 +1717,7 @@ public class Queries {
 							+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 									.format(Calendar.getInstance().getTime())
 							+ ";" + "Selected Database:"
-							+ Databases.dbnames[dbindex]
+							+ DatabaseConfig.getConfig(dbindex).getDatabase()
 							+ ";Population Search Radius(miles):"
 							+ String.valueOf(x) + ";Selected Geographic Area:"
 							+ areaid + ";" + DbUpdate.VERSION;
@@ -1485,7 +1745,7 @@ public class Queries {
 							+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 									.format(Calendar.getInstance().getTime())
 							+ ";" + "Selected Database:"
-							+ Databases.dbnames[dbindex]
+							+ DatabaseConfig.getConfig(dbindex).getDatabase()
 							+ ";Population Search Radius(miles):"
 							+ String.valueOf(x) + ";Selected Geographic Area:"
 							+ areaid + ";Selected Transit Agency:" + agency
@@ -1514,7 +1774,7 @@ public class Queries {
 						+ ";Report Date:"
 						+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 								.format(Calendar.getInstance().getTime()) + ";"
-						+ "Selected Database:" + Databases.dbnames[dbindex]
+						+ "Selected Database:" + DatabaseConfig.getConfig(dbindex).getDatabase()
 						+ ";Population Search Radius(miles):"
 						+ String.valueOf(x) + ";Selected Geographic Area:"
 						+ areaid + ";Selected Transit Agency:" + agency
@@ -1538,7 +1798,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1603,7 +1863,7 @@ public class Queries {
 					+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 							.format(Calendar.getInstance().getTime())
 					+ ";Selected Database:"
-					+ Databases.dbnames[dbindex]
+					+ DatabaseConfig.getConfig(dbindex).getDatabase()
 					+ ";"
 					+ DbUpdate.VERSION;
 			response.areaName = instance.getName();
@@ -1617,7 +1877,7 @@ public class Queries {
 							.format(Calendar.getInstance().getTime())
 					+ ";"
 					+ "Selected Database:"
-					+ Databases.dbnames[dbindex]
+					+ DatabaseConfig.getConfig(dbindex).getDatabase()
 					+ ";"
 					+ DbUpdate.VERSION;
 		}
@@ -1629,7 +1889,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1739,7 +1999,7 @@ public class Queries {
 				+ "	WHERE times.arrivaltime > 0 "
 				+ "	GROUP BY times.trip_agencyid, times.trip_id "
 				+ "	ORDER BY MIN(arrivaltime)";
-		// System.out.println(query);
+		// logger.debug(query);
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
 			TripTime t = new TripTime();
@@ -1844,7 +2104,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -1883,7 +2143,7 @@ public class Queries {
 						.getInstance().getTime())
 				+ ";"
 				+ "Selected Database:"
-				+ Databases.dbnames[dbindex]
+				+ DatabaseConfig.getConfig(dbindex).getDatabase()
 				+ ";Selected Date(s):"
 				+ date
 				+ ";Selected Transit Agency:"
@@ -1892,7 +2152,7 @@ public class Queries {
 				+ routeid + ";" + DbUpdate.VERSION;
 		String[] dates = date.split(",");
 		int[][] days = daysOfWeek(dates);
-		// System.out.println(days[0][0]);
+		// logger.debug(days[0][0]);
 		AgencyAndId routeId = new AgencyAndId(agency, routeid);
 		response.Agency = GtfsHibernateReaderExampleMain.QueryAgencybyid(
 				agency, dbindex).getName()
@@ -2015,15 +2275,15 @@ public class Queries {
 						&& trip.getDirectionId().equals("1")) {
 					if (ts.stoptimes.size() > maxSize[1]) {
 						response.directions[1].stops = ts.stoptimes;
-						// System.out.println(response.stops.get(0).StopId);
+						// logger.debug(response.stops.get(0).StopId);
 						maxSize[1] = ts.stoptimes.size();
 					}
 					response.directions[1].schedules.add(ts);
 				} else {
 					if (ts.stoptimes.size() > maxSize[0]) {
-						// System.out.println(ts.stoptimes.size());
+						// logger.debug(ts.stoptimes.size());
 						response.directions[0].stops = ts.stoptimes;
-						// System.out.println(response.stops.get(0).StopId);
+						// logger.debug(response.stops.get(0).StopId);
 						maxSize[0] = ts.stoptimes.size();
 					}
 					response.directions[0].schedules.add(ts);
@@ -2035,7 +2295,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2143,7 +2403,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2186,7 +2446,7 @@ public class Queries {
 				+ " Employment Report;Report Date:"
 				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar
 						.getInstance().getTime()) + ";" + "Selected Database:"
-				+ Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+				+ DatabaseConfig.getConfig(dbindex).getDatabase() + ";" + DbUpdate.VERSION;
 		return results;
 	}
 
@@ -2223,7 +2483,7 @@ public class Queries {
 				+ " Title VI Report;Report Date:"
 				+ new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar
 						.getInstance().getTime()) + ";" + "Selected Database:"
-				+ Databases.dbnames[dbindex] + ";" + DbUpdate.VERSION;
+				+ DatabaseConfig.getConfig(dbindex).getDatabase() + ";" + DbUpdate.VERSION;
 		return results;
 	}
 
@@ -2306,7 +2566,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2397,7 +2657,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2482,7 +2742,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2588,7 +2848,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		each.waterArea = String
@@ -2775,7 +3035,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -2887,7 +3147,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3038,7 +3298,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3089,7 +3349,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3159,7 +3419,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3236,7 +3496,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3300,7 +3560,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3473,7 +3733,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3709,7 +3969,7 @@ public class Queries {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		progVal.remove(key);
 		return response;
@@ -3915,7 +4175,7 @@ public class Queries {
 				stmt.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
@@ -4079,7 +4339,7 @@ public class Queries {
 								+ "	CROSS JOIN routescount CROSS JOIN countiescount CROSS JOIN countiesarray CROSS JOIN pop"
 								+ "	CROSS JOIN clustercoor CROSS JOIN urbanarray CROSS JOIN regionsarray CROSS JOIN agenciescount"
 								+ "	CROSS JOIN pnrarray CROSS JOIN placesarray CROSS JOIN rac CROSS JOIN wac";
-						// System.out.println("this one"+query+"-------------");
+						// logger.debug("this one"+query+"-------------");
 
 						ResultSet rs = stmt.executeQuery(query);
 
@@ -4183,7 +4443,7 @@ public class Queries {
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e);
 				}
 
 				PgisEventManager.dropConnection(connection);
@@ -4218,7 +4478,7 @@ public class Queries {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
@@ -4365,7 +4625,7 @@ public class Queries {
 				+ " select a1id, a1name, a2id, a2name, COUNT(dist) AS connections"
 				+ "	FROM a2stops "
 				+ "	GROUP BY a1id, a1name, a2id, a2name";
-//		System.out.println(query);
+//		logger.debug(query);
 		ResultSet rs = stmt.executeQuery(query);
 		rs.next();
 		double connections = rs.getInt("connections");
@@ -4407,8 +4667,7 @@ public class Queries {
 					i.centralized = e.getValue().centralized;
 					response.list.add(i);
 				}catch(NullPointerException error){
-					System.err.println("Angecy ID " + e.getKey() + " does not have any service.");
-					error.printStackTrace();
+					logger.error("Angecy ID " + e.getKey() + " does not have any service.", error);
 				}
 			} else {
 				ConGraphAgencyGraph i = SpatialEventManager.getAgencyCentroids(
@@ -4439,7 +4698,7 @@ public class Queries {
 		try {
 			response = SpatialEventManager.getAllAgencies(username, dbindex);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return response;
 	}
@@ -4479,7 +4738,7 @@ public class Queries {
 				sedlist.SEDList.add(seDates);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();			
+			logger.error(e);			
 		}
 		return sedlist;
 	}
@@ -4890,7 +5149,7 @@ public class Queries {
 	Feed name = new Feed();
 	name.a=feeds;
 	String[] feedcount=name.a.split(",");
-	System.out.println(name.a);
+	logger.debug(name.a);
 	name.Len=0;
 	name.Len=feedcount.length;
 	return name.Len;

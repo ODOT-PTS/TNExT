@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.model.database.queries.util.Hutil;
 import com.model.database.queries.util.Types;
 import com.model.database.queries.objects.*;
@@ -44,7 +46,8 @@ import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 
-public class EventManager {		
+public class EventManager {	
+	final static Logger logger = Logger.getLogger(EventManager.class);	
 private	static Session[] session = new Session[Hutil.getSessionFactory().length];
 static{
 	for (int scnt=0; scnt< session.length; scnt++){
@@ -823,14 +826,14 @@ public static void updateSessions(){
 		
 		switch (type) {
 		case 0: //counties	
-			//System.out.println("The SA size is: "+selectedAgencies.size());
-			//System.out.println("SA list: "+selectedAgencies.size());
+			//logger.debug("The SA size is: "+selectedAgencies.size());
+			//logger.debug("SA list: "+selectedAgencies.size());
 			q = session[sessionindex].getNamedQuery("AGENCIES_BY_COUNTY_SEL_AGENCIES");
 			q.setParameter("id",areaId);	
 			q.setParameterList("sa", selectedAgencies);
 	        results = q.list();	
-			System.out.println("The result size for county "+areaId+" is :"+results.size());
-			//System.out.println("Query result is: "+results.get(0));
+			logger.debug("The result size for county "+areaId+" is :"+results.size());
+			//logger.debug("Query result is: "+results.get(0));
 
 			break;						
 		case 1:	//census tract
@@ -1064,14 +1067,14 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);
+		logger.debug("no of points: "+plist.length);
 		queryBuf.append(" where distance(:allpoints, location)<:radius ");
 		queryBuf.append("group by blockId");
 		String hqlQuery = queryBuf.toString();
 		Query query = session[sessionindex].createQuery(hqlQuery);
 		query.setParameter("radius",d);
 		query.setParameter("allpoints",allpoints,geomType);
-		System.out.println(hqlQuery);		
+		logger.debug(hqlQuery);		
 		@SuppressWarnings("unchecked")
 		List<Census> results = (List<Census>) query.list();		
         Hutil.getSessionFactory()[sessionindex].close();
@@ -1096,18 +1099,18 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);
-		System.out.println("no of points: "+plist.length);
+		logger.debug("no of points: "+plist.length);
 		Query q = session[sessionindex].getNamedQuery("POP_UNDUP_BATCH");
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());
+		logger.debug(q.toString());
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
 		pop = (Long) results.get(0);
 		}
 		Hutil.getSessionFactory()[sessionindex].close();
-		System.out.println("Query returned: "+pop);
+		logger.debug("Query returned: "+pop);
         return pop;		
     }
 	
@@ -1130,12 +1133,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("COUNTY_POP_UNDUP_BATCH");		
 		q.setParameter("id",countyId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
@@ -1164,12 +1167,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("REGION_POP_UNDUP_BATCH");		
 		q.setParameter("id",regionId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
@@ -1198,12 +1201,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("TRACT_POP_UNDUP_BATCH");		
 		q.setParameter("id",tractId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
@@ -1231,12 +1234,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("PLACE_POP_UNDUP_BATCH");		
 		q.setParameter("id",placeId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
@@ -1265,12 +1268,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("URBAN_POP_UNDUP_BATCH");		
 		q.setParameter("id",urbanId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
@@ -1299,12 +1302,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("URBAN_POP_UNDUP_BATCH_BYPOP");		
 		q.setParameter("pop",(long)upop);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 
@@ -1333,12 +1336,12 @@ public static void updateSessions(){
 		}
 		MultiPoint allpoints = geometryFactory.createMultiPoint(plist);
 		allpoints.setSRID(2993);		
-		System.out.println("no of points: "+plist.length);		
+		logger.debug("no of points: "+plist.length);		
 		Query q = session[sessionindex].getNamedQuery("CONGDIST_POP_UNDUP_BATCH");		
 		q.setParameter("id",congdistId);
 		q.setParameter("radius",d);
 		q.setParameter("allpoints",allpoints,geomType);
-		System.out.println(q.toString());		
+		logger.debug(q.toString());		
         List results = q.list();
 		long pop = 0;
 		if (results.size()>0 && results.get(0)!=null){ 

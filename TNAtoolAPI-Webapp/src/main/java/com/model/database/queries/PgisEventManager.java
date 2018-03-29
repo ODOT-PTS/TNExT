@@ -39,6 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.CRS;
@@ -50,6 +52,7 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import com.model.database.Databases;
+import com.model.database.DatabaseConfig;
 import com.model.database.queries.objects.AgencyRoute;
 import com.model.database.queries.objects.AgencyRouteList;
 import com.model.database.queries.objects.AgencySR;
@@ -93,8 +96,10 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class PgisEventManager {
+	final static Logger logger = Logger.getLogger(PgisEventManager.class);	
+
 	//public static Connection connection;
-	
+
 	/**
 	 * makes a connection to a database based on the database index
 	 * 
@@ -102,18 +107,25 @@ public class PgisEventManager {
 	 * @return Connection
 	 */
 	public static Connection makeConnection(int dbindex){
+		return DatabaseConfig.getConfig(dbindex).getConnection();
+	}
+
+	public static Connection makeConnectionByUrl(String url, String user, String pass) throws SQLException {
 		Connection response = null;
 		try {
-		Class.forName("org.postgresql.Driver");
-		response = DriverManager
-           .getConnection(Databases.connectionURLs[dbindex],
-           Databases.usernames[dbindex], Databases.passwords[dbindex]);
-		}catch ( Exception e ) {
-	        e.printStackTrace();	         
-	      }
+			Class.forName("org.postgresql.Driver");
+    } catch (ClassNotFoundException e) {
+      logger.error("PostgreSQL DataSource unable to load PostgreSQL JDBC Driver");
+    }
+		try {
+			response = DriverManager.getConnection(url, user, pass);
+		} catch ( SQLException e ) {
+			e.printStackTrace();
+			throw e;
+		}
 		return response;
 	}
-	
+
 	/**
 	 * Drops the connection
 	 * @param connection
@@ -2869,11 +2881,11 @@ public class PgisEventManager {
 		String [] et=etime.split(":");
 		int stime1=0;
 		int etime1=0;
-		System.out.println(etime+"="+et[0]+et[1]);
-		System.out.println(stime+"="+st[0]+st[1]);
+		logger.debug(etime+"="+et[0]+et[1]);
+		logger.debug(stime+"="+st[0]+st[1]);
 		stime1=(Integer.parseInt(st[0])*100)+Integer.parseInt(st[1]);
 		etime1=(Integer.parseInt(et[0])*100)+Integer.parseInt(et[1]);
-		System.out.println(stime1+"-"+etime1);
+		logger.debug(stime1+"-"+etime1);
 		String agencyDefaultID = new String();
 		if (agency != null) {agencyDefaultID = getDefaultAgencyID(agency, dbindex);}
 		HashMap<String, Integer> stopsVisits = new HashMap<String, Integer>();
@@ -3010,7 +3022,7 @@ public class PgisEventManager {
 						+ "	LEFT JOIN census_counties ON census_counties.countyid = LEFT(result.blockid,5)";
 				
 		}
-		System.out.println(mainquery);
+		logger.debug(mainquery);
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);
 			ResultSet rs = stmt.executeQuery();				
@@ -3645,13 +3657,13 @@ public class PgisEventManager {
 			  +"routes as (select distinct on ( routeid) "
 			  +"round((trip.length+trip.estlength)::numeric,2) as length, trip.route_id as routeid, id ,shape  as tripshape "
 			  +"from gtfs_trips trip  where trip.agencyid='"+agencyId+"' order by routeid,length DESC,shape,id), "
-              +" rrtmiles as ( select sum(ST_Length(st_transform(ST_Intersection(census_blocks.shape,tripshape),2993))/1609.34) as rrtmiles from census_blocks join routes on ST_intersects(census_blocks.shape,tripshape) where poptype='R'),"
-              +" urtmiles as ( select sum(ST_Length(st_transform(ST_Intersection(census_blocks.shape,tripshape),2993))/1609.34) as urtmiles from census_blocks join routes on ST_intersects(census_blocks.shape,tripshape) where poptype='U'),"
-              + "rmiles as (select sum(length) as rtmiles from routes) " 
-		      + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
+			  + "rrtmiles AS (SELECT SUM(ST_Length(ST_Transform(ST_Intersection(gtfs_trip_segments.shape, census_blocks.shape), 2993))) / 1609.34 as rrtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id INNER JOIN census_blocks ON ST_Intersects(gtfs_trip_segments.shape, census_blocks.shape) WHERE census_blocks.poptype = 'R'),"
+			  + "urtmiles AS (SELECT SUM(ST_Length(ST_Transform(ST_Intersection(gtfs_trip_segments.shape, census_blocks.shape), 2993))) / 1609.34 as urtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id INNER JOIN census_blocks ON ST_Intersects(gtfs_trip_segments.shape, census_blocks.shape) WHERE census_blocks.poptype = 'U'),"
+			  + "rtmiles AS (SELECT SUM(ST_Length(ST_Transform(gtfs_trip_segments.shape, 2993))) / 1609.34 as rtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id)"		  
+			  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
 		      + "	COALESCE(rpop,0) as ruralpop,coalesce(employment,0) as rac,coalesce(employees,0) as wac, COALESCE(rtmiles,0) as rtmiles, COALESCE(urtmiles,0) as urtmiles ,COALESCE(rrtmiles,0) as rrtmiles "
 		      + "	from urbanpop inner join ruralpop on true "
-		      + "	inner join rmiles on true "
+		      + "	inner join rtmiles on true "
 		      + "	inner join urtmiles on true "
 		      + "	inner join rrtmiles on true "
 		      + "	inner join employment on true "
@@ -4021,7 +4033,7 @@ public class PgisEventManager {
     				  }
     	  }
      double[] results = new double[9];
-    System.out.println(querytext);
+    logger.debug(querytext);
      try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
@@ -5077,7 +5089,7 @@ public class PgisEventManager {
 		HashMap<String, Integer> response = new HashMap<String, Integer>();
 		Connection connection = makeConnection(dbindex);
 		String agencyFilter = "";
-		System.out.println(stime+"-"+etime);
+		logger.debug(stime+"-"+etime);
 		if (agency != null){
 			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
 		}
@@ -5108,7 +5120,6 @@ public class PgisEventManager {
 				+ "		group by stop_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices01 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
-		System.out.print(mainquery);	
 		try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
@@ -6459,7 +6470,7 @@ public class PgisEventManager {
 						  +"totalAgencies as (select count(distinct agencyid) as total from  gtfs_trips )," 
 						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
 						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
-				System.out.println(query);
+				logger.debug(query);
 				  try {
 					  stmt = connection.createStatement();
 					  ResultSet rs = stmt.executeQuery(query);
