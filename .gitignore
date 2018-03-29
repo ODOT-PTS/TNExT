@@ -1,3 +1,4 @@
 data
 conf
 docker-compose.override.yml
+.DS_Store
