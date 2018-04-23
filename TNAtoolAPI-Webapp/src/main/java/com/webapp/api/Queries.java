@@ -458,7 +458,7 @@ public class Queries {
 					"		gtfs_trips.agencyid, " +
 					"		gtfs_trips.serviceid_id " +
 					"	FROM gtfs_trips " +
-					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.serviceid_agencyid " +
 					"), " +
 					"routes AS ( " +
 					"	SELECT  " +
@@ -531,7 +531,7 @@ public class Queries {
 					"		gtfs_trips.agencyid, " +
 					"		gtfs_trips.serviceid_id " +
 					"	FROM gtfs_trips " +
-					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.agencyid " +
+					"	INNER JOIN svcids ON svcids.serviceid_id = gtfs_trips.serviceid_id AND svcids.serviceid_agencyid = gtfs_trips.serviceid_agencyid " +
 					"), " +
 					"stop_visits AS ( " +
 					"	SELECT  " +
