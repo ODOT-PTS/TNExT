@@ -252,7 +252,7 @@ var accessibleCons = L.featureGroup(); // Leaflet object
 var accessibleConsPolylines = []; // Array of Leaflet Polylines
 var originalTrip; // L.Polyline
 
-function initMap() {
+function initTimingConnectionMap() {
 	map = new L.Map('map', {
 		minZoom : 4,
 		maxZoom : 18,
@@ -370,8 +370,6 @@ function drawMap() {
 	console.log("map fitBounds:", bounds.toBBoxString());
 	map.fitBounds(bounds);
 }
-
-$(document).ready(function() { initMap() });
 
 /**
  * hide/display the original trips as well as missed and accessible ones

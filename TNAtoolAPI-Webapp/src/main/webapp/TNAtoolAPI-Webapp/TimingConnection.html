@@ -59,6 +59,9 @@
 	html += '<thead>'+tmp+'</thead><tbody>';
 	
 	$(document).ready(function(){
+		// init map
+		initTimingConnectionMap();
+
 		$('h2').append('Timing-Connection Report <br><hr>');
 		$('#mapDialog').hide(); // hides the map dialog box
 		$( "#date" ).datepicker({
