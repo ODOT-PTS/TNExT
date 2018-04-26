@@ -1,4 +1,4 @@
-# TNAST Integration Tests
+# TNExT Integration Tests
 
 To run integration tests using Docker:
 
