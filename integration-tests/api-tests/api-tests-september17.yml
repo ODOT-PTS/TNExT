@@ -1,6 +1,6 @@
 ---
 - config:
-    - testset: "TNAST API integration tests against september17 database"
+    - testset: "TNExT API integration tests against september17 database"
 
 - test:
     - group: "Overview Map"

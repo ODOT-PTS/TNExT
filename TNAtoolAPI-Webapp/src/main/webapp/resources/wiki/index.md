@@ -1,7 +1,7 @@
-Transit Network Analysis Software Tool Wiki
+Transit Network Explorer Tool Wiki
 =========
 
-The Transit Network Analysis Software Tool (`TNAST`) is a web-based software tool developed for the visualization, analysis, and reporting of regional and statewide transit networks in the state of Oregon. The TNExT has been developed using open source tools.
+The Transit Network Explorer Tool (`TNAST`) is a web-based software tool developed for the visualization, analysis, and reporting of regional and statewide transit networks in the state of Oregon. The TNExT has been developed using open source tools.
  
 <iframe src="../resources/wiki/slideshow.html" width="810" height="440" frameborder="0" scrolling="no"  style="margin:0 auto;display:block;"></iframe> 
 

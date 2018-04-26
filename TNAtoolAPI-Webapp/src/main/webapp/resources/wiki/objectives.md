@@ -8,7 +8,7 @@ Based on the RPTD's long experience in dealing with public transit issues, the m
   1. Based on local service providers' individual priorities, and
   2. Made with limited ability to consider the impact that these investments may have on the larger transit network.
 
-Prior to the Transit Network Analysis Software Tool (TNAST), the ODOT's RPTD did not have an integrated tool that could help their planners to better understand and assess gaps in spatial and temporal transit schedule connectivity, and organize this information to help analyze the performance of the larger state transit network and how this correlates to populations within the state.
+Prior to the Transit Network Explorer Tool (TNExT), the ODOT's RPTD did not have an integrated tool that could help their planners to better understand and assess gaps in spatial and temporal transit schedule connectivity, and organize this information to help analyze the performance of the larger state transit network and how this correlates to populations within the state.
 
 The objectives of this project are: 
 
