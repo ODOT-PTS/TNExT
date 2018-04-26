@@ -29,13 +29,6 @@ The following software packages must be installed on a computer to be able to ho
     directly from GitHub. 
 6.	**Maven Apache Project**. Maven is used to run the TNExT on a Tomcat7 web server.
 7.  **Tomcat Config** The war file should be installed as ROOT.war on the Tomcat7 server, it will be installed to '/' on the server.
-            
-## Setting Database Parameters
-Once the source code of the TNExT is downloaded from the GitHub repository and copied onto a local computer disk, the comma separated value (CSV) file named “databaseParams.csv” must be opened. The path to access the file “databaseParams.csv” is shown below. [Project Directory] indicates the location where the source code of the TNExT is saved on the local computer disk.
-          
-                      <Your_Project_Directory>\src\main\webapp\resources\admin\databaseParams.csv
-
-Once the file “databaseParams.csv” has been accessed, the database parameters DB Server **URL**, **Port**, **Username**, and **Password** must be set by the user.
 
 ## Testing
 
