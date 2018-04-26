@@ -2788,7 +2788,7 @@ public class DbUpdate {
         }
 
       // For Issue #6, do not delete the file, so we can keep it for reference!
-      // https://github.com/pouyalireza/TNAST_MAVEN/issues/6/
+      // https://github.com/pouyalireza/TNExT/issues/6/
       // target.delete();
     }
 
