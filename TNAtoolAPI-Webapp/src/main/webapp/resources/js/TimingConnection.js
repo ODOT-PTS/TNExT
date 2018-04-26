@@ -263,7 +263,7 @@ function initTimingConnectionMap() {
 	var tonerMap = new L.StamenTileLayer("toner");
 	var terrainMap = new L.StamenTileLayer("terrain");
 	var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'
-			+ ' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '
+			+ ' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNExT</a> '
 			+ getVersion() + ' beta';
 	var osmLayer = new L.TileLayer(OSMURL, {
 		subdomains : [ "otile1-s", "otile2-s", "otile3-s",

@@ -3,7 +3,7 @@ Software Architecture
 
 The Transit Network Analysis Software (TNAST) is a web application and uses a client-server architecture. The architecture of the TNAST is displayed in the picture below. 
 
-![](images/architecture.png "TNA Software Tool Architecture")
+![](images/architecture.png "TNExT Architecture")
 
 Client Side Application
 ---------
