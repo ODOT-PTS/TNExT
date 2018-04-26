@@ -1,21 +1,21 @@
 // Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
-//   This file is part of Transit Network Analysis Software Tool.
+//   This file is part of Transit Network Explorer Tool.
 //
-//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    Transit Network Explorer Tool is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU  General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    Transit Network Explorer Tool is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU  General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+//    along with Transit Network Explorer Tool.  If not, see <http://www.gnu.org/licenses/>.
 // =========================================================================================================
 //	  This script contains JavaScript variables and methods used to generate Timing Connections Report
-//	  in the Transit Network Analysis Software Tool.
+//	  in the Transit Network Explorer Tool.
 // =========================================================================================================
 
 var selectedDB = 1;
@@ -263,7 +263,7 @@ function initTimingConnectionMap() {
 	var tonerMap = new L.StamenTileLayer("toner");
 	var terrainMap = new L.StamenTileLayer("terrain");
 	var osmAttrib = 'Map by &copy; <a href="http://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'
-			+ ' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNA Software Tool</a> '
+			+ ' | Census & shapes by &copy; <a href="http://www.census.gov" target="_blank">US Census Bureau</a> 2010 | <a href="https://github.com/tnatool/beta" target="_blank">TNExT</a> '
 			+ getVersion() + ' beta';
 	var osmLayer = new L.TileLayer(OSMURL, {
 		subdomains : [ "otile1-s", "otile2-s", "otile3-s",

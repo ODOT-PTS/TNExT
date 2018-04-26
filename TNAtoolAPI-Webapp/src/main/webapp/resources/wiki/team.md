@@ -1,7 +1,7 @@
-Transit Network Analysis Software Tool -- Team
+Transit Network Explorer Tool -- Team
 =========
 
-The Transit Network Analysis Software Tool (TNAST) was developed in the [School of Mechanical, Industrial, and Manufacturing Engineering (MIME)](http://mime.oregonstate.edu, "MIME home page") at [Oregon State University (OSU)](http://oregonstate.edu, "OSU home page").
+The Transit Network Explorer Tool (TNExT) was developed in the [School of Mechanical, Industrial, and Manufacturing Engineering (MIME)](http://mime.oregonstate.edu, "MIME home page") at [Oregon State University (OSU)](http://oregonstate.edu, "OSU home page").
 
 The project team members are:
 
