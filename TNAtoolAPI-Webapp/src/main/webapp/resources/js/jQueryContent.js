@@ -501,12 +501,7 @@ function daydiff(first, second) {
 function pad(s) { return (s < 10) ? '0' + s : s; }
 
 function go(key){	
-	$(document).tooltip({
-		position: {
-	        my: "left bottom",
-	        at: "right bottom",
-	    }
-	});
+	$(document).tooltip({});
 	
 	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
@@ -620,22 +615,11 @@ function go(key){
 		$("#submit").trigger('mouseenter');		
 	});
 	
-	$("#submit").tooltip({
-		  open: function () {		    	    
-		    setTimeout(function () {		      
-		    	$("#submit").trigger('mouseleave');
-		    }, 4000);
-		  }
-		});
+	$("#submit").tooltip({});
 }
 /*Agency Extended report*/
 function gos(key){
-	$(document).tooltip({
-		position: {
-	        my: "left bottom",
-	        at: "right bottom",
-	    }
-	});
+	$(document).tooltip({});
 	
 	var progressLabel = $( ".progress-label" );
 	$( "#progressbar" ).progressbar({
@@ -761,12 +745,6 @@ function gos(key){
 		$("#submit").trigger('mouseenter');		
 	});*/
 	
-	$("#submit").tooltip({
-		  open: function () {		    	    
-		    setTimeout(function () {		      
-		    	$("#submit").trigger('mouseleave');
-		    }, 4000);
-		  }
-		});
+	$("#submit").tooltip({});
 	
 }

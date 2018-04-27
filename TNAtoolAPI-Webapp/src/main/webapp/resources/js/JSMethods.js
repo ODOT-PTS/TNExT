@@ -258,12 +258,7 @@ function exceedsMaxRadius(x){
  * sets the position and transitions for tooltips in tabular reports
  */
 function updateToolTips() {
-	$(document).tooltip({
-		position : {
-			my : "bottom",
-			at : "center top+12"
-		}
-	});
+	$(document).tooltip({});
 	
 	$(".input").each(function(index, object) {
 		$(object).on('input', function() {
@@ -271,13 +266,7 @@ function updateToolTips() {
 		});
 	});
 
-	$("#submit").tooltip({
-		open : function() {
-			setTimeout(function() {
-				$("#submit").trigger('mouseleave');
-			}, 1000);
-		}
-	});
+	$("#submit").tooltip({});
 }
 
 /**
