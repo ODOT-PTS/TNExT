@@ -2877,6 +2877,8 @@ public class PgisEventManager {
 		String popsfilter = "";
 		String mainquery ="with ";
 		String criteria = "";
+		if (stime == null || "".equals(stime)) {stime = "00:00";}
+		if (etime == null || "".equals(etime)) {etime = "23:59";}
 		String [] st=stime.split(":");
 		String [] et=etime.split(":");
 		int stime1=0;
