@@ -297,19 +297,19 @@ function reloadPage() {
 		// updating dates
 		try {
 			if($('#stime').val()!=null){
-			var stime=$('#stime').val();
-			var etime=$('#etime').val();
-			var hs=stime.split(":");
-			var st=(parseInt(hs[0])*100)+parseInt(hs[1]);
-			var he=etime.split(":");
-			var et=(parseInt(he[0])*100)+parseInt(he[1]);
-			if(et>st){
-			output = setURIParameter(output, 'stime',stime, keyName)
-	        output = setURIParameter(output, 'etime',etime, keyName)
-			}
-			else{
-				alert("Choose an end time that is the after start time")
-			}
+				var stime=$('#stime').val();
+				var etime=$('#etime').val();
+				var hs=stime.split(":");
+				var st=(parseInt(hs[0])*100)+parseInt(hs[1]);
+				var he=etime.split(":");
+				var et=(parseInt(he[0])*100)+parseInt(he[1]);
+				if(et>st){
+					output = setURIParameter(output, 'stime', stime, null);
+		        	output = setURIParameter(output, 'etime', etime, null);
+				} else{
+					alert("Choose an end time that is the after start time");
+					return
+				}
 			}
 			var dates = $('#datepicker').multiDatesPicker('getDates');
 			if (dates.length == 0) {
@@ -448,6 +448,7 @@ function setURIParameter(url, param, newValue, currentValue) {
 	if (newValue != currentValue) {
 		var URL = url.split("&" + param + "=");
 		var last = "";
+		URL.push(""); // handle new params
 		if (URL[1].indexOf("&") != -1) {
 			last = URL[1].substring(URL[1].indexOf("&"));
 		}
