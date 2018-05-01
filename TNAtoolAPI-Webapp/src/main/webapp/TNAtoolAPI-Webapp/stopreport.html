@@ -34,19 +34,18 @@
 
 w_qstringd = getDates(keyName);
 var dateIOnumber = 2;
-var geotype=parseInt(getURIParameter("geotype"));
-var type = parseInt(getURIParameter("type"));
+var geotype=parseInt(getURIParameter("geotype") || -1);
+var type = parseInt(getURIParameter("type") || 0);
 var areaId = getURIParameter("areaid");
 var geoid = getURIParameter("geoid");
 var route = getURIParameter("route");
 var agency = getURIParameter("agency");
-var rc= getURIParameter("rc");
-var stime = getURIParameter("stime");
-var etime = getURIParameter("etime");
+var rc = parseInt(getURIParameter("rc") || -1);
+var stime = getURIParameter("stime") || "";
+var etime = getURIParameter("etime") || "";
 var table;
 var xhr='';
 var ipop=popYear;
-type = (isNaN(type))?0:type;
 
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th id="aid">Agency ID</th>'+
@@ -204,11 +203,11 @@ $(document).ready(function(){
                     </tr>
                     <tr>    
                        <td style="font-size:15">Start Time<span class="IOSym">(3)</span></td>
-                       <td><input type="text" id="stime"  class="timepicker1" name="time" style='width: 150px ' style='height: 25px '/></td>
+                       <td><input type="text" id="stime"  class="timepicker1" name="stime" style='width: 150px ' style='height: 25px '/></td>
 				      </tr>
 				      <tr>
 				         <td style="font-size:15">End Time<span class="IOSym">(4)</span></td>
-				         <td><input type="text" id="etime" class=" timepicker1" name="time" style='width: 150px' style='height: 25px '/></td>			
+				         <td><input type="text" id="etime" class=" timepicker1" name="etime" style='width: 150px' style='height: 25px '/></td>			
 			 	</tr>
 			 	</table>
 			 	</div>
