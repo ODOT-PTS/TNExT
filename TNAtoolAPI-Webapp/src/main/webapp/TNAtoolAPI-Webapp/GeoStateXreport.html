@@ -85,7 +85,8 @@ $(document).ready(function(){
 		success: function(item){
 			docMetadata = item.metadata;
 			appendNavigation(item.AreaName);
-
+			debugger;
+			
 			html += '<tr><td class="metric">Geo ID<td>'+ item.AreaId 
 			+'</td></tr><tr><td class="metric">Name</td><td>' + item.AreaName 
 			+'</td></tr><tr><td class="metric">Route Miles </td><td>'+ numberconv(item.RouteMiles) 
@@ -97,7 +98,14 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Miles of Service Per Capita<span class="IOSym">(3)</span></td><td >'+numberconv(item.MilesofServicePerCapita)
 			+'</td></tr><tr><td class="metric">Urban Population Served<span class="IOSym">(1)</span></td><td>' + numberconv(item.UPopWithinX)
 			+'</td></tr><tr><td class="metric">Rural Population Served<span class="IOSym">(1)</span></td><td>' + numberconv(item.RPopWithinX) 
-			+'</td></tr><tr><td class="metric">Percent of Population Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.PopServed))
+
+			// Density
+			+'</td></tr><tr><td class="metric">Urban Landarea (sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.ULandareaWithinX) / (1e6 / 0.386102)))
+			+'</td></tr><tr><td class="metric">Rural Landarea (sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.RLandareaWithinX) / (1e6 / 0.386102)))
+			+'</td></tr><tr><td class="metric">Urban Population Density (people/sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.UPopWithinX) / parseInt(item.ULandareaWithinX) * (1e6 / 0.386102)))
+			+'</td></tr><tr><td class="metric">Rural Population Density (people/sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.RPopWithinX) / parseInt(item.RLandareaWithinX) * (1e6 / 0.386102)))
+
+            +'</td></tr><tr><td class="metric">Percent of Population Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.PopServed))
 			+'</td></tr><tr><td class="metric">Percent of Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.PopServedAtLoService))
 			+'</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.UPopServedAtLoService)			
 			+'</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.RPopServedAtLoService)
