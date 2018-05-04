@@ -60,7 +60,15 @@ public class GeoXR {
 	@XmlAttribute
     @JsonSerialize
     public String RPopWithinX;
-	
+
+    @XmlAttribute
+    @JsonSerialize
+    public String ULandareaWithinX;
+
+    @XmlAttribute
+    @JsonSerialize
+    public String RLandareaWithinX;
+
 	@XmlAttribute
     @JsonSerialize
     public String UracWithinX;
