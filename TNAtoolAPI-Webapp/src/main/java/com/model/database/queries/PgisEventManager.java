@@ -1787,41 +1787,31 @@ public class PgisEventManager {
     	  geocriteria2 = "block."+Types.getIdColumnName(geotype);
       }
       }
-      if(geotype==-1||geotype==3)
-     {
-       querytext = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select id, agencyid, "+column+", location from "
-      		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"'), census as (select population"+popYear+" as population, poptype,block.blockid from "
-      		+ "census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' group by block.blockid), urbanpop as "
-      		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
-      		+ "censusemployment  as (select C000_"+popYear+"  as employment,poptype from census left join  lodes_rac_projection_block using(blockid)),"
-      		+ "censusemployee as (select C000 as employee,poptype from census left join lodes_blocks_wac using (blockid)),"
-      	
-      		+ "urbanrac as (select COALESCE(sum(employment),0) uemployment from censusemployment where poptype = 'U')," 
-      	    + "ruralrac as (select COALESCE(sum(employment),0) remployment from censusemployment where poptype = 'R'),"
-      	    + "urbanwac as (select COALESCE(sum(employee),0) uemployee from censusemployee where poptype = 'U')," 
-      	    + "ruralwac as (select COALESCE(sum(employee),0) remployee from censusemployee where poptype = 'R'),"	
-      		+ "stopcount as (select count(stops.id) as stopscount from stops) "
-      		+ "select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as ruralpop ,COALESCE(uemployment,0) as urbanemployment, "
-      		+ "COALESCE(remployment,0) as ruralemployment,COALESCE(uemployee,0) as urbanemployee, COALESCE(remployee,0) as ruralemployee from stopcount inner join urbanpop on true inner join ruralpop on true inner join ruralrac on true inner join ruralwac on true inner join urbanrac on true inner join urbanwac on true";     
-     }
-     else
-     {
-         querytext = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select id, agencyid, "+column+", location from "
-           		+ "gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"' and "+geocriteria1+"='"+geoid+"'), census as (select population"+popYear+" as population, poptype,block.blockid from "
-           		+ "census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' and "+geocriteria2 +"='"+geoid+"' group by block.blockid), urbanpop as "
-           		+ "(select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'),"
-           		+ "censusemployment  as (select C000_"+popYear+"  as employment,poptype from census left join  lodes_rac_projection_block using(blockid)),"
-           		+ "censusemployee as (select C000 as employee,poptype from census left join lodes_blocks_wac using (blockid)),"
-           		+ "urbanrac as (select COALESCE(sum(employment),0) uemployment from censusemployment where poptype = 'U')," 
-           	    + "ruralrac as (select COALESCE(sum(employment),0) remployment from censusemployment where poptype = 'R'),"
-           	    + "urbanwac as (select COALESCE(sum(employee),0) uemployee from censusemployee where poptype = 'U')," 
-           	    + "ruralwac as (select COALESCE(sum(employee),0) remployee from censusemployee where poptype = 'R'),"	
-           		+ "stopcount as (select count(stops.id) as stopscount from stops) "
-           		+ "select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as ruralpop ,COALESCE(uemployment,0) as urbanemployment, "
-           		+ "COALESCE(remployment,0) as ruralemployment,COALESCE(uemployee,0) as urbanemployee, COALESCE(remployee,0) as ruralemployee from stopcount inner join urbanpop on true inner join ruralpop on true inner join ruralrac on true inner join ruralwac on true inner join urbanrac on true inner join urbanwac on true";     
+	  
+	  String clause1="and "+geocriteria1+"='"+geoid+"'";
+	  String clause2="and "+geocriteria2+"='"+geoid+"'";
+	  if(geotype==-1||geotype==3) {
+		  clause1="";
+		  clause2="";
+      }
+		querytext = "with"
+			+ " aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'),"
+			+ " stops as (select id, agencyid, "+column+", location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"' "+clause1+"),"
+			+ " census as (select population"+popYear+" as population,poptype,block.blockid,landarea from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' "+clause2+" group by block.blockid),"
+			+ " urbanpop as (select COALESCE(sum(population),0) upop, sum(landarea) as landarea from census where poptype = 'U'), "
+			+ " ruralpop as (select COALESCE(sum(population),0) rpop, sum(landarea) as landarea from census where poptype = 'R'),"
+			+ " censusemployment  as (select C000_"+popYear+"  as employment,poptype from census left join  lodes_rac_projection_block using(blockid)),"
+			+ " censusemployee as (select C000 as employee,poptype from census left join lodes_blocks_wac using (blockid)),"
+			+ " urbanrac as (select COALESCE(sum(employment),0) uemployment from censusemployment where poptype = 'U')," 
+			+ " ruralrac as (select COALESCE(sum(employment),0) remployment from censusemployment where poptype = 'R'),"
+			+ " urbanwac as (select COALESCE(sum(employee),0) uemployee from censusemployee where poptype = 'U')," 
+			+ " ruralwac as (select COALESCE(sum(employee),0) remployee from censusemployee where poptype = 'R'),"	
+			+ " stopcount as (select count(stops.id) as stopscount from stops) "
+			+ " select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as ruralpop ,COALESCE(uemployment,0) as urbanemployment, COALESCE(remployment,0) as ruralemployment,COALESCE(uemployee,0) as urbanemployee, COALESCE(remployee,0) as ruralemployee, urbanpop.landarea as urbanlandarea, ruralpop.landarea as rurallandarea "
+			+ " from stopcount"
+			+ " inner join urbanpop on true inner join ruralpop on true inner join ruralrac on true inner join ruralwac on true inner join urbanrac on true inner join urbanwac on true";     
           
-     }
-      long[] results = new long[7];
+      long[] results = new long[9];
       try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(querytext);        
@@ -1832,7 +1822,9 @@ public class PgisEventManager {
         	results[3] = rs.getLong("urbanemployment"); 
         	results[4] = rs.getLong("ruralemployment"); 
         	results[5] = rs.getLong("urbanemployee"); 
-        	results[6] = rs.getLong("ruralemployee");    
+			results[6] = rs.getLong("ruralemployee");
+			results[7] = rs.getLong("urbanlandarea");
+			results[8] = rs.getLong("rurallandarea");
         }
         rs.close();
         stmt.close();        
