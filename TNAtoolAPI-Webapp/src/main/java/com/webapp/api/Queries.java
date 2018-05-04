@@ -3841,6 +3841,8 @@ public class Queries {
 		response.RracWithinX = String.valueOf(stopspop[4]);
 		response.UwacWithinX = String.valueOf(stopspop[5]);
 		response.RwacWithinX = String.valueOf(stopspop[6]);
+		response.ULandareaWithinX = String.valueOf(stopspop[7]);
+		response.RLandareaWithinX = String.valueOf(stopspop[8]);
 		response.PopServed = String.valueOf(Math
 				.round((10000.00 * (stopspop[1] + stopspop[2]) / instance
 						.getPopulation())) / 100.00);
