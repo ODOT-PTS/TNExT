@@ -3261,7 +3261,7 @@ public class PgisEventManager {
 		mainquery += "with "
 		        + " aids as (SELECT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY a.defaultid), "
 				+ "agencies as (select id, name, fareurl, phone, url, feedname, version, startdate, enddate, publishername, publisherurl"
-				+ "		from gtfs_agencies agencies inner join aids on agencies.defaultid = aids.aid "
+				+ "		from gtfs_agencies agencies inner join aids on agencies.id = aids.aid "
 				+ "		inner join gtfs_feed_info info on agencies.defaultid=info.defaultid), "
 				+ "stops as (select map.agencyid as aid, coalesce((count(id))::int, -1) as stops, coalesce((count(distinct placeid))::int,-1) as places, "
 				+ "		coalesce((count(distinct left(blockid, 5)))::int,-1) as counties, coalesce((count(distinct regionid))::int,-1) as odotregions, "
