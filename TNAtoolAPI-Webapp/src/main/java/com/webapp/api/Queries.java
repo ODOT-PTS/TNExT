@@ -5128,12 +5128,16 @@ public class Queries {
 		
 		return PgisEventManager.daterange(dbindex);
 
-	}		
+	}
+
 	@GET
 	@Path("/Agencyget")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
-	public Object getAgency(@QueryParam("dbindex") Integer dbindex)
+	public Object getAgency(
+		@QueryParam("dbindex") Integer dbindex,
+		@QueryParam("username") String username
+	)
 			throws SQLException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
 		return PgisEventManager.Agencyget(dbindex, username);
