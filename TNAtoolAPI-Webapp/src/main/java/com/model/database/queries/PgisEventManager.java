@@ -6567,7 +6567,35 @@ public class PgisEventManager {
 			}
 			return r;	
 		}
-		public static Map<String,Agencyselect> Agencyget( int dbindex) 
+
+		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			Connection connection = db.getConnection();
+			String query = ""
+			+ " INSERT INTO user_selected_agencies (username, agency_id, hidden) ("
+			+ "   SELECT ?::text AS username, a.id, CASE WHEN id = ANY(?) THEN true ELSE false END AS hidden "
+			+ "   FROM gtfs_agencies AS a "
+			+ "   LEFT OUTER JOIN user_selected_agencies AS b"
+			+ "     ON (b.username = ? AND a.id = b.agency_id)"
+			+ "   WHERE b.hidden = true OR a.id = ANY(?)"
+			+ " ) ON CONFLICT (username, agency_id) DO UPDATE SET hidden = EXCLUDED.hidden"
+			+ "";
+			try {
+				PreparedStatement ps = connection.prepareStatement(query);
+				ps.setString(1, username);
+				ps.setArray(2, connection.createArrayOf("VARCHAR", agency_ids));
+				ps.setString(3, username);
+				ps.setArray(4, connection.createArrayOf("VARCHAR", agency_ids));
+				logger.info("setHiddenAgencies query:\n "+ ps.toString());
+				ps.executeUpdate();
+				ps.close();
+			} catch ( Exception e ) {
+				logger.error(e);
+			}
+
+			return Agencyget(dbindex, username);
+		}
+
 				throws FactoryException, TransformException	{
 			Connection  connection = makeConnection(dbindex);
 			String query="";
