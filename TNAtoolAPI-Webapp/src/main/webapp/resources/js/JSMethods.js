@@ -1117,3 +1117,65 @@ function drawCircleAroundCoordinate(latLng) {
 	that._fireCreatedEvent();
 	that.disable();
 }
+
+////////////////////////////
+// Agency picker 2
+////////////////////////////
+
+function getAgencies() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(d) {
+			buildAgencyPicker(d);
+		}
+	});
+}
+
+function buildAgencyPicker(agencies) {
+	var elem = $('#agencypicker');
+	elem.empty();
+	var ul = $('<ul/>').appendTo(elem);
+	$.each(agencies, function(key, agency){
+		console.log(key, agency);
+		var li = $('<li/>').appendTo(ul);
+		$('<input type="checkbox" name="agency" />').val(agency.AgencyId).attr('checked', !agency.Hidden).appendTo(li);
+		$('<span />').text(agency.Agencyname).appendTo(li);
+	});
+}
+
+function setHiddenAgencies(agencies) {
+	console.log("setHiddenAgencies:", agencies);
+	var hiddenAgencies = $("#agencypicker input[name=agency]:checkbox:not(:checked)").map(function(i){return this.value}).get();
+	$.ajax({
+		type: 'GET',
+		// datatype: 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
+		async: false,
+		success: function(item){
+			alert("Successfully saved the hidden agency list.");
+			window.location.reload();
+		},
+		error: function() {
+			alert("There was an error setting the hidden agency list.");
+		}	
+	});
+}
+
+function showAgencyPicker() {
+	getAgencies();
+	$('#agencypicker').dialog( {
+		width: 600,
+		modal: true,
+		buttons: {
+		  "Submit": function() {
+			setHiddenAgencies();
+			$( this ).dialog( "close" );
+		  },
+		  Cancel: function() {
+			$( this ).dialog( "close" );
+		  }
+		}
+	});
+}
