@@ -6596,32 +6596,30 @@ public class PgisEventManager {
 			return Agencyget(dbindex, username);
 		}
 
+		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
 				throws FactoryException, TransformException	{
 			Connection  connection = makeConnection(dbindex);
 			String query="";
 			Statement stmt = null;
 		
 		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
-			query ="select id,name,defaultid from gtfs_agencies";
-		
+			// query ="select id,name,defaultid from gtfs_agencies";
+			query = "SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
+
 			try {
 		        stmt = connection.createStatement();
 		        ResultSet rs = stmt.executeQuery(query); 
-		     
-		        
 		        while ( rs.next() ) {
 		        	Agencyselect a=new Agencyselect();
 		        	a.AgencyId=rs.getString("id");
 		        	a.Agencyname=rs.getString("name");
-		        	a.DefaultId=rs.getString("defaultid");
+					a.DefaultId=rs.getString("defaultid");
+					a.Hidden=rs.getBoolean("hidden");
 		        	  r.put(a.Agencyname, a);     
 		        }
 				 rs.close();
 				 stmt.close(); 
 				 dropConnection(connection);
-	 
-		
-			
 			}
 			 catch ( Exception e ) {
 				 e.printStackTrace();
