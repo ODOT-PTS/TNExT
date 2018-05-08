@@ -3258,7 +3258,8 @@ public class PgisEventManager {
 		AgencySR instance;
 		Connection connection = makeConnection(dbindex);		
 		String mainquery ="";
-		mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
+		mainquery += "with "
+		        + " aids as (SELECT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY a.defaultid), "
 				+ "agencies as (select id, name, fareurl, phone, url, feedname, version, startdate, enddate, publishername, publisherurl"
 				+ "		from gtfs_agencies agencies inner join aids on agencies.defaultid = aids.aid "
 				+ "		inner join gtfs_feed_info info on agencies.defaultid=info.defaultid), "
