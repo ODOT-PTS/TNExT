@@ -1360,18 +1360,18 @@ $mylist
 		    $.ajax({
 		    	type: 'GET',
 				datatype: 'json',
-				url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex,
-				async: false,
-				
+				url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+				async: false,				
 		    	success: function(item){
 		    		console.log(item)
 		    		var na=0;
-		    		$.each(item, function(i,item){
-						if(item.feedname!='Overlap')
-							{
-		    	    	feedmenucontent+= '<tr><input type="checkbox"  name="feed" value='+item.AgencyId+'>'+item.Agencyname+'<br></tr>' ;
-							}
-		    	na[item.AgencyId]=item.Agencyname;
+		    		$.each(item, function(i,item) {
+						var checked='checked="checked"';
+						if (item.Hidden) {
+							checked="";
+						}
+						feedmenucontent+= '<tr><input type="checkbox" '+checked+' name="feed" value='+item.AgencyId+'>'+item.Agencyname+'<br></tr>';
+				    	na[item.AgencyId]=item.Agencyname;
 		    		});
 		    		
 		    	 feedmenucontent+='<tr><br></tr></th></table></div>';
@@ -1393,26 +1393,20 @@ $mylist
 		          maxWidth: 4000,
 		          buttons: {
 		              "Submit": function() {
-		            	  var allVals = [];
-		   		       var feeds= $("input[name=feed]:checked").map(
-		   		            		     function () {return this.value;}).get().join(",");   
-		   		    
-		   		         console.log(allVals)
-		   		       
+						var allVals = [];
+						var hiddenAgencies = $("input[name=feed]:checkbox:not(:checked)").map(function(i){return this.value}).get();		   		       
 		   		      $.ajax({
 					    	type: 'GET',
 							datatype: 'json',
-							url : '/TNAtoolAPI-Webapp/queries/transit/feedselect?&feeds='+feeds,
+							url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
 							async: false,
-							
 					    	success: function(item){
-					    		alert("selected feeds:"+feeds+"Count"+item)
-					    		
-					    		
-					    
-					    
-					    	}			
-					   
+								alert("Successfully saved the hidden agency list.");
+								window.location.reload();
+							},
+							error: function() {
+								alert("There was an error setting the hidden agency list.");
+							}	
 					    });
 		   		         
 		              },

@@ -3258,9 +3258,10 @@ public class PgisEventManager {
 		AgencySR instance;
 		Connection connection = makeConnection(dbindex);		
 		String mainquery ="";
-		mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
+		mainquery += "with "
+		        + " aids as (SELECT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY a.defaultid), "
 				+ "agencies as (select id, name, fareurl, phone, url, feedname, version, startdate, enddate, publishername, publisherurl"
-				+ "		from gtfs_agencies agencies inner join aids on agencies.defaultid = aids.aid "
+				+ "		from gtfs_agencies agencies inner join aids on agencies.id = aids.aid "
 				+ "		inner join gtfs_feed_info info on agencies.defaultid=info.defaultid), "
 				+ "stops as (select map.agencyid as aid, coalesce((count(id))::int, -1) as stops, coalesce((count(distinct placeid))::int,-1) as places, "
 				+ "		coalesce((count(distinct left(blockid, 5)))::int,-1) as counties, coalesce((count(distinct regionid))::int,-1) as odotregions, "
@@ -6567,33 +6568,59 @@ public class PgisEventManager {
 			}
 			return r;	
 		}
-		public static Map<String,Agencyselect> Agencyget( int dbindex) 
+
+		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			Connection connection = db.getConnection();
+			String query = ""
+			+ " INSERT INTO user_selected_agencies (username, agency_id, hidden) ("
+			+ "   SELECT ?::text AS username, a.id, CASE WHEN id = ANY(?) THEN true ELSE false END AS hidden "
+			+ "   FROM gtfs_agencies AS a "
+			+ "   LEFT OUTER JOIN user_selected_agencies AS b"
+			+ "     ON (b.username = ? AND a.id = b.agency_id)"
+			+ "   WHERE b.hidden = true OR a.id = ANY(?)"
+			+ " ) ON CONFLICT (username, agency_id) DO UPDATE SET hidden = EXCLUDED.hidden"
+			+ "";
+			try {
+				PreparedStatement ps = connection.prepareStatement(query);
+				ps.setString(1, username);
+				ps.setArray(2, connection.createArrayOf("VARCHAR", agency_ids));
+				ps.setString(3, username);
+				ps.setArray(4, connection.createArrayOf("VARCHAR", agency_ids));
+				logger.info("setHiddenAgencies query:\n "+ ps.toString());
+				ps.executeUpdate();
+				ps.close();
+			} catch ( Exception e ) {
+				logger.error(e);
+			}
+
+			return Agencyget(dbindex, username);
+		}
+
+		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
 				throws FactoryException, TransformException	{
 			Connection  connection = makeConnection(dbindex);
 			String query="";
 			Statement stmt = null;
 		
 		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
-			query ="select id,name,defaultid from gtfs_agencies";
-		
+			// query ="select id,name,defaultid from gtfs_agencies";
+			query = "SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
+
 			try {
 		        stmt = connection.createStatement();
 		        ResultSet rs = stmt.executeQuery(query); 
-		     
-		        
 		        while ( rs.next() ) {
 		        	Agencyselect a=new Agencyselect();
 		        	a.AgencyId=rs.getString("id");
 		        	a.Agencyname=rs.getString("name");
-		        	a.DefaultId=rs.getString("defaultid");
+					a.DefaultId=rs.getString("defaultid");
+					a.Hidden=rs.getBoolean("hidden");
 		        	  r.put(a.Agencyname, a);     
 		        }
 				 rs.close();
 				 stmt.close(); 
 				 dropConnection(connection);
-	 
-		
-			
 			}
 			 catch ( Exception e ) {
 				 e.printStackTrace();

@@ -5128,33 +5128,36 @@ public class Queries {
 		
 		return PgisEventManager.daterange(dbindex);
 
-	}		
+	}
+
 	@GET
 	@Path("/Agencyget")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
-	public Object getAgency(@QueryParam("dbindex") Integer dbindex)
+	public Object getAgency(
+		@QueryParam("dbindex") Integer dbindex,
+		@QueryParam("username") String username
+	)
 			throws SQLException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
-		
-		return PgisEventManager.Agencyget(dbindex);
-
-	}		
-	 //Sets a global variable with string of feeds selected
-    @SuppressWarnings("null")
-	@Path("/feedselect")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-			MediaType.TEXT_XML })
-	public static Object getfeeds(@QueryParam("feeds") String feeds)
-			throws SQLException, NoSuchFieldException, SecurityException,
-			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
-	Feed name = new Feed();
-	name.a=feeds;
-	String[] feedcount=name.a.split(",");
-	logger.debug(name.a);
-	name.Len=0;
-	name.Len=feedcount.length;
-	return name.Len;
-
+		return PgisEventManager.Agencyget(dbindex, username);
+	}	
+	
+	@GET
+    @Path("/setHiddenAgencies")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object setHiddenAgencies(
+		@QueryParam("dbindex") Integer dbindex,
+		@QueryParam("agencies") String agencies,
+		@QueryParam("username") String username
+	) throws SQLException, NoSuchFieldException, SecurityException,
+	IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
+		// agencies = (agencies == null ? "" : String.valueOf(agencies));
+		String[] hiddenAgencies = agencies.split(",");
+		logger.info("username: "+username);
+		for (String a: hiddenAgencies) {           
+			logger.info("hiding agency: " + a);
+		}
+		return PgisEventManager.setHiddenAgencies(dbindex, username, hiddenAgencies);
 	}	
 }
