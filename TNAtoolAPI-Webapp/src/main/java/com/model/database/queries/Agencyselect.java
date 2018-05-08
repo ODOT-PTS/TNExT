@@ -15,5 +15,9 @@ public class Agencyselect {
 	
 	@XmlAttribute
 	@JsonSerialize
-    public String Agencyname;
+	public String Agencyname;
+	
+	@XmlAttribute
+	@JsonSerialize
+	public Boolean Hidden;
 }
