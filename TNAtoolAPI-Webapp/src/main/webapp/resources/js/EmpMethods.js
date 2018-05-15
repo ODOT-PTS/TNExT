@@ -84,8 +84,7 @@ function racWacAjax() {
 						+ '&L='
 						+ $('#LOS').val()
 						+ '&dbindex='
-						+ dbindex
-						+ '&username=' + getSession(),
+						+ dbindex,
 				async : true,
 				success : function(d) {
 					docMetadata = d.metadata;
@@ -110,7 +109,7 @@ function racWacAjax() {
 										+ '&L='
 										+ $('#LOS').val()
 										+ '&dbindex='
-										+ dbindex + '&username=' + getSession(),
+										+ dbindex,
 								async : true,
 								success : function(d) {
 									docMetadata = d.metadata;
@@ -146,8 +145,7 @@ function racAjax() {
 						+ '&L='
 						+ $('#LOS').val()
 						+ '&dbindex='
-						+ dbindex
-						+ '&username=' + getSession(),
+						+ dbindex,
 				async : true,
 				success : function(d) {
 					docMetadata = d.metadata;
@@ -181,8 +179,7 @@ function wacAjax() {
 						+ '&L='
 						+ $('#LOS').val()
 						+ '&dbindex='
-						+ dbindex
-						+ '&username=' + getSession(),
+						+ dbindex,
 				async : true,
 				success : function(d) {
 					docMetadata = d.metadata;				

@@ -1129,7 +1129,7 @@ $mylist
      },
 	"json_data" : {
 		"ajax" : {
-            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex+'&username='+getSession(),
+            "url" : "/TNAtoolAPI-Webapp/queries/transit/menu?day="+w_qstringd+"&dbindex="+dbindex,
             "type" : "get",	                
             "success" : function(ops) {  
             	
@@ -1360,7 +1360,7 @@ $mylist
 		    $.ajax({
 		    	type: 'GET',
 				datatype: 'json',
-				url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+				url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex,
 				async: false,				
 		    	success: function(item){
 		    		console.log(item)
@@ -1398,7 +1398,7 @@ $mylist
 		   		      $.ajax({
 					    	type: 'GET',
 							datatype: 'json',
-							url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
+							url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&agencies='+hiddenAgencies.join(","),
 							async: false,
 					    	success: function(item){
 								alert("Successfully saved the hidden agency list.");
@@ -1535,7 +1535,7 @@ $mylist
 					var qstringx3 = '2.0'; // park and ride search radius
 					var qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 					var keyName = setDates(qstringd);
-			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear/*+'&username='+getSession()*/);
+			    	window.open('/TNAtoolAPI-Webapp/HubSreport.html?&x1='+qstringx+'&x2='+qstringx2+ '&x3='+qstringx3+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear);
 			    }else if (casestring=="KTHR"){
 				    var d = new Date();
 					var qstringx = '0.08';	// clustering radius
@@ -1840,7 +1840,7 @@ function updateListDialog(agenciesIds){
 	              "South Clackamas Transportation District",
 	              "Warm Springs Transit"];
 	
-	if (!w_qstringd && getSession()=='admin'){
+	if (!w_qstringd) {
 		var html = 	"<br><br><p style='margin-left:3%'><b>Agencies with no GTFS feed:</b></p>";
 		html +=	"<ul style='margin-bottom: 20px;'>";
 		for(var i=0; i<noGTFS.length; i++){

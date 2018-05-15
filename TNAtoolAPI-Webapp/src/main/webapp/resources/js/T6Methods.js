@@ -139,7 +139,7 @@ function toggleCheckbox(checkbox){
 		$.ajax({
 			type: 'GET',
 			datatype: 'json',
-			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?emp?&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex+'&username='+getSession(),
+			url: '/TNAtoolAPI-Webapp/queries/transit/titlevi?emp?&report=' + $("#reportType").val() + '&day=' + w_qstringd + '&radius='+ $('#Sradius').val() * 1609.34 + '&L=' + $('#LOS').val() +'&dbindex='+dbindex,
 			async: true,
 			success: function(d){// making a hashmap of the query results.
 				docMetadata = d.metadata;

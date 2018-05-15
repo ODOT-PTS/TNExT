@@ -127,7 +127,7 @@ function openConGraph() {
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/agencyCentriods?&dbindex='
-				+ dbindex + '&username=' + getSession(),
+				+ dbindex,
 		async : false,
 		success : function(d) {
 			$.each(d.list, function(index, item) {
@@ -149,8 +149,7 @@ function callBack(agencyCentroids, dbindex) {
 					    + '&x=' + gap * 1609.3
 						+ '&key=' + key
 						+ '&day=' + day
-						+ '&dbindex=' + dbindex
-						+ '&username=' + getSession(),
+						+ '&dbindex=' + dbindex,
 				async : true,
 				success : function(d) {
 					localStorage.setItem('myStorage', JSON.stringify(d));
@@ -339,8 +338,7 @@ function callBack(agencyCentroids, dbindex) {
 							.ajax({
 								type : 'GET',
 								datatype : 'json',
-								url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
-										+ dbindex + '&username=' + getSession(),
+								url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='+dbindex,
 								async : false,
 								success : function(d) {
 									$.each(d, function(index, item) {
@@ -783,8 +781,7 @@ function getConnections(input){
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/getConnections?&dbindex='+dbindex
-		+ '&radius='+ gap*1609.3 +'&date=' 
-		+ day + '&username=' + getSession() 
+		+ '&radius='+ gap*1609.3 +'&date=' + day
 		+ '&aid1=' + agencyIDs[0] + '&aid2=' + agencyIDs[1],
 		async : true,
 		beforeSend: function(){

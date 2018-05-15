@@ -335,7 +335,7 @@ function showOnMapReport(lat, lon, date, x, losRadius){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&losRadius='+losRadius+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/onmapreport?&lat='+lat+'&lon='+lon+'&x='+x+'&day='+date+'&dbindex='+dbindex+'&losRadius='+losRadius,
 		async: true,
 		success: function(data){
 			//------------ populating "Transit Agencies" tab -------------
@@ -736,7 +736,7 @@ function nearbyStops(markerId, countyId, lat ,lon, radius){
 		datatype: 'json',
 		url: 	'/TNAtoolAPI-Webapp/queries/transit/pnrstopsroutes?&pnrId=' + markerId +
 				'&pnrCountyId=' + countyId + '&lat=' + lat +
-				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex + '&username=' + getSession(),
+				'&lng=' + lon + '&radius=' + PnrRadius + '&dbindex=' + dbindex,
 		async: true,
 		success: function(data){			
 			var tmpPnrRouteCluster = new L.FeatureGroup();

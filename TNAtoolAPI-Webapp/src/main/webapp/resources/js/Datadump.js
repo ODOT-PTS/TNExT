@@ -122,8 +122,7 @@ function generateDatadump() {
 		$.ajax({
 			type : 'GET',
 			datatype : 'json',
-			url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
-					+ dbIndex + '&username=' + getSession(),
+			url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='+ dbIndex,
 			async : false,
 			success : function(d) {
 				$.each(d, function(index,item){
@@ -143,14 +142,14 @@ function runAjaxAreas(ind,areaType,fileName){
 	console.log('/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
 	+ '&x='+sRadius+'&n='+keyName+'&day='+dates+'&key='+ key
 	+ '&dbindex=' + $('#dbselect').val() + '&l=' + los + '&popYear='+popYear
-	+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null);
+	+ '&geotype=' + -1 + '&geoid=' + null);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type='+areaType+'&areaid='+areaIDs[ind]
 			+ '&x='+sRadius+'&n='+keyName+'&day='+dates+'&key='+ key
 			+ '&dbindex=' + $('#dbselect').val() + '&l=' + los + '&popYear='+popYear
-			+'&username='+getSession() + '&geotype=' + -1 + '&geoid=' + null,
+			+ '&geotype=' + -1 + '&geoid=' + null,
 		async: true,
 		success: function(d){
 			if (areaType == 4) // area names of some of the ODOT regions are null, thus they are replaced by the region ID. 
@@ -210,16 +209,16 @@ function runAjaxAgency(ind, fileName){
 		return false;
 	console.log('/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
 				+ agencies[ind] + '&day=' + dates + '&key=' + key + '&popYear='
-				+ popYear + '&areaId=null&type=' + 0 + '&username='
-				+ getSession() + '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
+				+ popYear + '&areaId=null&type=' + 0 
+				+ '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
 				+ '&geoid=null&dbindex=' + $('#dbselect').val());
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
 				+ agencies[ind] + '&day=' + dates + '&key=' + key + '&popYear='
-				+ popYear + '&areaId=null&type=' + 0 + '&username='
-				+ getSession() + '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
+				+ popYear + '&areaId=null&type=' + 0
+				+ '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
 				+ '&geoid=null&dbindex=' + $('#dbselect').val(),
 		async : false,
 		success : function(d) {

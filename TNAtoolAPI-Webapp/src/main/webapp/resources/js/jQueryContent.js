@@ -225,19 +225,6 @@ function getVersion(){
 	
 	return version;
 }
-function getSession(){
-	var username = "admin";
-	$.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/FileUpload?getSessionUser=gsu",
-        dataType: "json",
-        async: false,
-        success: function(d) {
-        	username = d.username;
-        }
-	});
-	return username;
-}
 
 function dateRemove(e, d){
 	$(e).remove();
@@ -544,7 +531,7 @@ function go(key){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex,
 		async: false,
 		success: function(d){
 			startDateUnion = d.Startdate;
@@ -666,7 +653,7 @@ function gos(key){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&agency='+w_qstring+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&agency='+w_qstring,
 		async: false,
 		success: function(d){
 			startDate = d.Startdate;

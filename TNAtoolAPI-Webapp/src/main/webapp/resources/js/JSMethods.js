@@ -673,24 +673,6 @@ function addDate(date) {
 }
 
 /**
- * returns user's session
- * @returns {String}
- */
-function getSession() {
-	var username = "admin";
-	$.ajax({
-		type : "GET",
-		url : "/TNAtoolAPI-Webapp/FileUpload?getSessionUser=gsu",
-		dataType : "json",
-		async : false,
-		success : function(d) {
-			username = d.username;
-		}
-	});
-	return username;
-}
-
-/**
  * removes data, d, and its associated html tag, e,  from datepicker widget
  * @param e
  * @param d
@@ -1126,7 +1108,7 @@ function getAgencies() {
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
-		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex,
 		success : function(d) {
 			buildAgencyPicker(d);
 		}
@@ -1151,7 +1133,7 @@ function setHiddenAgencies(agencies) {
 	$.ajax({
 		type: 'GET',
 		// datatype: 'json',
-		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
+		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&agencies='+hiddenAgencies.join(","),
 		async: false,
 		success: function(item){
 			alert("Successfully saved the hidden agency list.");

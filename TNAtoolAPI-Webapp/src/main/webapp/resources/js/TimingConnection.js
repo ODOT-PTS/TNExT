@@ -42,7 +42,7 @@ function getAgencies(input) {
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
-				+ selectedDB + '&username=' + getSession(),
+				+ selectedDB,
 		async : false,
 		success : function(d) {
 			$.each(d, function(index, item) {

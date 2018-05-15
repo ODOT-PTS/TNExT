@@ -777,7 +777,7 @@ function updateFeed(index){
 function updatenext(i,db){
 	$.ajax({
         type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateNext?&feed="+currentFiles[i]+"&db="+db+"&agency="+currentAgencies[i]+"&username="+"admin",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateNext?&feed="+currentFiles[i]+"&db="+db+"&agency="+currentAgencies[i],
         dataType: "text",
         async: true,
         success: function(d) {
@@ -808,7 +808,7 @@ function runUpdates(index){
 	
 	$.ajax({
 	    type: "GET",
-	    url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateFeeds?&db="+db+"&username=admin",
+	    url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateFeeds?&db="+db,
 	    dataType: "json",
 	    async: false,
 	    success: function(b) {

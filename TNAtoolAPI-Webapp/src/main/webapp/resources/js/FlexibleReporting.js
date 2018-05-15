@@ -265,8 +265,7 @@ function flexRepDialog() {
 	$.ajax({
 			type : 'GET',
 			datatype : 'json',
-			url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
-					+ dbindex + '&username=' + getSession(),
+			url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex=' + dbindex,
 			async : false,
 			success : function(d) {
 				$.each(d, function(index, item) {
