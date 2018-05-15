@@ -386,7 +386,6 @@ public class Queries {
 	 * @param agencyIDs
 	 * @param flag
 	 * @param dbName
-	 * @param username
 	 * @return String - zipfile path
 	 * @throws SQLException
 	 * @throws IOException
@@ -401,8 +400,7 @@ public class Queries {
 			@QueryParam("flag") String flag,
 			@QueryParam("date") String date,
 			@QueryParam("dbName") String dbName,
-			@QueryParam("dbIndex") Integer dbIndex,
-			@QueryParam("username") String username) throws SQLException,
+			@QueryParam("dbIndex") Integer dbIndex) throws SQLException,
 			IOException, ZipException, InterruptedException {
 
 		String[] agencies = agencyIDs.split(",");
@@ -734,7 +732,6 @@ public class Queries {
 	 * @param countyId
 	 * @param radius
 	 * @param dbindex
-	 * @param username
 	 * @return PnrInCountyList
 	 * @throws JSONException
 	 */
@@ -745,8 +742,7 @@ public class Queries {
 	public Object pnrsInCounty(@QueryParam("key") double key,
 			@QueryParam("countyId") String countyId,
 			@QueryParam("radius") double radius,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -871,7 +867,6 @@ public class Queries {
 	 * @param x - search radius
 	 * @param dbindex  - database index
 	 * @param losRadius - search radius for population served at level of service
-	 * @param username - session
 	 * @return MapDisplay
 	 * @throws JSONException
 	 * @throws SQLException
@@ -886,8 +881,7 @@ public class Queries {
 			@QueryParam("day") String date,
 			@QueryParam("x") double x, 
 			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("losRadius") String losRadius,
-			@QueryParam("username") String username
+			@QueryParam("losRadius") String losRadius
 			) throws JSONException,
 			SQLException {
 		if (Double.isNaN(x) || x <= 0) {
@@ -990,7 +984,6 @@ public class Queries {
 	 * @param lng - longitude of the P&R centroid
 	 * @param radius - search radius
 	 * @param dbindex
-	 * @param username
 	 * @return MapPnrRecord
 	 * @throws JSONException
 	 * @throws SQLException
@@ -1004,8 +997,7 @@ public class Queries {
 			@QueryParam("lat") Double lat, 
 			@QueryParam("lng") Double lng,
 			@QueryParam("radius") Double radius,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username
+			@QueryParam("dbindex") Integer dbindex
 			) throws JSONException,
 			SQLException {
 
@@ -1069,7 +1061,6 @@ public class Queries {
 	 * Generates a list of routes, sorted by agency ID, for the on-map floating menu
 	 * @param date
 	 * @param dbindex
-	 * @param username
 	 * @return AgencyRouteList
 	 * @throws JSONException
 	 */
@@ -1080,8 +1071,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getmenu(
 			@QueryParam("day") String date,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username
+			@QueryParam("dbindex") Integer dbindex
 			) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = 1;
@@ -1475,7 +1465,6 @@ public class Queries {
 	 * @param dbindex
 	 * @param areaid - ID of the geographical area to filter the service
 	 * @param type - type of the geographical area
-	 * @param username - user session
 	 * @param geoid - ID of the geographical area to be intersected with urban areas for filtering service
 	 * @param geotype - type of the geographical area to be intersected with urban areas for filtering service
  	 * @return AgencyXR
@@ -1493,7 +1482,6 @@ public class Queries {
 			@QueryParam("l") Integer LOS,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("areaId") String areaid, @QueryParam("type") int type,
-			@QueryParam("username") String username,
 			@QueryParam("geoid") String geoid,
 			@QueryParam("geotype") int geotype) throws JSONException,
 			SQLException {
@@ -1622,7 +1610,6 @@ public class Queries {
 	 * @param popYear - population projection year
 	 * @param date
 	 * @param dbindex
-	 * @param username
 	 * @param geotype - type of the geographical area to intersect with urban areas
 	 * @param geoid - ID of the geographical area to intersect with urban areas
 	 * @param rc - integer to distinguish rural and urban stops
@@ -1644,7 +1631,6 @@ public class Queries {
 			@QueryParam("popYear") String popYear,
 			@QueryParam("day") String date,
 			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username,
 			@QueryParam("geotype") Integer geotype,
 			@QueryParam("geoid") String geoid,
 			@QueryParam("rc") Integer rc, 
@@ -1826,7 +1812,6 @@ public class Queries {
 	 * @param key - unique key to update progress
 	 * @param dbindex - database index
 	 * @param popYear - population projection year
-	 * @param username - user session
 	 * @param areaId - ID of the geographical area to filter service
 	 * @param type - type of the geographical area to filter service
 	 * @param geotype - type of the geographical area to intersect with urban areas
@@ -1841,7 +1826,6 @@ public class Queries {
 	public Object getASR(@QueryParam("key") double key,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("popYear") String popYear,
-			@QueryParam("username") String username,
 			@QueryParam("areaid") String areaId,
 			@QueryParam("type") Integer type,
 			@QueryParam("geotype") Integer geotype,
@@ -1916,7 +1900,6 @@ public class Queries {
 	 * 
 	 * @param agencyId
 	 * @param dbindex
-	 * @param username
 	 * @return RouteListR
 	 * @throws SQLException
 	 */
@@ -1925,8 +1908,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getAgencyRoutes(@QueryParam("agency") String agencyId,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws SQLException {
+			@QueryParam("dbindex") Integer dbindex) throws SQLException {
 		RouteListR response = new RouteListR();
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
@@ -2041,7 +2023,6 @@ public class Queries {
 	 * @param key - unique key to track progress
 	 * @param dbindex - database index
 	 * @param popYear - population projection year
-	 * @param username - user session
 	 * @param areaid - ID of the geographical area to filter stops
 	 * @param type - type of the geographical area to filter stops
 	 * @return RouteListR
@@ -2057,7 +2038,6 @@ public class Queries {
 			@QueryParam("key") double key,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("popYear") String popYear,
-			@QueryParam("username") String username,
 			@QueryParam("areaid") String areaid,
 			@QueryParam("type") Integer type
 			) throws JSONException {
@@ -2353,7 +2333,6 @@ public class Queries {
 	 * @param popYear - population projection year
 	 * @param type - type of the geographical area to filter stops
 	 * @param agency - agency ID
-	 * @param username - user session
 	 * @param popmax - maximum population of urban areas to filter
 	 * @param popmin - minimum population of urban areas to filter
 	 * @param areaid - ID of the geographical area to filter stops
@@ -2374,7 +2353,6 @@ public class Queries {
 			@QueryParam("popYear") String popYear,
 			@QueryParam("type") Integer type,
 			@QueryParam("agency") String agency,
-			@QueryParam("username") String username,
 			@QueryParam("popMax") String popmax,
 			@QueryParam("popMin") String popmin,
 			@QueryParam("areaid") String areaid,
@@ -2433,7 +2411,6 @@ public class Queries {
 	 * @param radius - search radius
 	 * @param L - minimum level of service
 	 * @param dbindex
-	 * @param username
 	 * @return EmpDataList
 	 * @throws JSONException
 	 */
@@ -2446,8 +2423,7 @@ public class Queries {
 			@QueryParam("report") String reportType,
 			@QueryParam("day") String date,
 			@QueryParam("radius") double radius, @QueryParam("L") int L,
-			@QueryParam("dbindex") int dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") int dbindex) throws JSONException {
 		EmpDataList results = new EmpDataList();
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
@@ -2472,7 +2448,6 @@ public class Queries {
 	 * @param radius - search radius
 	 * @param L - minimum level of service
 	 * @param dbindex
-	 * @param username
 	 * @return TitleVIDataList
 	 * @throws JSONException
 	 */
@@ -2483,8 +2458,7 @@ public class Queries {
 	public Object getTitleVIData(@QueryParam("report") String reportType,
 			@QueryParam("day") String date,
 			@QueryParam("radius") double radius, @QueryParam("L") int L,
-			@QueryParam("dbindex") int dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") int dbindex) throws JSONException {
 		TitleVIDataList results = new TitleVIDataList();
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
@@ -2506,7 +2480,6 @@ public class Queries {
 	 * Generates The counties Summary report
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return GeoRList
 	 * @throws JSONException
 	 */
@@ -2515,8 +2488,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getGCSR(@QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -2593,7 +2565,6 @@ public class Queries {
 	 * @param county - ID of the county in which the tracts are to reported
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return GeoRList
 	 * @throws JSONException
 	 */
@@ -2604,8 +2575,7 @@ public class Queries {
 	public Object getGCTSR(
 			@QueryParam("county") String county,
 			@QueryParam("key") double key, 
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username
+			@QueryParam("dbindex") Integer dbindex
 			) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
@@ -2682,7 +2652,6 @@ public class Queries {
 	 * Generates The Census Places Summary report
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return GeoRList
 	 * @throws JSONException
 	 */
@@ -2690,8 +2659,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getGCPSR(@QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -2771,7 +2739,6 @@ public class Queries {
 	 * @param type - type of the geographical area to filter service
 	 * @param dbindex
 	 * @param popYear - population projection year
-	 * @param username
 	 * @param popmax - maximum population of urban areas to report on
 	 * @param popmin - minimum population of urban areas to report on
 	 * @return GeoRList
@@ -2785,7 +2752,6 @@ public class Queries {
 			@QueryParam("key") double key, @QueryParam("type") String type,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("popYear") String popYear,
-			@QueryParam("username") String username,
 			@QueryParam("popMax") Integer popmax
 			,@QueryParam("popMin") Integer popmin) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
@@ -2889,7 +2855,6 @@ public class Queries {
 	 * @param key - unique key to track and update progress
 	 * @param dbindex - database index
 	 * @param popYear - population projection year
-	 * @param username - user session
 	 * @param popmax - maximum population of urban areas to report on
 	 * @param popmin - minimum population of urban areas to report on
 	 * @return GeoXR
@@ -2906,7 +2871,6 @@ public class Queries {
 			@QueryParam("key") double key,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("popYear") String popYear,
-			@QueryParam("username") String username,
 			@QueryParam("popMax") Integer popmax, 
 			@QueryParam("popMin") Integer popmin
 			) throws JSONException {
@@ -3062,7 +3026,6 @@ public class Queries {
 	 * 
 	 * @param agencyId
 	 * @param dbindex
-	 * @param username
 	 * @return
 	 * @throws JSONException
 	 */
@@ -3071,8 +3034,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getAgenStops(@QueryParam("agency") String agencyId,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -3086,7 +3048,6 @@ public class Queries {
 	 * @param key - unique key to track and update progress
 	 * @param type - type of the geographical area to intersect with congressional districts
 	 * @param dbindex
-	 * @param username
 	 * @return response
 	 * @throws JSONException
 	 */
@@ -3096,8 +3057,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getGCDSR(@QueryParam("key") double key,
 			@QueryParam("type") String type,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -3174,7 +3134,6 @@ public class Queries {
 	 * @param key
 	 * @param type
 	 * @param dbindex
-	 * @param username
 	 * @return
 	 * @throws JSONException
 	 */
@@ -3183,8 +3142,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getGORSR(@QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -3324,7 +3282,6 @@ public class Queries {
 	 * @param gap - search radius
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return ClusterRList
 	 * @throws JSONException
 	 */
@@ -3334,8 +3291,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getGURSRd(@QueryParam("gap") double gap,
 			@QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
@@ -3379,7 +3335,6 @@ public class Queries {
 	 * @param gap - search radius (maximum distance that is considered a connection)
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return ClusterRList
 	 * @throws JSONException
 	 */
@@ -3391,8 +3346,7 @@ public class Queries {
 			@QueryParam("agency") String agencyId,
 			@QueryParam("gap") double gap, 
 			@QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username
+			@QueryParam("dbindex") Integer dbindex
 			) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
@@ -3446,7 +3400,6 @@ public class Queries {
 	 * @param gap - search radius (maximum distance that is considered a connection)
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return ClusterRList
 	 * @throws JSONException
 	 */
@@ -3456,8 +3409,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getCTNSR(@QueryParam("gap") double gap,
 			@QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException {
+			@QueryParam("dbindex") Integer dbindex) throws JSONException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) 
 			dbindex = default_dbindex;		
 		if (gap <= 0) 
@@ -3523,7 +3475,6 @@ public class Queries {
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
 	 * @param popYear - population projection year
-	 * @param username
 	 * @return GeoRList
 	 * @throws JSONException
 	 * @throws FactoryException
@@ -3535,8 +3486,7 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getStateSR(@QueryParam("key") double key,
 			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("popYear") String popYear,
-			@QueryParam("username") String username) throws JSONException,
+			@QueryParam("popYear") String popYear) throws JSONException,
 			FactoryException, TransformException {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) 
 			dbindex = default_dbindex;		
@@ -3589,7 +3539,6 @@ public class Queries {
 	 * @param L - minimum level of service 
 	 * @param key - unique key to track and update progress
 	 * @param dbindex
-	 * @param username
 	 * @return GeoXR
 	 * @throws JSONException
 	 * @throws SQLException
@@ -3601,8 +3550,7 @@ public class Queries {
 	public Object getStateXR(@QueryParam("day") String date,
 			@QueryParam("x") double x, @QueryParam("popYear") String popYear,
 			@QueryParam("l") Integer L, @QueryParam("key") double key,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username) throws JSONException,
+			@QueryParam("dbindex") Integer dbindex) throws JSONException,
 			SQLException {
 		if (Double.isNaN(x) || x <= 0) 
 			x = STOP_SEARCH_RADIUS;
@@ -3768,7 +3716,6 @@ public class Queries {
 	 * @param key - unique key to track and update progress
 	 * @param dbindex - database index
 	 * @param popYear - population projection year
-	 * @param username - user session
 	 * @param geoid - ID of the geographical to be intersected with the original area
 	 * @param geotype - type of the geographical to be intersected with the original area
 	 * @return
@@ -3786,7 +3733,6 @@ public class Queries {
 			@QueryParam("key") double key,
 			@QueryParam("dbindex") Integer dbindex,
 			@QueryParam("popYear") String popYear,
-			@QueryParam("username") String username,
 			@QueryParam("geoid") String geoid,
 			@QueryParam("geotype") Integer geotype) throws JSONException {
 		long stopspop[] = new long[20];
@@ -4003,7 +3949,6 @@ public class Queries {
 	 * @param key - unique key to track and update progress
 	 * @param date
 	 * @param dbindex
-	 * @param username
 	 * @return HubsClusterList
 	 * @throws JSONException
 	 * @throws SQLException
@@ -4019,8 +3964,7 @@ public class Queries {
 			@QueryParam("x3") double x3, 
 			@QueryParam("key") double key,
 			@QueryParam("day") String date,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username
+			@QueryParam("dbindex") Integer dbindex
 			) throws JSONException,
 			SQLException {
 		if (popYear == null || popYear.equals("null")) {
@@ -4058,8 +4002,7 @@ public class Queries {
 		}
 
 		// get detailed information on clusters
-		response = getClusterData(y, fulldates, days, dbindex, x2, x3,
-				getUsername(), key, popYear);
+		response = getClusterData(y, fulldates, days, dbindex, x2, x3, key, popYear);
 		return response;
 	}
 
@@ -4072,7 +4015,6 @@ public class Queries {
 	 * @param key - unique key to track and update progress
 	 * @param date
 	 * @param dbindex
-	 * @param username
 	 * @return HubsClusterList
 	 * @throws JSONException
 	 * @throws SQLException
@@ -4088,8 +4030,7 @@ public class Queries {
 			@QueryParam("popYear") String popYear,
 			@QueryParam("key") double key,
 			@QueryParam("day") String date,
-			@QueryParam("dbindex") Integer dbindex,
-			@QueryParam("username") String username
+			@QueryParam("dbindex") Integer dbindex
 			) throws JSONException,
 			SQLException {
 		if (popYear == null || popYear.equals("null")) {
@@ -4151,8 +4092,7 @@ public class Queries {
 		}
 		
 		// get detailed information on key clusters
-		response = getClusterData(h, fulldates, days, dbindex, x2, x3,
-				getUsername(), key, popYear);
+		response = getClusterData(h, fulldates, days, dbindex, x2, x3, key, popYear);
 		return response;
 	}
 
@@ -4216,7 +4156,6 @@ public class Queries {
 	 * @param dbindex
 	 * @param popRadius - population search radius
 	 * @param pnrRadius - park and ride search radius
-	 * @param username - user session
 	 * @param key - unique key to track and update progress
 	 * @param popYear - population projection year
 	 * @return HubsClusterList
@@ -4229,7 +4168,6 @@ public class Queries {
 			final int dbindex,
 			final double popRadius, 
 			final double pnrRadius, 
-			String username,
 			final double key, 
 			final String popYear
 			) throws SQLException {
@@ -4237,7 +4175,7 @@ public class Queries {
 		int progress = 0;
 		setprogVal(key, 5);
 		final HashMap<String, Integer> serviceMap = PgisEventManager
-				.stopFrequency1(null, dates, days, username, dbindex);
+				.stopFrequency1(null, dates, days, getUsername(), dbindex);
 
 		setprogVal(key, 10);
 		int totalLoad = x.entrySet().size();
@@ -4529,7 +4467,6 @@ public class Queries {
 	 * @param x - connection distance
 	 * @param key - unique key to track and update progress
 	 * @param date - selected date in mm/dd/yyyy format
-	 * @param session - user session
 	 * @param dbindex
 	 * @return ConGraphObjSet
 	 * @throws SQLException
@@ -4542,7 +4479,6 @@ public class Queries {
 			@QueryParam("x") Double x,
 			@QueryParam("key") double key,
 			@QueryParam("day") String date,
-			@QueryParam("username") String session,
 			@QueryParam("dbindex") Integer dbindex
 			) throws SQLException {
 		// Setting date
@@ -4559,7 +4495,7 @@ public class Queries {
 
 		// Retrieving list of agencies and putting the IDs into an array.
 		HashMap<String, ConGraphAgency> agencies = SpatialEventManager
-				.getAllAgencies(session, dbindex);
+				.getAllAgencies(getUsername(), dbindex);
 
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
@@ -4567,7 +4503,7 @@ public class Queries {
 		int counter = 1;
 		for (Entry<String, ConGraphAgency> i : agencies.entrySet()) {
 			e = SpatialEventManager.getConGraphObj(i.getKey(),
-					i.getValue().name, fulldate, day, session, x, stmt);
+					i.getValue().name, fulldate, day, getUsername(), x, stmt);
 			response.set.addAll(e);
 			setprogVal(key, (int) Math.floor((counter*100)/totalLoad) );
 			counter++;
@@ -4581,7 +4517,6 @@ public class Queries {
 	 * returns the number of connection of the given length between the two agency on the given date. 
 	 * 
 	 * @param dbindex
-	 * @param username
 	 * @param date
 	 * @param radius
 	 * @param agencyID1
@@ -4595,7 +4530,6 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object getConnections(
 			@QueryParam("dbindex") int dbindex,
-			@QueryParam("username") String username,
 			@QueryParam("date") String date,
 			@QueryParam("radius") double radius,
 			@QueryParam("aid1") String agencyID1,
@@ -4608,7 +4542,7 @@ public class Queries {
 		day = datedays[1][0];
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
-		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'),"
+		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + getUsername() + "'),"
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID1 + "'"
 				+ " 	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day + "= 1 and serviceid_agencyid||serviceid_id "
@@ -4657,7 +4591,6 @@ public class Queries {
 	 * only on coordinate is reported. Otherwise, for agencies like Greyhound
 	 * a simplified graph of with the stops as edges is returned. 
 	 * a
-	 * @param username
 	 * @param dbindex
 	 * @return ConGraphAgencyGraphList
 	 * @throws SQLException
@@ -4667,7 +4600,6 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getAgencyCentroids(
-			@QueryParam("username") String username,
 			@QueryParam("dbindex") Integer dbindex
 			) throws SQLException {
 		// Making connection to DB
@@ -4700,7 +4632,6 @@ public class Queries {
 	
 	/**
 	 * returns hashmap of all agencies
-	 * @param username
 	 * @param dbindex
 	 * @return
 	 * @throws SQLException
@@ -4709,7 +4640,7 @@ public class Queries {
 	@Path("/allAgencies")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
-	public Object getAllAgencies(@QueryParam("username") String username,
+	public Object getAllAgencies(
 			@QueryParam("dbindex") Integer dbindex) throws SQLException {
 		HashMap<String, ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
 		try {
@@ -4763,7 +4694,6 @@ public class Queries {
 	/**
 	 * returns overall calendar range
 	 * @param agency
-	 * @param username
 	 * @param dbindex
 	 * @return StartEndDates
 	 */
@@ -4773,14 +4703,11 @@ public class Queries {
 			MediaType.TEXT_XML })
 	public Object calendarRange(
 			@QueryParam("agency") String agency,
-			@QueryParam("username") String username,
 			@QueryParam("dbindex") Integer dbindex
 			) {
 		if (dbindex == null || dbindex < 0 || dbindex > dbsize - 1) {
 			dbindex = default_dbindex;
 		}
-		if (getUsername() == null)
-			username = "admin";
 		if (agency != null) {
 			if (agency.equals("null") || agency.equals("")
 					|| agency.equals("undefined"))
@@ -4818,7 +4745,6 @@ public class Queries {
 	 * @param date - list of selected dates
 	 * @param areas - IDs of the selected areas
 	 * @param areaType - type of area of interest
-	 * @param username - user session
 	 * @param urbanFilter - flag on whether to filter on urban areas or not
 	 * @param minUrbanPop - minimum population filter for urban areas
 	 * @param maxUrbanPop - maximum population filter for urban areas
@@ -4837,7 +4763,6 @@ public class Queries {
 			@QueryParam("dates") String date,
 			@QueryParam("areas") String areas,
 			@QueryParam("areaType") String areaType,
-			@QueryParam("username") String username,
 			@QueryParam("urbanFilter") Boolean urbanFilter,
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
 			@QueryParam("maxUrbanPop") Integer maxUrbanPop,
@@ -4865,7 +4790,6 @@ public class Queries {
 	 * @param los - minimum level of service defined by user
 	 * @param sradius - population search radius
 	 * @param areaType  - Type of area of interest
-	 * @param username - user session
 	 * @param urbanFilter - flag on whether to filter on urban areas or not
 	 * @param minUrbanPop - minimum population filter for urban areas
 	 * @param maxUrbanPop - maximum population filter for urban areas
@@ -4886,7 +4810,6 @@ public class Queries {
 			@QueryParam("year") String popyear, @QueryParam("los") Integer los,
 			@QueryParam("sradius") Double sradius,
 			@QueryParam("areaType") String areaType,
-			@QueryParam("username") String username,
 			@QueryParam("urbanFilter") Boolean urbanFilter,
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
 			@QueryParam("maxUrbanPop") Integer maxUrbanPop,
@@ -4914,7 +4837,6 @@ public class Queries {
 	 * @param los - minimum level of service defined by user
 	 * @param sradius - population search radius
 	 * @param areaType - type of area of interest
-	 * @param username - user session
 	 * @param urbanFilter - flag on whether to filter on urban areas or not
 	 * @param minUrbanPop - minimum population filter for urban areas
 	 * @param maxUrbanPop - maximum population filter for urban areas
@@ -4941,7 +4863,6 @@ public class Queries {
 			@QueryParam("year") String popyear, @QueryParam("los") Integer los,
 			@QueryParam("sradius") Double sradius,
 			@QueryParam("areaType") String areaType,
-			@QueryParam("username") String username,
 			@QueryParam("urbanFilter") Boolean urbanFilter,
 			@QueryParam("urbanYear") String urbanYear,
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
@@ -4973,7 +4894,6 @@ public class Queries {
 	 * @param los - minimum level of service defined by user
 	 * @param sradius - population search radius
 	 * @param areaType - type of area of interest
-	 * @param username - user session
 	 * @param urbanFilter - flag on whether to filter on urban areas or not
 	 * @param urbanYear - urban areas population projection year
 	 * @param minUrbanPop - minimum population filter for urban areas
@@ -4997,7 +4917,6 @@ public class Queries {
 			@QueryParam("areas") String areas, @QueryParam("los") Integer los,
 			@QueryParam("sradius") Double sradius,
 			@QueryParam("areaType") String areaType,
-			@QueryParam("username") String username,
 			@QueryParam("urbanFilter") Boolean urbanFilter,
 			@QueryParam("urbanYear") String urbanYear,
 			@QueryParam("minUrbanPop") Integer minUrbanPop,
@@ -5020,7 +4939,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public HeatMap1 getcsv(
 			@QueryParam("popYear") String popYear, 
-			@QueryParam("dbindex") Integer dbindex ,@QueryParam("username") String username)
+			@QueryParam("dbindex") Integer dbindex)
 					throws JSONException, SQLException, ParseException {
 		HeatMap1 val=new HeatMap1();
 		Map<String, HeatMap> dateNorm = new LinkedHashMap<String,HeatMap>();
@@ -5150,10 +5069,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 		MediaType.TEXT_XML })
 	public Object getSessionId() {
-		HttpSession session = request.getSession();
-		logger.info("session id:");
-		logger.info(request.getSession().getId());
-		return request.getSession().getId();
+		return getUsername();
 	}
 
 	@GET
@@ -5161,8 +5077,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getAgency(
-		@QueryParam("dbindex") Integer dbindex,
-		@QueryParam("username") String username
+		@QueryParam("dbindex") Integer dbindex
 	)
 			throws SQLException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
@@ -5174,8 +5089,7 @@ public class Queries {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 	public Object setHiddenAgencies(
 		@QueryParam("dbindex") Integer dbindex,
-		@QueryParam("agencies") String agencies,
-		@QueryParam("username") String username
+		@QueryParam("agencies") String agencies
 	) throws SQLException, NoSuchFieldException, SecurityException,
 	IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
 		// agencies = (agencies == null ? "" : String.valueOf(agencies));
