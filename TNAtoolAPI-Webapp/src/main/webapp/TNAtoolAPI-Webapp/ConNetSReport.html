@@ -48,7 +48,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){			
 			$('h2').append('Connected Transit Networks Summary Report <br><hr>');

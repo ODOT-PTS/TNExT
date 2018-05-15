@@ -85,7 +85,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear,
 		async: true,
 		success: function(d){
 			appendNavigation();
@@ -158,7 +158,7 @@ $(document).ready(function(){
 			    		w_qstringl = '2'
 			    		qstringd = [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/');
 						var keyName = setDates(qstringd);
-			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&l='+w_qstringl+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaid='+null+'&type='+0+'&username='+getSession()+'&geotype='+-1+'&geoid='+null+'&nav='+nav);	    		
+			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&l='+w_qstringl+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaid='+null+'&type='+0+'&geotype='+-1+'&geoid='+null+'&nav='+nav);	    		
 				    }else if($(this).attr('type')=="CSA"){
 				    	qstring = $(this).attr('id');
 				    	window.open('/TNAtoolAPI-Webapp/GeoCountiesReport.html'+'?&agency='+qstring+'&dbindex='+dbindex+'&popYear='+popYear+'&nav='+nav);

@@ -57,7 +57,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+agencyId+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency='+agencyId+'&gap='+gap+'&key='+ key+'&dbindex='+dbindex,
 		async: true,
 		success: function(d){
 			var cons = [];

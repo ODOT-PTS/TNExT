@@ -56,7 +56,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=2'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear+'&username='+getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=2'+ajaxURL+'&day='+w_qstringd+'&key='+ key+'&popYear='+popYear,
 		async: true,
 		success: function(item){	
 			docMetadata = item.metadata;

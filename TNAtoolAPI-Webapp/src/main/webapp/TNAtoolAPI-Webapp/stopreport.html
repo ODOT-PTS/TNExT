@@ -83,7 +83,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username=admin'+'&geotype='+geotype+'&geoid='+geoid+'&rc='+rc+'&stime='+stime+'&etime='+etime,
+		url: '/TNAtoolAPI-Webapp/queries/transit/StopsR?agency='+agency+'&day='+w_qstringd+'&route='+route+'&x='+w_qstringx+'&areaid='+areaId+'&type='+type+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&geotype='+geotype+'&geoid='+geoid+'&rc='+rc+'&stime='+stime+'&etime='+etime,
 		async: true,
 		success: function(d){
 			var namestring = " Stops Report";

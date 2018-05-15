@@ -76,7 +76,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + w_qstringx + '&dbindex=' + dbindex + '&username=' + getSession(),
+		url: '/TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=' + key + '&countyId=' + countyId + '&radius=' + w_qstringx + '&dbindex=' + dbindex,
 		async: true,
 		success: function(d){	
 			docMetadata = d.metadata;

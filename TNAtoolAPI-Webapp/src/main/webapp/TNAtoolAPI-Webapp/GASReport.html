@@ -84,7 +84,7 @@ $(document).ready(function(){
 		datatype: 'json',
 		url: '/TNAtoolAPI-Webapp/queries/transit/AgencySR?&type='+type+'&areaid='+areaId
 				+'&x='+ w_qstringx+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear
-				+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid,
+				+'&geotype='+geotype+'&geoid='+geoid,
 		async: true,
 		success: function(d){
 			console.log(d);
@@ -151,7 +151,7 @@ $(document).ready(function(){
 			    		w_qstringl = '2';
 			    		keyName = setDates(qstringd);
 
-			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&l='+w_qstringl+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaId='+areaId+'&type='+type+'&username='+getSession()+'&geotype='+geotype+'&geoid='+geoid+'&nav='+nav);	    		
+			    		window.open('/TNAtoolAPI-Webapp/AgenXReport.html?&agency='+qstring+'&x='+qstringx+'&l='+w_qstringl+'&n='+keyName+'&dbindex='+dbindex+'&popYear='+popYear+'&areaId='+areaId+'&type='+type+'&geotype='+geotype+'&geoid='+geoid+'&nav='+nav);	    		
 				    
 
 				    };
