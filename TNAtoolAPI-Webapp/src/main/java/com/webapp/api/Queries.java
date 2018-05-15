@@ -5094,10 +5094,6 @@ public class Queries {
 	IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
 		// agencies = (agencies == null ? "" : String.valueOf(agencies));
 		String[] hiddenAgencies = agencies.split(",");
-		logger.info("username: "+getUsername());
-		for (String a: hiddenAgencies) {           
-			logger.info("hiding agency: " + a);
-		}
 		return PgisEventManager.setHiddenAgencies(dbindex, getUsername(), hiddenAgencies);
 	}	
 }
