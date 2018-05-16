@@ -179,7 +179,8 @@ public class Queries {
 		HttpSession session = request.getSession();
 		logger.info("session id:");
 		logger.info(request.getSession().getId());
-		return request.getSession().getId();
+		return "admin";
+		// return request.getSession().getId();
 	}
 
 	/**
