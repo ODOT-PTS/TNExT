@@ -5,7 +5,7 @@ export PGPASSWORD=postgres
 
 /scripts/wait-for-it.sh db:5432 --timeout=30 -- echo "db ready"
 
-if [ "$(createdb test1 || echo exists)" == "exists" ]; then 
+if [ "$(createdb test || echo exists)" == "exists" ]; then 
     echo "exists"
 else
     pg_restore -v --dbname=test /data/may2018.backup

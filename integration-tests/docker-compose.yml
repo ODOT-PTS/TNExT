@@ -26,7 +26,6 @@ services:
       PGPASSWORD: postgres
       PGHOST: db
     volumes:
-      - conf_test:/app/conf
       - tnastm2_test:/root/.m2
       - "./scripts:/scripts"
       - "./data:/data"
