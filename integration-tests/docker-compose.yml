@@ -31,7 +31,7 @@ services:
       - "./data:/data"
       - "./conf:/app/conf"
     ports:
-      - "8080"
+      - "18080:8080"
     links:
       - db
 

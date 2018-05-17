@@ -13,4 +13,6 @@ fi
 
 /scripts/wait-for-it.sh ${TNAST_HOST} --timeout=30 -- echo "tnast ready"
 
-/scripts/wait-for-it.sh ${TNAST_HOST} --timeout=30 -- resttest.py http://${TNAST_HOST} /api-tests/*.yaml
+echo "running tests"
+/scripts/wait-for-it.sh ${TNAST_HOST}:8080 --timeout=30 -- resttest.py http://${TNAST_HOST} /api-tests/*.yaml
+echo "running done"
