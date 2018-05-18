@@ -1,0 +1,22 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/RoutesR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&agency=456&x=0.25&n=eqs&dbindex=0&popYear=2010&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/RoutesR?agency=456&&x=0.25&day=05/17/2018&key=0.279980826032034&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&agency=456&areaid=00955&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=0&geoid=41003&nav=stateS-agencyS-countyS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/RoutesR?agency=456&areaid=00955&type=3&&x=0.25&day=05/17/2018&key=0.8982339862913071&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&agency=456&areaid=41003&type=0&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/RoutesR?agency=456&areaid=41003&type=0&&x=0.25&day=05/17/2018&key=0.9087444121146442&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&areaid=13221&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/RoutesR?areaid=13221&type=3&&x=0.25&day=05/17/2018&key=0.23113145269061608&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&areaid=4101&type=5&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-congS
+    url: /TNAtoolAPI-Webapp/queries/transit/RoutesR?areaid=4101&type=5&&x=0.25&day=05/17/2018&key=0.044693047323275614&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&areaid=4101000&type=2&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/RoutesR?areaid=4101000&type=2&&x=0.25&day=05/17/2018&key=0.5637212800809099&dbindex=0&popYear=2010&username=admin

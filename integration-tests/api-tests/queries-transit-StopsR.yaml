@@ -1,0 +1,25 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/StopsR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&agency=456&areaid=00955&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=0&geoid=41003&stime=0:00&etime=23:59&nav=stateS-agencyS-countyS-urbanS&rc=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=456&day=05/17/2018&route=null&x=0.25&areaid=00955&type=3&key=0.7672017539874179&dbindex=0&popYear=2010&username=admin&geotype=0&geoid=41003&rc=-1&stime=0:00&etime=23:59
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&agency=456&n=eqs&x=0.25&dbindex=0&popYear=2010&geotype=-1&geoid=null&areaid=null&type=null&route=null&nav=stateS-agencyS&rc=-1&stime=0:00&etime=23:59
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=456&day=05/17/2018&route=null&x=0.25&areaid=null&type=0&key=0.9933903779098299&dbindex=0&popYear=2010&username=admin&geotype=-1&geoid=null&rc=-1&stime=0:00&etime=23:59
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=1&type=4&x=0.25&n=eqs&dbindex=0&rc=0&popYear=2010&geotype=-1&stime=0:00&etime=23:59&geoid=null&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=null&day=05/17/2018&route=null&x=0.25&areaid=1&type=4&key=0.32073627082599643&dbindex=0&popYear=2010&username=admin&geotype=-1&geoid=null&rc=0&stime=0:00&etime=23:59
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=1&type=4&x=0.25&n=eqs&dbindex=0&popYear=2010&rc=1&geotype=-1&geoid=null&stime=0:00&etime=23:59&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=null&day=05/17/2018&route=null&x=0.25&areaid=1&type=4&key=0.9269638322186637&dbindex=0&popYear=2010&username=admin&geotype=-1&geoid=null&rc=1&stime=0:00&etime=23:59
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=13221&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&stime=0:00&etime=23:59&nav=stateS-regionS-urbanS&rc=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=null&day=05/17/2018&route=null&x=0.25&areaid=13221&type=3&key=0.8748744010957812&dbindex=0&popYear=2010&username=admin&geotype=4&geoid=1&rc=-1&stime=0:00&etime=23:59
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=4101000&type=2&rc=0&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&stime=0:00&etime=23:59&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=null&day=05/17/2018&route=null&x=0.25&areaid=4101000&type=2&key=0.3701204013572601&dbindex=0&popYear=2010&username=admin&geotype=-1&geoid=null&rc=0&stime=0:00&etime=23:59
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=71317&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&stime=0:00&etime=23:59&nav=stateS-regionS-urbanS&rc=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/StopsR?agency=null&day=05/17/2018&route=null&x=0.25&areaid=71317&type=3&key=0.04554235450511723&dbindex=0&popYear=2010&username=admin&geotype=4&geoid=1&rc=-1&stime=0:00&etime=23:59

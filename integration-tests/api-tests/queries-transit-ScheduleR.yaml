@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/ScheduleR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/schedulereport.html?&agency=456&route=3099&n=eqs&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/ScheduleR?&agency=456&route=3099&day=05/17/2018&key=0.7602256686126316
