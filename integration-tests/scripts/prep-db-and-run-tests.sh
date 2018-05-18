@@ -13,6 +13,15 @@ fi
 
 /scripts/wait-for-it.sh ${TNAST_HOST} --timeout=30 -- echo "tnast ready"
 
+logfile=/var/log/tnext/test.log
+if [ -f "${logfile}" ]; then
+    rm ${logfile}
+fi
+mkdir -p `dirname ${logfile}`
+
 echo "running tests"
-/scripts/wait-for-it.sh ${TNAST_HOST}:8080 --timeout=30 -- resttest.py http://${TNAST_HOST} /api-tests/*.yaml
+for i in `ls api-tests/*.yaml`; do
+    echo $i
+    resttest.py --log debug http://${TNAST_HOST} $i | tee -a ${logfile}
+done
 echo "running done"
