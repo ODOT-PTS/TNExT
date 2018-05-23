@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/calendarRange
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/schedulereport.html?&agency=456&route=3099&n=eqs&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex=0&agency=456

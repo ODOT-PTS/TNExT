@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/CountiesPnR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/ParkRideReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/CountiesPnR?&key=0.2873564225671481&dbindex=0

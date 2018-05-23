@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/stateSR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoStateSreport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/stateSR?key=0.6611011499728947&dbindex=0&popYear=2010&username=admin

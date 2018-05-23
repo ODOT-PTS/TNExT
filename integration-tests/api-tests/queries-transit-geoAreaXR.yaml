@@ -1,0 +1,25 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/geoAreaXR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid=41001&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&nav=stateS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=0&areaid=41001&x=0.25&l=2&dbindex=0&popYear=2010&nav=stateS-countyS&day=05/17/2018&key=0.15651896882657246&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid=41003&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=0&areaid=41003&x=0.25&l=2&dbindex=0&popYear=2010&nav=stateS-agencyS-countyS&day=05/17/2018&key=0.7064454085551157&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid=00955&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&geotype=3&geoid=null&nav=stateS-AggUAS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=3&areaid=00955&x=0.25&l=2&dbindex=0&popYear=2010&geotype=3&geoid=null&nav=stateS-AggUAS-urbanS&day=05/17/2018&key=0.4940077460920551&popYear=2010&username=admin&geotype=3&geoid=null
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid=13221&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=3&areaid=13221&x=0.25&l=2&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS&day=05/17/2018&key=0.9385490463426223&popYear=2010&username=admin&geotype=4&geoid=1
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongdistsXreport.html?&areaid=4101&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&nav=stateS-congS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=5&areaid=4101&x=0.25&l=2&dbindex=0&popYear=2010&nav=stateS-congS&day=05/17/2018&key=0.2985836263363879&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoStateXreport.html?&x=0.1&l=3&n=eqs&dbindex=0&areaId=41&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=6&areaid=41&day=05/17/2018&key=0.43356589465445206&popYear=2010&username=admin&dbindex=0&l=3&x=0.1
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoStateXreport.html?&x=0.25&l=2&n=eqs&dbindex=0&areaId=41&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/geoAreaXR?&type=6&areaid=41&day=05/17/2018&key=0.755807894441249&popYear=2010&username=admin&dbindex=0&l=2&x=0.25

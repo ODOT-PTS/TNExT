@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/ConNetSR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/ConNetSReport.html?&gap=0.1&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/ConNetSR?&gap=0.1&key=0.6471283838094748&dbindex=0&username=admin

@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/pnrsInCounty
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/ParkRideXReport.html?&countyid=41003&x=0.25&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/pnrsInCounty?&key=0.6368259977186781&countyId=41003&radius=0.25&dbindex=0&username=admin

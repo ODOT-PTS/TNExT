@@ -1,0 +1,10 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/GeoURSR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasRReport.html?&popMin=0&popMax=2000000&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop=NaN&key=0.27546224125590313&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasRReport.html?&popMin=0&popMax=2000000&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop=NaN&key=0.30969946185861486&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0

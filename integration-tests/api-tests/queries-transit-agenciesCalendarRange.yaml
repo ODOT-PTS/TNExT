@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/agenciesCalendarRange
+    timeout: 600
+- test:
+    referer: /?&n=--&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/agenciesCalendarRange?agencies=456,174,131,148,169,200,227,58,61,179,256,47,cherriots-salem-or-us,266,397,193,37,57,531,84,445,C-TRAN,curry,184,50,192,158,186,48,94,451,224,215,LTD,89,457,91,269,188,157,178,690,187,10408982,59,TRAM,PSC,185,133,225,1739,678,86,473,130,101,45,253,162,22,TRIMET,92,501,129,268&dbindex=0
