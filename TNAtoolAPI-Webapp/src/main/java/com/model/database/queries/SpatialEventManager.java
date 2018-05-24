@@ -196,32 +196,6 @@ public class SpatialEventManager {
 	}
 	
 	/**
-	 * return all agencies active in the database
-	 * 
-	 * @param username
-	 * @param dbindex
-	 * @return HashMap<String, ConGraphAgency>
-	 * @throws SQLException
-	 */
-	public static HashMap<String, ConGraphAgency> getSelectedAgencies ( String username, int dbindex ) throws SQLException {
-		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
-		String query = "SELECT a.* FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT TRUE AND a.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY a.name";
-		Connection connection = PgisEventManager.makeConnection(dbindex);
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery(query);
-		
-		while ( rs.next() ){
-			ConGraphAgency i = new ConGraphAgency();
-			i.name = rs.getString("name");
-			i.centralized = rs.getBoolean("centralized");
-			i.id = rs.getString("id");
-			response.put(rs.getString("id"), i);
-		}
-		connection.close();
-		return response;
-	}
-	
-	/**
 	 * returns all the connections between the input agency and the other agencies
 	 * in the database. Each ConGraphObj represents a connection which will be 
 	 * displayed on the map as an edge on the Connectivity Graph.
