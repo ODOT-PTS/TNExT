@@ -114,59 +114,6 @@ public class DbUpdate {
   public static boolean gtfsUpload = false;
   public static String gtfsMessage = "";
 
-  public static List<String> getSelectedAgencies(String username) {
-    List<String> selectedAgencies = new ArrayList<String>();
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    try {
-      c = dbConfig.getConnection();
-      statement = c.createStatement();
-      /*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
-          + "JOIN gtfs_selected_feeds "
-          + "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
-          + "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
-      rs = statement
-          .executeQuery("SELECT agency_id FROM gtfs_selected_feeds " + "WHERE username = '" + username + "';");
-      while (rs.next()) {
-        selectedAgencies.add(rs.getString("agency_id"));
-      }
-    } catch (SQLException e) {
-      logger.error(e);
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-    if (selectedAgencies.isEmpty()) {
-      selectedAgencies.add("null");
-    }
-    return selectedAgencies;
-  }
-
-  // ian: unused?
-  @POST
-  @Path("/correctAjax")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object tests(@QueryParam("x") String x) {
-    PDBerror b = new PDBerror();
-    b.DBError = x;
-    logger.debug(x);
-    return b;
-  }
-
   @GET
   @Path("/readDBinfo")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
