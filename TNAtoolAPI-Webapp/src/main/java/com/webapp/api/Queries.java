@@ -403,7 +403,7 @@ public class Queries {
 
 		// Getting hashmap of agencies (AgencyId -> AgencyName)
 		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
-				.getAllAgencies(username, dbIndex);
+				.getSelectedAgencies(username, dbIndex);
 
 		// Filtering by date
 		String fdate = "0";
@@ -1507,7 +1507,7 @@ public class Queries {
 		x = x * 1609.34;
 		response.AgencyId = agency;
 		HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-		allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+		allAgencies = SpatialEventManager.getSelectedAgencies(username, dbindex);
 		response.AgencyName = allAgencies.get(agency).name;
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1665,7 +1665,7 @@ public class Queries {
 		ArrayList<StopR> report = new ArrayList<StopR>();
 		if (areaid == null) {
 			HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-			allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+			allAgencies = SpatialEventManager.getSelectedAgencies(username, dbindex);
 			response.AgencyName = allAgencies.get(agency).name;
 			index++;
 			setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1734,7 +1734,7 @@ public class Queries {
 					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 				} else {// area and agency
 					HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-					allAgencies = SpatialEventManager.getAllAgencies(username,
+					allAgencies = SpatialEventManager.getSelectedAgencies(username,
 							dbindex);
 					response.AgencyName = allAgencies.get(agency).name;
 					index++;
@@ -1764,7 +1764,7 @@ public class Queries {
 				}
 			} else {// area, agency, and route
 				HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-				allAgencies = SpatialEventManager.getAllAgencies(username,
+				allAgencies = SpatialEventManager.getSelectedAgencies(username,
 						dbindex);
 				response.AgencyName = allAgencies.get(agency).name;
 				index++;
@@ -2383,7 +2383,7 @@ public class Queries {
 		if (agency != null) {			
 			response.agencyId = agency;
 			HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-			allAgencies = SpatialEventManager.getAllAgencies(username, dbindex);
+			allAgencies = SpatialEventManager.getSelectedAgencies(username, dbindex);
 			response.agencyName = allAgencies.get(agency).name;
 		} 
 		if (type == 3) {
@@ -4544,7 +4544,7 @@ public class Queries {
 
 		// Retrieving list of agencies and putting the IDs into an array.
 		HashMap<String, ConGraphAgency> agencies = SpatialEventManager
-				.getAllAgencies(session, dbindex);
+				.getSelectedAgencies(session, dbindex);
 
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
@@ -4661,7 +4661,7 @@ public class Queries {
 		ConGraphAgencyGraphList response = new ConGraphAgencyGraphList();
 
 		Map<String, ConGraphAgency> agencies = SpatialEventManager
-				.getAllAgencies(username, dbindex);
+				.getSelectedAgencies(username, dbindex);
 		for (Entry<String, ConGraphAgency> e : agencies.entrySet()) {
 			if (!e.getValue().centralized) {
 				try{
@@ -4691,14 +4691,14 @@ public class Queries {
 	 * @throws SQLException
 	 */
 	@GET
-	@Path("/allAgencies")
+	@Path("/getSelectedAgencies")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
-	public Object getAllAgencies(@QueryParam("username") String username,
+	public Object getSelectedAgencies(@QueryParam("username") String username,
 			@QueryParam("dbindex") Integer dbindex) throws SQLException {
 		HashMap<String, ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
 		try {
-			response = SpatialEventManager.getAllAgencies(username, dbindex);
+			response = SpatialEventManager.getSelectedAgencies(username, dbindex);
 		} catch (SQLException e) {
 			logger.error(e);
 		}

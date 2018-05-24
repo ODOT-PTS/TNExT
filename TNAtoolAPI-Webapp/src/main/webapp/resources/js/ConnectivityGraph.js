@@ -339,7 +339,7 @@ function callBack(agencyCentroids, dbindex) {
 							.ajax({
 								type : 'GET',
 								datatype : 'json',
-								url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
+								url : '/TNAtoolAPI-Webapp/queries/transit/getSelectedAgencies?&dbindex='
 										+ dbindex + '&username=' + getSession(),
 								async : false,
 								success : function(d) {
