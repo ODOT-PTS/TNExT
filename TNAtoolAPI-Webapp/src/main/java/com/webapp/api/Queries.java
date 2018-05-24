@@ -402,8 +402,7 @@ public class Queries {
 		logger.debug("shapefile export to tmpdir: " + tmpdir);
 
 		// Getting hashmap of agencies (AgencyId -> AgencyName)
-		HashMap<String, ConGraphAgency> agenciesHashMap = SpatialEventManager
-				.getSelectedAgencies(username, dbIndex);
+		HashMap<String, ConGraphAgency> agenciesHashMap = PgisEventManager.getSelectedActiveAgencies(username, dbIndex);
 
 		// Filtering by date
 		String fdate = "0";
@@ -998,7 +997,7 @@ public class Queries {
 		response.id = pnrId;
 		MapStop mapPnrStop;
 		MapRoute mapPnrRoute;
-		List<String> agencyList = DbUpdate.getSelectedAgencies(username);
+		List<String> agencyList = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		logger.debug(agencyList);
 		List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 		List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
@@ -1087,8 +1086,7 @@ public class Queries {
 						null, username, dbindex);
 				return response;
 			}
-			List<String> selectedAgencies = DbUpdate
-					.getSelectedAgencies(username);
+			List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 			Collection<Agency> allagencies = GtfsHibernateReaderExampleMain
 					.QueryAllAgencies(selectedAgencies, dbindex);
 			if (menuResponse[dbindex] == null
@@ -1507,7 +1505,7 @@ public class Queries {
 		x = x * 1609.34;
 		response.AgencyId = agency;
 		HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-		allAgencies = SpatialEventManager.getSelectedAgencies(username, dbindex);
+		allAgencies = PgisEventManager.getSelectedActiveAgencies(username, dbindex);
 		response.AgencyName = allAgencies.get(agency).name;
 		index++;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1665,7 +1663,7 @@ public class Queries {
 		ArrayList<StopR> report = new ArrayList<StopR>();
 		if (areaid == null) {
 			HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-			allAgencies = SpatialEventManager.getSelectedAgencies(username, dbindex);
+			allAgencies = PgisEventManager.getSelectedActiveAgencies(username, dbindex);
 			response.AgencyName = allAgencies.get(agency).name;
 			index++;
 			setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1734,8 +1732,7 @@ public class Queries {
 					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
 				} else {// area and agency
 					HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-					allAgencies = SpatialEventManager.getSelectedAgencies(username,
-							dbindex);
+					allAgencies = PgisEventManager.getSelectedActiveAgencies(username, dbindex);
 					response.AgencyName = allAgencies.get(agency).name;
 					index++;
 					setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1764,8 +1761,7 @@ public class Queries {
 				}
 			} else {// area, agency, and route
 				HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-				allAgencies = SpatialEventManager.getSelectedAgencies(username,
-						dbindex);
+				allAgencies = PgisEventManager.getSelectedActiveAgencies(username, dbindex);
 				response.AgencyName = allAgencies.get(agency).name;
 				index++;
 				setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -2383,7 +2379,7 @@ public class Queries {
 		if (agency != null) {			
 			response.agencyId = agency;
 			HashMap<String, ConGraphAgency> allAgencies = new HashMap<String, ConGraphAgency>();
-			allAgencies = SpatialEventManager.getSelectedAgencies(username, dbindex);
+			allAgencies = PgisEventManager.getSelectedActiveAgencies(username, dbindex);
 			response.agencyName = allAgencies.get(agency).name;
 		} 
 		if (type == 3) {
@@ -2506,7 +2502,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<County> allcounties = new ArrayList<County>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		try {
 			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
@@ -2596,7 +2592,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<Tract> alltracts = new ArrayList<Tract>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		try {
 			alltracts = EventManager.gettractsbycounty(county, dbindex);
 		} catch (FactoryException e1) {
@@ -2681,7 +2677,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<Place> allplaces = new ArrayList<Place>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		try {
 			allplaces = EventManager.getplaces(dbindex);
 		} catch (FactoryException e1) {
@@ -2783,7 +2779,7 @@ public class Queries {
 			popYear = "2010";
 		}
 		List<Urban> allurbanareas = new ArrayList<Urban>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		try {
 			allurbanareas = EventManager.geturbansbypopbet(popmin,popmax,dbindex, popYear);
 		} catch (FactoryException e1) {
@@ -3087,7 +3083,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<CongDist> allcongdists = new ArrayList<CongDist>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		try {
 			allcongdists = EventManager.getcongdist(dbindex);
 		} catch (FactoryException e1) {
@@ -3174,7 +3170,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<County> allcounties = new ArrayList<County>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		try {
 			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
@@ -3601,7 +3597,7 @@ public class Queries {
 		if (popYear == null || popYear.equals("null"))
 			popYear = "2010";
 		
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(username);
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgenciesDefaultIds(dbindex, username);
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
 		String[] fulldates = fulldate(dates);
@@ -4543,8 +4539,7 @@ public class Queries {
 		Statement stmt = connection.createStatement();
 
 		// Retrieving list of agencies and putting the IDs into an array.
-		HashMap<String, ConGraphAgency> agencies = SpatialEventManager
-				.getSelectedAgencies(session, dbindex);
+		HashMap<String, ConGraphAgency> agencies = PgisEventManager.getSelectedActiveAgencies(session, dbindex);
 
 		ConGraphObjSet response = new ConGraphObjSet();
 		Set<ConGraphObj> e = new HashSet<ConGraphObj>();
@@ -4660,8 +4655,7 @@ public class Queries {
 		Statement stmt = connection.createStatement();
 		ConGraphAgencyGraphList response = new ConGraphAgencyGraphList();
 
-		Map<String, ConGraphAgency> agencies = SpatialEventManager
-				.getSelectedAgencies(username, dbindex);
+		Map<String, ConGraphAgency> agencies = PgisEventManager.getSelectedActiveAgencies(username, dbindex);
 		for (Entry<String, ConGraphAgency> e : agencies.entrySet()) {
 			if (!e.getValue().centralized) {
 				try{
@@ -4680,28 +4674,6 @@ public class Queries {
 		}
 		stmt.close();
 		connection.close();
-		return response;
-	}
-	
-	/**
-	 * returns hashmap of all agencies
-	 * @param username
-	 * @param dbindex
-	 * @return
-	 * @throws SQLException
-	 */
-	@GET
-	@Path("/getSelectedAgencies")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-			MediaType.TEXT_XML })
-	public Object getSelectedAgencies(@QueryParam("username") String username,
-			@QueryParam("dbindex") Integer dbindex) throws SQLException {
-		HashMap<String, ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
-		try {
-			response = SpatialEventManager.getSelectedAgencies(username, dbindex);
-		} catch (SQLException e) {
-			logger.error(e);
-		}
 		return response;
 	}
 
@@ -5131,7 +5103,7 @@ public class Queries {
 	}
 
 	@GET
-	@Path("/Agencyget")
+	@Path("/getAllAgencies")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
 			MediaType.TEXT_XML })
 	public Object getAgency(
@@ -5140,9 +5112,19 @@ public class Queries {
 	)
 			throws SQLException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, FactoryException, TransformException {
-		return PgisEventManager.Agencyget(dbindex, username);
-	}	
-	
+		return PgisEventManager.getAllAgencies(dbindex, username);
+	}
+		
+	@GET
+	@Path("/getSelectedAgencies")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.TEXT_XML })
+	public Object getSelectedAgencies(@QueryParam("username") String username,
+			@QueryParam("dbindex") Integer dbindex) throws SQLException {
+		HashMap<String, ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
+		return PgisEventManager.getSelectedAgencies(dbindex, username);
+	}
+
 	@GET
     @Path("/setHiddenAgencies")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
