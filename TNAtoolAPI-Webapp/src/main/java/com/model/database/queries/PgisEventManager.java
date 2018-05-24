@@ -87,6 +87,7 @@ import com.model.database.queries.objects.TitleVIDataFloat;
 import com.model.database.queries.objects.TitleVIDataList;
 import com.model.database.queries.objects.VariantListm;
 import com.model.database.queries.objects.agencyCluster;
+import com.model.database.queries.congraph.ConGraphAgency;
 import com.model.database.queries.util.Types;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -94,6 +95,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+
 
 public class PgisEventManager {
 	final static Logger logger = Logger.getLogger(PgisEventManager.class);	
@@ -6572,9 +6575,8 @@ public class PgisEventManager {
 			return r;	
 		}
 
-		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {
+		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws FactoryException, TransformException {
 			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
-			Connection connection = db.getConnection();
 			String query = ""
 			+ " INSERT INTO user_selected_agencies (username, agency_id, hidden) ("
 			+ "   SELECT ?::text AS username, a.id, CASE WHEN id = ANY(?) THEN true ELSE false END AS hidden "
@@ -6585,6 +6587,7 @@ public class PgisEventManager {
 			+ " ) ON CONFLICT (username, agency_id) DO UPDATE SET hidden = EXCLUDED.hidden"
 			+ "";
 			try {
+				Connection connection = db.getConnection();
 				PreparedStatement ps = connection.prepareStatement(query);
 				ps.setString(1, username);
 				ps.setArray(2, connection.createArrayOf("VARCHAR", agency_ids));
@@ -6596,40 +6599,93 @@ public class PgisEventManager {
 			} catch ( Exception e ) {
 				logger.error(e);
 			}
-
-			return Agencyget(dbindex, username);
+			return getAllAgencies(dbindex, username);
 		}
 
-		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
-				throws FactoryException, TransformException	{
-			Connection  connection = makeConnection(dbindex);
-			String query="";
-			Statement stmt = null;
-		
-		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
-			// query ="select id,name,defaultid from gtfs_agencies";
-			query = "SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
-
-			try {
-		        stmt = connection.createStatement();
-		        ResultSet rs = stmt.executeQuery(query); 
-		        while ( rs.next() ) {
-		        	Agencyselect a=new Agencyselect();
-		        	a.AgencyId=rs.getString("id");
-		        	a.Agencyname=rs.getString("name");
-					a.DefaultId=rs.getString("defaultid");
-					a.Hidden=rs.getBoolean("hidden");
-		        	  r.put(a.Agencyname, a);     
-		        }
-				 rs.close();
-				 stmt.close(); 
-				 dropConnection(connection);
-			}
-			 catch ( Exception e ) {
-				 e.printStackTrace();
-			}
+		public static Map<String,Agencyselect> getAllAgencies(int dbindex, String username) {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();					
+			String query="SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
+			try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+				try (ResultSet rs = stmt.executeQuery(query)) {				
+					while ( rs.next() ) {
+						Agencyselect a=new Agencyselect();
+						a.AgencyId=rs.getString("id");
+						a.Agencyname=rs.getString("name");
+						a.DefaultId=rs.getString("defaultid");
+						a.Hidden=rs.getBoolean("hidden");
+						r.put(a.Agencyname, a);     
+					}
+				}
+			} catch (Exception e) { logger.error(e); }
 			return r;	
 		}
 
+		/** Moved from DbUpdate.getSelectedAgencies */
+		public static List<String> getSelectedAgenciesDefaultIds(int dbindex, String username) {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			List<String> selectedAgencies = new ArrayList<String>();
+			/*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
+				+ "JOIN gtfs_selected_feeds "
+				+ "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
+				+ "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
+			String query = "";
+			try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+				try (ResultSet rs = stmt.executeQuery(query)) {				
+					while ( rs.next() ) {
+						selectedAgencies.add(rs.getString("agency_id"));
+					}
+				}
+			} catch (Exception e) { logger.error(e); }
+			if (selectedAgencies.isEmpty()) {
+			  selectedAgencies.add("null");
+			}
+			return selectedAgencies;
+		}
 
+		/**
+		 * return all agencies active in the database
+		 * NOTE: Moved from SpatialEventManager - currently returns ConGraphAgency, unlike getAllAgencies returns Agencyselect below.
+		 * @param username
+		 * @param dbindex
+		 * @return HashMap<String, ConGraphAgency>
+		 * @throws SQLException
+		 */
+		public static HashMap<String, ConGraphAgency> getSelectedActiveAgencies ( String username, int dbindex ) {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
+			String query = "SELECT a.* FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT TRUE AND a.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY a.name";
+			try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+				try (ResultSet rs = stmt.executeQuery(query)) {				
+					while ( rs.next() ) {
+						ConGraphAgency i = new ConGraphAgency();
+						i.name = rs.getString("name");
+						i.centralized = rs.getBoolean("centralized");
+						i.id = rs.getString("id");
+						response.put(rs.getString("id"), i);
+					}
+				}
+			} catch (Exception e) { logger.error(e); }
+			return response;
+		}
+
+	public static Map<String,Agencyselect> getSelectedAgencies(int dbindex, String username) {
+		DatabaseConfig db = DatabaseConfig.getConfig(dbindex);			
+		Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();					
+		String query="SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT TRUE ORDER BY name";
+		try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+			try (ResultSet rs = stmt.executeQuery(query)) {				
+				while ( rs.next() ) {
+					Agencyselect a=new Agencyselect();
+					a.AgencyId=rs.getString("id");
+					a.Agencyname=rs.getString("name");
+					a.DefaultId=rs.getString("defaultid");
+					a.Hidden=rs.getBoolean("hidden");
+					r.put(a.Agencyname, a);     
+				}
+			}
+		} catch (Exception e) { logger.error(e); }
+		return r;	
+	}
+			
 }
