@@ -205,9 +205,7 @@ public class SpatialEventManager {
 	 */
 	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
 		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
-		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
-				+ " FROM gtfs_selected_feeds WHERE username='" + username + "') "
-				+ " AND gtfs_agencies.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY name";
+		String query = "SELECT a.* FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT TRUE AND a.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY a.name";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery(query);

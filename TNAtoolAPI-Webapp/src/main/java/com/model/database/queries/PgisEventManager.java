@@ -2701,7 +2701,7 @@ public class PgisEventManager {
 		}
 		if(geotype==-1||geotype==3)
 		{
-		mainquery += "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), stops as (select map.agencyid as agencyid, count(id) "
+		mainquery += "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), stops as (select map.agencyid as agencyid, count(id) "
 			+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aid "
 			+ "where "+criteria+"='"+areaId+"' group by map.agencyid), agencies as (select agencies.id as id, name, fareurl, phone, url, feedname, version, startdate, enddate, "
 			+ "publishername, publisherurl from gtfs_agencies agencies inner join stops on agencies.id = stops.agencyid inner join gtfs_feed_info info on "
@@ -2725,7 +2725,7 @@ public class PgisEventManager {
 		}
 		else
 		{
-			mainquery += "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), stops as (select map.agencyid as agencyid, count(id) "
+			mainquery += "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), stops as (select map.agencyid as agencyid, count(id) "
 				+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aid "
 				+ "where "+criteria+"='"+areaId+"' And "+geocriteria+"='"+geoid+"' group by map.agencyid), "	
 				+"stops1 as (select map.agencyid as agencyid, id as stop "
@@ -4924,11 +4924,11 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
+			String query = "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
 					+ " stops AS (SELECT map.agencyid, stops.location"
 					+ " 	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map"
 					+ " 	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id"
-					+ " 	WHERE stops.agencyid IN (SELECT * FROM aids)),"
+					+ " 	WHERE map.agencyid IN (SELECT * FROM aids)),"
 					+ " agencyshapes AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops GROUP BY agencyid),"
 					+ " connections AS (SELECT agencyshapes.agencyid, gtfs_agencies.name AS agencyname, stops.agencyid AS connectedagency"
 					+ " 	FROM stops INNER JOIN agencyshapes ON ST_DWITHIN(agencyshapes.shape,stops.location," + dist + ")"
@@ -4985,11 +4985,11 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
+			String query = "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 					+ "stops AS (SELECT map.agencyid, stops.location, stops.lat, stops.lon, name "
 					+ "	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map "
 					+ "	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id "
-					+ "	WHERE stops.agencyid IN (SELECT * FROM aids)), "
+					+ "	WHERE map.agencyid IN (SELECT * FROM aids)), "
 					+ " agencyshape AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops WHERE agencyid = '" + agencyId + "' GROUP BY agencyid), "
 					+ " connections AS (SELECT agencyshape.agencyid, stops.agencyid AS connectedagency "
 					+ "	FROM stops INNER JOIN agencyshape ON ST_DWITHIN(agencyshape.shape,stops.location," + dist + ") WHERE stops.agencyid != agencyshape.agencyid "
@@ -6458,11 +6458,11 @@ public class PgisEventManager {
 					  date=popYear+month1+day;
 					  datekey=month1+"/"+day+"/"+popYear;
 					  }
-				  query="with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
+				  query="with aids as (SELECT DISTINCT a.id AS agencyid, a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
 				  		+ "svcids as (select serviceid_agencyid, serviceid_id  from gtfs_calendars gc where startdate::int<="+date+" and enddate::int>="+date+" and "+dayOfWeek+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date+"' and exceptiontype=1),"
-						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
+						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.agencyid),"
 						  +"activeAgencies as (select count(distinct aid) as active from trips),"
-						  +"totalAgencies as (select count(distinct agencyid) as total from  gtfs_trips )," 
+						  +"totalAgencies as (select count(distinct agencyid) as total from  aids )," 
 						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
 						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
 				logger.debug(query);
