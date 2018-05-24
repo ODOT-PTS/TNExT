@@ -6,7 +6,7 @@
 - test:
     - group: "Overview Map"
     - name: "List agencies"
-    - url: "/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex=0"
+    - url: "/TNAtoolAPI-Webapp/queries/transit/getAllAgencies?&dbindex=0"
     - validators:
         - compare: {jsonpath_mini: "RVTD.AgencyId", comparator: "eq", expected: "1739"}
 
