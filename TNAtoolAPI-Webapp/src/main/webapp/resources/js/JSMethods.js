@@ -1199,25 +1199,29 @@ function buildPopTable(item, elem) {
 	var land_u_los = land_u_x * 0.5;
 	var land_r_los = land_r_x * 0.5;
 	var data = {
-		'Land area (sq.mi.)': {
+		'Land area': {
 			served: [land_u_x, land_r_x],
 			los: [land_u_los, land_r_los],
+			units: '(sq.mi.)'
 		},
 		'Population': {
 			served: [parseInt(item.UPopWithinX), parseInt(item.RPopWithinX)],
 			los: [parseInt(item.UPopServedAtLoService), parseInt(item.RPopServedAtLoService)],
-			density: true
+			density: true,
+			units: ''
 		},
 		'Employment': {
-			served: [parseInt(item.UwacWithinX), parseInt(item.RwacWithinX)],
-			los: [parseInt(item.UwacServedAtLoService), parseInt(item.RwacServedAtLoService)],
-			density: true
-		},
-		'Employee': {
 			served: [parseInt(item.UracWithinX), parseInt(item.RracWithinX)],
 			los: [parseInt(item.UracServedAtLoService), parseInt(item.RracServedAtLoService)],
-			density: true
-		}
+			density: true,
+			units: '(RAC)'
+		},
+		'Employee': {
+			served: [parseInt(item.UwacWithinX), parseInt(item.RwacWithinX)],
+			los: [parseInt(item.UwacServedAtLoService), parseInt(item.RwacServedAtLoService)],
+			density: true,
+			units: '(WAC)'
+		},
 	}
 	// var t = elem;
 	// var tb = $("<tbody />").appendTo(t);
@@ -1235,19 +1239,19 @@ function buildPopTable(item, elem) {
 		}
 		var order = [
 			// within x
-			[tba, key + ' served', '(1)', v.served[0] + v.served[1]],
-			[tba, 'Urban '+key.toLowerCase()+' served', '(1)', v.served[0]],
-			[tba, 'Rural '+key.toLowerCase()+' served', '(1)', v.served[1]],
-			[tbd, key+' density of area served', '(1)', (v.served[0] + v.served[1])/(land_u_x+land_r_x)],
-			[tbd, key+' density of urban area served', '(1)', v.served[0]/land_u_x],
-			[tbd, key+' density of rural area served', '(1)', v.served[1]/land_r_x],
+			[tba, key+' served '+v.units, '(1)', v.served[0] + v.served[1]],
+			[tba, 'Urban '+key.toLowerCase()+' served '+v.units, '(1)', v.served[0]],
+			[tba, 'Rural '+key.toLowerCase()+' served '+v.units, '(1)', v.served[1]],
+			[tbd, key+' density of area served '+v.units, '(1)', (v.served[0] + v.served[1])/(land_u_x+land_r_x)],
+			[tbd, key+' density of urban area served '+v.units, '(1)', v.served[0]/land_u_x],
+			[tbd, key+' density of rural area served '+v.units, '(1)', v.served[1]/land_r_x],
 			// los
-			[tba, key+' served at level of service', '(1)(2)(3)', v.los[0] + v.los[1]],
-			[tba, 'Urban '+key.toLowerCase()+' served at level of service', '(1)(2)(3)', v.los[0]],
-			[tba, 'Rural '+key.toLowerCase()+' served at level of service', '(1)(2)(3)', v.los[1]],
-			[tbd, key+' density of area served at level of service', '(1)(2)(3)', (v.los[0] + v.los[1])/(land_u_los+land_r_los)],
-			[tbd, key+' density of urban area served at level of service', '(1)(2)(3)', v.los[0]/land_u_los],
-			[tbd, key+' density of rural area served at level of service', '(1)(2)(3)', v.los[1]/land_r_los],
+			[tba, key+' served at level of service '+v.units, '(1)(2)(3)', v.los[0] + v.los[1]],
+			[tba, 'Urban '+key.toLowerCase()+' served at level of service '+v.units, '(1)(2)(3)', v.los[0]],
+			[tba, 'Rural '+key.toLowerCase()+' served at level of service '+v.units, '(1)(2)(3)', v.los[1]],
+			[tbd, key+' density of area served at level of service '+v.units, '(1)(2)(3)', (v.los[0] + v.los[1])/(land_u_los+land_r_los)],
+			[tbd, key+' density of urban area served at level of service '+v.units, '(1)(2)(3)', v.los[0]/land_u_los],
+			[tbd, key+' density of rural area served at level of service '+v.units, '(1)(2)(3)', v.los[1]/land_r_los],
 		]
 		order.forEach(function(i) {
 			var row = $("<tr />").appendTo(i[0]);
