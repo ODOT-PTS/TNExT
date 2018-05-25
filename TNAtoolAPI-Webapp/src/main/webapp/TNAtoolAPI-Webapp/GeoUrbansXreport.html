@@ -127,7 +127,8 @@ $(document).ready(function(){
 			popServedLOS = numberconv(item.PopServedAtLoService);
 			popServed = parseFloat(item.RPopServedByService) + parseFloat(item.UPopServedByService);
 			
-			$('#displayReport').append($(html));	
+			$('#displayReport').append($(html));
+			buildPopTable(item, $("table#RT > tbody"));				
 			progressbar.remove();
 			
 			tableProperties.paging = false;
