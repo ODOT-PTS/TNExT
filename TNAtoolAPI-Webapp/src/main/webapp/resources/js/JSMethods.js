@@ -1187,6 +1187,9 @@ function showAgencyPicker() {
 function buildPopTable(item, elem) {
 	function nc(v) {
 		v = Number(v)
+		if (!isFinite(v) || isNaN(v)) {
+			return "N/A";
+		}
 		if (!(v%1 === 0)) { v = v.toFixed(2) }
 		return v.toLocaleString();
 	}
@@ -1237,7 +1240,7 @@ function buildPopTable(item, elem) {
 			[tba, 'Rural '+key.toLowerCase()+' served', '(1)', v.served[1]],
 			[tbd, key+' density of area served', '(1)', (v.served[0] + v.served[1])/(land_u_x+land_r_x)],
 			[tbd, key+' density of urban area served', '(1)', v.served[0]/land_u_x],
-			[tbd, key+' density of rural area served', '(1)', v.served[1]/land_u_x],
+			[tbd, key+' density of rural area served', '(1)', v.served[1]/land_r_x],
 			// los
 			[tba, key+' served at level of service', '(1)(2)(3)', v.los[0] + v.los[1]],
 			[tba, 'Urban '+key.toLowerCase()+' served at level of service', '(1)(2)(3)', v.los[0]],
