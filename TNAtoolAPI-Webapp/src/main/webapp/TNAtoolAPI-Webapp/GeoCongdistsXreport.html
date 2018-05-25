@@ -126,6 +126,8 @@ $(document).ready(function(){
 			popServed = parseFloat(item.RPopServedByService) + parseFloat(item.UPopServedByService);
 			
 			$('#displayReport').append($(html));	
+			buildPopTable(item, $("table#RT > tbody"));
+			
 			progressbar.remove();
 			
 			tableProperties.bAutoWidth = false;

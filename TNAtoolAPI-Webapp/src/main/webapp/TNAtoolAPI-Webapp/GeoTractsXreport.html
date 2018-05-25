@@ -117,6 +117,8 @@ $(document).ready(function(){
 			html +='</tr></tbody></table>';
 			
 			$('#displayReport').append($(html));	
+			buildPopTable(item, $("table#RT > tbody"));
+			
 			progressbar.remove();
 			
 			tableProperties.paging = false;

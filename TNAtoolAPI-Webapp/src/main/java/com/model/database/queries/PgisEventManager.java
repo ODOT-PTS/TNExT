@@ -1908,9 +1908,9 @@ public class PgisEventManager {
       		+ "st_dwithin(block.location, stops.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' group by blockid), "
       		+"racserved as (select (C000_"+popYear+"*freq)  as rac ,poptype from popserved left join lodes_rac_projection_block using (blockid)),"
       		+"wacserved as (select (C000*freq)  as wac ,poptype,blockid from popserved left join lodes_blocks_wac using (blockid)),	"
-      		+ "popatlos as (select population"+popYear+" as population, poptype,block.blockid from "
+      		+ "popatlos as (select population"+popYear+" as population, poptype,block.blockid,block.landarea from "
       		+ "census_blocks block inner join stopsatlos on st_dwithin(block.location,stopsatlos.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' group by blockid),"
-      		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos from popatlos where poptype='U'), rpopatlos as (select COALESCE(sum(population),0) as rpoplos from "
+      		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos, SUM(landarea) AS landarea from popatlos where poptype='U'), rpopatlos as (select COALESCE(sum(population),0) as rpoplos, SUM(landarea) AS landarea from "
       		+ "popatlos where poptype='R'), "
       		+"racatlos as (select C000_"+popYear+"  as rac ,poptype from popatlos left join lodes_rac_projection_block using (blockid)),"
             +"wacatlos as (select C000  as wac ,poptype from popatlos left join lodes_blocks_wac using (blockid)),"
@@ -1925,7 +1925,7 @@ public class PgisEventManager {
       		+"uwacserved as (select COALESCE(sum(wac),0) as uswac from wacserved where poptype='U'),"
       		+"rwacserved as (select COALESCE(sum(wac),0) as rswac from wacserved where poptype='R'),"
       		+ "svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
-      	  +"select svcmiles,svchours,coalesce(usvcstops,0) as usvcstops ,coalesce(rsvcstops,0) as rsvcstops,svcstops,upoplos,rpoplos,uspop,rspop,uraclos,rraclos,usrac,rsrac,uwaclos,rwaclos,uswac,rswac,svdays,fromtime,totime,connections "
+      	  +"select svcmiles,svchours,coalesce(usvcstops,0) as usvcstops ,coalesce(rsvcstops,0) as rsvcstops,svcstops,upoplos,rpoplos,uspop,rspop,uraclos,rraclos,usrac,rsrac,uwaclos,rwaclos,uswac,rswac,svdays,fromtime,totime,connections, upopatlos.landarea AS urbanlandarea, rpopatlos.landarea AS rurallandarea "
       	  + "from service inner join upopatlos on true inner join rpopatlos on true inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true inner join uracatlos on true inner join rracatlos on true inner join uracserved on true inner join rracserved on true inner join uwacatlos on true inner join rwacatlos on true inner join uwacserved on true inner join rwacserved on true inner join rsvc on true inner join usvc on true";
    }
      else
@@ -1952,9 +1952,9 @@ public class PgisEventManager {
     	      		+ "st_dwithin(block.location, stops.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' and "+geocriteria+"='"+geoid+"' group by blockid), "
     	      		+"racserved as (select (C000_"+popYear+"*freq)  as rac ,poptype from popserved left join lodes_rac_projection_block using (blockid)),"
     	      		+"wacserved as (select (C000*freq)  as wac ,poptype,blockid from popserved left join lodes_blocks_wac using (blockid)),	"
-    	      		+ "popatlos as (select population"+popYear+" as population, poptype,block.blockid from "
+    	      		+ "popatlos as (select population"+popYear+" as population, poptype,block.blockid,block.landarea from "
     	      		+ "census_blocks block inner join stopsatlos on st_dwithin(block.location,stopsatlos.location,"+String.valueOf(x)+") where "+criteria+"='"+areaId+"' and "+geocriteria+"='"+geoid+"' group by blockid),"
-    	      		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos from popatlos where poptype='U'), rpopatlos as (select COALESCE(sum(population),0) as rpoplos from "
+    	      		+ "upopatlos as (select COALESCE(sum(population),0) as upoplos, SUM(landarea) AS landarea from popatlos where poptype='U'), rpopatlos as (select COALESCE(sum(population),0) as rpoplos, SUM(landarea) AS landarea from "
     	      		+ "popatlos where poptype='R'), "
     	      		+"racatlos as (select C000_"+popYear+"  as rac ,poptype from popatlos left join lodes_rac_projection_block using (blockid)),"
     	            +"wacatlos as (select C000  as wac ,poptype from popatlos left join lodes_blocks_wac using (blockid)),"
@@ -1969,7 +1969,7 @@ public class PgisEventManager {
     	      		+"uwacserved as (select COALESCE(sum(wac),0) as uswac from wacserved where poptype='U'),"
     	      		+"rwacserved as (select COALESCE(sum(wac),0) as rswac from wacserved where poptype='R'),"
     	      		+ "svcdays as (select COALESCE(array_agg(distinct day)::text,'-') as svdays from svcids) "
-    	      	    +"select svcmiles,svchours,coalesce(usvcstops,0) as usvcstops ,coalesce(rsvcstops,0) as rsvcstops,svcstops,upoplos,rpoplos,uspop,rspop,uraclos,rraclos,usrac,rsrac,uwaclos,rwaclos,uswac,rswac,svdays,fromtime,totime,connections"
+    	      	    +"select svcmiles,svchours,coalesce(usvcstops,0) as usvcstops ,coalesce(rsvcstops,0) as rsvcstops,svcstops,upoplos,rpoplos,uspop,rspop,uraclos,rraclos,usrac,rsrac,uwaclos,rwaclos,uswac,rswac,svdays,fromtime,totime,connections, upopatlos.landarea AS urbanlandarea, rpopatlos.landarea AS rurallandarea"
     	      	    + " from service inner join upopatlos on true inner join rpopatlos on true inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join svchrs on true inner join concomnames on true inner join uracatlos on true inner join rracatlos on true inner join uracserved on true inner join rracserved on true inner join uwacatlos on true inner join rwacatlos on true inner join uwacserved on true inner join rwacserved on true inner join rsvc on true inner join usvc on true";
     	 }
       try {
@@ -1996,8 +1996,10 @@ public class PgisEventManager {
         	response.put("svcdays", String.valueOf(rs.getString("svdays")));
         	response.put("fromtime", String.valueOf(rs.getInt("fromtime")));
         	response.put("totime", String.valueOf(rs.getInt("totime")));
-        	response.put("connections", rs.getString("connections"));        	                      
-        }
+			response.put("connections", rs.getString("connections"));
+			response.put("urbanlandarea", String.valueOf(rs.getLong("urbanlandarea")));
+			response.put("rurallandarea", String.valueOf(rs.getLong("rurallandarea")));
+		}
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {

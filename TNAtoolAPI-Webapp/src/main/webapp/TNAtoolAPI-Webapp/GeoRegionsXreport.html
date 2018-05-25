@@ -118,6 +118,7 @@ $(document).ready(function(){
 			fMedian.push(item.MedianFare);							    
 			
 			$('#displayReport').append($(html));	
+			buildPopTable(item, $("table#RT > tbody"));			
 			progressbar.remove();
 			
 			tableProperties.paging = false;
