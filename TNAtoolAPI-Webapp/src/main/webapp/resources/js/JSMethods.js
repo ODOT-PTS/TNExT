@@ -1231,6 +1231,7 @@ function buildPopTable(item, elem) {
 	var tba;
 	var tbd;
 	$.each(data, function(key,v) {
+		var lkey = key.toLowerCase();
 		if (v.density) {
 			tba = nowhere;
 			tbd = tb;
@@ -1239,25 +1240,26 @@ function buildPopTable(item, elem) {
 			tbd = nowhere;
 		}
 		var order = [
+			// value, table, description, notes, tooltip
 			// within x
-			[tba, key+' served '+v.units, '(1)', v.served[0] + v.served[1]],
-			[tba, 'Urban '+key.toLowerCase()+' served '+v.units, '(1)', v.served[0]],
-			[tba, 'Rural '+key.toLowerCase()+' served '+v.units, '(1)', v.served[1]],
-			[tbd, key+' density of area served '+v.units, '(1)', (v.served[0] + v.served[1])/(land_u_x+land_r_x)],
-			[tbd, key+' density of urban area served '+v.units, '(1)', v.served[0]/land_u_x],
-			[tbd, key+' density of rural area served '+v.units, '(1)', v.served[1]/land_r_x],
+			[v.served[0] + v.served[1], tba, key+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all census blocks within an X-mile radius of all stops in the given area'],
+			[v.served[0], tba, 'Urban '+lkey+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all urban census blocks within an X-mile radius of all stops in the given area'],
+			[v.served[1], tba, 'Rural '+lkey+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all rural census blocks within an X-mile radius of all stops in the given area'],
+			[(v.served[0] + v.served[1])/(land_u_x+land_r_x), tbd, key+' density of area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.served[0]/land_u_x, tbd, key+' density of urban area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all urban census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.served[1]/land_r_x, tbd, key+' density of rural area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all rural census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
 			// los
-			[tba, key+' served at level of service '+v.units, '(1)(2)(3)', v.los[0] + v.los[1]],
-			[tba, 'Urban '+key.toLowerCase()+' served at level of service '+v.units, '(1)(2)(3)', v.los[0]],
-			[tba, 'Rural '+key.toLowerCase()+' served at level of service '+v.units, '(1)(2)(3)', v.los[1]],
-			[tbd, key+' density of area served at level of service '+v.units, '(1)(2)(3)', (v.los[0] + v.los[1])/(land_u_los+land_r_los)],
-			[tbd, key+' density of urban area served at level of service '+v.units, '(1)(2)(3)', v.los[0]/land_u_los],
-			[tbd, key+' density of rural area served at level of service '+v.units, '(1)(2)(3)', v.los[1]/land_r_los],
+			[v.los[0] + v.los[1], tba, key+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all census blocks served at the specified level of service in the given area'],
+			[v.los[0], tba, 'Urban '+lkey+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all urban census blocks served at the specified level of service in the given area'],
+			[v.los[1], tba, 'Rural '+lkey+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all rural census blocks served at the specified level of service in the given area'],
+			[(v.los[0] + v.los[1])/(land_u_los+land_r_los), tbd, key+' density of area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.los[0]/land_u_los, tbd, key+' density of urban area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all urban census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.los[1]/land_r_los, tbd, key+' density of rural area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all rural census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile.'],
 		]
 		order.forEach(function(i) {
-			var row = $("<tr />").appendTo(i[0]);
-			$("<td />").text(i[1]).addClass('metric').append($("<span />").text(i[2]).addClass('IOSym')).appendTo(row);
-			$("<td />").text(nc(i[3])).appendTo(row);
+			var row = $("<tr />").appendTo(i[1]);
+			$("<td />").attr('title',i[4]).text(i[2]).addClass('metric').append($("<span />").text(i[3]).addClass('IOSym')).appendTo(row);
+			$("<td />").text(nc(i[0])).appendTo(row);
 		})
 	});
 }
