@@ -3921,6 +3921,9 @@ public class Queries {
 		response.RPopServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rpopatlos")));
 		response.racServedAtLoService = String.valueOf(Math.round(10000.0*racatLOS/instance.getEmployment())/100.0);
 	   
+		response.ULandareaAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("urbanlandarea")));
+		response.RLandareaAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rurallandarea")));
+
 		response.UracServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("uracatlos")));
 		response.RracServedAtLoService = String.valueOf(Long.parseLong(servicemetrics.get("rracatlos")));
 		response.wacServedAtLoService = String.valueOf(Math.round(10000.0*wacatLOS/instance.getEmployee())/100.0);

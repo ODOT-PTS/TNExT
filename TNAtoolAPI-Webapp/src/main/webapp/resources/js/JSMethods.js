@@ -1194,10 +1194,11 @@ function buildPopTable(item, elem) {
 		return v.toLocaleString();
 	}
 	var r = {};
+	// square miles
 	var land_u_x = parseInt(item.ULandareaWithinX) / (1e6 / 0.386102);
 	var land_r_x = parseInt(item.RLandareaWithinX) / (1e6 / 0.386102);
-	var land_u_los = land_u_x * 0.5;
-	var land_r_los = land_r_x * 0.5;
+	var land_u_los = parseInt(item.ULandareaAtLoService) / (1e6 / 0.386102);
+	var land_r_los = parseInt(item.RLandareaAtLoService) / (1e6 / 0.386102);
 	var data = {
 		'Land area': {
 			served: [land_u_x, land_r_x],

@@ -1996,8 +1996,10 @@ public class PgisEventManager {
         	response.put("svcdays", String.valueOf(rs.getString("svdays")));
         	response.put("fromtime", String.valueOf(rs.getInt("fromtime")));
         	response.put("totime", String.valueOf(rs.getInt("totime")));
-        	response.put("connections", rs.getString("connections"));        	                      
-        }
+			response.put("connections", rs.getString("connections"));
+			response.put("urbanlandarea", String.valueOf(rs.getLong("urbanlandarea")));
+			response.put("rurallandarea", String.valueOf(rs.getLong("rurallandarea")));
+		}
         rs.close();
         stmt.close();        
       } catch ( Exception e ) {
