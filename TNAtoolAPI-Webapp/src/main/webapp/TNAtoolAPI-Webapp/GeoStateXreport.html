@@ -98,12 +98,6 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Urban Population Served<span class="IOSym">(1)</span></td><td>' + numberconv(item.UPopWithinX)
 			+'</td></tr><tr><td class="metric">Rural Population Served<span class="IOSym">(1)</span></td><td>' + numberconv(item.RPopWithinX) 
 
-			// Density
-			+'</td></tr><tr><td class="metric">Urban Area Served (sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.ULandareaWithinX) / (1e6 / 0.386102)))
-			+'</td></tr><tr><td class="metric">Rural Area Served (sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.RLandareaWithinX) / (1e6 / 0.386102)))
-			+'</td></tr><tr><td class="metric">Population Density of Urban Area Served (people/sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.UPopWithinX) / parseInt(item.ULandareaWithinX) * (1e6 / 0.386102)))
-			+'</td></tr><tr><td class="metric">Population Density of Rural Area Served (people/sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.RPopWithinX) / parseInt(item.RLandareaWithinX) * (1e6 / 0.386102)))
-
             +'</td></tr><tr><td class="metric">Percent of Population Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.PopServed))
 			+'</td></tr><tr><td class="metric">Percent of Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.PopServedAtLoService))
 			+'</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.UPopServedAtLoService)			
@@ -125,7 +119,6 @@ $(document).ready(function(){
            //WAC
            if(popYear==2010){ 
 			   html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."> Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
-			+'</td></tr><tr id="wac3"><td  class="metric">Employees Served Density (jobs/sq.mi.)<span class="IOSym">(1)</span></td><td>' + numberconv(Math.round(parseInt(item.wacWithinX) / (parseInt(item.ULandareaWithinX) + parseInt(item.ULandareaWithinX)) * (1e6 / 0.386102)))
 			+'</td></tr><tr id="wac3"><td  class="metric">Percent of Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.wacServed))
 			+'</td></tr><tr id="wac4"><td  class="metric">Percent of Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.wacServedAtLoService))
 			+'</td></tr><tr id="wac5"><td  class="metric">Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalwacServedAtLoService)			
@@ -151,9 +144,10 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Median Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MedianFare)
 			+'</td></tr><tr><td class="metric">Maximum Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MaxFare)+'</td>';
 			html +='</tr></tbody></table>';	
-	
 			
 			$('#displayReport').append($(html));
+			buildPopTable(item, $("table#RT > tbody"));
+
 			areaName = item.AreaName;
 			popWithinX = numberconv(item.PopServed);
 			popServedLOS = numberconv(item.PopServedAtLoService);
@@ -165,6 +159,7 @@ $(document).ready(function(){
 			tableProperties.unsortableCols = [0,1];
 		
 			table = buildDatatables();
+
 			
 			// append toopltips
 			var tooltips = populateMetricDefs();

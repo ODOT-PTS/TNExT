@@ -1179,3 +1179,77 @@ function showAgencyPicker() {
 		}
 	});
 }
+
+///////////////
+// Population table
+///////////////
+
+function buildPopTable(item, elem) {
+	function nc(v) {
+		v = Number(v)
+		if (!(v%1 === 0)) { v = v.toFixed(2) }
+		return v.toLocaleString();
+	}
+	var r = {};
+	var land_u_x = parseInt(item.ULandareaWithinX) / (1e6 / 0.386102);
+	var land_r_x = parseInt(item.RLandareaWithinX) / (1e6 / 0.386102);
+	var land_u_los = land_u_x * 0.5;
+	var land_r_los = land_r_x * 0.5;
+	var data = {
+		'Land area (sq.mi.)': {
+			served: [land_u_x, land_r_x],
+			los: [land_u_los, land_r_los],
+		},
+		'Population': {
+			served: [parseInt(item.UPopWithinX), parseInt(item.RPopWithinX)],
+			los: [parseInt(item.UPopServedAtLoService), parseInt(item.RPopServedAtLoService)],
+			density: true
+		},
+		'Employment': {
+			served: [parseInt(item.UwacWithinX), parseInt(item.RwacWithinX)],
+			los: [parseInt(item.UwacServedAtLoService), parseInt(item.RwacServedAtLoService)],
+			density: true
+		},
+		'Employee': {
+			served: [parseInt(item.UracWithinX), parseInt(item.RracWithinX)],
+			los: [parseInt(item.UracServedAtLoService), parseInt(item.RracServedAtLoService)],
+			density: true
+		}
+	}
+	// var t = elem;
+	// var tb = $("<tbody />").appendTo(t);
+	var tb = elem;
+	var nowhere = $("<div />");
+	var tba;
+	var tbd;
+	$.each(data, function(key,v) {
+		if (v.density) {
+			tba = nowhere;
+			tbd = tb;
+		} else {
+			tba = tb;
+			tbd = nowhere;
+		}
+		var order = [
+			// within x
+			[tba, key + ' served', '(1)', v.served[0] + v.served[1]],
+			[tba, 'Urban '+key.toLowerCase()+' served', '(1)', v.served[0]],
+			[tba, 'Rural '+key.toLowerCase()+' served', '(1)', v.served[1]],
+			[tbd, key+' density of area served', '(1)', (v.served[0] + v.served[1])/(land_u_x+land_r_x)],
+			[tbd, key+' density of urban area served', '(1)', v.served[0]/land_u_x],
+			[tbd, key+' density of rural area served', '(1)', v.served[1]/land_u_x],
+			// los
+			[tba, key+' served at level of service', '(1)(2)(3)', v.los[0] + v.los[1]],
+			[tba, 'Urban '+key.toLowerCase()+' served at level of service', '(1)(2)(3)', v.los[0]],
+			[tba, 'Rural '+key.toLowerCase()+' served at level of service', '(1)(2)(3)', v.los[1]],
+			[tbd, key+' density of area served at level of service', '(1)(2)(3)', (v.los[0] + v.los[1])/(land_u_los+land_r_los)],
+			[tbd, key+' density of urban area served at level of service', '(1)(2)(3)', v.los[0]/land_u_los],
+			[tbd, key+' density of rural area served at level of service', '(1)(2)(3)', v.los[1]/land_r_los],
+		]
+		order.forEach(function(i) {
+			var row = $("<tr />").appendTo(i[0]);
+			$("<td />").text(i[1]).addClass('metric').append($("<span />").text(i[2]).addClass('IOSym')).appendTo(row);
+			$("<td />").text(nc(i[3])).appendTo(row);
+		})
+	});
+}
