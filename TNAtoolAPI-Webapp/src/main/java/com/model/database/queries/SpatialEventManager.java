@@ -247,7 +247,7 @@ public class SpatialEventManager {
 			Statement stmt
 			) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
-		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+		String query = "with aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true), "
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID + "' "
 				+ "	where startdate::int<= " + fulldate + "  and enddate::int>= " + fulldate + "  and  " + day + " = 1 and serviceid_agencyid||serviceid_id "
