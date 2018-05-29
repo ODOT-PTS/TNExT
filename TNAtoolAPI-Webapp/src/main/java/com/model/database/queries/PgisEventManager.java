@@ -2047,7 +2047,6 @@ public class PgisEventManager {
       if (agencyId==null){
     	  query += "aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true),";
     	  join = "left";
-    	  aidsjoin = "inner join aids on map.agencyid=aids.usa_agencyid";
       }else {
     	  join = "inner";
     	  if(type==3){
@@ -2704,7 +2703,7 @@ public class PgisEventManager {
 		if(geotype==-1||geotype==3)
 		{
 		mainquery += "with aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true), stops as (select map.agencyid as agencyid, count(id) "
-			+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aids.usa_defaultid "
+			+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on map.agencyid=aids.usa_agencyid "
 			+ "where "+criteria+"='"+areaId+"' group by map.agencyid), agencies as (select agencies.id as id, name, fareurl, phone, url, feedname, version, startdate, enddate, "
 			+ "publishername, publisherurl from gtfs_agencies agencies inner join stops on agencies.id = stops.agencyid inner join gtfs_feed_info info on "
 			+ "agencies.defaultid=info.defaultid ), fare as (select frule.route_agencyid as aid, frule.route_id as routeid, (round(avg(ftrb.price)*100))::integer as price "
@@ -2728,10 +2727,10 @@ public class PgisEventManager {
 		else
 		{
 			mainquery += "with aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true), stops as (select map.agencyid as agencyid, count(id) "
-				+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aids.usa_defaultid "
+				+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on map.agencyid=aids.usa_agencyid "
 				+ "where "+criteria+"='"+areaId+"' And "+geocriteria+"='"+geoid+"' group by map.agencyid), "	
 				+"stops1 as (select map.agencyid as agencyid, id as stop "
-				+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aids.usa_defaultid "
+				+ " from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on map.agencyid=aids.usa_agencyid "
 				+ "where "+criteria+"='"+areaId+"' And "+geocriteria+"='"+geoid+"'),"
 						+ "agencies as (select agencies.id as id, name, fareurl, phone, url, feedname, version, startdate, enddate, "
 				+ "publishername, publisherurl from gtfs_agencies agencies inner join stops on agencies.id = stops.agencyid inner join gtfs_feed_info info on "
@@ -2912,7 +2911,7 @@ public class PgisEventManager {
 			if (route==null){
 				if (agency==null){//stops by areaId
 					mainquery +="aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true), ";
-					stopsfilter = "inner join aids on stop.agencyid=aids.usa_defaultid and "+criteria+"='"+areaId+"' ";					
+					stopsfilter = "inner join aids on map.agencyid=aids.usa_agencyid and "+criteria+"='"+areaId+"' ";					
 				}else {//stops by areaId and agency
 					stopsfilter = "where map.agencyid='"+agency+"' and "+criteria+"='"+areaId+"'";
 					agenciesfilter = "where agencies.id='"+agency+"'";
@@ -5974,7 +5973,9 @@ public class PgisEventManager {
 		String query="";
 		Statement stmt = null;
 		HashMap<String, Long> response = new HashMap<String, Long>();
-		query = "WITH counties AS (SELECT count(countyid) AS county, stateid FROM census_counties GROUP BY stateid), "
+		query = "WITH "
+		        + "aids as (SELECT DISTINCT a.id AS agencyid, a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
+		        + "counties AS (SELECT count(countyid) AS county, stateid FROM census_counties GROUP BY stateid), "		
 				+ "tracts AS (SELECT COUNT(tractid) AS tract, stateid FROM census_tracts GROUP BY stateid), "
 				+ "places AS (SELECT COUNT(placeId) AS place, stateid FROM census_places GROUP BY stateid), "
 				+ "urbanized_areas AS (SELECT COUNT(urbanId) AS urbanized_area, stateid "
@@ -5994,10 +5995,11 @@ public class PgisEventManager {
 				+ "agencies AS (SELECT COUNT(DISTINCT map.agencyid) AS agency,stateid"
 				+ "		FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
 				+ "		ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+				+ "     INNER JOIN aids ON map.agencyid = aids.agencyid "				
 				+ "		GROUP BY stops.stateid),"
-				+ "stops AS (SELECT COUNT(id) AS stop, stateid FROM gtfs_stops GROUP BY stateid),"
+				+ "stops AS (SELECT COUNT(id) AS stop, stateid FROM gtfs_stops INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def INNER JOIN aids ON map.agencyid = aids.agencyid GROUP BY stateid),"
 				+ "trip_states_map AS (SELECT times.trip_id, stops.stateid from  gtfs_stop_times AS times inner join gtfs_stops as stops ON times.stop_id = stops.id AND times.stop_agencyid = stops.agencyid GROUP BY stateid,trip_id),"
-				+ "routes AS (SELECT COUNT(DISTINCT(route_id, route_agencyid)) AS route, stateid FROM gtfs_trips INNER JOIN trip_states_map ON gtfs_trips.id = trip_states_map.trip_id GROUP BY stateid)"
+				+ "routes AS (SELECT COUNT(DISTINCT(route_id, route_agencyid)) AS route, stateid FROM gtfs_trips INNER JOIN trip_states_map ON gtfs_trips.id = trip_states_map.trip_id INNER JOIN aids ON gtfs_trips.agencyid = aids.agencyid GROUP BY stateid)"
 				+ "SELECT stateid, sname, county, tract, place, urbanized_area, urban_cluster, congdist, region, landarea, stop, "
 				+ "		population" + popYear + " AS pop, urbanpop, ruralpop,rac, wac, agency, route FROM census_states "
 				+ "		INNER JOIN counties USING (stateid)"
