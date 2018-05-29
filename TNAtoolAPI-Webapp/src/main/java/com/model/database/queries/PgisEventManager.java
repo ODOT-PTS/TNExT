@@ -2038,8 +2038,8 @@ public class PgisEventManager {
       String selectquery = "";
       String query = "with ";
       String join = "";
-      String aidsjoin = "";
-      String routesidsjoin = "";
+      String aidsjoin = "INNER JOIN aids ON map.agencyid = aids.usa_agencyid";
+      String routesidsjoin = "INNER JOIN aids ON map.agencyid = aids.usa_agencyid";
       String routesquery = "";
       String urbanquery="";
       String tractsFilter = "";
@@ -3261,7 +3261,7 @@ public class PgisEventManager {
 		Connection connection = makeConnection(dbindex);		
 		String mainquery ="";
 		mainquery += "with "
-		        + " aids as (SELECT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY a.defaultid), "
+		        + " aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true), "
 				+ "agencies as (select id, name, fareurl, phone, url, feedname, version, startdate, enddate, publishername, publisherurl"
 				+ "		from gtfs_agencies agencies inner join aids on agencies.id = aids.usa_agencyid "
 				+ "		inner join gtfs_feed_info info on agencies.defaultid=info.defaultid), "
@@ -5089,7 +5089,7 @@ public class PgisEventManager {
 		String agencyFilter = "";
 		logger.debug(stime+"-"+etime);
 		if (agency != null){
-			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
+			agencyFilter = " AND usa_agencyid IN (SELECT id FROM gtfs_agencies WHERE id='" + agency + "')";
 		}
 		String mainquery ="with aids as (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true" + agencyFilter + "), svcids as (";
 		Statement stmt = null;
@@ -5101,7 +5101,7 @@ public class PgisEventManager {
 			if (i+1<date.length)
 				mainquery+=" union all ";
 		}
-		mainquery +="), trips as (select agencyid as aid, id as tripid,count(id) as servicecount from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id )group by id,aid), "
+		mainquery +="), trips as (select agencyid, id as tripid, count(id) as servicecount from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids on agencyid = aids.usa_agencyid GROUP BY id, agencyid), "
 				+"triptimes as (SELECT times.trip_agencyid, times.trip_id, FLOOR(MIN(arrivaltime)/3600) AS arrival_hour, FLOOR(MIN(arrivaltime)%3600/60) AS arrival_minute, FLOOR((MIN(arrivaltime)%3600%60)/60) AS arrival_second, "
 	 			+" 	FLOOR(MAX(departuretime)/3600) AS departure_hour, FLOOR(MAX(departuretime)%3600/60) AS departure_minute, FLOOR((MAX(departuretime)%3600%60)/60) AS departure_second,servicecount"
 	 		    +"	FROM trips INNER JOIN gtfs_stop_times AS times "
@@ -5109,15 +5109,15 @@ public class PgisEventManager {
 				+"WHERE times.arrivaltime > 0 "
 	 			+"GROUP BY times.trip_agencyid, times.trip_id,servicecount),"
 	 			+"trips1 as ( select trip_agencyid as aid ,trip_id as tripid,(arrival_hour*100+arrival_minute),arrival_hour,arrival_minute,servicecount from triptimes where (arrival_hour*100+arrival_minute) between "+stime+" and "+etime+" ),"	
-				+ "stopservices0 as (select stime.stop_agencyid as aid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips1.aid)*servicecount,0) as service "
+				+ "stopservices0 as (select stime.trip_agencyid as aid, stime.stop_id as stopid, COALESCE(count(trips1.aid)*servicecount,0) as service "
 				+ "		from gtfs_stop_times stime JOIN trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid "
-				+ "		group by stime.stop_agencyid, stime.stop_id,servicecount), "
+				+ "		group by stime.trip_agencyid, stime.stop_id,servicecount), "
 				+"stopservices01 as (select aid,stopid, sum(service)as service from stopservices0 group by stopid,aid),"
-				+ "stopservices1 as (select stop_agencyid as aid, stop_agencyid||stop_id as stopid, 0 as service "
+				+ "stopservices1 as (select trip_agencyid as aid, stop_id as stopid, 0 as service "
 				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices01) "
-				+ "		group by stop_agencyid, stop_id), "
+				+ "		group by trip_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices01 UNION ALL select * from stopservices1)"
-				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices USING(aid)";
+				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices ON aids.usa_agencyid = stopservices.aid";
 		try{
 				stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(mainquery);
