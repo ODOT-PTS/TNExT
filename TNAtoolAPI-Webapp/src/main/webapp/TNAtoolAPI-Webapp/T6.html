@@ -46,7 +46,9 @@
 	    $(document).ready(function() {
 	    	$('.sb-slidebar').css('width', '28%');
 	    	loadDBList();
-	    	updateToolTips();
+			updateToolTips();
+			$('button.feedpicker').click(feedPickerShow);
+		    feedPickerUpdateStatus();
 	    	go(key);
 	    	
 	    	$('.ui-accordion-content').css('padding', '0px 0px');

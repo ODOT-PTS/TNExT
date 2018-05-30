@@ -71,7 +71,10 @@ $(document).ready(function(){
 	$("#Sradius").val(w_qstringx);
 	loadDBList();
 	updateToolTips();
-	progressBar()
+	progressBar();
+	$('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+
 	
 	$.ajax({
 		type: 'GET',

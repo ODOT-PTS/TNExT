@@ -61,6 +61,8 @@
 	$(document).ready(function(){
 		// init map
 		initTimingConnectionMap();
+		$('button.feedpicker').click(feedPickerShow);
+	    feedPickerUpdateStatus();
 
 		$('h2').append('Timing-Connection Report <br><hr>');
 		$('#mapDialog').hide(); // hides the map dialog box

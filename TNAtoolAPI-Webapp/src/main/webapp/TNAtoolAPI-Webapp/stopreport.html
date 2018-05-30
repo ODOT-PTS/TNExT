@@ -77,6 +77,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();		
+	$('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	go(key);
 	  $('input.timepicker').timepicker({timeFormat: 'H:mm',scrollbar:true});
 	  $('input.timepicker1').timepicker({timeFormat: 'H:mm',scrollbar:true});

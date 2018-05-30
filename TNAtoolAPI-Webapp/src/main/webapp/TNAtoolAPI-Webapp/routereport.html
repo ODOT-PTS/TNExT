@@ -71,6 +71,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();	
+	$('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	go(key);
 	
 	var url = '/TNAtoolAPI-Webapp/queries/transit/RoutesR?';

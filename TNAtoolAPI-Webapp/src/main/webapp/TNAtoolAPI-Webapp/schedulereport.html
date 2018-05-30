@@ -36,6 +36,9 @@ var w_qstring = getURIParameter("agency");
 
 $(document).ready(function(){
 	loadDBList();
+	$('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	
 	$("#accordion").accordion({
 		collapsible: true,

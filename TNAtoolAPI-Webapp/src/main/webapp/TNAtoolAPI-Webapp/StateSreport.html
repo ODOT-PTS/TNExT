@@ -58,6 +58,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 
 	$.ajax({
 		type: 'GET',
