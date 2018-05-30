@@ -336,7 +336,7 @@ public class PgisEventManager {
 		PnrInCountyList results = new PnrInCountyList();
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String query =	"WITH aids AS (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true order by aid), "
+		String query =	"WITH aids AS (SELECT a.id AS usa_agencyid, a.defaultid AS usa_defaultid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true), "
 				+ "pnr AS (SELECT  parknride.* FROM parknride INNER JOIN census_counties AS counties ON ST_contains(ST_Transform(counties.shape,2993), parknride.geom) WHERE counties.countyid = '" + countyId + "'),"
 				+ "temp1 AS (SELECT pnr.*,	gtfs_stops.name stopname, 	gtfs_stops.id stopid, gtfs_stops.agencyid AS agencyid_def "
 				+ "		FROM pnr LEFT JOIN gtfs_stops "
@@ -1806,7 +1806,7 @@ public class PgisEventManager {
 			+ " ruralrac as (select COALESCE(sum(employment),0) remployment from censusemployment where poptype = 'R'),"
 			+ " urbanwac as (select COALESCE(sum(employee),0) uemployee from censusemployee where poptype = 'U')," 
 			+ " ruralwac as (select COALESCE(sum(employee),0) remployee from censusemployee where poptype = 'R'),"	
-			+ " stopcount as (select count(stops.id) as stopscount from stops) "
+			+ " stopcount as (select count(distinct(stops.id)) as stopscount from stops) "
 			+ " select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop, COALESCE(rpop,0) as ruralpop ,COALESCE(uemployment,0) as urbanemployment, COALESCE(remployment,0) as ruralemployment,COALESCE(uemployee,0) as urbanemployee, COALESCE(remployee,0) as ruralemployee, urbanpop.landarea as urbanlandarea, ruralpop.landarea as rurallandarea "
 			+ " from stopcount"
 			+ " inner join urbanpop on true inner join ruralpop on true inner join ruralrac on true inner join ruralwac on true inner join urbanrac on true inner join urbanwac on true";     
@@ -1890,7 +1890,7 @@ public class PgisEventManager {
      if(geotype==-1||geotype==3){
       query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
       		+ "map.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
-      		+"trip.id = map.tripid and trip.agencyid = map.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"'),service as (select COALESCE(sum(length),0) as svcmiles,"
+      		+"trip.id = map.tripid and trip.agencyid = map.agencyid INNER JOIN aids ON trip.agencyid = aids.usa_agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"'),service as (select COALESCE(sum(length),0) as svcmiles,"
       		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
       		+ "stop.location as location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and "
       		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by "
@@ -1933,7 +1933,7 @@ public class PgisEventManager {
     	 query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
     	      		+ "map.stopscount as stops,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1 from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
     	      		+"trip.id = map.tripid and trip.agencyid = map.agencyid inner join "+Types.getTripMapTableName(geotype)+ " maps on "
-    	      		+"trip.id = maps.tripid and trip.agencyid = maps.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"' And maps."+Types.getIdColumnName(geotype)+"='"+geoid+"' ),service as (select COALESCE(sum(s1),0) as svcmiles,"
+    	      		+"trip.id = maps.tripid and trip.agencyid = maps.agencyid INNER JOIN aids ON trip.agencyid = aids.usa_agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"' And maps."+Types.getIdColumnName(geotype)+"='"+geoid+"' ),service as (select COALESCE(sum(s1),0) as svcmiles,"
     	      		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
     	      		+ "stop.location as location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and "
     	      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by "
@@ -3478,7 +3478,7 @@ public class PgisEventManager {
       		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) as upop from census ),"
       		+"wac as (select sum(C000) as wac from lodes_blocks_wac join census using(blockid)),"
           +"rac as (select sum(C000_"+popYear+") as rac from lodes_rac_projection_block join census using(blockid)),"
-            +"stopcount as (select count(stops.id) as stopscount from stops)"
+            +"stopcount as (select count(distinct(stops.id)) as stopscount from stops)"
             +"select COALESCE(stopscount,0) as stopscount, COALESCE(upop,0) as urbanpop,rac,wac from stopcount inner join urbanpop on true inner join wac on true inner join rac on true ";
 
       long[] results = new long[7];
@@ -3536,7 +3536,7 @@ public class PgisEventManager {
 		} 
 		 query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount"
     		+ " 	as stops "
-    		+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    		+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     		+ "		inner join census_urbans_trip_map map on trip.id = map.tripid and "
     		+ "		trip.agencyid = map.agencyid inner join areas on areas.urbanid = map.urbanid), "
     		+ "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
@@ -4094,7 +4094,7 @@ public class PgisEventManager {
       {
       query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((trip.length+trip.estlength)::numeric,2) as length,"
       		+ "		trip.tlength as tlength, trip.stopscount as stops "
-      		+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+      		+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
       		+ "		where trip.agencyid ='"+agencyId+"'), "
 			+ "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
 			+ "		from trips), "
@@ -4140,7 +4140,7 @@ public class PgisEventManager {
       {
     	  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
     	  + "	map.tlength as tlength, map.stopscount as stops,trip.stopscount as ss "
-    	  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    	  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     	  + "	inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     	  + "	where trip.agencyid ='"+agencyId+"' and map.countyid='"+areaid+"' ),"
     	  + "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
@@ -4186,7 +4186,7 @@ public class PgisEventManager {
       {    	  
     	  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
 				+ "		map.tlength as tlength, map.stopscount as stops,trip.stopscount as  ss "
-				+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+				+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
 				+ "		inner join census_tracts_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
 				+ "		where trip.agencyid ='"+agencyId+"' and map.tractid='"+areaid+"' ),"
 				+ "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
@@ -4237,7 +4237,7 @@ public class PgisEventManager {
       else if (type==2){// census places
     	  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
 				+ "		map.tlength as tlength, map.stopscount as stops,trip.stopscount as  ss "
-				+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+				+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
 				+ "		inner join census_places_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
 				+ "		where trip.agencyid ='"+agencyId+ "' and map.placeid='"+areaid+ "' ),"
 				+ "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips)," 
@@ -4285,7 +4285,7 @@ public class PgisEventManager {
     	  {
     		  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
     				  + "		map.tlength as tlength, map.stopscount as stops,trip.stopscount as ss "
-    				  + "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    				  + "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     				  + "		inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     				  + "		where trip.agencyid ='"+agencyId+ "' and map.urbanid='"+areaid+ "' ),"
     				  + "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
@@ -4334,7 +4334,7 @@ public class PgisEventManager {
     		  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
     				  + "	map.tlength as tlength,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1,"
     				  + "	map.stopscount as stops,trip.stopscount as ss "
-    				  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    				  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid  "
     				  + "	inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     				  + "	inner join census_counties_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid "
     				  + "	where trip.agencyid ='"+agencyId+ "' and map.urbanid='"+areaid+ "' AND maps.countyid='"+geoid+ "' ),"
@@ -4383,7 +4383,7 @@ public class PgisEventManager {
     		  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
 					+ "		map.tlength as tlength,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1, "
 					+ "		map.stopscount as stops,trip.stopscount as  ss "
-					+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+					+ "		from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
 					+ "		inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_tracts_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid  where trip.agencyid ='"+agencyId+"' and map.urbanid='"+areaid+"' AND maps.tractid='"+geoid+"' ),"
 					+ "service as (select COALESCE(sum(s1),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
 					+ "		from trips)," 
@@ -4431,7 +4431,7 @@ public class PgisEventManager {
     		  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length,"
     				  + "	map.tlength as tlength,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1, "
     				  + "	map.stopscount as stops,trip.stopscount as  ss "
-    				  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    				  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     				  + "	inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     				  + "	inner join census_places_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid  "
     				  + "	where trip.agencyid ='"+agencyId+ "' and map.urbanid='"+areaid+ "' AND maps.placeid='"+geoid+ "' ),"
@@ -4483,7 +4483,7 @@ public class PgisEventManager {
     				  + "trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
     				  + "	map.tlength as tlength,(ST_Length(st_transform(st_intersection(regions.rshape, map.shape),2993))/1609.34) as s1, "
     				  + "	map.stopscount as stops,trip.stopscount as  ss "
-    				  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    				  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     				  + "	inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     				  + "	cross join regions   "
     				  + "	where trip.agencyid ='"+agencyId+"' and map.urbanid='"+areaid+"' ),"
@@ -4531,7 +4531,7 @@ public class PgisEventManager {
     	  else if(geotype==5)//congressional districts 
     	  {
     		  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
-    				  + "	map.tlength as tlength,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1, map.stopscount as stops,trip.stopscount as  ss from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_congdists_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid  where trip.agencyid ='"+agencyId+ "' and map.urbanid='"+areaid+ "' AND maps.congdistid='"+geoid+ "' ),"
+    				  + "	map.tlength as tlength,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1, map.stopscount as stops,trip.stopscount as  ss from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_congdists_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid  where trip.agencyid ='"+agencyId+ "' and map.urbanid='"+areaid+ "' AND maps.congdistid='"+geoid+ "' ),"
     				  + "service as (select COALESCE(sum(s1),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
     				  + "	from trips)," 
     				  + "stops as (select stop.blockid, trips.aid as aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, "
@@ -4578,7 +4578,7 @@ public class PgisEventManager {
       else if (type==4){//ODOT regions 
     	  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, "
     			  + "	map.tlength as tlength, map.stopscount as stops,trip.stopscount as ss "
-    			  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    			  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     			  + "	inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     			  + "	where trip.agencyid ='"+agencyId+ "' and map.regionid='"+areaid+ "' ),"
     			  + "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
@@ -4624,7 +4624,7 @@ public class PgisEventManager {
       else if (type==5){//congressional districts 
     	  query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
     			  + "	map.stopscount as stops,trip.stopscount as ss "
-    			  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+    			  + "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.usa_agencyid "
     			  + "	inner join census_congdists_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid "
     			  + "	where trip.agencyid ='"+agencyId+ "' and map.congdistid='"+areaid+ "' ),"
     			  + "service as (select COALESCE(sum(length),0) as svcmiles, COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops "
@@ -5151,12 +5151,12 @@ public class PgisEventManager {
 				mainquery+=" union all ";
 		}
 		mainquery +="), trips as (select agencyid, id as tripid from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON agencyid=aids.usa_agencyid), "
-				+ "stopservices0 as (select stime.trip_agencyid as trip_agencyid, stime.stop_agencyid||stime.stop_id as stopid, COALESCE(count(trips.aid),0) as service "
+				+ "stopservices0 as (select stime.trip_agencyid as trip_agencyid, stime.stop_id as stopid, COALESCE(count(trips.agencyid),0) as service "
 				+ "		from gtfs_stop_times stime JOIN trips on stime.trip_agencyid =trips.agencyid and stime.trip_id=trips.tripid "
-				+ "		group by stime.stop_agencyid, stime.stop_id), "
-				+ "stopservices1 as (select trip_agencyid, stop_agencyid||stop_id as stopid, 0 as service "
-				+ "		FROM gtfs_stop_times  where stop_agencyid||stop_id NOT IN (SELECT stopid FROM stopservices0) "
-				+ "		group by stop_agencyid, stop_id), "
+				+ "		group by stime.trip_agencyid, stime.stop_id), "
+				+ "stopservices1 as (select trip_agencyid, stop_id as stopid, 0 as service "
+				+ "		FROM gtfs_stop_times  where stop_id NOT IN (SELECT stopid FROM stopservices0) "
+				+ "		group by trip_agencyid, stop_id), "
 				+ "stopservices as (select * from stopservices0 UNION ALL select * from stopservices1)"
 				+ " select stopservices.stopid, stopservices.service from aids INNER JOIN stopservices ON stopservices.trip_agencyid = aids.usa_agencyid";
 			try{
