@@ -46,7 +46,9 @@
 	    $(document).ready(function() {
 	    	$('.sb-slidebar').css('width', '28%');
 	    	loadDBList();
-	    	updateToolTips();
+			updateToolTips();
+			$('button.feedpicker').click(feedPickerShow);
+		    feedPickerUpdateStatus();
 	    	go(key);
 	    	
 	    	$('.ui-accordion-content').css('padding', '0px 0px');
@@ -264,6 +266,7 @@
 			
 		<div class="headerR">
 			<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+			<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
 			<input type="button" style="margin-right:10px; height:81%" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 		</div>
 	</div>

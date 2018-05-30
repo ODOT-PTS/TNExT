@@ -36,6 +36,9 @@ var w_qstring = getURIParameter("agency");
 
 $(document).ready(function(){
 	loadDBList();
+	$('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	
 	$("#accordion").accordion({
 		collapsible: true,
@@ -319,6 +322,7 @@ function reload(){
 				<!-- <input type="button" onclick="exportbutton()" title="Export Report"  value="Export Report" class="button" />
 				<input type="button" onclick="printbutton()" title="Print Report"  value="Print Report" class="button" /> -->
 				<select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input' onchange='reloadPage()'></select>
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button" />
 			</div>
 		</div>	

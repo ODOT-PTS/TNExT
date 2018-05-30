@@ -6579,7 +6579,7 @@ public class PgisEventManager {
 			+ "   SELECT ?::text AS username, a.id, CASE WHEN id = ANY(?) THEN true ELSE false END AS hidden "
 			+ "   FROM gtfs_agencies AS a "
 			+ "   LEFT OUTER JOIN user_selected_agencies AS b"
-			+ "     ON (b.username = ? AND a.id = b.agency_id)"
+			+ "     ON (b.username = ? AND a.defaultid = b.agency_id)"
 			+ "   WHERE b.hidden = true OR a.id = ANY(?)"
 			+ " ) ON CONFLICT (username, agency_id) DO UPDATE SET hidden = EXCLUDED.hidden"
 			+ "";
@@ -6607,7 +6607,7 @@ public class PgisEventManager {
 		
 		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
 			// query ="select id,name,defaultid from gtfs_agencies";
-			query = "SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
+			query = "SELECT a.id,a.name,a.defaultid,b.hidden,f.feedname,f.startdate,f.enddate FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) INNER JOIN gtfs_feed_info f ON f.defaultid = a.defaultid ORDER BY name";
 
 			try {
 		        stmt = connection.createStatement();
@@ -6618,7 +6618,10 @@ public class PgisEventManager {
 		        	a.Agencyname=rs.getString("name");
 					a.DefaultId=rs.getString("defaultid");
 					a.Hidden=rs.getBoolean("hidden");
-		        	  r.put(a.Agencyname, a);     
+					a.Feedname=rs.getString("feedname");
+					a.StartDate=rs.getString("startdate");
+					a.EndDate=rs.getString("enddate");
+		        	r.put(a.Agencyname, a);     
 		        }
 				 rs.close();
 				 stmt.close(); 

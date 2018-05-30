@@ -52,6 +52,9 @@ var metadata  = '';
 $(document).ready(function(){
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	dbindex = window.opener.dbindex;
 	areas = window.opener.areas;
 	agencies = window.opener.agencies;
@@ -423,8 +426,8 @@ $(document).ready(function(){
 		</div>
 
 		<div class="headerR">
-			<input type="button" onclick="window.close()" title="Close Report"
-				value="Close Report" class="button" />
+			<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>										
+			<input type="button" onclick="window.close()" title="Close Report" value="Close Report" class="button" />
 		</div>
 	</div>
 	<table id="controls">

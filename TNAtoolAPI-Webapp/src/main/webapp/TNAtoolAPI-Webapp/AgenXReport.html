@@ -69,6 +69,9 @@
 						loadDBList();
 						updateToolTips();
 						progressBar();
+						$('button.feedpicker').click(feedPickerShow);
+					    feedPickerUpdateStatus();
+
 						go(key);
 						$.ajax({
 							type : 'GET',
@@ -144,11 +147,10 @@
 				/ Employment Source</label><select id='popselect'
 				data-label='Population Source' name='popYear' class='input dropDown'
 				onchange='reloadPage()'></select> <label for="dbselect"
-				style="margin-right: 0.5em; font-weight: bold">GTFS Source</label><select
-				disabled id='dbselect' data-label='GTFS Source' name='dbindex'
-				class='input dropDown' onchange='reloadPage()'></select> <input
-				type="button" onclick="window.close()" title="Close Report"
-				value="Close Report" class="button closeButton" />
+				style="margin-right: 0.5em; font-weight: bold">GTFS Source</label>
+				<select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>											
+				<input type="button" onclick="window.close()" title="Close Report" value="Close Report" class="button closeButton" />
 		</div>
 	</div>
 
