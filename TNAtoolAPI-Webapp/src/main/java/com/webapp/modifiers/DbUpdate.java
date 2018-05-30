@@ -123,7 +123,7 @@ public class DbUpdate {
       c = dbConfig.getConnection();
       statement = c.createStatement();
       rs = statement
-          .executeQuery("SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true");
+          .executeQuery("SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true");
       while (rs.next()) {
         selectedAgencies.add(rs.getString("aid"));
       }
