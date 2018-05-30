@@ -122,14 +122,10 @@ public class DbUpdate {
     try {
       c = dbConfig.getConnection();
       statement = c.createStatement();
-      /*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
-          + "JOIN gtfs_selected_feeds "
-          + "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
-          + "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
       rs = statement
-          .executeQuery("SELECT agency_id FROM gtfs_selected_feeds " + "WHERE username = '" + username + "';");
+          .executeQuery("SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true");
       while (rs.next()) {
-        selectedAgencies.add(rs.getString("agency_id"));
+        selectedAgencies.add(rs.getString("aid"));
       }
     } catch (SQLException e) {
       logger.error(e);

@@ -34,13 +34,13 @@
 
 w_qstringd = getDates(keyName);
 var dateIOnumber = 2;
-var geotype=parseInt(getURIParameter("geotype") || -1);
-var type = parseInt(getURIParameter("type") || 0);
+var geotype=parseInt(getURIParameter("geotype"))  || -1;
+var type = parseInt(getURIParameter("type"))  || 0;
 var areaId = getURIParameter("areaid");
 var geoid = getURIParameter("geoid");
 var route = getURIParameter("route");
 var agency = getURIParameter("agency");
-var rc = parseInt(getURIParameter("rc") || -1);
+var rc = parseInt(getURIParameter("rc"))  || -1;
 var stime = getURIParameter("stime") || "";
 var etime = getURIParameter("etime") || "";
 var table;
