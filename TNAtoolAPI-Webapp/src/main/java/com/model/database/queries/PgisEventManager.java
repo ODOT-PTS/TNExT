@@ -6607,7 +6607,7 @@ public class PgisEventManager {
 		
 		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
 			// query ="select id,name,defaultid from gtfs_agencies";
-			query = "SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
+			query = "SELECT a.id,a.name,a.defaultid,b.hidden,f.feedname,f.startdate,f.enddate FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) INNER JOIN gtfs_feed_info f ON f.defaultid = a.defaultid ORDER BY name";
 
 			try {
 		        stmt = connection.createStatement();
