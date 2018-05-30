@@ -87,6 +87,7 @@ import com.model.database.queries.objects.TitleVIDataFloat;
 import com.model.database.queries.objects.TitleVIDataList;
 import com.model.database.queries.objects.VariantListm;
 import com.model.database.queries.objects.agencyCluster;
+import com.model.database.queries.congraph.ConGraphAgency;
 import com.model.database.queries.util.Types;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -94,6 +95,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+
 
 public class PgisEventManager {
 	final static Logger logger = Logger.getLogger(PgisEventManager.class);	
@@ -200,7 +203,7 @@ public class PgisEventManager {
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       float RouteMiles = 0;      
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
       		+ "trips as (select agencyid, routeid, round(max(length)::numeric,2) as length "
       		+ "		from "+Types.getTripMapTableName(type)+" map inner join aids on map.agencyid_def=aids.aid "
 			+ "		where "+Types.getIdColumnName(type)+" ='"+areaId +"' "
@@ -238,7 +241,7 @@ public class PgisEventManager {
       Statement stmt = null;
       HashMap<String, Float> response = new HashMap<String, Float>();
       ArrayList<Float> faredata = new ArrayList<Float>();
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]+
     			  " and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from " +
@@ -336,7 +339,7 @@ public class PgisEventManager {
 		PnrInCountyList results = new PnrInCountyList();
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
-		String query =	"WITH aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds WHERE username='"+username+"' order by aid), "
+		String query =	"WITH aids AS (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 				+ "pnr AS (SELECT  parknride.* FROM parknride INNER JOIN census_counties AS counties ON ST_contains(ST_Transform(counties.shape,2993), parknride.geom) WHERE counties.countyid = '" + countyId + "'),"
 				+ "temp1 AS (SELECT pnr.*,	gtfs_stops.name stopname, 	gtfs_stops.id stopid, gtfs_stops.agencyid AS agencyid_def "
 				+ "		FROM pnr LEFT JOIN gtfs_stops "
@@ -442,7 +445,7 @@ public class PgisEventManager {
 		List<String> result = new ArrayList<String>();
 		Connection connection = makeConnection(dbindex);
 	    Statement stmt = null;
-	    String query = "with aids AS (SELECT agency_id AS aid FROM gtfs_selected_feeds where username='" + username + "') "
+	    String query = "with aids AS (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid) "
 	    		+ "SELECT id AS agencyid FROM gtfs_agencies INNER JOIN aids ON gtfs_agencies.defaultid = aids.aid";
 	    try {
 	    	stmt = connection.createStatement();
@@ -482,7 +485,7 @@ public class PgisEventManager {
 	    String query = "";
 	    
 	    if (reportType.equals("Agencies")){ // returns employment data for a specific agency.
-    		query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+    		query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
 	    	for (int i=0; i<dates.length; i++){
 	  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
 	  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -769,7 +772,7 @@ public class PgisEventManager {
 		    	DS = "lodes_rac_projection_block"; projectionYear = "_" + projection;
 		    }
 		    
-		    query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='admin'), svcids AS (";
+		    query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids AS (";
 		    for (int i=0; i<dates.length; i++){
   	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
   	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -1269,7 +1272,7 @@ public class PgisEventManager {
 	    String query = "";
 	    
 	    if (reportType.contains("Agencies")){ // returns title data for a agencies.
-    		query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+    		query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
     		for (int i=0; i<dates.length; i++){
   	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
   	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -1460,7 +1463,7 @@ public class PgisEventManager {
 					criteria5 = "'Region ' || regions.regionid";
 			    }
 			    
-			    query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='admin'), svcids AS (";
+			    query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids AS (";
 			    for (int i=0; i<dates.length; i++){
 	  	    	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
 	  	    	  		+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -1795,7 +1798,7 @@ public class PgisEventManager {
 		  clause2="";
       }
 		querytext = "with"
-			+ " aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'),"
+			+ " aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
 			+ " stops as (select id, agencyid, "+column+", location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid where "+criteria1+"='"+areaId+"' "+clause1+"),"
 			+ " census as (select population"+popYear+" as population,poptype,block.blockid,landarea from census_blocks block inner join stops on st_dwithin(block.location, stops.location, "+String.valueOf(x)+") where "+criteria2 +"='"+areaId+"' "+clause2+" group by block.blockid),"
 			+ " urbanpop as (select COALESCE(sum(population),0) upop, sum(landarea) as landarea from census where poptype = 'U'), "
@@ -1878,7 +1881,7 @@ public class PgisEventManager {
     	  geocriteria = Types.getIdColumnName(type);
       }
       
-      String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
     	  		+ "startdate::int<="+date[i]+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -2045,7 +2048,7 @@ public class PgisEventManager {
       String tractsFilter = "";
       String stopsquery="";
       if (agencyId==null){
-    	  query += "aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),";
+    	  query += "aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),";
     	  join = "left";
     	  aidsjoin = "inner join aids on aid=stop.agencyid";
       }else {
@@ -2703,7 +2706,7 @@ public class PgisEventManager {
 		}
 		if(geotype==-1||geotype==3)
 		{
-		mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select map.agencyid as agencyid, count(id) "
+		mainquery += "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), stops as (select map.agencyid as agencyid, count(id) "
 			+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aid "
 			+ "where "+criteria+"='"+areaId+"' group by map.agencyid), agencies as (select agencies.id as id, name, fareurl, phone, url, feedname, version, startdate, enddate, "
 			+ "publishername, publisherurl from gtfs_agencies agencies inner join stops on agencies.id = stops.agencyid inner join gtfs_feed_info info on "
@@ -2727,7 +2730,7 @@ public class PgisEventManager {
 		}
 		else
 		{
-			mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), stops as (select map.agencyid as agencyid, count(id) "
+			mainquery += "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), stops as (select map.agencyid as agencyid, count(id) "
 				+ "as stops from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id inner join aids on stop.agencyid=aid "
 				+ "where "+criteria+"='"+areaId+"' And "+geocriteria+"='"+geoid+"' group by map.agencyid), "	
 				+"stops1 as (select map.agencyid as agencyid, id as stop "
@@ -2911,8 +2914,8 @@ public class PgisEventManager {
 		      }
 			if (route==null){
 				if (agency==null){//stops by areaId
-					mainquery +="aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), ";
-					stopsfilter = "inner join aids on stop.agencyid=aid and "+criteria+"='"+areaId+"' ";					
+					mainquery +="aids as (SELECT DISTINCT a.id as agencyid, a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), ";
+					stopsfilter = "INNER JOIN aids on map.agencyid=aids.agencyid and "+criteria+"='"+areaId+"' ";					
 				}else {//stops by areaId and agency
 					stopsfilter = "where map.agencyid='"+agency+"' and "+criteria+"='"+areaId+"'";
 					agenciesfilter = "where agencies.id='"+agency+"'";
@@ -3137,7 +3140,7 @@ public class PgisEventManager {
 					+ "trip.agencyid_def=serviceid_agencyid and trip.serviceid=serviceid_id where "+Types.getIdColumnName(type)+"='"+areaId+"'), ";
 			blocksfilter = "where "+bcriteria+"='"+areaId+"' and "+scriteria+"='"+areaId+"'";
 			if (agency==null){//routes by areaId
-				agenciesfilter = "aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), agencies as (select agencies.id as "
+				agenciesfilter = "aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), agencies as (select agencies.id as "
 						+ "agencyid, agencies.name as aname, defaultid from gtfs_agencies agencies inner join aids on aids.aid=agencies.defaultid), ";
 				stopscountfilter = "stopscount AS (SELECT count(distinct (map.stopid||map.agencyid)) AS stops, map.routeid "
 						+ "	FROM gtfs_stop_route_map AS map INNER JOIN gtfs_stops AS stop ON stop.id=map.stopid AND stop.agencyid=map.agencyid_def WHERE " + scriteria + "='" + areaId + "' GROUP BY routeid),";
@@ -3371,7 +3374,7 @@ public class PgisEventManager {
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       float RouteMiles = 0;
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), areas as (select urbanid from census_urbans where "
       		+ "population"+popYear+" Between " +String.valueOf(popmin)+" And "+String.valueOf(popmax)+"), trips as (select agencyid, routeid, round(max(length)::numeric,2) as length from census_urbans_trip_map map inner "
       		+ "join aids on map.agencyid_def=aids.aid inner join areas on areas.urbanid = map.urbanid group by agencyid, routeid) select sum(length) as routemiles from trips";
       try {
@@ -3407,7 +3410,7 @@ public class PgisEventManager {
       Statement stmt = null;
       HashMap<String, Float> response = new HashMap<String, Float>();
       ArrayList<Float> faredata = new ArrayList<Float>();
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where population"+popYear+" Between "
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), areas as (select urbanid from census_urbans where population"+popYear+" Between "
       +String.valueOf(popmin)+" And "+String.valueOf(popmax)+"), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]+
@@ -3473,7 +3476,7 @@ public class PgisEventManager {
     {	
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
-      String querytext = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
+      String querytext = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), areas as (select urbanid from census_urbans where "
       		+ "population"+popYear+" Between "+String.valueOf(popmin)+" And "+String.valueOf(popmax)+"), stops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid inner join areas on "
       		+ "stop.urbanid = areas.urbanid), census as (select population"+popYear+" as population, block.blockid from census_blocks block inner join stops on st_dwithin(block.location, stops.location,"
       		+ String.valueOf(x)+") inner join areas on block.urbanid = areas.urbanid group by block.blockid), urbanpop as (select COALESCE(sum(population),0) as upop from census ),"
@@ -3525,7 +3528,7 @@ public class PgisEventManager {
 	  Connection connection = makeConnection(dbindex);
       Statement stmt = null;
       HashMap<String, String> response = new HashMap<String, String>();      
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), areas as (select urbanid from census_urbans where "
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), areas as (select urbanid from census_urbans where "
       		+ "population"+popYear+" Between "+String.valueOf(popmin)+" And "+String.valueOf(popmax)+"), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
@@ -4719,7 +4722,7 @@ public class PgisEventManager {
       Statement stmt = null;
       HashMap<String, String> response = new HashMap<String, String>();      
       
-      String query = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+      String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
       for (int i=0; i<date.length; i++){
     	  query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
     	  		+ "startdate::int<="+date[i]+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
@@ -4795,7 +4798,7 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), "
+			ResultSet rs = stmt.executeQuery( "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 					+ "pops as (select population"+popYear+" as population from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location,"+String.valueOf(x)+") inner join aids on "
 					+ "stop.agencyid=aids.aid group by block.blockid), "
 					+ "pops1 as (select block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location,"+String.valueOf(x)+") inner join aids on "
@@ -4832,7 +4835,7 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+			ResultSet rs = stmt.executeQuery( "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 					+ "pops as (select population"+popYear+" as population, poptype, block.urbanid "
 					+ "from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location,stop.location," + String.valueOf(x) + ") inner join aids on "
 					+ "stop.agencyid=aids.aid group by block.blockid), "
@@ -4866,7 +4869,7 @@ public class PgisEventManager {
 		Connection connection = makeConnection(dbindex);
 		try{
 			stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), trips as "
+			ResultSet rs = stmt.executeQuery("with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), trips as "
 					+ "(select max(length+estlength) as rlength from gtfs_trips trip inner join aids on trip.serviceid_agencyid = aids.aid group by trip.route_agencyid, "
 					+ "trip.route_id) select coalesce(sum(rlength), 0) as rtmiles from trips");	
 			while ( rs.next() ) {
@@ -4895,7 +4898,7 @@ public class PgisEventManager {
       long population = 0;
       try {
         stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery( "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),uids as (select urbanid from "
+        ResultSet rs = stmt.executeQuery( "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),uids as (select urbanid from "
         		+ "census_urbans where population>="+String.valueOf(pop)+"),blocks as (select distinct block.blockid, population from census_blocks block inner join gtfs_stops stop"
         		+ " on st_dwithin(block.location,stop.location,"+String.valueOf(x)+") inner join uids on stop.urbanid=uids.urbanid and uids.urbanid=block.urbanid inner join aids on "
         		+ "stop.agencyid=aids.aid) select sum(population) as pop from blocks");        
@@ -4926,11 +4929,11 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'),"
+			String query = "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
 					+ " stops AS (SELECT map.agencyid, stops.location"
 					+ " 	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map"
 					+ " 	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id"
-					+ " 	WHERE stops.agencyid IN (SELECT * FROM aids)),"
+					+ " 	WHERE map.agencyid IN (SELECT * FROM aids)),"
 					+ " agencyshapes AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops GROUP BY agencyid),"
 					+ " connections AS (SELECT agencyshapes.agencyid, gtfs_agencies.name AS agencyname, stops.agencyid AS connectedagency"
 					+ " 	FROM stops INNER JOIN agencyshapes ON ST_DWITHIN(agencyshapes.shape,stops.location," + dist + ")"
@@ -4987,11 +4990,11 @@ public class PgisEventManager {
 		Statement stmt = null;
 		try{
 			stmt = connection.createStatement();
-			String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+			String query = "with aids as (SELECT DISTINCT a.id AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 					+ "stops AS (SELECT map.agencyid, stops.location, stops.lat, stops.lon, name "
 					+ "	FROM gtfs_stops AS stops JOIN gtfs_stop_service_map AS map "
 					+ "	ON map.agencyid_def = stops.agencyid AND map.stopid = stops.id "
-					+ "	WHERE stops.agencyid IN (SELECT * FROM aids)), "
+					+ "	WHERE map.agencyid IN (SELECT * FROM aids)), "
 					+ " agencyshape AS (SELECT agencyid, ST_COLLECT(location) AS shape FROM stops WHERE agencyid = '" + agencyId + "' GROUP BY agencyid), "
 					+ " connections AS (SELECT agencyshape.agencyid, stops.agencyid AS connectedagency "
 					+ "	FROM stops INNER JOIN agencyshape ON ST_DWITHIN(agencyshape.shape,stops.location," + dist + ") WHERE stops.agencyid != agencyshape.agencyid "
@@ -5090,7 +5093,7 @@ public class PgisEventManager {
 		if (agency != null){
 			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
 		}
-		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'" + agencyFilter + "), svcids as (";
+		String mainquery ="with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid" + agencyFilter + "), svcids as (";
 		Statement stmt = null;
 		for (int i=0; i<date.length; i++){
 			mainquery+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
@@ -5140,7 +5143,7 @@ public class PgisEventManager {
 		if (agency != null){
 			agencyFilter = " AND agency_id IN (SELECT defaultid FROM gtfs_agencies WHERE id='" + agency + "')";
 		}
-		String mainquery ="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'" + agencyFilter + "), svcids as (";
+		String mainquery ="with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid" + agencyFilter + "), svcids as (";
 		Statement stmt = null;
 		for (int i=0; i<date.length; i++){
 			mainquery+= "(select serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
@@ -5186,7 +5189,7 @@ public class PgisEventManager {
 	 */
 	public static HashMap<String, KeyClusterHashMap> getClusters(double radius, int dbindex, String username){
 		HashMap<String, KeyClusterHashMap> y = new HashMap<String, KeyClusterHashMap>();
-		String query = "WITH aids AS (SELECT distinct agency_id AS aid FROM gtfs_selected_feeds WHERE username='" + username + "'), "
+		String query = "WITH aids AS (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 				+ " stops0 AS (SELECT stops1.id AS stop1, stops2.id AS stop2,stops1.id || ':' || stops1.agencyid AS clusterid, stops1.agencyid AS agencyid1, stops2.id || ':' || stops2.agencyid AS stop, stops2.agencyid AS agencyid2"
 				+ " FROM gtfs_stops AS stops1 LEFT JOIN gtfs_stops AS stops2	"
 				+ " ON ST_Dwithin(stops1.location, stops2.location, " + radius + ")),"
@@ -5260,7 +5263,7 @@ public class PgisEventManager {
 		Collection<MapStop> Stops = new ArrayList<MapStop>();
 		Connection connection = makeConnection(dbindex);		
 		//((org.postgresql.PGConnection)connection).addDataType("geometry",Class.forName("org.postgis.PGgeometry"));
-		String mainquery = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+		String mainquery = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
 		for (int i=0; i<date.length; i++){
 			mainquery+= "(select  serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
 					+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from "
@@ -5708,7 +5711,7 @@ public class PgisEventManager {
 		String mainquery ="";		
 		if (day!=null){
 			//the query with dates
-			mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), svcids as (";
+			mainquery += "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), svcids as (";
 			for (int i=0; i<date.length; i++){
 				mainquery+= "(select  serviceid_agencyid, serviceid_id from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where startdate::int<="+date[i]
 						+" and enddate::int>="+date[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from "
@@ -5728,7 +5731,7 @@ public class PgisEventManager {
 					+ "trip.stop_agencyid_destination, trip.stop_id_destination, trip.stop_name_destination, route.shortname as rsname, route.longname as rlname from tripstops trip "
 					+ "inner join gtfs_routes route on trip.aid = route.agencyid and trip.routeid = route.id) select * from triproute order by agency, routeid, length desc, tripid";
 		}else {	
-			mainquery += "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'), trips as (select trip.agencyid as aid, trip.tripshortname "
+			mainquery += "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), trips as (select trip.agencyid as aid, trip.tripshortname "
 					+ "as sname, round((trip.length+trip.estlength)::numeric,2) as length, trip.tripheadsign as sign, trip.id as tripid, trip.uid as uid, trip.route_id as routeid "
 					+ "from gtfs_trips trip inner join aids on trip.serviceid_agencyid = aids.aid), tripagency as (select trips.aid, agency.name as agency, trips.sname, "
 					+ "trips.sign, trips.length, trips.tripid, trips.uid, trips.routeid from trips inner join gtfs_agencies agency on trips.aid=agency.id), tripstops as (select "
@@ -5881,7 +5884,7 @@ public class PgisEventManager {
 		String endDate = sdfDate.format(cal.getTime());
 		String mainquery ="";
 		if (agency==null){
-			mainquery = "with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"') select coalesce(min(startdate::int),"+startDate
+			mainquery = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid) select coalesce(min(startdate::int),"+startDate
 					+") as start, coalesce(max(enddate::int),"+endDate+") as end from gtfs_feed_info inner join aids on aid=defaultid";
 			} else {
 			mainquery = "select coalesce(min(startdate::int),"+startDate+") as start, coalesce(max(enddate::int),"+endDate+") as end from gtfs_feed_info inner join gtfs_agencies "
@@ -5973,7 +5976,9 @@ public class PgisEventManager {
 		String query="";
 		Statement stmt = null;
 		HashMap<String, Long> response = new HashMap<String, Long>();
-		query = "WITH counties AS (SELECT count(countyid) AS county, stateid FROM census_counties GROUP BY stateid), "
+		query = "WITH "
+		        + "aids as (SELECT DISTINCT a.id AS agencyid, a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
+		        + "counties AS (SELECT count(countyid) AS county, stateid FROM census_counties GROUP BY stateid), "
 				+ "tracts AS (SELECT COUNT(tractid) AS tract, stateid FROM census_tracts GROUP BY stateid), "
 				+ "places AS (SELECT COUNT(placeId) AS place, stateid FROM census_places GROUP BY stateid), "
 				+ "urbanized_areas AS (SELECT COUNT(urbanId) AS urbanized_area, stateid "
@@ -5993,10 +5998,11 @@ public class PgisEventManager {
 				+ "agencies AS (SELECT COUNT(DISTINCT map.agencyid) AS agency,stateid"
 				+ "		FROM gtfs_stops AS stops INNER JOIN gtfs_stop_service_map AS map "
 				+ "		ON stops.id = map.stopid AND stops.agencyid = map.agencyid_def "
+				+ "     INNER JOIN aids ON map.agencyid = aids.agencyid "
 				+ "		GROUP BY stops.stateid),"
-				+ "stops AS (SELECT COUNT(id) AS stop, stateid FROM gtfs_stops GROUP BY stateid),"
+				+ "stops AS (SELECT COUNT(id) AS stop, stateid FROM gtfs_stops INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def INNER JOIN aids ON map.agencyid = aids.agencyid GROUP BY stateid),"
 				+ "trip_states_map AS (SELECT times.trip_id, stops.stateid from  gtfs_stop_times AS times inner join gtfs_stops as stops ON times.stop_id = stops.id AND times.stop_agencyid = stops.agencyid GROUP BY stateid,trip_id),"
-				+ "routes AS (SELECT COUNT(DISTINCT(route_id, route_agencyid)) AS route, stateid FROM gtfs_trips INNER JOIN trip_states_map ON gtfs_trips.id = trip_states_map.trip_id GROUP BY stateid)"
+				+ "routes AS (SELECT COUNT(DISTINCT(route_id, route_agencyid)) AS route, stateid FROM gtfs_trips INNER JOIN trip_states_map ON gtfs_trips.id = trip_states_map.trip_id INNER JOIN aids ON gtfs_trips.agencyid = aids.agencyid GROUP BY stateid)"
 				+ "SELECT stateid, sname, county, tract, place, urbanized_area, urban_cluster, congdist, region, landarea, stop, "
 				+ "		population" + popYear + " AS pop, urbanpop, ruralpop,rac, wac, agency, route FROM census_states "
 				+ "		INNER JOIN counties USING (stateid)"
@@ -6227,7 +6233,7 @@ public class PgisEventManager {
 		String id1="'"+urbanId+"'";
 		Statement stmt = null;
 		long response=0;
-		query ="select count(Id) as stopscount from gtfs_stops where urbanid="+id1+" and agencyId in (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"')";
+		query ="select count(Id) as stopscount from gtfs_stops where urbanid="+id1+" and agencyId in (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid)";
 		try {
 	        stmt = connection.createStatement();
 	        ResultSet rs = stmt.executeQuery(query); 
@@ -6342,7 +6348,7 @@ public class PgisEventManager {
 	String list= String.join( "','",selectedAgencies);
 	list = "'" + list + "'";
 	List<GeoStopRouteMap> response = new ArrayList<GeoStopRouteMap>();
-	query ="select routeid,stopid,gsr.agencyid,gtfs_stops.agencyid as defaultid from gtfs_Stop_Route_Map gsr join gtfs_stops on agencyid_def=gtfs_stops.agencyid and stopid=id where urbanid="+id1+" and gtfs_stops.agencyid in (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"')";
+	query ="select routeid,stopid,gsr.agencyid,gtfs_stops.agencyid as defaultid from gtfs_Stop_Route_Map gsr join gtfs_stops on agencyid_def=gtfs_stops.agencyid and stopid=id where urbanid="+id1+" and gtfs_stops.agencyid in (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid)";
 	try {
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query); 
@@ -6460,11 +6466,11 @@ public class PgisEventManager {
 					  date=popYear+month1+day;
 					  datekey=month1+"/"+day+"/"+popYear;
 					  }
-				  query="with aids as (select distinct agency_id as aid from gtfs_selected_feeds where username='"+username+"'),"
+				  query="with aids as (SELECT DISTINCT a.id AS agencyid, a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid),"
 				  		+ "svcids as (select serviceid_agencyid, serviceid_id  from gtfs_calendars gc where startdate::int<="+date+" and enddate::int>="+date+" and "+dayOfWeek+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date+"' and exceptiontype=1),"
-						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
+						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.agencyid = aids.agencyid),"
 						  +"activeAgencies as (select count(distinct aid) as active from trips),"
-						  +"totalAgencies as (select count(distinct agencyid) as total from  gtfs_trips )," 
+						  +"totalAgencies as (select count(distinct agencyid) as total from  aids )," 
 						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
 						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
 				logger.debug(query);
@@ -6571,9 +6577,8 @@ public class PgisEventManager {
 			return r;	
 		}
 
-		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {
+		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws FactoryException, TransformException {
 			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
-			Connection connection = db.getConnection();
 			String query = ""
 			+ " INSERT INTO user_selected_agencies (username, agency_id, hidden) ("
 			+ "   SELECT ?::text AS username, a.id, CASE WHEN id = ANY(?) THEN true ELSE false END AS hidden "
@@ -6584,6 +6589,7 @@ public class PgisEventManager {
 			+ " ) ON CONFLICT (username, agency_id) DO UPDATE SET hidden = EXCLUDED.hidden"
 			+ "";
 			try {
+				Connection connection = db.getConnection();
 				PreparedStatement ps = connection.prepareStatement(query);
 				ps.setString(1, username);
 				ps.setArray(2, connection.createArrayOf("VARCHAR", agency_ids));
@@ -6595,40 +6601,93 @@ public class PgisEventManager {
 			} catch ( Exception e ) {
 				logger.error(e);
 			}
-
-			return Agencyget(dbindex, username);
+			return getAllAgencies(dbindex, username);
 		}
 
-		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
-				throws FactoryException, TransformException	{
-			Connection  connection = makeConnection(dbindex);
-			String query="";
-			Statement stmt = null;
-		
-		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
-			// query ="select id,name,defaultid from gtfs_agencies";
-			query = "SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
-
-			try {
-		        stmt = connection.createStatement();
-		        ResultSet rs = stmt.executeQuery(query); 
-		        while ( rs.next() ) {
-		        	Agencyselect a=new Agencyselect();
-		        	a.AgencyId=rs.getString("id");
-		        	a.Agencyname=rs.getString("name");
-					a.DefaultId=rs.getString("defaultid");
-					a.Hidden=rs.getBoolean("hidden");
-		        	  r.put(a.Agencyname, a);     
-		        }
-				 rs.close();
-				 stmt.close(); 
-				 dropConnection(connection);
-			}
-			 catch ( Exception e ) {
-				 e.printStackTrace();
-			}
+		public static Map<String,Agencyselect> getAllAgencies(int dbindex, String username) {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();					
+			String query="SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) ORDER BY name";
+			try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+				try (ResultSet rs = stmt.executeQuery(query)) {				
+					while ( rs.next() ) {
+						Agencyselect a=new Agencyselect();
+						a.AgencyId=rs.getString("id");
+						a.Agencyname=rs.getString("name");
+						a.DefaultId=rs.getString("defaultid");
+						a.Hidden=rs.getBoolean("hidden");
+						r.put(a.Agencyname, a);     
+					}
+				}
+			} catch (Exception e) { logger.error(e); }
 			return r;	
 		}
 
+		/** Moved from DbUpdate.getSelectedAgencies */
+		public static List<String> getSelectedAgenciesDefaultIds(int dbindex, String username) {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			List<String> selectedAgencies = new ArrayList<String>();
+			/*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
+				+ "JOIN gtfs_selected_feeds "
+				+ "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
+				+ "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
+			String query = "";
+			try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+				try (ResultSet rs = stmt.executeQuery(query)) {				
+					while ( rs.next() ) {
+						selectedAgencies.add(rs.getString("agency_id"));
+					}
+				}
+			} catch (Exception e) { logger.error(e); }
+			if (selectedAgencies.isEmpty()) {
+			  selectedAgencies.add("null");
+			}
+			return selectedAgencies;
+		}
 
+		/**
+		 * return all agencies active in the database
+		 * NOTE: Moved from SpatialEventManager - currently returns ConGraphAgency, unlike getAllAgencies returns Agencyselect below.
+		 * @param username
+		 * @param dbindex
+		 * @return HashMap<String, ConGraphAgency>
+		 * @throws SQLException
+		 */
+		public static HashMap<String, ConGraphAgency> getSelectedActiveAgencies ( String username, int dbindex ) {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
+			String query = "SELECT a.* FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT TRUE AND a.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY a.name";
+			try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+				try (ResultSet rs = stmt.executeQuery(query)) {				
+					while ( rs.next() ) {
+						ConGraphAgency i = new ConGraphAgency();
+						i.name = rs.getString("name");
+						i.centralized = rs.getBoolean("centralized");
+						i.id = rs.getString("id");
+						response.put(rs.getString("id"), i);
+					}
+				}
+			} catch (Exception e) { logger.error(e); }
+			return response;
+		}
+
+	public static Map<String,Agencyselect> getSelectedAgencies(int dbindex, String username) {
+		DatabaseConfig db = DatabaseConfig.getConfig(dbindex);			
+		Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();					
+		String query="SELECT a.id,a.name,a.defaultid,b.hidden FROM gtfs_agencies a LEFT OUTER JOIN user_selected_agencies b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT TRUE ORDER BY name";
+		try (Connection connection = db.getConnection(); Statement stmt = connection.createStatement()) {
+			try (ResultSet rs = stmt.executeQuery(query)) {				
+				while ( rs.next() ) {
+					Agencyselect a=new Agencyselect();
+					a.AgencyId=rs.getString("id");
+					a.Agencyname=rs.getString("name");
+					a.DefaultId=rs.getString("defaultid");
+					a.Hidden=rs.getBoolean("hidden");
+					r.put(a.Agencyname, a);     
+				}
+			}
+		} catch (Exception e) { logger.error(e); }
+		return r;	
+	}
+			
 }

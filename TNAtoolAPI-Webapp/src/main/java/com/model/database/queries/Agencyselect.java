@@ -20,4 +20,8 @@ public class Agencyselect {
 	@XmlAttribute
 	@JsonSerialize
 	public Boolean Hidden;
+
+	@XmlAttribute
+	@JsonSerialize
+	public Boolean Centralized;
 }

@@ -181,6 +181,7 @@ $(document).ready(function(){
 		</div>
 
 		<div class="headerR">
+			<button onclick="showAgencyPicker()">Select Agencies</button>							
 			<label for="popselect" style="margin-right: 0.5em; font-weight: bold">Population/Employment
 				Source</label><select id='popselect' data-label='Population Source'
 				class='input dropDown' name='popYear' onchange='reloadPage()'></select>
@@ -243,6 +244,7 @@ $(document).ready(function(){
 	</p>
 	<br>
 	<br>
+	<div id="agencypicker" style="display:none"></div>	
 	<div id="progressbar" style="width: 40%; margin-left: 27%">
 		<div class="progress-label"></div>
 	</div>

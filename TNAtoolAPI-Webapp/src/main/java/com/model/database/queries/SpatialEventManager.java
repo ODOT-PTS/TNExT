@@ -196,34 +196,6 @@ public class SpatialEventManager {
 	}
 	
 	/**
-	 * return all agencies active in the database
-	 * 
-	 * @param username
-	 * @param dbindex
-	 * @return HashMap<String, ConGraphAgency>
-	 * @throws SQLException
-	 */
-	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
-		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
-		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
-				+ " FROM gtfs_selected_feeds WHERE username='" + username + "') "
-				+ " AND gtfs_agencies.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY name";
-		Connection connection = PgisEventManager.makeConnection(dbindex);
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery(query);
-		
-		while ( rs.next() ){
-			ConGraphAgency i = new ConGraphAgency();
-			i.name = rs.getString("name");
-			i.centralized = rs.getBoolean("centralized");
-			i.id = rs.getString("id");
-			response.put(rs.getString("id"), i);
-		}
-		connection.close();
-		return response;
-	}
-	
-	/**
 	 * returns all the connections between the input agency and the other agencies
 	 * in the database. Each ConGraphObj represents a connection which will be 
 	 * displayed on the map as an edge on the Connectivity Graph.
@@ -247,7 +219,7 @@ public class SpatialEventManager {
 			Statement stmt
 			) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
-		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+		String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.id = b.agency_id) WHERE b.hidden IS NOT true ORDER BY aid), "
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID + "' "
 				+ "	where startdate::int<= " + fulldate + "  and enddate::int>= " + fulldate + "  and  " + day + " = 1 and serviceid_agencyid||serviceid_id "

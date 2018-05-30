@@ -122,7 +122,7 @@ function generateDatadump() {
 		$.ajax({
 			type : 'GET',
 			datatype : 'json',
-			url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
+			url : '/TNAtoolAPI-Webapp/queries/transit/getSelectedAgencies?&dbindex='
 					+ dbIndex + '&username=' + getSession(),
 			async : false,
 			success : function(d) {

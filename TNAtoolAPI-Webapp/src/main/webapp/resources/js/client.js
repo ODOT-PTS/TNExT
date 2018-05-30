@@ -1360,7 +1360,7 @@ $mylist
 		    $.ajax({
 		    	type: 'GET',
 				datatype: 'json',
-				url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+				url : '/TNAtoolAPI-Webapp/queries/transit/getAllAgencies?&dbindex='+dbindex+'&username='+getSession(),
 				async: false,				
 		    	success: function(item){
 		    		console.log(item)
