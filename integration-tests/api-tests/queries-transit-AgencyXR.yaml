@@ -1,0 +1,13 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/AgencyXR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=456&day=05/17/2018&key=0.14263401793849884&dbindex=0&popYear=2010&areaId=null&type=0&l=2&username=admin&x=0.25&geotype=-1&geoid=null
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=456&day=05/17/2018&key=0.48239349059514325&dbindex=0&popYear=2010&areaId=null&type=0&l=2&username=admin&x=0.25&geotype=-1&geoid=null
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=456&day=05/17/2018&key=0.865609653149451&dbindex=0&popYear=2010&areaId=null&type=0&l=2&username=admin&x=0.25&geotype=-1&geoid=null

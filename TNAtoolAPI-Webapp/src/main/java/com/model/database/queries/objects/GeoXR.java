@@ -305,6 +305,13 @@ public class GeoXR {
     @JsonSerialize
 	public String WacAtLoService;
 
+    @XmlAttribute
+    @JsonSerialize
+    public String ULandareaAtLoService;
+
+    @XmlAttribute
+    @JsonSerialize
+    public String RLandareaAtLoService;
 
 }
 

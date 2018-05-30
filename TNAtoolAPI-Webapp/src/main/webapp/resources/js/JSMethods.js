@@ -1101,54 +1101,94 @@ function drawCircleAroundCoordinate(latLng) {
 }
 
 ////////////////////////////
-// Agency picker 2
+// Feed picker 2
 ////////////////////////////
 
-function getAgencies() {
+function feedPickerGetAgencies() {
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex,
 		success : function(d) {
-			buildAgencyPicker(d);
+			feedPickerBuild(feedPickerProcessAgencies(d));
 		}
 	});
 }
 
-function buildAgencyPicker(agencies) {
-	var elem = $('#agencypicker');
+function feedPickerProcessAgencies(agencies) {
+	var feeds = {};
+	$.each(agencies, function(key, agency) {
+		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: null, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
+		var feed = feeds[agency.DefaultId];
+		feed.agencies.push(agency);
+		if (agency.AgencyId == agency.DefaultId) {
+			feed.hidden = agency.Hidden;
+		}
+	});
+	return feeds
+}
+
+function feedPickerFormatDate(str) {
+	function pad(num, size) {
+		var s = num+"";
+		while (s.length < size) s = "0" + s;
+		return s;
+	}
+	var y = str.substr(0,4), m = str.substr(4,2), d = str.substr(6,2);
+	return pad(y, 4)+'-'+pad(m, 2)+'-'+pad(d, 2);
+}
+
+function feedPickerBuild(feeds) {
+	var elem = $('#feedpicker');
 	elem.empty();
-	var ul = $('<ul/>').appendTo(elem);
-	$.each(agencies, function(key, agency){
-		console.log(key, agency);
-		var li = $('<li/>').appendTo(ul);
-		$('<input type="checkbox" name="agency" />').val(agency.AgencyId).attr('checked', !agency.Hidden).appendTo(li);
-		$('<span />').text(agency.Agencyname).appendTo(li);
+	var t = $('<table />').appendTo(elem);
+	t.append('<thead><tr><th><input type="checkbox" name="toggle" /></th><th>Feed</th><th>Agencies</th><th>Start</th><th>End</th></tr></thead>');
+	var tbody = $('<tbody />').appendTo(t);
+	var keys = Object.keys(feeds).sort(function(a,b){return feeds[a].feedname - feeds[b].feedname});
+	$.each(keys, function(i, key) {
+		var feed = feeds[key];
+		var click = $('<input type="checkbox" />').val(key).attr('name', 'feed').attr('checked', (!feed.hidden));
+		var ul = $('<ul />').addClass('agencylist');
+		$.each(feed.agencies, function(i, agency) {
+			$('<li />').text(agency.Agencyname).appendTo(ul);
+		});
+		var tr = $('<tr />');
+		$('<td />').append(click).appendTo(tr);
+		$('<td />').text(feed.feedname + ' ('+key+')').appendTo(tr);
+		$('<td />').append(ul).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.startdate)).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.enddate)).appendTo(tr);
+		tr.appendTo(tbody);
+	});
+	$('#feedpicker input[name=toggle]').click(function(e) {
+		var toggled = $(e.target).prop('checked');
+		$('#feedpicker input[name=feed]').prop('checked', toggled);
+		return true;
 	});
 }
 
-function setHiddenAgencies(agencies) {
-	console.log("setHiddenAgencies:", agencies);
-	var hiddenAgencies = $("#agencypicker input[name=agency]:checkbox:not(:checked)").map(function(i){return this.value}).get();
+function setHiddenAgencies() {
+	var hiddenAgencies = $("#feedpicker input[name=feed]:checkbox:not(:checked)").map(function(i){return this.value}).get();
 	$.ajax({
 		type: 'GET',
 		// datatype: 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&agencies='+hiddenAgencies.join(","),
 		async: false,
 		success: function(item){
-			alert("Successfully saved the hidden agency list.");
+			alert("Successfully saved the hidden feed list.");
 			window.location.reload();
 		},
 		error: function() {
-			alert("There was an error setting the hidden agency list.");
+			alert("There was an error setting the hidden feed list.");
 		}	
 	});
 }
 
-function showAgencyPicker() {
-	getAgencies();
-	$('#agencypicker').dialog( {
-		width: 600,
+function feedPickerShow() {
+	feedPickerGetAgencies();
+	$('#feedpicker').dialog( {
+		width: $(window).width()*0.8,
+		height: $(window).height()*0.8,
 		modal: true,
 		buttons: {
 		  "Submit": function() {
@@ -1159,5 +1199,107 @@ function showAgencyPicker() {
 			$( this ).dialog( "close" );
 		  }
 		}
+	});
+}
+
+function feedPickerUpdateStatus() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(d) {
+			var feeds = feedPickerProcessAgencies(d);
+			var count = 0;
+			var display = 0;
+			$.each(feeds, function(key, feed) {
+				if (!feed.hidden) {display += 1}
+				count += 1;
+			});
+			$('button.feedpicker').text(display + ' / ' + count + ' Feeds selected');
+		}
+	});
+}
+
+///////////////
+// Population table
+///////////////
+
+function buildPopTable(item, elem) {
+	function nc(v) {
+		v = Number(v)
+		if (!isFinite(v) || isNaN(v)) {
+			return "N/A";
+		}
+		if (!(v%1 === 0)) { v = v.toFixed(2) }
+		return v.toLocaleString();
+	}
+	var r = {};
+	// square miles
+	var land_u_x = parseInt(item.ULandareaWithinX) / (1e6 / 0.386102);
+	var land_r_x = parseInt(item.RLandareaWithinX) / (1e6 / 0.386102);
+	var land_u_los = parseInt(item.ULandareaAtLoService) / (1e6 / 0.386102);
+	var land_r_los = parseInt(item.RLandareaAtLoService) / (1e6 / 0.386102);
+	var data = {
+		'Land area': {
+			served: [land_u_x, land_r_x],
+			los: [land_u_los, land_r_los],
+			units: '(sq.mi.)'
+		},
+		'Population': {
+			served: [parseInt(item.UPopWithinX), parseInt(item.RPopWithinX)],
+			los: [parseInt(item.UPopServedAtLoService), parseInt(item.RPopServedAtLoService)],
+			density: true,
+			units: ''
+		},
+		'Employment': {
+			served: [parseInt(item.UracWithinX), parseInt(item.RracWithinX)],
+			los: [parseInt(item.UracServedAtLoService), parseInt(item.RracServedAtLoService)],
+			density: true,
+			units: '(RAC)'
+		},
+		'Employee': {
+			served: [parseInt(item.UwacWithinX), parseInt(item.RwacWithinX)],
+			los: [parseInt(item.UwacServedAtLoService), parseInt(item.RwacServedAtLoService)],
+			density: true,
+			units: '(WAC)'
+		},
+	}
+	// var t = elem;
+	// var tb = $("<tbody />").appendTo(t);
+	var tb = elem;
+	var nowhere = $("<div />");
+	var tba;
+	var tbd;
+	$.each(data, function(key,v) {
+		var lkey = key.toLowerCase();
+		if (v.density) {
+			tba = nowhere;
+			tbd = tb;
+		} else {
+			tba = tb;
+			tbd = nowhere;
+		}
+		var order = [
+			// value, table, description, notes, tooltip
+			// within x
+			[v.served[0] + v.served[1], tba, key+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all census blocks within an X-mile radius of all stops in the given area'],
+			[v.served[0], tba, 'Urban '+lkey+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all urban census blocks within an X-mile radius of all stops in the given area'],
+			[v.served[1], tba, 'Rural '+lkey+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all rural census blocks within an X-mile radius of all stops in the given area'],
+			[(v.served[0] + v.served[1])/(land_u_x+land_r_x), tbd, key+' density of area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.served[0]/land_u_x, tbd, key+' density of urban area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all urban census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.served[1]/land_r_x, tbd, key+' density of rural area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all rural census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			// los
+			[v.los[0] + v.los[1], tba, key+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all census blocks served at the specified level of service in the given area'],
+			[v.los[0], tba, 'Urban '+lkey+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all urban census blocks served at the specified level of service in the given area'],
+			[v.los[1], tba, 'Rural '+lkey+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all rural census blocks served at the specified level of service in the given area'],
+			[(v.los[0] + v.los[1])/(land_u_los+land_r_los), tbd, key+' density of area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.los[0]/land_u_los, tbd, key+' density of urban area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all urban census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.los[1]/land_r_los, tbd, key+' density of rural area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all rural census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile.'],
+		]
+		order.forEach(function(i) {
+			var row = $("<tr />").appendTo(i[1]);
+			$("<td />").attr('title',i[4]).text(i[2]).addClass('metric').append($("<span />").text(i[3]).addClass('IOSym')).appendTo(row);
+			$("<td />").text(nc(i[0])).appendTo(row);
+		})
 	});
 }

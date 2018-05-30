@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/keyHubs
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/KeyHubSreport.html?&x1=0.08&x2=0.25&x3=2.0&n=eqs&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/keyHubs?&x1=0.08&x2=0.25&x3=2.0&dbindex=0&popYear=2010&day=05/17/2018&popYear=2010&key=0.326917258502889&username=admin

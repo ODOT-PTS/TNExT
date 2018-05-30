@@ -1,0 +1,25 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/AgencySR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=4101000&type=2&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&type=2&areaid=4101000&x=NaN&key=0.6419764740575111&dbindex=0&popYear=2010&username=admin&geotype=-1&geoid=null
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=13221&type=3&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&type=3&areaid=13221&x=NaN&key=0.2650419215170834&dbindex=0&popYear=2010&username=admin&geotype=4&geoid=1
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=13221&type=3&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&type=3&areaid=13221&x=NaN&key=0.3182037475900503&dbindex=0&popYear=2010&username=admin&geotype=4&geoid=1
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=71317&type=3&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&type=3&areaid=71317&x=NaN&key=0.054314796215392036&dbindex=0&popYear=2010&username=admin&geotype=4&geoid=1
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenSReport.html?&x=0.25&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&x=0.25&key=0.5494933717791146&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenSReport.html?&x=0.25&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&x=0.25&key=0.6158451455296978&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenSReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/AgencySR?&x=NaN&key=0.9697213629565535&dbindex=0&popYear=2010&username=admin
