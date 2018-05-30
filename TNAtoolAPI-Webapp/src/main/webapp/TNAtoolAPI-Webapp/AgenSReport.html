@@ -81,6 +81,8 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
 
 	$.ajax({
 		type: 'GET',
@@ -261,8 +263,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<button onclick="showFeedPicker()">Feeds</button>				
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>				
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -282,11 +284,10 @@ $(document).ready(function(){
 			</tr>
 		</table>		
 		
-		
 		<p id="displayReport"><br></p>
 		<br>
 		<br>
-		<div id="feedpicker" style="display:none"></div>
+		
 		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>	
 </body>
 </html>

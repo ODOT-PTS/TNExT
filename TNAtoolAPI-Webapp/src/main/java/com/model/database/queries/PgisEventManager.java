@@ -6624,7 +6624,7 @@ public class PgisEventManager {
 					a.Feedname=rs.getString("feedname");
 					a.StartDate=rs.getString("startdate");
 					a.EndDate=rs.getString("enddate");
-		        	  r.put(a.Agencyname, a);
+		        	r.put(a.Agencyname, a);     
 		        }
 				 rs.close();
 				 stmt.close(); 

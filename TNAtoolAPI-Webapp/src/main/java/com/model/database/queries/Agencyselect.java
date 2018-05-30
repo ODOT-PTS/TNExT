@@ -20,8 +20,7 @@ public class Agencyselect {
 	@XmlAttribute
 	@JsonSerialize
 	public Boolean Hidden;
-
-
+	
 	@XmlAttribute
 	@JsonSerialize
 	public String Feedname;
@@ -32,7 +31,5 @@ public class Agencyselect {
 
 	@XmlAttribute
 	@JsonSerialize
-	public String EndDate;
-
-
+	public String EndDate;	
 }

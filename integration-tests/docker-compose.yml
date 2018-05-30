@@ -3,7 +3,7 @@ version: "3"
 volumes:
   pgdata_test:
   conf_test:
-  tnastm2_test:
+  tnexttestm2_test:
 
 services:
   db:
@@ -19,14 +19,14 @@ services:
     ports:
       - "5432"
 
-  tnast:
+  tnexttest:
     build: ../
     environment:
       PGUSER: postgres
       PGPASSWORD: postgres
       PGHOST: db
     volumes:
-      - tnastm2_test:/root/.m2
+      - tnexttestm2_test:/root/.m2
       - "./scripts:/scripts"
       - "./data:/data"
       - "./conf:/app/conf"
@@ -38,12 +38,12 @@ services:
   pyresttest:
     build: ./api-tests/
     environment:
-      TNAST_HOST: "tnast:8080"
+      TNAST_HOST: "tnexttest:8080"
     volumes:
       - "./api-tests:/api-tests"
       - "./scripts:/scripts"
       - "./data:/data"
     links:
-      - tnast
+      - tnexttest
       - db      
 
