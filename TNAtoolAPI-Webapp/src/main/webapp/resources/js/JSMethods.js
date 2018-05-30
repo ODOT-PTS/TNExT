@@ -1128,12 +1128,12 @@ function getAgencies() {
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
 		success : function(d) {
-			buildFeedPicker(d);
+			buildFeedPicker(feedPickerProcessAgencies(d));
 		}
 	});
 }
 
-function buildFeedPicker(agencies) {
+function feedPickerProcessAgencies(agencies) {
 	var feeds = {};
 	$.each(agencies, function(key, agency) {
 		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: false, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
@@ -1143,6 +1143,10 @@ function buildFeedPicker(agencies) {
 			feed.hidden = agency.Hidden;
 		}
 	});
+	return feeds
+}
+
+function buildFeedPicker(feeds) {
 	var elem = $('#feedpicker');
 	elem.empty();
 	var t = $('<table />').appendTo(elem);
