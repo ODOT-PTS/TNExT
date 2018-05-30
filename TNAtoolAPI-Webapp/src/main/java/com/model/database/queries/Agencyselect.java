@@ -20,4 +20,19 @@ public class Agencyselect {
 	@XmlAttribute
 	@JsonSerialize
 	public Boolean Hidden;
+
+
+	@XmlAttribute
+	@JsonSerialize
+	public String Feedname;
+
+	@XmlAttribute
+	@JsonSerialize
+	public String StartDate;
+
+	@XmlAttribute
+	@JsonSerialize
+	public String EndDate;
+
+
 }
