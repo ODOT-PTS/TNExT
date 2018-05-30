@@ -1122,13 +1122,13 @@ function drawCircleAroundCoordinate(latLng) {
 // Feed picker 2
 ////////////////////////////
 
-function getAgencies() {
+function feedPickerGetAgencies() {
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
 		success : function(d) {
-			buildFeedPicker(feedPickerProcessAgencies(d));
+			feedPickerBuild(feedPickerProcessAgencies(d));
 		}
 	});
 }
@@ -1136,7 +1136,7 @@ function getAgencies() {
 function feedPickerProcessAgencies(agencies) {
 	var feeds = {};
 	$.each(agencies, function(key, agency) {
-		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: false, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
+		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: null, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
 		var feed = feeds[agency.DefaultId];
 		feed.agencies.push(agency);
 		if (agency.AgencyId == agency.DefaultId) {
@@ -1146,14 +1146,25 @@ function feedPickerProcessAgencies(agencies) {
 	return feeds
 }
 
-function buildFeedPicker(feeds) {
+function feedPickerFormatDate(str) {
+	function pad(num, size) {
+		var s = num+"";
+		while (s.length < size) s = "0" + s;
+		return s;
+	}
+	var y = str.substr(0,4), m = str.substr(4,2), d = str.substr(6,2);
+	return pad(y, 4)+'-'+pad(m, 2)+'-'+pad(d, 2);
+}
+
+function feedPickerBuild(feeds) {
 	var elem = $('#feedpicker');
 	elem.empty();
 	var t = $('<table />').appendTo(elem);
 	t.append('<thead><tr><th><input type="checkbox" name="toggle" /></th><th>Feed</th><th>Agencies</th><th>Start</th><th>End</th></tr></thead>');
 	var tbody = $('<tbody />').appendTo(t);
-	$.each(feeds, function(key, feed) {
-		console.log(feed);
+	var keys = Object.keys(feeds).sort(function(a,b){return feeds[a].feedname - feeds[b].feedname});
+	$.each(keys, function(i, key) {
+		var feed = feeds[key];
 		var click = $('<input type="checkbox" />').val(key).attr('name', 'feed').attr('checked', (!feed.hidden));
 		var ul = $('<ul />').addClass('agencylist');
 		$.each(feed.agencies, function(i, agency) {
@@ -1163,8 +1174,8 @@ function buildFeedPicker(feeds) {
 		$('<td />').append(click).appendTo(tr);
 		$('<td />').text(feed.feedname + ' ('+key+')').appendTo(tr);
 		$('<td />').append(ul).appendTo(tr);
-		$('<td />').text(feed.startdate).appendTo(tr);
-		$('<td />').text(feed.enddate).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.startdate)).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.enddate)).appendTo(tr);
 		tr.appendTo(tbody);
 	});
 	$('#feedpicker input[name=toggle]').click(function(e) {
@@ -1176,26 +1187,26 @@ function buildFeedPicker(feeds) {
 
 function setHiddenAgencies() {
 	var hiddenAgencies = $("#feedpicker input[name=feed]:checkbox:not(:checked)").map(function(i){return this.value}).get();
-	console.log(hiddenAgencies);
 	$.ajax({
 		type: 'GET',
 		// datatype: 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
 		async: false,
 		success: function(item){
-			alert("Successfully saved the hidden agency list.");
+			alert("Successfully saved the hidden feed list.");
 			window.location.reload();
 		},
 		error: function() {
-			alert("There was an error setting the hidden agency list.");
+			alert("There was an error setting the hidden feed list.");
 		}	
 	});
 }
 
-function showFeedPicker() {
-	getAgencies();
+function feedPickerShow() {
+	feedPickerGetAgencies();
 	$('#feedpicker').dialog( {
-		width: 600,
+		width: $(window).width()*0.8,
+		height: $(window).height()*0.8,
 		modal: true,
 		buttons: {
 		  "Submit": function() {
@@ -1205,6 +1216,24 @@ function showFeedPicker() {
 		  Cancel: function() {
 			$( this ).dialog( "close" );
 		  }
+		}
+	});
+}
+
+function feedPickerUpdateStatus() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(d) {
+			var feeds = feedPickerProcessAgencies(d);
+			var count = 0;
+			var display = 0;
+			$.each(feeds, function(key, feed) {
+				if (!feed.hidden) {display += 1}
+				count += 1;
+			});
+			$('button.feedpicker').text(display + ' / ' + count + ' Feeds selected');
 		}
 	});
 }
