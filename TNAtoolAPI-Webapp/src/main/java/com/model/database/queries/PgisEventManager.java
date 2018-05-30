@@ -6579,7 +6579,7 @@ public class PgisEventManager {
 			+ "   SELECT ?::text AS username, a.id, CASE WHEN id = ANY(?) THEN true ELSE false END AS hidden "
 			+ "   FROM gtfs_agencies AS a "
 			+ "   LEFT OUTER JOIN user_selected_agencies AS b"
-			+ "     ON (b.username = ? AND a.id = b.agency_id)"
+			+ "     ON (b.username = ? AND a.defaultid = b.agency_id)"
 			+ "   WHERE b.hidden = true OR a.id = ANY(?)"
 			+ " ) ON CONFLICT (username, agency_id) DO UPDATE SET hidden = EXCLUDED.hidden"
 			+ "";
@@ -6618,7 +6618,10 @@ public class PgisEventManager {
 		        	a.Agencyname=rs.getString("name");
 					a.DefaultId=rs.getString("defaultid");
 					a.Hidden=rs.getBoolean("hidden");
-		        	  r.put(a.Agencyname, a);     
+					a.Feedname=rs.getString("feedname");
+					a.StartDate=rs.getString("startdate");
+					a.EndDate=rs.getString("enddate");
+		        	r.put(a.Agencyname, a);     
 		        }
 				 rs.close();
 				 stmt.close(); 
