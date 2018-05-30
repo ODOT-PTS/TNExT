@@ -1119,7 +1119,7 @@ function drawCircleAroundCoordinate(latLng) {
 }
 
 ////////////////////////////
-// Agency picker 2
+// Feed picker 2
 ////////////////////////////
 
 function getAgencies() {
@@ -1128,26 +1128,51 @@ function getAgencies() {
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
 		success : function(d) {
-			buildAgencyPicker(d);
+			buildFeedPicker(d);
 		}
 	});
 }
 
-function buildAgencyPicker(agencies) {
-	var elem = $('#agencypicker');
+function buildFeedPicker(agencies) {
+	var feeds = {};
+	$.each(agencies, function(key, agency) {
+		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: false, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
+		var feed = feeds[agency.DefaultId];
+		feed.agencies.push(agency);
+		if (agency.AgencyId == agency.DefaultId) {
+			feed.hidden = agency.Hidden;
+		}
+	});
+	var elem = $('#feedpicker');
 	elem.empty();
-	var ul = $('<ul/>').appendTo(elem);
-	$.each(agencies, function(key, agency){
-		console.log(key, agency);
-		var li = $('<li/>').appendTo(ul);
-		$('<input type="checkbox" name="agency" />').val(agency.AgencyId).attr('checked', !agency.Hidden).appendTo(li);
-		$('<span />').text(agency.Agencyname).appendTo(li);
+	var t = $('<table />').appendTo(elem);
+	t.append('<thead><tr><th><input type="checkbox" name="toggle" /></th><th>Feed</th><th>Agencies</th><th>Start</th><th>End</th></tr></thead>');
+	var tbody = $('<tbody />').appendTo(t);
+	$.each(feeds, function(key, feed) {
+		console.log(feed);
+		var click = $('<input type="checkbox" />').val(key).attr('name', 'feed').attr('checked', (!feed.hidden));
+		var ul = $('<ul />').addClass('agencylist');
+		$.each(feed.agencies, function(i, agency) {
+			$('<li />').text(agency.Agencyname).appendTo(ul);
+		});
+		var tr = $('<tr />');
+		$('<td />').append(click).appendTo(tr);
+		$('<td />').text(feed.feedname + ' ('+key+')').appendTo(tr);
+		$('<td />').append(ul).appendTo(tr);
+		$('<td />').text(feed.startdate).appendTo(tr);
+		$('<td />').text(feed.enddate).appendTo(tr);
+		tr.appendTo(tbody);
+	});
+	$('#feedpicker input[name=toggle]').click(function(e) {
+		var toggled = $(e.target).prop('checked');
+		$('#feedpicker input[name=feed]').prop('checked', toggled);
+		return true;
 	});
 }
 
-function setHiddenAgencies(agencies) {
-	console.log("setHiddenAgencies:", agencies);
-	var hiddenAgencies = $("#agencypicker input[name=agency]:checkbox:not(:checked)").map(function(i){return this.value}).get();
+function setHiddenAgencies() {
+	var hiddenAgencies = $("#feedpicker input[name=feed]:checkbox:not(:checked)").map(function(i){return this.value}).get();
+	console.log(hiddenAgencies);
 	$.ajax({
 		type: 'GET',
 		// datatype: 'json',
@@ -1163,9 +1188,9 @@ function setHiddenAgencies(agencies) {
 	});
 }
 
-function showAgencyPicker() {
+function showFeedPicker() {
 	getAgencies();
-	$('#agencypicker').dialog( {
+	$('#feedpicker').dialog( {
 		width: 600,
 		modal: true,
 		buttons: {
