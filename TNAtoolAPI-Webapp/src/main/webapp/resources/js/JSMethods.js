@@ -1119,54 +1119,94 @@ function drawCircleAroundCoordinate(latLng) {
 }
 
 ////////////////////////////
-// Agency picker 2
+// Feed picker 2
 ////////////////////////////
 
-function getAgencies() {
+function feedPickerGetAgencies() {
 	$.ajax({
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
 		success : function(d) {
-			buildAgencyPicker(d);
+			feedPickerBuild(feedPickerProcessAgencies(d));
 		}
 	});
 }
 
-function buildAgencyPicker(agencies) {
-	var elem = $('#agencypicker');
+function feedPickerProcessAgencies(agencies) {
+	var feeds = {};
+	$.each(agencies, function(key, agency) {
+		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: null, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
+		var feed = feeds[agency.DefaultId];
+		feed.agencies.push(agency);
+		if (agency.AgencyId == agency.DefaultId) {
+			feed.hidden = agency.Hidden;
+		}
+	});
+	return feeds
+}
+
+function feedPickerFormatDate(str) {
+	function pad(num, size) {
+		var s = num+"";
+		while (s.length < size) s = "0" + s;
+		return s;
+	}
+	var y = str.substr(0,4), m = str.substr(4,2), d = str.substr(6,2);
+	return pad(y, 4)+'-'+pad(m, 2)+'-'+pad(d, 2);
+}
+
+function feedPickerBuild(feeds) {
+	var elem = $('#feedpicker');
 	elem.empty();
-	var ul = $('<ul/>').appendTo(elem);
-	$.each(agencies, function(key, agency){
-		console.log(key, agency);
-		var li = $('<li/>').appendTo(ul);
-		$('<input type="checkbox" name="agency" />').val(agency.AgencyId).attr('checked', !agency.Hidden).appendTo(li);
-		$('<span />').text(agency.Agencyname).appendTo(li);
+	var t = $('<table />').appendTo(elem);
+	t.append('<thead><tr><th><input type="checkbox" name="toggle" /></th><th>Feed</th><th>Agencies</th><th>Start</th><th>End</th></tr></thead>');
+	var tbody = $('<tbody />').appendTo(t);
+	var keys = Object.keys(feeds).sort(function(a,b){return feeds[a].feedname - feeds[b].feedname});
+	$.each(keys, function(i, key) {
+		var feed = feeds[key];
+		var click = $('<input type="checkbox" />').val(key).attr('name', 'feed').attr('checked', (!feed.hidden));
+		var ul = $('<ul />').addClass('agencylist');
+		$.each(feed.agencies, function(i, agency) {
+			$('<li />').text(agency.Agencyname).appendTo(ul);
+		});
+		var tr = $('<tr />');
+		$('<td />').append(click).appendTo(tr);
+		$('<td />').text(feed.feedname + ' ('+key+')').appendTo(tr);
+		$('<td />').append(ul).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.startdate)).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.enddate)).appendTo(tr);
+		tr.appendTo(tbody);
+	});
+	$('#feedpicker input[name=toggle]').click(function(e) {
+		var toggled = $(e.target).prop('checked');
+		$('#feedpicker input[name=feed]').prop('checked', toggled);
+		return true;
 	});
 }
 
-function setHiddenAgencies(agencies) {
-	console.log("setHiddenAgencies:", agencies);
-	var hiddenAgencies = $("#agencypicker input[name=agency]:checkbox:not(:checked)").map(function(i){return this.value}).get();
+function setHiddenAgencies() {
+	var hiddenAgencies = $("#feedpicker input[name=feed]:checkbox:not(:checked)").map(function(i){return this.value}).get();
 	$.ajax({
 		type: 'GET',
 		// datatype: 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
 		async: false,
 		success: function(item){
-			alert("Successfully saved the hidden agency list.");
+			alert("Successfully saved the hidden feed list.");
 			window.location.reload();
 		},
 		error: function() {
-			alert("There was an error setting the hidden agency list.");
+			alert("There was an error setting the hidden feed list.");
 		}	
 	});
 }
 
-function showAgencyPicker() {
-	getAgencies();
-	$('#agencypicker').dialog( {
-		width: 600,
+function feedPickerShow() {
+	feedPickerGetAgencies();
+	$('#feedpicker').dialog( {
+		width: $(window).width()*0.8,
+		height: $(window).height()*0.8,
 		modal: true,
 		buttons: {
 		  "Submit": function() {
@@ -1176,6 +1216,24 @@ function showAgencyPicker() {
 		  Cancel: function() {
 			$( this ).dialog( "close" );
 		  }
+		}
+	});
+}
+
+function feedPickerUpdateStatus() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(d) {
+			var feeds = feedPickerProcessAgencies(d);
+			var count = 0;
+			var display = 0;
+			$.each(feeds, function(key, feed) {
+				if (!feed.hidden) {display += 1}
+				count += 1;
+			});
+			$('button.feedpicker').text(display + ' / ' + count + ' Feeds selected');
 		}
 	});
 }

@@ -61,6 +61,8 @@
 	$(document).ready(function(){
 		// init map
 		initTimingConnectionMap();
+		$('button.feedpicker').click(feedPickerShow);
+	    feedPickerUpdateStatus();
 
 		$('h2').append('Timing-Connection Report <br><hr>');
 		$('#mapDialog').hide(); // hides the map dialog box
@@ -115,9 +117,10 @@
 					<h1>Transit Network Analysis Tool Reports</h1>
 				</div>
 				
-				<div class="headerR">				
+				<div class="headerR">		
 					<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
-				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />	</div>
+					<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
+					<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />	</div>
 			</div>	
 			
 			<table id="controls">
