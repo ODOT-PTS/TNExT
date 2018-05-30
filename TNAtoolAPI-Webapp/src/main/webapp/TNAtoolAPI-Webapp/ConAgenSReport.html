@@ -42,6 +42,8 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();	
 	$('#Sradius').val(gap);
 	
 	$.ajax({
@@ -90,8 +92,8 @@ $(document).ready(function(){
 			</div>
 			
 			<div class="headerR">
-				<div id="feedpicker" style="display:none"></div> <button class="feedpicker" onclick="showFeedPicker()">Feeds</button>							
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()' style="margin-right:2em;height:81%"></select>
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
