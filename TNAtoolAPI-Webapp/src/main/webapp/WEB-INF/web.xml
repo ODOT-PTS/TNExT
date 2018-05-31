@@ -57,15 +57,6 @@
 <security-role>
 <role-name>admin</role-name>
 </security-role>
-    <security-constraint>
-    <web-resource-collection>
-    <web-resource-name>adminTool.html</web-resource-name>
-    <url-pattern>/TNAtoolAPI-Webapp/admin</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-    <role-name>admin</role-name>
-    </auth-constraint>
-    </security-constraint>
     <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Administrative Interface</realm-name>
