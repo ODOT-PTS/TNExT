@@ -2048,7 +2048,8 @@ public class PgisEventManager {
     	  query += "aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true),";
     	  join = "left";
     	  aidsjoin = "inner join aids on aid=stop.agencyid";
-      }else {
+		  routesidsjoin = "inner join aids on aid=map.agencyid_def";
+	  } else {
     	  join = "inner";
     	  if(type==3){
     		  if(geotype == -1 || geotype==3)
