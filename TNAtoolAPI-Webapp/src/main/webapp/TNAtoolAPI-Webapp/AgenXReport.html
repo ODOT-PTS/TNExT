@@ -79,7 +79,7 @@
 							url : '/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency='
 									+ w_qstringa + '&day=' + w_qstringd + '&key=' + key + '&dbindex=' + dbindex
 									+ '&popYear=' + popYear + '&areaId=' + areaId + '&type=' + type  + '&l=' + los
-									+ '&x=' + w_qstringx + '&geotype=' + geotype
+									+ '&username=' + getSession() + '&x=' + w_qstringx + '&geotype=' + geotype
 									+ '&geoid=' + geoid,
 							async : true,
 							success : function(item) {

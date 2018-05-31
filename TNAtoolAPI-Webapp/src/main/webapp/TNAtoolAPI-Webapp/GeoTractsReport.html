@@ -63,9 +63,9 @@ $(document).ready(function(){
     feedPickerUpdateStatus();
 	
 	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=1'+'&dbindex='+dbindex+'&popYear='+popYear;
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=1'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&county='+w_qstring+'&key='+ key+'&agency='+agencyId+'&type=1'+'&dbindex='+dbindex+'&popYear='+popYear;
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&county='+w_qstring+'&key='+ key+'&agency='+agencyId+'&type=1'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	}
 	$.ajax({
 		type: 'GET',

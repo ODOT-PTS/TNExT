@@ -78,12 +78,15 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+<<<<<<< HEAD
     $('button.feedpicker').click(feedPickerShow);
     feedPickerUpdateStatus();
 	
+=======
+>>>>>>> parent of 00c40f7... Remove username passing in templates
 	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key='+ key+'&agency=null&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	if (agencyId!=null){
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	}
 	console.log(url);
 	$.ajax({

@@ -108,7 +108,7 @@ $(document).ready(function(){
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepSrv?dbindex='+dbindex+'&agencies='+agencies+'&dates='+dates+'&areas='+ areas+'&areaType='+areaType+'&key='+key
-					+'&urbanFilter='+filterOnUrban+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&uAreaYear=' +urbanFilterYear,
+					+'&urbanFilter='+filterOnUrban+'&username='+getSession()+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&uAreaYear=' +urbanFilterYear,
 			async: true,
 			success: function(d){
 				html = '<table id="RT" class="display" align="center">';
@@ -194,7 +194,7 @@ $(document).ready(function(){
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepPop?dbindex='+dbindex+'&agencies='+agencies+'&year='+year+'&dates='+dates
-					+'&areas='+ areas+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&key='+key
+					+'&areas='+ areas+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&key='+key
 					+'&urbanFilter='+filterOnUrban+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&uAreaYear=' +urbanFilterYear,
 			async: true,
 			success: function(d){
@@ -287,7 +287,7 @@ $(document).ready(function(){
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepEmp?dbindex='+dbindex+'&agencies='+agencies+'&year='+year+'&dates='+dates+'&areas='+ areas
-					+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&urbanFilter='+filterOnUrban+'&key='+key
+					+'&los='+los+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&urbanFilter='+filterOnUrban+'&key='+key
 					+'&urbanYear='+urbanFilterYear+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&wac='+wac+'&rac='+rac+'&metrics='+metrics.values,
 			async: true,
 			success: function(d){
@@ -378,7 +378,7 @@ $(document).ready(function(){
 			type: 'GET',
 			datatype: 'json',
 			url: '/TNAtoolAPI-Webapp/queries/transit/flexRepT6?dbindex='+dbindex+'&agencies='+agencies+'&dates='+dates+'&areas='+ areas+'&los='+los
-					+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&urbanYear='+urbanFilterYear+'&key='+key
+					+'&sradius='+sradius*1609.3+'&areaType='+areaType+'&username='+getSession()+'&urbanYear='+urbanFilterYear+'&key='+key
 					+'&urbanFilter='+filterOnUrban+'&minUrbanPop='+minUrbanPop+'&maxUrbanPop='+maxUrbanPop+'&metrics='+metrics.values,
 			async: true,
 			success: function(d){

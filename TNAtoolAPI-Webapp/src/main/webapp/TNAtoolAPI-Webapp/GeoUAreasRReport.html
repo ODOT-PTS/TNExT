@@ -65,7 +65,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop='+ upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&popMax='+popMax+'&popMin='+popMin,
+		url: '/TNAtoolAPI-Webapp/queries/transit/GeoURSR?&upop='+ upop+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin,
 		async: true,
 		success: function(d){
 			appendNavigation(null);

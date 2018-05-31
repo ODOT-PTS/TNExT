@@ -99,7 +99,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/keyHubs?'+ajaxURL+'&day='+w_qstringd+'&popYear='+popYear+'&key='+ key,
+		url: '/TNAtoolAPI-Webapp/queries/transit/keyHubs?'+ajaxURL+'&day='+w_qstringd+'&popYear='+popYear+'&key='+ key+'&username='+getSession(),
 		async: true,
 		success: function(d){
 			var ID = 0;

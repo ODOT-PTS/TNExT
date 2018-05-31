@@ -218,7 +218,8 @@ body{
 					type : 'GET',
 					datatype : 'json',
 					url : '/TNAtoolAPI-Webapp/queries/transit/heatMap?&key='
-							+ key + '&popYear=' + heatMapPopYear + '&dbindex=' + dbindex,
+							+ key + '&popYear=' + heatMapPopYear + '&username='
+							+ getSession() + '&dbindex=' + dbindex,
 					async : true,
 					success : function(item) {
 						var y = heatMapPopYear;

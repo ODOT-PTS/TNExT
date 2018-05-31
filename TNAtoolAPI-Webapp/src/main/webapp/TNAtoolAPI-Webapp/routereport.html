@@ -83,7 +83,7 @@ $(document).ready(function(){
 	if (areaId!=null){
 		url+='areaid='+areaId+'&type='+type+'&';
 	}
-	url+='&x='+w_qstringx+'&day='+w_qstringd+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear;
+	url+='&x='+w_qstringx+'&day='+w_qstringd+'&key='+ key+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',

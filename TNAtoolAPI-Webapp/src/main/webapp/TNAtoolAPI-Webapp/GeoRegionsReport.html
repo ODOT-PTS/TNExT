@@ -64,9 +64,9 @@ $(document).ready(function(){
     $('button.feedpicker').click(feedPickerShow);
     feedPickerUpdateStatus();
 	
-	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear;
+	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	if (agencyId!=null)
-		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?key='+ key+'&agency='+agencyId+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear;
+		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?key='+ key+'&agency='+agencyId+'&type=4'+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession();
 	
 	$.ajax({
 		type: 'GET',
