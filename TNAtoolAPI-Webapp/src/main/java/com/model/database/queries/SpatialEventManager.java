@@ -1,18 +1,18 @@
 // Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
-//   This file is part of Transit Network Analysis Software Tool.
+//   This file is part of Transit Network Explorer Tool.
 //
-//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    Transit Network Explorer Tool is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    Transit Network Explorer Tool is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU  General Public License for more details.
 //
 //    You should have received a copy of the GNU  General Public License
-//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+//    along with Transit Network Explorer Tool.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.model.database.queries;
 
@@ -205,8 +205,7 @@ public class SpatialEventManager {
 	 */
 	public static HashMap<String, ConGraphAgency> getAllAgencies ( String username, int dbindex ) throws SQLException {
 		HashMap<String,ConGraphAgency> response = new HashMap<String, ConGraphAgency>();
-		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT agency_id AS aid "
-				+ " FROM gtfs_selected_feeds WHERE username='" + username + "') "
+		String query = "SELECT * FROM gtfs_agencies WHERE gtfs_agencies.defaultid IN (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true) "
 				+ " AND gtfs_agencies.id IN (SELECT trip_agencyid FROM gtfs_stop_times GROUP BY trip_agencyid) ORDER BY name";
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
@@ -247,7 +246,7 @@ public class SpatialEventManager {
 			Statement stmt
 			) throws SQLException{
 		Set<ConGraphObj> response = new HashSet<ConGraphObj>();
-		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + username + "'), "
+		String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), "
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID + "' "
 				+ "	where startdate::int<= " + fulldate + "  and enddate::int>= " + fulldate + "  and  " + day + " = 1 and serviceid_agencyid||serviceid_id "

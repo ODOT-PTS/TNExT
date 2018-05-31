@@ -1,0 +1,13 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/ConAgenXR
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenXReport.html?&gap=0.1&agency=174&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency=174&gap=0.1&key=0.9366522309923693&dbindex=0&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenXReport.html?&gap=0.1&agency=456&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency=456&gap=0.1&key=0.9620073523051615&dbindex=0&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenXReport.html?&gap=0.1&agency=457&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/ConAgenXR?&agency=457&gap=0.1&key=0.4592925956344691&dbindex=0&username=admin

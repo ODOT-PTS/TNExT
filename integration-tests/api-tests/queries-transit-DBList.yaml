@@ -1,0 +1,181 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/DBList
+    timeout: 600
+- test:
+    referer: /?&n=--&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenSReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenSReport.html?&x=0.25&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenSReport.html?&gap=0.1&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenXReport.html?&gap=0.1&agency=174&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenXReport.html?&gap=0.1&agency=456&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ConAgenXReport.html?&gap=0.1&agency=457&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ConNetSReport.html?&gap=0.1&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/Emp.html?&n=eqs&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=13221&type=3&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=4101000&type=2&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GASReport.html?&areaid=71317&type=3&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongDistsReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongDistsReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongdistsXreport.html?&areaid=4101&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&nav=stateS-congS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesReport.html?&agency=456&dbindex=0&popYear=2010&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid=41001&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&nav=stateS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesXreport.html?&areaid=41003&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoPlacesReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoPlacesReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoRegionsReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoRegionsReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoStateSreport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoStateXreport.html?&x=0.1&l=3&n=eqs&dbindex=0&areaId=41&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoStateXreport.html?&x=0.25&l=2&n=eqs&dbindex=0&areaId=41&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoTractsReport.html?&county=41003&agency=456&dbindex=0&popYear=2010&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasRReport.html?&popMin=0&popMax=2000000&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=41003&type=0&uc=0&agency=456&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&dbindex=0&uc=3&popYear=2010&popMin=0&popMax=2000000&areaid=null&type=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&uc=0&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=1&type=4&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&uc=0&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=4101000&type=2&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&uc=1&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=1&type=4&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&popMin=0&uc=3&popMax=2000000&dbindex=0&popYear=2010&type=3&nav=stateS-AggUAS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid=00955&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&geotype=3&geoid=null&nav=stateS-AggUAS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUrbansXreport.html?&areaid=13221&x=0.25&l=2&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/HubSreport.html?&x1=0.08&x2=0.25&x3=2.0&n=eqs&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/KeyHubSreport.html?&x1=0.08&x2=0.25&x3=2.0&n=eqs&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ParkRideReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/ParkRideXReport.html?&countyid=41003&x=0.25&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/TimingConnection.html?&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&agency=456&areaid=00955&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=0&geoid=41003&nav=stateS-agencyS-countyS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&agency=456&areaid=41003&type=0&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&agency=456&x=0.25&n=eqs&dbindex=0&popYear=2010&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&areaid=13221&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&nav=stateS-regionS-urbanS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&areaid=4101&type=5&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-congS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/routereport.html?&areaid=4101000&type=2&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/schedulereport.html?&agency=456&route=3099&n=eqs&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&agency=456&areaid=00955&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=0&geoid=41003&stime=0:00&etime=23:59&nav=stateS-agencyS-countyS-urbanS&rc=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&agency=456&areaid=41003&type=0&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&rc=0&stime=0:00&etime=23:59&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&agency=456&n=eqs&x=0.25&dbindex=0&popYear=2010&geotype=-1&geoid=null&areaid=null&type=null&route=null&nav=stateS-agencyS&rc=-1&stime=0:00&etime=23:59
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=1&type=4&x=0.25&n=eqs&dbindex=0&popYear=2010&rc=1&geotype=-1&geoid=null&stime=0:00&etime=23:59&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=1&type=4&x=0.25&n=eqs&dbindex=0&rc=0&popYear=2010&geotype=-1&stime=0:00&etime=23:59&geoid=null&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=13221&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&stime=0:00&etime=23:59&nav=stateS-regionS-urbanS&rc=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=4101000&type=2&rc=0&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=-1&geoid=null&stime=0:00&etime=23:59&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?&areaid=71317&type=3&x=0.25&n=eqs&dbindex=0&popYear=2010&geotype=4&geoid=1&stime=0:00&etime=23:59&nav=stateS-regionS-urbanS&rc=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList
+- test:
+    referer: /TNAtoolAPI-Webapp/stopreport.html?agency=456&x=0.25&route=3099&n=eqs&popYear=2010&nav=stateS-agencyS-route&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/DBList

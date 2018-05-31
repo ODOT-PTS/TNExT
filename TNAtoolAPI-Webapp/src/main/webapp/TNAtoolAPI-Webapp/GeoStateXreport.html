@@ -73,6 +73,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	go(key);	
 
 	$.ajax({
@@ -97,13 +100,14 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Miles of Service Per Capita<span class="IOSym">(3)</span></td><td >'+numberconv(item.MilesofServicePerCapita)
 			+'</td></tr><tr><td class="metric">Urban Population Served<span class="IOSym">(1)</span></td><td>' + numberconv(item.UPopWithinX)
 			+'</td></tr><tr><td class="metric">Rural Population Served<span class="IOSym">(1)</span></td><td>' + numberconv(item.RPopWithinX) 
-			+'</td></tr><tr><td class="metric">Percent of Population Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.PopServed))
+
+            +'</td></tr><tr><td class="metric">Percent of Population Served<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.PopServed))
 			+'</td></tr><tr><td class="metric">Percent of Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.PopServedAtLoService))
 			+'</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.UPopServedAtLoService)			
 			+'</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.RPopServedAtLoService)
-		    +'</td></tr><tr><td class="metric">Percent of Population Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.PopUnServed))
-		    +'</td></tr><tr><td class="metric" >Urban Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.UServiceStops)
-		    +'</td></tr><tr><td class="metric" >Rural Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.RServiceStops)
+			+'</td></tr><tr><td class="metric">Percent of Population Unserved<span class="IOSym">(1)</span></td><td>'+ addPercent(numberconv(item.PopUnServed))
+		    +'</td></tr><tr><td class="metric">Urban Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.UServiceStops)
+		    +'</td></tr><tr><td class="metric">Rural Service Stops<span class="IOSym">(3)</span></td><td>' +numberconv(item.RServiceStops)
 	        +'</td></tr><tr><td class="metric">Urban Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.UPopServedByService)
 			+'</td></tr><tr><td class="metric">Rural Population Served By Service<span class="IOSym">(1)(3)</span></td><td>' + numberconv(item.RPopServedByService)
 
@@ -116,7 +120,8 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Employment Served By Service (RAC)<span class="IOSym">(1)(3)</span></td><td>' +numberconv(item.racServedByService)+'</td></tr>';
            //RAC		
            //WAC
-           if(popYear==2010){ html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."> Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
+           if(popYear==2010){ 
+			   html+='<tr id="wac1"><td  class="metric" title="Summation of unduplicated employees (WAC)within an X-mile radius (i.e., stop distance) of all stops within the given geographic area."> Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.wacWithinX)
 			+'</td></tr><tr id="wac3"><td  class="metric">Percent of Employees Served (WAC)<span class="IOSym">(1)</span></td><td>' + addPercent(numberconv(item.wacServed))
 			+'</td></tr><tr id="wac4"><td  class="metric">Percent of Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + addPercent(numberconv(item.wacServedAtLoService))
 			+'</td></tr><tr id="wac5"><td  class="metric">Employees Served at Level of Service (WAC)<span class="IOSym">(1)(2)(3)</span></td><td>' + numberconv(item.totalwacServedAtLoService)			
@@ -142,9 +147,10 @@ $(document).ready(function(){
 			+'</td></tr><tr><td class="metric">Median Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MedianFare)
 			+'</td></tr><tr><td class="metric">Maximum Fare<span class="IOSym">(3)</span></td><td>'+showDollarSign(item.MaxFare)+'</td>';
 			html +='</tr></tbody></table>';	
-	
 			
 			$('#displayReport').append($(html));
+			buildPopTable(item, $("table#RT > tbody"));		
+
 			areaName = item.AreaName;
 			popWithinX = numberconv(item.PopServed);
 			popServedLOS = numberconv(item.PopServedAtLoService);
@@ -156,6 +162,7 @@ $(document).ready(function(){
 			tableProperties.unsortableCols = [0,1];
 		
 			table = buildDatatables();
+
 			
 			// append toopltips
 			var tooltips = populateMetricDefs();
@@ -173,7 +180,7 @@ $(document).ready(function(){
 <body>
 	<div class="container">
 		<div class="headerL">
-			<h1>Transit Network Analysis Tool Reports</h1>
+			<h1>Transit Network Explorer Tool Reports</h1>
 		</div>
 
 		<div class="headerR">
@@ -183,6 +190,7 @@ $(document).ready(function(){
 			<label for="dbselect" style="margin-right: 0.5em; font-weight: bold">GTFS
 				Source</label><select id='dbselect' data-label='GTFS Source'
 				class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+			<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>											
 			<input type="button" onclick="window.close()" title="Close Report"
 				value="Close Report" class="button closeButton" />
 		</div>

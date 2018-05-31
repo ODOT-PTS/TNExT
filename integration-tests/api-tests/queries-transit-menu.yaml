@@ -1,0 +1,7 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/menu
+    timeout: 600
+- test:
+    referer: /?&n=--&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/menu?day=null&dbindex=0&username=admin

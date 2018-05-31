@@ -1,7 +1,7 @@
 Features List
 =========
 
-This is a list of all metrics in the most current version of the Transit Network Analysis Software Tool (TNAST).
+This is a list of all metrics in the most current version of the Transit Network Explorer Tool (TNExT).
 Group metrics by <select onchange="$('iframe').attr('src', '../../TNAtoolAPI-Webapp/Metrics.html?&flag='+$(this).val());">
 	<option value="reportsJson">report</option>	
 	<option value="metricsJson">metric name</option>	

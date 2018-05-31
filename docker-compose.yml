@@ -5,14 +5,15 @@ volumes:
   conf:
 
 services:
-
   nginx:
     restart: always
     image: nginx:alpine
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+     - ./nginx/tnext.conf:/etc/nginx/conf.d/tnext.conf
     ports:
       - "8080"
+    links:
+      - tnext      
 
   db:
     restart: always
@@ -26,7 +27,7 @@ services:
     ports:
       - "5432"
 
-  tnast:
+  tnext:
     build: .
     restart: always
     environment:
@@ -39,4 +40,3 @@ services:
       - "8080"
     links:
       - db
-      - nginx

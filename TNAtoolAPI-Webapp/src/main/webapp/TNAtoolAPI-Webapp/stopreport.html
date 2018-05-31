@@ -34,19 +34,18 @@
 
 w_qstringd = getDates(keyName);
 var dateIOnumber = 2;
-var geotype=parseInt(getURIParameter("geotype"));
-var type = parseInt(getURIParameter("type"));
+var geotype=parseInt(getURIParameter("geotype")) || -1;
+var type = parseInt(getURIParameter("type")) || 0;
 var areaId = getURIParameter("areaid");
 var geoid = getURIParameter("geoid");
 var route = getURIParameter("route");
 var agency = getURIParameter("agency");
-var rc= getURIParameter("rc");
-var stime = getURIParameter("stime");
-var etime = getURIParameter("etime");
+var rc = parseInt(getURIParameter("rc")) || -1;
+var stime = getURIParameter("stime") || "";
+var etime = getURIParameter("etime") || "";
 var table;
 var xhr='';
 var ipop=popYear;
-type = (isNaN(type))?0:type;
 
 html = '<table id="RT" class="display" align="center">';
 tmp = '<tr><th id="aid">Agency ID</th>'+
@@ -78,6 +77,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();		
+	$('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	go(key);
 	  $('input.timepicker').timepicker({timeFormat: 'H:mm',scrollbar:true});
 	  $('input.timepicker1').timepicker({timeFormat: 'H:mm',scrollbar:true});
@@ -160,7 +162,7 @@ $(document).ready(function(){
 			<div class="headerR">
 				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select disabled id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
-				
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>											
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	
@@ -204,11 +206,11 @@ $(document).ready(function(){
                     </tr>
                     <tr>    
                        <td style="font-size:15">Start Time<span class="IOSym">(3)</span></td>
-                       <td><input type="text" id="stime"  class="timepicker1" name="time" style='width: 150px ' style='height: 25px '/></td>
+                       <td><input type="text" value="00:00" id="stime"  class="timepicker1" name="time" style='width: 150px ' style='height: 25px '/></td>
 				      </tr>
 				      <tr>
 				         <td style="font-size:15">End Time<span class="IOSym">(4)</span></td>
-				         <td><input type="text" id="etime" class=" timepicker1" name="time" style='width: 150px' style='height: 25px '/></td>			
+				         <td><input type="text" value="23:59" id="etime" class=" timepicker1" name="time" style='width: 150px' style='height: 25px '/></td>			
 			 	</tr>
 			 	</table>
 			 	</div>

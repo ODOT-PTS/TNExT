@@ -1,18 +1,18 @@
 // Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
-//   This file is part of Transit Network Analysis Software Tool.
+//   This file is part of Transit Network Explorer Tool.
 //
-//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    Transit Network Explorer Tool is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    Transit Network Explorer Tool is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU  General Public License for more details.
 //
 //    You should have received a copy of the GNU  General Public License
-//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+//    along with Transit Network Explorer Tool.  If not, see <http://www.gnu.org/licenses/>.
 
 // Includes all the methods used for the creation, modification, maintenance, and deletion of databases
 
@@ -113,48 +113,6 @@ public class DbUpdate {
   public final static String VERSION = "V4.16.07";
   public static boolean gtfsUpload = false;
   public static String gtfsMessage = "";
-
-  public static List<String> getSelectedAgencies(String username) {
-    List<String> selectedAgencies = new ArrayList<String>();
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    try {
-      c = dbConfig.getConnection();
-      statement = c.createStatement();
-      /*ResultSet rs = statement.executeQuery("SELECT defaultid FROM gtfs_feed_info "
-          + "JOIN gtfs_selected_feeds "
-          + "ON gtfs_feed_info.feedname=gtfs_selected_feeds.feedname "
-          + "WHERE gtfs_selected_feeds.username = '"+username+"';");*/
-      rs = statement
-          .executeQuery("SELECT agency_id FROM gtfs_selected_feeds " + "WHERE username = '" + username + "';");
-      while (rs.next()) {
-        selectedAgencies.add(rs.getString("agency_id"));
-      }
-    } catch (SQLException e) {
-      logger.error(e);
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-    if (selectedAgencies.isEmpty()) {
-      selectedAgencies.add("null");
-    }
-    return selectedAgencies;
-  }
 
   // ian: unused?
   @POST
@@ -2788,7 +2746,7 @@ public class DbUpdate {
         }
 
       // For Issue #6, do not delete the file, so we can keep it for reference!
-      // https://github.com/pouyalireza/TNAST_MAVEN/issues/6/
+      // https://github.com/pouyalireza/TNExT/issues/6/
       // target.delete();
     }
 

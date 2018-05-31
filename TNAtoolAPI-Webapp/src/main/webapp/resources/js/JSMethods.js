@@ -1,21 +1,21 @@
 // Copyright (C) 2015 Oregon State University - School of Mechanical,Industrial and Manufacturing Engineering 
-//   This file is part of Transit Network Analysis Software Tool.
+//   This file is part of Transit Network Explorer Tool.
 //
-//    Transit Network Analysis Software Tool is free software: you can redistribute it and/or modify
+//    Transit Network Explorer Tool is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU  General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    Transit Network Analysis Software Tool is distributed in the hope that it will be useful,
+//    Transit Network Explorer Tool is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU  General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with Transit Network Analysis Software Tool.  If not, see <http://www.gnu.org/licenses/>.
+//    along with Transit Network Explorer Tool.  If not, see <http://www.gnu.org/licenses/>.
 // =========================================================================================================
 //	  This script contains JavaScript variables and methods used to generate tabular reports
-//	  in the Transit Network Analysis Software Tool.
+//	  in the Transit Network Explorer Tool.
 // =========================================================================================================
 
 
@@ -258,12 +258,7 @@ function exceedsMaxRadius(x){
  * sets the position and transitions for tooltips in tabular reports
  */
 function updateToolTips() {
-	$(document).tooltip({
-		position : {
-			my : "bottom",
-			at : "center top+12"
-		}
-	});
+	$(document).tooltip({});
 	
 	$(".input").each(function(index, object) {
 		$(object).on('input', function() {
@@ -271,13 +266,7 @@ function updateToolTips() {
 		});
 	});
 
-	$("#submit").tooltip({
-		open : function() {
-			setTimeout(function() {
-				$("#submit").trigger('mouseleave');
-			}, 1000);
-		}
-	});
+	$("#submit").tooltip({});
 }
 
 /**
@@ -308,19 +297,19 @@ function reloadPage() {
 		// updating dates
 		try {
 			if($('#stime').val()!=null){
-			var stime=$('#stime').val();
-			var etime=$('#etime').val();
-			var hs=stime.split(":");
-			var st=(parseInt(hs[0])*100)+parseInt(hs[1]);
-			var he=etime.split(":");
-			var et=(parseInt(he[0])*100)+parseInt(he[1]);
-			if(et>st){
-			output = setURIParameter(output, 'stime',stime, keyName)
-	        output = setURIParameter(output, 'etime',etime, keyName)
-			}
-			else{
-				alert("Choose an end time that is the after start time")
-			}
+				var stime=$('#stime').val();
+				var etime=$('#etime').val();
+				var hs=stime.split(":");
+				var st=(parseInt(hs[0])*100)+parseInt(hs[1]);
+				var he=etime.split(":");
+				var et=(parseInt(he[0])*100)+parseInt(he[1]);
+				if(et>st){
+					output = setURIParameter(output, 'stime', stime, null);
+		        	output = setURIParameter(output, 'etime', etime, null);
+				} else{
+					alert("Choose an end time that is the after start time");
+					return
+				}
 			}
 			var dates = $('#datepicker').multiDatesPicker('getDates');
 			if (dates.length == 0) {
@@ -459,6 +448,7 @@ function setURIParameter(url, param, newValue, currentValue) {
 	if (newValue != currentValue) {
 		var URL = url.split("&" + param + "=");
 		var last = "";
+		URL.push(""); // handle new params
 		if (URL[1].indexOf("&") != -1) {
 			last = URL[1].substring(URL[1].indexOf("&"));
 		}
@@ -1126,4 +1116,208 @@ function drawCircleAroundCoordinate(latLng) {
 	that._map.addLayer(that._shape);
 	that._fireCreatedEvent();
 	that.disable();
+}
+
+////////////////////////////
+// Feed picker 2
+////////////////////////////
+
+function feedPickerGetAgencies() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(d) {
+			feedPickerBuild(feedPickerProcessAgencies(d));
+		}
+	});
+}
+
+function feedPickerProcessAgencies(agencies) {
+	var feeds = {};
+	$.each(agencies, function(key, agency) {
+		if (feeds[agency.DefaultId] == null) {feeds[agency.DefaultId] = {hidden: null, agencies: [], feedname: agency.Feedname, startdate: agency.StartDate, enddate: agency.EndDate}};
+		var feed = feeds[agency.DefaultId];
+		feed.agencies.push(agency);
+		if (agency.AgencyId == agency.DefaultId) {
+			feed.hidden = agency.Hidden;
+		}
+	});
+	return feeds
+}
+
+function feedPickerFormatDate(str) {
+	function pad(num, size) {
+		var s = num+"";
+		while (s.length < size) s = "0" + s;
+		return s;
+	}
+	var y = str.substr(0,4), m = str.substr(4,2), d = str.substr(6,2);
+	return pad(y, 4)+'-'+pad(m, 2)+'-'+pad(d, 2);
+}
+
+function feedPickerBuild(feeds) {
+	var elem = $('#feedpicker');
+	elem.empty();
+	var t = $('<table />').appendTo(elem);
+	t.append('<thead><tr><th><input type="checkbox" name="toggle" /></th><th>Feed</th><th>Agencies</th><th>Start</th><th>End</th></tr></thead>');
+	var tbody = $('<tbody />').appendTo(t);
+	var keys = Object.keys(feeds).sort(function(a,b){return (feeds[a].feedname || '').localeCompare(feeds[b].feedname || '')});
+	$.each(keys, function(i, key) {
+		var feed = feeds[key];
+		var click = $('<input type="checkbox" />').val(key).attr('name', 'feed').attr('checked', (!feed.hidden));
+		var ul = $('<ul />').addClass('agencylist');
+		$.each(feed.agencies, function(i, agency) {
+			$('<li />').text(agency.Agencyname).appendTo(ul);
+		});
+		var tr = $('<tr />');
+		$('<td />').append(click).appendTo(tr);
+		$('<td />').text(feed.feedname + ' ('+key+')').appendTo(tr);
+		$('<td />').append(ul).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.startdate)).appendTo(tr);
+		$('<td />').text(feedPickerFormatDate(feed.enddate)).appendTo(tr);
+		tr.appendTo(tbody);
+	});
+	$('#feedpicker input[name=toggle]').click(function(e) {
+		var toggled = $(e.target).prop('checked');
+		$('#feedpicker input[name=feed]').prop('checked', toggled);
+		return true;
+	});
+}
+
+function setHiddenAgencies() {
+	var hiddenAgencies = $("#feedpicker input[name=feed]:checkbox:not(:checked)").map(function(i){return this.value}).get();
+	$.ajax({
+		type: 'GET',
+		// datatype: 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+hiddenAgencies.join(","),
+		async: false,
+		success: function(item){
+			alert("Successfully saved the hidden feed list.");
+			window.location.reload();
+		},
+		error: function() {
+			alert("There was an error setting the hidden feed list.");
+		}	
+	});
+}
+
+function feedPickerShow() {
+	feedPickerGetAgencies();
+	$('#feedpicker').dialog( {
+		width: window.innerWidth * 0.8,
+		height: window.innerHeight * 0.8,
+		modal: true,
+		buttons: {
+		  "Submit": function() {
+			setHiddenAgencies();
+			$( this ).dialog( "close" );
+		  },
+		  Cancel: function() {
+			$( this ).dialog( "close" );
+		  }
+		}
+	});
+}
+
+function feedPickerUpdateStatus() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(d) {
+			var feeds = feedPickerProcessAgencies(d);
+			var count = 0;
+			var display = 0;
+			$.each(feeds, function(key, feed) {
+				if (!feed.hidden) {display += 1}
+				count += 1;
+			});
+			$('button.feedpicker').text(display + ' / ' + count + ' Feeds selected');
+		}
+	});
+}
+
+///////////////
+// Population table
+///////////////
+
+function buildPopTable(item, elem) {
+	function nc(v) {
+		v = Number(v)
+		if (!isFinite(v) || isNaN(v)) {
+			return "N/A";
+		}
+		if (!(v%1 === 0)) { v = v.toFixed(2) }
+		return v.toLocaleString();
+	}
+	var r = {};
+	// square miles
+	var land_u_x = parseInt(item.ULandareaWithinX) / (1e6 / 0.386102);
+	var land_r_x = parseInt(item.RLandareaWithinX) / (1e6 / 0.386102);
+	var land_u_los = parseInt(item.ULandareaAtLoService) / (1e6 / 0.386102);
+	var land_r_los = parseInt(item.RLandareaAtLoService) / (1e6 / 0.386102);
+	var data = {
+		'Land area': {
+			served: [land_u_x, land_r_x],
+			los: [land_u_los, land_r_los],
+			units: '(sq.mi.)'
+		},
+		'Population': {
+			served: [parseInt(item.UPopWithinX), parseInt(item.RPopWithinX)],
+			los: [parseInt(item.UPopServedAtLoService), parseInt(item.RPopServedAtLoService)],
+			density: true,
+			units: ''
+		},
+		'Employment': {
+			served: [parseInt(item.UracWithinX), parseInt(item.RracWithinX)],
+			los: [parseInt(item.UracServedAtLoService), parseInt(item.RracServedAtLoService)],
+			density: true,
+			units: '(RAC)'
+		},
+		'Employee': {
+			served: [parseInt(item.UwacWithinX), parseInt(item.RwacWithinX)],
+			los: [parseInt(item.UwacServedAtLoService), parseInt(item.RwacServedAtLoService)],
+			density: true,
+			units: '(WAC)'
+		},
+	}
+	// var t = elem;
+	// var tb = $("<tbody />").appendTo(t);
+	var tb = elem;
+	var nowhere = $("<div />");
+	var tba;
+	var tbd;
+	$.each(data, function(key,v) {
+		var lkey = key.toLowerCase();
+		if (v.density) {
+			tba = nowhere;
+			tbd = tb;
+		} else {
+			tba = tb;
+			tbd = nowhere;
+		}
+		var order = [
+			// value, table, description, notes, tooltip
+			// within x
+			[v.served[0] + v.served[1], tba, key+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all census blocks within an X-mile radius of all stops in the given area'],
+			[v.served[0], tba, 'Urban '+lkey+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all urban census blocks within an X-mile radius of all stops in the given area'],
+			[v.served[1], tba, 'Rural '+lkey+' served '+v.units, '(1)', 'Summation of the unduplicated '+lkey+' of all rural census blocks within an X-mile radius of all stops in the given area'],
+			[(v.served[0] + v.served[1])/(land_u_x+land_r_x), tbd, key+' density of area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.served[0]/land_u_x, tbd, key+' density of urban area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all urban census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.served[1]/land_r_x, tbd, key+' density of rural area served '+v.units, '(1)', 'The summated unduplicated '+lkey+' of all rural census blocks within in X-mile radius, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			// los
+			[v.los[0] + v.los[1], tba, key+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all census blocks served at the specified level of service in the given area'],
+			[v.los[0], tba, 'Urban '+lkey+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all urban census blocks served at the specified level of service in the given area'],
+			[v.los[1], tba, 'Rural '+lkey+' served at level of service '+v.units, '(1)(2)(3)', 'Summation of the unduplicated '+lkey+' of all rural census blocks served at the specified level of service in the given area'],
+			[(v.los[0] + v.los[1])/(land_u_los+land_r_los), tbd, key+' density of area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.los[0]/land_u_los, tbd, key+' density of urban area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all urban census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile'],
+			[v.los[1]/land_r_los, tbd, key+' density of rural area served at level of service '+v.units, '(1)(2)(3)', 'The summated unduplicated '+lkey+' of all rural census blocks served at the specified level of service, divided by the area of the census blocks, in '+lkey+' per square mile.'],
+		]
+		order.forEach(function(i) {
+			var row = $("<tr />").appendTo(i[1]);
+			$("<td />").attr('title',i[4]).text(i[2]).addClass('metric').append($("<span />").text(i[3]).addClass('IOSym')).appendTo(row);
+			$("<td />").text(nc(i[0])).appendTo(row);
+		})
+	});
 }

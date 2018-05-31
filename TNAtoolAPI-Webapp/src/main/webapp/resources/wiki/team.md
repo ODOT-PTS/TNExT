@@ -1,11 +1,11 @@
-Transit Network Analysis Software Tool -- Team
+Transit Network Explorer Tool -- Team
 =========
 
-The Transit Network Analysis Software Tool (TNAST) was developed in the [School of Mechanical, Industrial, and Manufacturing Engineering (MIME)](http://mime.oregonstate.edu, "MIME home page") at [Oregon State University (OSU)](http://oregonstate.edu, "OSU home page").
+The Transit Network Explorer Tool (TNExT) was developed in the [School of Mechanical, Industrial, and Manufacturing Engineering (MIME)](http://mime.oregonstate.edu, "MIME home page") at [Oregon State University (OSU)](http://oregonstate.edu, "OSU home page").
 
 The project team members are:
 
-<p><img src="http://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/styles/thumbnail/public/porter-david.jpg" alt="Dr. David Porter" style="float:left;" title="Dr. David Porter">
+<p><img src="https://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/styles/thumbnail/public/porter-david.jpg" alt="Dr. David Porter" style="float:left;" title="Dr. David Porter">
 <span style="margin-left:100px; display:block;">Dr. J. David Porter</span></b>
 <span style="margin-left:100px; display:block;">Associate Professor of Industrial and Manufacturing Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
@@ -13,7 +13,7 @@ The project team members are:
 </p>
 
 ---
-<p><img src="http://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/styles/thumbnail/public/kim-mime.jpg" alt="Dr. David Kim" style="float:left;" title="Dr. David Kim">
+<p><img src="https://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/styles/thumbnail/public/kim-mime.jpg" alt="Dr. David Kim" style="float:left;" title="Dr. David Kim">
 <span style="margin-left:100px; display:block;">Dr. David S. Kim</span></b>
 <span style="margin-left:100px; display:block;">Professor of Industrial and Manufacturing Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>
@@ -29,7 +29,7 @@ The project team members are:
 </p>
 
 ---
-<p><img width=110 height=110 src="http://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/photos/grad-directory/mohseni-seyed-web.jpg" alt="Alireza Mohseni" style="float:left;" title="Alireza Mohseni">
+<p><img width=110 height=110 src="https://mime.oregonstate.edu/sites/mime.oregonstate.edu/files/photos/grad-directory/mohseni-seyed-web.jpg" alt="Alireza Mohseni" style="float:left;" title="Alireza Mohseni">
 <span style="margin-left:100px; display:block;">Alireza Mohseni</span></b>
 <span style="margin-left:100px; display:block;">PhD Candidate in Industrial Engineering</span></b>
 <span style="margin-left:100px; display:block;">Oregon State University</span></b>

@@ -1,0 +1,10 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/getDefaultDbIndex
+    timeout: 600
+- test:
+    referer: /
+    url: /TNAtoolAPI-Webapp/queries/transit/getDefaultDbIndex
+- test:
+    referer: /?&n=--&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/getDefaultDbIndex

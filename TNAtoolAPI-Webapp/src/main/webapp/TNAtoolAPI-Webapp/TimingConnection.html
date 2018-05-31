@@ -2,174 +2,203 @@
 
 <html>
 
-<head>
-	<meta charset="utf-8" />
-	<title>Timing Connection Report</title>
+	<head>
+		<meta charset="utf-8" />
+		<title>Timing Connection Report</title>
+		
+		<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+		<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+		<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
+		<script	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
+		<script	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
+		<script	src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+		<script	src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+		<script	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
+		<script	src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+		<script	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
+		<script	src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+		<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet-src.js"></script>
+		<script type="text/javascript" src="../resources/js/tile.stamen.js"></script>
+		<script type="text/javascript" src="../resources/js/Polylinencoded.js"></script>
+		<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet-src.js"></script>
+		<script src="../resources/js/date.js"></script>
+		<script src="../resources/data/Datasources.js"></script>
+		<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
+		<script src="../resources/js/TimingConnection.js"></script>
+		<script src="../resources/data/metricDefinitions.js"></script>
+		<script src="../resources/js/JSMethods.js"></script>
+		
+		<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+		<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css" />
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+		<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
+		 
+		<!-- map -->
+		<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet-src.js"></script>
+		<script type="text/javascript" src="../vendors/leaflet-0.7/Control.MiniMap.js"></script>
+		<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet.contextmenu.js"></script>
+		<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet.draw.js"></script>
+		<script type="text/javascript" src="../resources/js/tile.stamen.js"></script>
+		<script type="text/javascript" src="../resources/js/Polylinencoded.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.1.0/leaflet.polylineDecorator.js"></script>
 	
-	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-	<script src="https://stuk.github.io/jszip/dist/jszip.js"></script>
-	<script src="https://stuk.github.io/jszip/vendor/FileSaver.js"></script>
-	<script	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
-	<script	src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
-	<script	src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
-	<script	src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
-	<script	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.min.js"></script>
-	<script	src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
-	<script	src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.print.min.js"></script>
-	<script	src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
-	<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet-src.js"></script>
-	<script type="text/javascript" src="../resources/js/tile.stamen.js"></script>
-	<script type="text/javascript" src="../resources/js/Polylinencoded.js"></script>
-	<script type="text/javascript" src="../vendors/leaflet-0.7/leaflet-src.js"></script>
-	<script src="../resources/js/date.js"></script>
-	<script src="../resources/data/Datasources.js"></script>
-	<script src="../resources/js/jquery-ui.multidatespicker.js"></script>
-	<script src="../resources/js/TimingConnection.js"></script>
-	<script src="../resources/data/metricDefinitions.js"></script>
-	<script src="../resources/js/JSMethods.js"></script>
+		<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/leaflet.draw.css" />
+		<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/Control.MiniMap.css" />
+		<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/leaflet.contextmenu.css" /> 
+		<link rel="stylesheet" type="text/css" href="../vendors/leaflet-0.7/leaflet.css" /> 
 	
-	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
-	<link rel="stylesheet" type="text/css" href="../resources/css/report.css" />
-	 
-<script type="text/javascript">
-
-var dateIOnumber = 3; // the number is used to map selected date(s) to the metrics affected by the date(s).
-html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
-tmp = '<tr><th>Metric</th><th>Value</th></tr>';
-html += '<thead>'+tmp+'</thead><tbody>';
-
-$(document).ready(function(){
-	$('h2').append('Timing-Connection Report <br><hr>');
-	$('#mapDialog').hide(); // hides the map dialog box
-	$( "#date" ).datepicker({
-		duration: "fast",
-		showButtonPanel: true,
-		onSelect: function (date) {
-			currentDate = date;
-			$("#dialogDate").datepicker( "setDate", currentDate);
-			$("#trips").empty();
-		}
-	});
-	$("#date").datepicker( "setDate", new Date());
-	loadDBList();
-	updateToolTips();
-	progressBar();
-	$("#progressbar").hide();
-	getAgencies($("#dbselect").val());
-	$("#submit").prop("disabled", true);
-	html = '<table id="RT" class="display" align="center">';
-	tmp = '<tr><th class="metric">#</th>'+
-	'<th class="metric">Stop1 ID</th>'+
-	'<th class="metric">Stop1 Name</th>'+
-	'<th class="metric">Stop2 ID</th>'+
-	'<th class="metric">Stop2 Name</th>'+
-	'<th class="metric">Stop2 Agency </th>'+
-	'<th class="metric">Stop2 Route ID</th>'+
-	'<th class="metric">Stop2 Route Name</th>'+
-	'<th class="metric">Stop1 Arrival</th>'+
-	'<th class="metric">Stop2 Departure</th>'+
-	'<th class="metric">Time Difference </th></tr>';
+	<script type="text/javascript">
+	
+	var dateIOnumber = 3; // the number is used to map selected date(s) to the metrics affected by the date(s).
+	html = '<div id="dtcontainer"><table id="RT" class="display" align="center"></div>';
+	tmp = '<tr><th>Metric</th><th>Value</th></tr>';
 	html += '<thead>'+tmp+'</thead><tbody>';
-	$('#displayReport').append($(html));
-	tableProperties.iDisplayLength = 10;
-	buildDatatables();
 	
-	// append toopltips
-	var tooltips = populateMetricDefs();
-	var tempKey = [];
-	$('.metric').each(function(index, item) {
-		tempKey = [$('title').text(),$(item).text().strip().trim() ];
-		$(item).attr('title',tooltips[tempKey]);
-		});
-	
-});
-</script>
+	$(document).ready(function(){
+		// init map
+		initTimingConnectionMap();
+		$('button.feedpicker').click(feedPickerShow);
+	    feedPickerUpdateStatus();
 
-</head>
-<body >
-		<div class="container">
-			<div class="headerL">
-				<h1>Transit Network Analysis Tool Reports</h1>
-			</div>
+		$('h2').append('Timing-Connection Report <br><hr>');
+		$('#mapDialog').hide(); // hides the map dialog box
+		$( "#date" ).datepicker({
+			duration: "fast",
+			showButtonPanel: true,
+			onSelect: function (date) {
+				currentDate = date;
+				$("#dialogDate").datepicker( "setDate", currentDate);
+				$("#trips").empty();
+			}
+		});
+		$("#date").datepicker( "setDate", new Date());
+		loadDBList();
+		updateToolTips();
+		progressBar();
+		$("#progressbar").hide();
+		getAgencies($("#dbselect").val());
+		$("#submit").prop("disabled", true);
+		html = '<table id="RT" class="display" align="center">';
+		tmp = '<tr><th class="metric">#</th>'+
+		'<th class="metric">Stop1 ID</th>'+
+		'<th class="metric">Stop1 Name</th>'+
+		'<th class="metric">Stop2 ID</th>'+
+		'<th class="metric">Stop2 Name</th>'+
+		'<th class="metric">Stop2 Agency </th>'+
+		'<th class="metric">Stop2 Route ID</th>'+
+		'<th class="metric">Stop2 Route Name</th>'+
+		'<th class="metric">Stop1 Arrival</th>'+
+		'<th class="metric">Stop2 Departure</th>'+
+		'<th class="metric">Time Difference </th></tr>';
+		html += '<thead>'+tmp+'</thead><tbody>';
+		$('#displayReport').append($(html));
+		tableProperties.iDisplayLength = 10;
+		buildDatatables();
+		
+		// append toopltips
+		var tooltips = populateMetricDefs();
+		var tempKey = [];
+		$('.metric').each(function(index, item) {
+			tempKey = [$('title').text(),$(item).text().strip().trim() ];
+			$(item).attr('title',tooltips[tempKey]);
+			});
+		
+	});
+	</script>
+	
+	</head>
+	<body >
+			<div class="container">
+				<div class="headerL">
+					<h1>Transit Network Analysis Tool Reports</h1>
+				</div>
+				
+				<div class="headerR">		
+					<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+					<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
+					<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />	</div>
+			</div>	
 			
-			<div class="headerR">				
-				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
-			<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />	</div>
-		</div>	
-		
-		<table id="controls">
-			<tr>
-			  <td id="td1">
-			  	<div class="headerBL"  >
-					<h2 style="margin:0px;"></h2>
-				</div>
-			  </td>
-			  <td id="td2"> 
-			  	<div class="headerBC" id="accordion" >
-					<h3></h3>
-					<div>
-						<table style="width:100%;">
-							<tr>
-								<td id="accordionItems" style="padding-left:10px;vertical-align:top">
-									<ul data-role="listview">
-							
-									</ul>
-								</td>
-								<td style="vertical-align:top;padding-top:15px">
-									<div id="datepicker" ></div>
-								</td>
-							</tr>
-						</table>
+			<table id="controls">
+				<tr>
+				  <td id="td1">
+					  <div class="headerBL"  >
+						<h2 style="margin:0px;"></h2>
 					</div>
+				  </td>
+				  <td id="td2"> 
+					  <div class="headerBC" id="accordion" >
+						<h3></h3>
+						<div>
+							<table style="width:100%;">
+								<tr>
+									<td id="accordionItems" style="padding-left:10px;vertical-align:top">
+										<ul data-role="listview">
+								
+										</ul>
+									</td>
+									<td style="vertical-align:top;padding-top:15px">
+										<div id="datepicker" ></div>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				  </td> 
+				  <td id="td3">
+					  <div class="headerBR" > 
+						  <table>
+							  <tr>
+								  <td style="font-size:15">Connection Radius (miles) </td>
+								  <td><input type="text" name="x" id="Sradius" value="0.25" data-label="Connection Search Radius (miles)" class="input radius tbox" style='width: 150px' onkeypress="return isNumber(event)"/></td>
+								  <td><input id="submit" type="button" onclick="getTimingConReport()" title="Click submit to refresh the report"  value="Submit" disabled/></td>	
+							  </tr>
+							  <tr>
+								  <td style="font-size:15"> Date </td>
+								  <td><input readonly type="text" id="date" data-label="Date" class="input tbox" style='width: 150px'></td>
+								  <td><input id="onMapSubmit" type="button" onclick="openMap()" title="Click to see the report on map"  value="Show map"/></td>
+							  </tr>
+							  <tr>
+								  <td style="font-size:15"> Time Window (min.) </td>
+								  <td> <input type="text" name="T" id="TW" value="15" style='width: 150px' data-label="Timing Window (min.)" class="input tbox" onkeypress="return isWholeNumber(event)"/></td>
+							  </tr>
+							  <tr>
+								  <td style="font-size:15">Agency</td>
+								  <td><select id='agencySelect' data-label='Agency' name='agency' class='input tbox' style='width: 150px' onchange='getRoutes(this)'><option value='default'>&lt; select &gt;</option></select></td>
+							  </tr>
+							  <tr>
+								  <td style="font-size:15">Route</td>
+								  <td><select id='routeSelect' data-label='Route' name='route' class='input tbox' style='width: 150px' onchange='getTripsOfDay(this)'><option value='default'>&lt; select &gt;</option></select></td>
+							  </tr>
+							  <tr>
+								  <td style="font-size:15">Trip</td>
+								  <td><select id='tripSelect' data-label='Trip' name='trip' class='input tbox' style='width: 150px' onchange='$("#submit").attr("disabled", false);'><option value='default'>&lt; select &gt;</option></select></td>
+							  </tr>
+						  </table>
+					</div>
+				  </td>
+				</tr>
+			</table>
+			
+			<p id="displayReport" class="displayReport" style="overflow:auto"><br></p>
+			<br>
+			<br>
+			<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
+	
+			<div id="mapDialog" style="display: table;" title="Timing Connection Report">
+				<div id="mapFrame" styoe="margin:0px;padding:0px">
+					<div id="map" style="margin:0px;padding:0px;"></div>
+					<div id="mapLegend" style="position:absolute;top:8px;left:8px;padding:5px;background:white">
+						<label><input checked type="checkbox" id="cbox0" value="originTrip" onchange="toggleTrips(this)"> <span style="font-size: 15pt;color:#0230ff;">-  </span>Selected Trip</label><br>
+						<label><input checked type="checkbox" id="cbox1" value="accessible" onchange="toggleTrips(this)"> <span style="font-size: 15pt;color:#0da00b;">-  </span>Accessible Connections</label><br>
+						<label><input checked type="checkbox" id="cbox2" value="missed" onchange="toggleTrips(this)"> <span style="font-size: 15pt;color:#f44242">-  </span>Missed Connections</label>
+					</div>			
 				</div>
-			  </td> 
-			  <td id="td3">
-			  	<div class="headerBR" > 
-			  		<table>
-			  			<tr>
-			  				<td style="font-size:15">Connection Radius (miles) </td>
-			  				<td><input type="text" name="x" id="Sradius" value="0.25" data-label="Connection Search Radius (miles)" class="input radius tbox" style='width: 150px' onkeypress="return isNumber(event)"/></td>
-			  				<td><input id="submit" type="button" onclick="getTimingConReport()" title="Click submit to refresh the report"  value="Submit" disabled/></td>	
-			  			</tr>
-			  			<tr>
-			  				<td style="font-size:15"> Date </td>
-			  				<td><input readonly type="text" id="date" data-label="Date" class="input tbox" style='width: 150px'></td>
-			  				<td><input id="onMapSubmit" type="button" onclick="openMap()" title="Click to see the report on map"  value="Show map"/></td>
-			  			</tr>
-			  			<tr>
-			  				<td style="font-size:15"> Time Window (min.) </td>
-			  				<td> <input type="text" name="T" id="TW" value="15" style='width: 150px' data-label="Timing Window (min.)" class="input tbox" onkeypress="return isWholeNumber(event)"/></td>
-			  			</tr>
-			  			<tr>
-			  				<td style="font-size:15">Agency</td>
-			  				<td><select id='agencySelect' data-label='Agency' name='agency' class='input tbox' style='width: 150px' onchange='getRoutes(this)'><option value='default'>&lt; select &gt;</option></select></td>
-			  			</tr>
-			  			<tr>
-			  				<td style="font-size:15">Route</td>
-			  				<td><select id='routeSelect' data-label='Route' name='route' class='input tbox' style='width: 150px' onchange='getTripsOfDay(this)'><option value='default'>&lt; select &gt;</option></select></td>
-			  			</tr>
-			  			<tr>
-			  				<td style="font-size:15">Trip</td>
-			  				<td><select id='tripSelect' data-label='Trip' name='trip' class='input tbox' style='width: 150px' onchange='$("#submit").attr("disabled", false);'><option value='default'>&lt; select &gt;</option></select></td>
-			  			</tr>
-			  		</table>
-		    	</div>
-			  </td>
-			</tr>
-		</table>
-		
-		<p id="displayReport" class="displayReport" style="overflow:auto"><br></p>
-		<br>
-		<br>
-		<div id="progressbar" style="width:40%;margin-left:27%"><div class="progress-label"></div></div>
-		<div id="mapDialog" style="display: table" title="Timing Connection Report">
-  			<iframe id="iframe" style="width:inherit" src="TimingConnectionOnMap.html"></iframe>
-		</div>
-</body>
-</html>
+			</div>
+	</body>
+	</html>
+	

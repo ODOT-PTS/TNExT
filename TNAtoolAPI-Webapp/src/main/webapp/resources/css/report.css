@@ -62,11 +62,6 @@ em{
 	margin-left: 3px;		
 }
 
-.ui-tooltip {
-	font-size:80%;
-	padding: 5px 5px;
-}
-
 #datepicker {
 	margin-left:20px;
 }
@@ -392,4 +387,28 @@ form span.timeEntry select {
 
 .shapeFileTable{
 	
+}
+
+/* feedpicker */
+#feedpicker ul {
+	list-style: none;
+}
+#feedpicker ul li {
+	padding: 0px;
+	margin: 0px;
+}
+#feedpicker table {
+	width: 100%;
+	border-collapse: collapse;
+}
+#feedpicker table td, #feedpicker table th {
+	padding: 5px;
+	margin: 0px;
+	vertical-align: top;
+}
+#feedpicker table tr:nth-child(even) {
+	background: #eee;
+}
+#feedpicker table thead th {
+	border-bottom: solid 1px black;
 }

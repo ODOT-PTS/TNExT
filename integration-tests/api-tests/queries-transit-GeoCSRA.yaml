@@ -1,0 +1,55 @@
+---
+- config:
+    testset: API tests for /TNAtoolAPI-Webapp/queries/transit/GeoCSRA
+    timeout: 600
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoTractsReport.html?&county=41003&agency=456&dbindex=0&popYear=2010&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&county=41003&key=0.5360876995352069&agency=456&type=1&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesReport.html?&agency=456&dbindex=0&popYear=2010&nav=stateS-agencyS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.0016044067395748485&agency=456&type=0&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoPlacesReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.16491699276302318&type=2&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoPlacesReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.17613033421932367&type=2&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=41003&type=0&uc=0&agency=456&nav=stateS-agencyS-countyS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.23560816745556679&agency=456&type=3&uc=0&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0&geotype=0&areaid=41003
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoRegionsReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.3300732042148933&type=4&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoRegionsReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.523897391982413&type=4&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.8404958837336696&type=0&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongDistsReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.8437452301376229&type=5&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongDistsReport.html?&dbindex=0&popYear=2010
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.8479681664383021&type=5&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCountiesReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.9203574695699974&type=0&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoCongDistsReport.html?&dbindex=0&popYear=2010&nav=stateS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key=0.9244237868888898&type=5&dbindex=0&popYear=2010&username=admin
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&uc=1&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=1&type=4&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key=0.050610432527730786&agency=null&type=3&uc=1&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0&geotype=4&areaid=1
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&uc=0&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=1&type=4&nav=stateS-regionS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key=0.08362521605496931&agency=null&type=3&uc=0&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0&geotype=4&areaid=1
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&popMin=0&uc=3&popMax=2000000&dbindex=0&popYear=2010&type=3&nav=stateS-AggUAS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key=0.43361432294370084&agency=null&type=3&uc=3&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0&geotype=3&areaid=null
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&dbindex=0&uc=3&popYear=2010&popMin=0&popMax=2000000&areaid=null&type=-1
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key=0.7830986926464321&agency=null&type=3&uc=3&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0&geotype=-1&areaid=null
+- test:
+    referer: /TNAtoolAPI-Webapp/GeoUAreasReport.html?&pop=-1&uc=0&dbindex=0&popYear=2010&popMin=0&popMax=2000000&areaid=4101000&type=2&nav=stateS-placeS
+    url: /TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key=0.8062056498393457&agency=null&type=3&uc=0&dbindex=0&popYear=2010&username=admin&popMax=2000000&popMin=0&geotype=2&areaid=4101000

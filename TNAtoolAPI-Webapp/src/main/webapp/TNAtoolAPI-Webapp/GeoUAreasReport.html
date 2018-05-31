@@ -78,6 +78,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	var url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&upop=2&key='+ key+'&agency=null&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
 	if (agencyId!=null){
 		url = '/TNAtoolAPI-Webapp/queries/transit/GeoCSRA?&key='+ key+'&agency='+agencyId+'&type=3'+'&uc='+uc+'&dbindex='+dbindex+'&popYear='+popYear+'&username='+getSession()+'&popMax='+popMax+'&popMin='+popMin+'&geotype='+geotype+'&areaid='+areaid;
@@ -223,12 +226,13 @@ $(document).ready(function(){
 <body>
 		<div class="container">
 			<div class="headerL">
-				<h1>Transit Network Analysis Tool Reports</h1>
+				<h1>Transit Network Explorer Tool Reports</h1>
 			</div>
 			
 			<div class="headerR">
 				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' name='popYear' class='input dropDown' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' name='dbindex' class='input dropDown' onchange='reloadPage()'></select>
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	

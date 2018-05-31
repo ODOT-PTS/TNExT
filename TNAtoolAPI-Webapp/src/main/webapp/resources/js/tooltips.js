@@ -37,6 +37,10 @@ var tooltips={
 			"Median Fare": "Fare median for the given geographic area",
 			"Min. Fare": "Minimum fare for the state",
 			"Max. Fare": "Maximum fare for the state",
+			"Urban Area Served (sq.mi.)": "Total area of all urban census blocks served, in square miles",
+			"Rural Area Served (sq.mi.)": "Total area of all rural census blocks served, in square miles",
+			"Population Density of Urban Area Served (people/sq.mi.)": "The total population of all urban census blocks served divided by the area of the census blocks, in persons per square mile.",
+			"Population Density of Rural Area Served (people/sq.mi.)": "The total population of all rural census blocks served divided by the area of the census blocks, in persons per square mile.",
 		},
 		"Transit Agency Summary Report": {
 			"Agency ID": "Identification number reported in the transit agency's GTFS feed",

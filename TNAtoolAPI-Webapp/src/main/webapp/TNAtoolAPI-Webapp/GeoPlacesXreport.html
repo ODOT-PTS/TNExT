@@ -51,6 +51,9 @@ $(document).ready(function(){
 	loadDBList();
 	updateToolTips();
 	progressBar();
+    $('button.feedpicker').click(feedPickerShow);
+    feedPickerUpdateStatus();
+	
 	go(key);	
 	
 	$.ajax({
@@ -122,7 +125,8 @@ $(document).ready(function(){
 			popWithinX = numberconv(item.PopServed);
 			popServedLOS = numberconv(item.PopServedAtLoService);
 			popServed = parseFloat(item.RPopServedByService) + parseFloat(item.UPopServedByService);
-			$('#displayReport').append($(html));	
+			$('#displayReport').append($(html));
+			buildPopTable(item, $("table#RT > tbody"));				
 			progressbar.remove();
 			
 			tableProperties.paging = false;
@@ -171,12 +175,13 @@ $(document).ready(function(){
 <body >
 		<div class="container">
 			<div class="headerL">
-				<h1>Transit Network Analysis Tool Reports</h1>
+				<h1>Transit Network Explorer Tool Reports</h1>
 			</div>
 			
-			<div class="headerR">				
+			<div class="headerR">	
 				<label for="popselect" style="margin-right:0.5em;font-weight:bold">Population / Employment Source</label><select id='popselect' data-label='Population Source' class='input dropDown' name='popYear' onchange='reloadPage()'></select>
 				<label for="dbselect" style="margin-right:0.5em;font-weight:bold">GTFS Source</label><select id='dbselect' data-label='GTFS Source' class='input dropDown' name='dbindex' onchange='reloadPage()'></select>
+				<div id="feedpicker" style="display:none"></div> <button class="feedpicker">Feeds</button>							
 				<input type="button" onclick="window.close()" title="Close Report"  value="Close Report" class="button closeButton" />
 			</div>
 		</div>	

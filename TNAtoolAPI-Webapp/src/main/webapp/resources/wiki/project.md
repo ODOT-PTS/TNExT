@@ -5,13 +5,13 @@ Assessing the current "state of health" of individual transit networks is a fund
 
 Prior to 2005, transit data was not readily available. This situation complicated the assessment of single transit networks, let alone performing a state-wide or region-wide study. The advent of the [General Transit Feed Specification](https://developers.google.com/transit/gtfs) (GTFS) changed this constrained landscape and motivated transit operators to release their schedules and route information to third party developers.
 
-The [Research Unit](http://www.oregon.gov/ODOT/TD/TP_RES/Pages/Research-Program-2.aspx "Research Unit") of the [Oregon Department of Transportation](http://www.oregon.gov/ODOT "Oregon Department of Transportation") (ODOT) provided the funding to develop the open source, web-based Transit Network Analysis Software Tool (TNAST). The [Rail and Public Transit Division](http://www.oregon.gov/ODOT/PT) (RPTD) of ODOT and Oregon State University collaborated in the definition of the functional and technical specifications of the software tool.
+The [Research Unit](http://www.oregon.gov/ODOT/TD/TP_RES/Pages/Research-Program-2.aspx "Research Unit") of the [Oregon Department of Transportation](http://www.oregon.gov/ODOT "Oregon Department of Transportation") (ODOT) provided the funding to develop the open source, web-based Transit Network Explorer Tool (TNExT). The [Rail and Public Transit Division](http://www.oregon.gov/ODOT/PT) (RPTD) of ODOT and Oregon State University collaborated in the definition of the functional and technical specifications of the software tool.
  
 <img src="images/odot.jpg" alt="Oregon Department of Transportation" height="150" width="200" style="margin:0 auto;display:block;" title="Oregon Department of Transportation"> 
 
 Phase I
 -------
-The first phase of the project was titled 'Proof of Concept: GTFS Data as a Basis for Optimization of Oregon's regional and statewide Transit Networks'. The software development efforts spanned from July 2012 until September 2013. In this phase, a review was conducted on currently available software packages that perform some form of transit network analysis. These packages varied largely in terms of the software platforms they are built upon, as well as the analysis capabilities they offer. A total of 43 software packages in different areas related to the analysis of transit networks were identified and analyzed based on the following criteria:
+The first phase of the project was titled 'Proof of Concept: GTFS Data as a Basis for Optimization of Oregon's regional and statewide Transit Networks'. The software development efforts spanned from July 2012 until September 2013. In this phase, a review was conducted on currently available software packages that perform some form of Transit Network Explorer. These packages varied largely in terms of the software platforms they are built upon, as well as the analysis capabilities they offer. A total of 43 software packages in different areas related to the analysis of transit networks were identified and analyzed based on the following criteria:
 
  * Be capable of collecting and storing GTFS data. 
  * Be capable of keeping GTFS data up-to-date.
@@ -21,9 +21,9 @@ The first phase of the project was titled 'Proof of Concept: GTFS Data as a Basi
 
 The conclusion reached from this analysis was that only OpenTripPlanner met most of the criteria discussed before and provided the best balance between already available features and required development work.
 
-<img src="images/oldtna.png" alt="Transit Network Analysis Tool - the old version" height="100" width="400" style="margin:0 auto;display:block;" title="Transit Network Analysis Tool - the old version"> 
+<img src="images/oldtna.png" alt="Transit Network Explorer Tool - the old version" height="100" width="400" style="margin:0 auto;display:block;" title="Transit Network Explorer Tool - the old version"> 
 
-The final product, referred to as the Transit Network Analysis Software Tool (TNAST), incorporates publicly available transit data and census data as its main inputs and can be used to visualize, analyze and report on the Oregon transit network. 
+The final product, referred to as the Transit Network Explorer Tool (TNExT), incorporates publicly available transit data and census data as its main inputs and can be used to visualize, analyze and report on the Oregon transit network. 
 
 NOTE: The final report of Phase I of the project can be accessed via the [ODOT](http://www.oregon.gov/ODOT/TD/TP_RES/docs/ProjectWorkPlans/SPR752WP.pdf) page.
 
