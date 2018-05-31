@@ -4182,6 +4182,7 @@ public class Queries {
 
 		setprogVal(key, 10);
 		int totalLoad = x.entrySet().size();
+		if (totalLoad == 0) {totalLoad = 1;} // avoid div by zero..
 		HashMap<String, KeyClusterHashMap> first = new HashMap<String, KeyClusterHashMap>();
 		HashMap<String, KeyClusterHashMap> second = new HashMap<String, KeyClusterHashMap>();
 		HashMap<String, KeyClusterHashMap> third = new HashMap<String, KeyClusterHashMap>();
