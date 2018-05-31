@@ -1006,7 +1006,7 @@ public class Queries {
 		response.id = pnrId;
 		MapStop mapPnrStop;
 		MapRoute mapPnrRoute;
-		List<String> agencyList = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> agencyList = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		logger.debug(agencyList);
 		List<GeoStop> pnrGeoStops = new ArrayList<GeoStop>();
 		List<GeoStopRouteMap> sRoutes = new ArrayList<GeoStopRouteMap>();
@@ -1093,8 +1093,7 @@ public class Queries {
 						null, getUsername(), dbindex);
 				return response;
 			}
-			List<String> selectedAgencies = DbUpdate
-					.getSelectedAgencies(getUsername());
+			List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 			Collection<Agency> allagencies = GtfsHibernateReaderExampleMain
 					.QueryAllAgencies(selectedAgencies, dbindex);
 			if (menuResponse[dbindex] == null
@@ -2494,7 +2493,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<County> allcounties = new ArrayList<County>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		try {
 			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
@@ -2582,7 +2581,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<Tract> alltracts = new ArrayList<Tract>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		try {
 			alltracts = EventManager.gettractsbycounty(county, dbindex);
 		} catch (FactoryException e1) {
@@ -2665,7 +2664,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<Place> allplaces = new ArrayList<Place>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		try {
 			allplaces = EventManager.getplaces(dbindex);
 		} catch (FactoryException e1) {
@@ -2765,7 +2764,7 @@ public class Queries {
 			popYear = "2010";
 		}
 		List<Urban> allurbanareas = new ArrayList<Urban>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		try {
 			allurbanareas = EventManager.geturbansbypopbet(popmin,popmax,dbindex, popYear);
 		} catch (FactoryException e1) {
@@ -3063,7 +3062,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<CongDist> allcongdists = new ArrayList<CongDist>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		try {
 			allcongdists = EventManager.getcongdist(dbindex);
 		} catch (FactoryException e1) {
@@ -3148,7 +3147,7 @@ public class Queries {
 			dbindex = default_dbindex;
 		}
 		List<County> allcounties = new ArrayList<County>();
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		try {
 			allcounties = EventManager.getcounties(dbindex);
 		} catch (FactoryException e1) {
@@ -3565,7 +3564,7 @@ public class Queries {
 		if (popYear == null || popYear.equals("null"))
 			popYear = "2010";
 		
-		List<String> selectedAgencies = DbUpdate.getSelectedAgencies(getUsername());
+		List<String> selectedAgencies = PgisEventManager.getSelectedAgencies(dbindex, getUsername());
 		String[] dates = date.split(",");
 		String[][] datedays = daysOfWeekString(dates);
 		String[] fulldates = fulldate(dates);
@@ -4546,7 +4545,7 @@ public class Queries {
 		day = datedays[1][0];
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
-		String query = "with aids as (select agency_id as aid from gtfs_selected_feeds where username='" + getUsername() + "'),"
+		String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+getUsername()+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true),"
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID1 + "'"
 				+ " 	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day + "= 1 and serviceid_agencyid||serviceid_id "

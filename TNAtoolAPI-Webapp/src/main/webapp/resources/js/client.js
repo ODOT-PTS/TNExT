@@ -1332,8 +1332,8 @@ $mylist
 		    div2.append(menucontent);
 		    div2.appendTo(titlebar);
 		  
-		    $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><button id="openfeeds" type="button">FS</button></div>');
-
+		    $('#map > div.leaflet-control-container > div.leaflet-top.leaflet-left').append('<div id="con-graph-control"  class="leaflet-control ui-widget-content" style="border-radius:5px; border:0"><div id="feedpicker" style="display:none"></div><button class="feedpicker">Feeds</button></div>');
+			$('button.feedpicker').click(feedPickerShow);
  
 		    // "Date Picker" button on the "Oregon Transit Agencies" dialog box
 		    var div3 = $("<div/>");	
