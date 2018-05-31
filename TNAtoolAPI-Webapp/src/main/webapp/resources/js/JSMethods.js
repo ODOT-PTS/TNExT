@@ -1162,7 +1162,7 @@ function feedPickerBuild(feeds) {
 	var t = $('<table />').appendTo(elem);
 	t.append('<thead><tr><th><input type="checkbox" name="toggle" /></th><th>Feed</th><th>Agencies</th><th>Start</th><th>End</th></tr></thead>');
 	var tbody = $('<tbody />').appendTo(t);
-	var keys = Object.keys(feeds).sort(function(a,b){return feeds[a].feedname - feeds[b].feedname});
+	var keys = Object.keys(feeds).sort(function(a,b){return (feeds[a].feedname || '').localeCompare(feeds[b].feedname || '')});
 	$.each(keys, function(i, key) {
 		var feed = feeds[key];
 		var click = $('<input type="checkbox" />').val(key).attr('name', 'feed').attr('checked', (!feed.hidden));
