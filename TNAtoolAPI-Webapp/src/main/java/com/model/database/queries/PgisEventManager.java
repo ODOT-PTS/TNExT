@@ -6466,9 +6466,9 @@ public class PgisEventManager {
 					  }
 				  query="with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true),"
 				  		+ "svcids as (select serviceid_agencyid, serviceid_id  from gtfs_calendars gc where startdate::int<="+date+" and enddate::int>="+date+" and "+dayOfWeek+" = 1 and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+date+"' and exceptiontype=2)union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+date+"' and exceptiontype=1),"
-						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) ),"
+						  +"trips as (select trip.agencyid as aid, trip.id as tripid,trip.stopscount as stops from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) INNER JOIN aids ON trip.serviceid_agencyid = aids.aid ),"
 						  +"activeAgencies as (select count(distinct aid) as active from trips),"
-						  +"totalAgencies as (select count(distinct agencyid) as total from  gtfs_trips )," 
+						  +"totalAgencies as (SELECT COUNT(distinct id) as total FROM gtfs_agencies INNER JOIN aids ON gtfs_agencies.defaultid = aids.aid ), " 
 						  +"tripcount as (select count (distinct tripid) as tripcount from trips) "
 						  +"select tripcount,active,total from activeAgencies Cross join totalAgencies cross join tripcount";
 				logger.debug(query);
