@@ -2870,7 +2870,7 @@ public class PgisEventManager {
 		String routesfilter = "";
 		String agenciesfilter = "";
 		String popsfilter = "";
-		String mainquery ="with ";
+		String mainquery ="with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), ";		
 		String criteria = "";
 		if (stime == null || "".equals(stime)) {stime = "00:00";}
 		if (etime == null || "".equals(etime)) {etime = "23:59";}
@@ -2911,9 +2911,8 @@ public class PgisEventManager {
 		    	  popsfilter = "block." + criteria + "='" + areaId + "' and";
 		      }
 			if (route==null){
-				if (agency==null){//stops by areaId
-					mainquery +="aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), ";
-					stopsfilter = "inner join aids on stop.agencyid=aid and "+criteria+"='"+areaId+"' ";					
+				if (agency==null){//stops by areaId					
+					stopsfilter = "where "+criteria+"='"+areaId+"' ";	// INNER JOIN aids on map.agencyid_def=aids.aid				
 				}else {//stops by areaId and agency
 					stopsfilter = "where map.agencyid='"+agency+"' and "+criteria+"='"+areaId+"'";
 					agenciesfilter = "where agencies.id='"+agency+"'";
@@ -2942,7 +2941,7 @@ public class PgisEventManager {
 		if(rc==1)//rural stops
 		{
 		 mainquery += "stops0 as (select map.agencyid as agencyid,map.agencyid_def as defagencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid, regionid, congdistid, placeid, blockid "
-				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
+				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id INNER JOIN aids on stop.agencyid=aids.aid " + stopsfilter + "), "
 				+"stops1 as (select stops0.* from stops0 join census_blocks using(blockid) where poptype='R'),"
 				+ "stops AS (select stops1.*, urban.population"+popYear+" AS urbanpop FROM stops1 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops1.urbanid AND population"+popYear+" >50000), "
 				+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
@@ -2968,7 +2967,7 @@ public class PgisEventManager {
 		}
 		else if (rc==0)// urban stops
 		{ mainquery += "stops0 as (select map.agencyid as agencyid,map.agencyid_def as defagencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid, regionid, congdistid, placeid, blockid "
-				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
+				+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id INNER JOIN aids on stop.agencyid=aids.aid " + stopsfilter + "), "
 				+"stops1 as (select stops0.* from stops0 join census_blocks using(blockid) where poptype='U'),"
 				+ "stops AS (select stops1.*, urban.population"+popYear+" AS urbanpop FROM stops1 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops1.urbanid AND population"+popYear+" >50000), "
 				+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
@@ -2995,7 +2994,7 @@ public class PgisEventManager {
 		else
 		{
 			 mainquery += "stops0 as (select map.agencyid as agencyid,map.agencyid_def as defagencyid,stop.lat, stop.lon, stop.name as name, stop.id as id, url, location, urbanid, regionid, congdistid, placeid, blockid "
-						+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id " + stopsfilter + "), "
+						+ "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.agencyid_def=stop.agencyid and map.stopid=stop.id INNER JOIN aids on stop.agencyid=aids.aid " + stopsfilter + "), "
 						+ "stops AS (select stops0.*, urban.population"+popYear+" AS urbanpop FROM stops0 LEFT JOIN census_urbans AS urban ON urban.urbanid = stops0.urbanid AND population"+popYear+" >50000), "
 						+ "agencies as (select agencies.id as agencyid, agencies.name as aname from gtfs_agencies "
 						+ "agencies "+agenciesfilter+"), routes as (select map.agencyid, stops.id, coalesce(string_agg(map.routeid,'; '),'-') as routes from gtfs_stop_route_map map inner "
