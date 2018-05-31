@@ -26,7 +26,7 @@ function openConGraph2(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/agencyCentriods2?&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/agencyCentriods2?&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){
 			$.each(d.list,function(index, item){
@@ -45,7 +45,7 @@ function callBack2(agencyCentroids, dbindex){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x='+$('#con-graph-input').val()*1609.3+'&day='+day+'&dbindex='+dbindex,
+		url: '/TNAtoolAPI-Webapp/queries/transit/connectivityGraph?&x='+$('#con-graph-input').val()*1609.3+'&day='+day+'&dbindex='+dbindex+'&username='+getSession(),
 		async: true,
 		success: function(d){			
 			localStorage.setItem('myStorage', JSON.stringify(d));	
@@ -152,7 +152,7 @@ function callBack2(agencyCentroids, dbindex){
 			$.ajax({
 				type: 'GET',
 				datatype: 'json',
-				url: '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='+dbindex,
+				url: '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='+dbindex+'&username='+getSession(),
 				async: false,
 				success: function(d){			
 					$.each(d,function(index, item){

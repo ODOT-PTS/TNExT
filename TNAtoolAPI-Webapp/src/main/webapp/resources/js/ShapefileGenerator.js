@@ -53,7 +53,8 @@ function getAgencies(input) {
 			.ajax({
 				type : 'GET',
 				datatype : 'json',
-				url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex=' + selectedDB,
+				url : '/TNAtoolAPI-Webapp/queries/transit/allAgencies?&dbindex='
+						+ selectedDB + '&username=' + getSession(),
 				async : false,
 				success : function(d) {
 					$.each(d, function(index, item) {
@@ -125,7 +126,7 @@ function createShapeFiles() {
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/getshapefile?agencyids='
 				+ agencies + '&flag=' + flag + '&dbName=' + dbName
-				+ '&dbIndex=' + selectedDB + '&date=' + date, 
+				+ '&username=' + getSession() + '&dbIndex=' + selectedDB + '&date=' + date, 
 		async : true,
 		success : function(d) {
 			console.log(d);
