@@ -114,44 +114,6 @@ public class DbUpdate {
   public static boolean gtfsUpload = false;
   public static String gtfsMessage = "";
 
-  public static List<String> getSelectedAgencies(String username) {
-    List<String> selectedAgencies = new ArrayList<String>();
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    try {
-      c = dbConfig.getConnection();
-      statement = c.createStatement();
-      rs = statement
-          .executeQuery("SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true");
-      while (rs.next()) {
-        selectedAgencies.add(rs.getString("aid"));
-      }
-    } catch (SQLException e) {
-      logger.error(e);
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-    if (selectedAgencies.isEmpty()) {
-      selectedAgencies.add("null");
-    }
-    return selectedAgencies;
-  }
-
   // ian: unused?
   @POST
   @Path("/correctAjax")
