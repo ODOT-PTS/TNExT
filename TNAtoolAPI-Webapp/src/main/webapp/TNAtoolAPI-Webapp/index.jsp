@@ -39,7 +39,7 @@
 	<script type="text/javascript" src="resources/js/Datadump.js"></script>
 	 
  
-     
+    <link rel="stylesheet" type="text/css" href="resources/css/report.css" />	
 	<link rel="stylesheet" type="text/css" href="resources/css/client.css" />	
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.multidatespicker.css">
