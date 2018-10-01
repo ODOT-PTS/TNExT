@@ -68,7 +68,16 @@ public class UpdateEventManager {
 	        		+ "  OIDS=FALSE);");
 	        stmt.executeUpdate("ALTER TABLE gtfs_pg_users"
 	        		+ "  OWNER TO postgres;");
-	        
+			
+			stmt.executeUpdate(""
+					+" CREATE TABLE user_selected_agencies ("
+					+" 	username text NOT NULL,"
+					+" 	agency_id text NOT NULL,"
+					+" 	hidden boolean DEFAULT false,"
+					+" 	CONSTRAINT user_selected_agencies_pkey PRIMARY KEY (username, agency_id),"
+					+" 	CONSTRAINT user_selected_agencies_agency_id_fkey FOREIGN KEY (agency_id) REFERENCES gtfs_agencies(id) ON UPDATE CASCADE ON DELETE CASCADE"
+					+" );");
+			stmt.executeUpdate("ALTER TABLE user_selected_agencies OWNER TO postgres;");	
 	        stmt.executeUpdate("CREATE TABLE gtfs_uploaded_feeds("
 	        		+ "  feedname text NOT NULL,"
 	        		+ "  username text,"
