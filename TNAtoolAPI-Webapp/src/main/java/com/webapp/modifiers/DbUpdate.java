@@ -2326,9 +2326,6 @@ public class DbUpdate {
 
       statement = c.createStatement();
 
-      statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '" + feedname + "';");
-      statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname IS NULL;");
-
       statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '" + feedname + "';");
       statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname IS NULL;");
 
@@ -2721,8 +2718,6 @@ public class DbUpdate {
 
       statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize,updated) "
           + "VALUES ('" + feedname + "','admin',False,'" + feedsize + "', False);");
-      statement.executeUpdate("INSERT INTO gtfs_selected_feeds (username,feedname,agency_id) " + "VALUES ('admin','"
-          + feedname + "','" + defaultId + "');");
 
       //UpdateEventManager.updateTables(To BE DELETED, defaultId);
     } catch (SQLException e) {
@@ -3563,49 +3558,6 @@ public class DbUpdate {
       return error;
     }
 
-  }
-
-  @GET
-  @Path("/selectedFeeds")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object selectedFeeds(@QueryParam("feeds") String feed, @QueryParam("username") String username) {
-
-    String[] feeds = feed.split(",");
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    try {
-      c = dbConfig.getConnection();
-      statement = c.createStatement();
-      statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '" + username + "';");
-
-      for (String f : feeds) {
-        statement.executeUpdate(
-            "INSERT INTO gtfs_selected_feeds (username,feedname) " + "VALUES ('" + username + "','" + f + "');");
-      }
-      statement.executeUpdate("update gtfs_selected_feeds " + "set agency_id = gtfs_feed_info.defaultid "
-          + "from gtfs_feed_info " + "where gtfs_selected_feeds.feedname = gtfs_feed_info.feedname;");
-    } catch (SQLException e) {
-      logger.error(e);
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-
-    return "done";
   }
 
   @GET
