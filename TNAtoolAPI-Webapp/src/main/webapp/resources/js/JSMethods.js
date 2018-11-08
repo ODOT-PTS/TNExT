@@ -359,7 +359,10 @@ String.prototype.strip = function () {
  * gathers the metadata of the tabular report in a text file to be exported.
  */
 function getMetadata() {
-	
+	// Get selected dates
+	var dates = $('#datepicker').multiDatesPicker('getDates');
+	var keyName = setDates(dates.join(","));
+
 	/*
 	 * Appending metadata
 	 */
