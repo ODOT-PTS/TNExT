@@ -4732,11 +4732,11 @@ public class PgisEventManager {
 		HashMap<String, String> response = new HashMap<String, String>();
 
 		// Query options
-		String select_trip_length = "trip.tlength as tlength, round((trip.length + trip.estlength):: numeric, 2) as length,";
+		String select_trip_length = "trip.stopscount as stops, trip.tlength as tlength, round((trip.length + trip.estlength):: numeric, 2) as length,";
 		String trip_inner_join = "";
 		String trip_where = "";
-		String block_areaid_field = "blockid";
-		String block_geoid_field = "";
+		String block_areaid_field = "urbanid";
+		String block_geoid_field = "''";
 		String undupblocks_where = "";
 		String service = "";
 
@@ -4783,18 +4783,17 @@ public class PgisEventManager {
 			}
 		}
 
-
 		String query = "";
 		query += "with svcids as (" + BuildServiceIDs(date, day, fulldates, agencyId) + "),";
 		query += ""
 		+ "regions as (select st_union(shape) as rshape, odotregionid from census_counties where odotregionid = :GEOID group by odotregionid), "		
-		+ "trips as ( select :SELECT_TRIP_LENGTH trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, map.stopscount as stops, trip.stopscount as ss from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) :TRIP_INNER_JOIN where trip.agencyid = :AGENCYID :TRIP_WHERE ), "
+		+ "trips as ( select :SELECT_TRIP_LENGTH trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) :TRIP_INNER_JOIN where trip.agencyid = :AGENCYID :TRIP_WHERE ), "
 		+ "service as ( select COALESCE( sum(length), 0 ) as svcmiles, COALESCE( sum(tlength), 0 ) as svchours, COALESCE( sum(stops), 0 ) as svcstops from trips ), "
 		+ "stops as ( select stop.blockid, trips.aid as aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, stop.location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid = trips.aid and stime.trip_id = trips.tripid group by trips.aid, stime.stop_id, stop.location, stop.blockid ), "
 		+ "svcstops_urban AS ( SELECT SUM(service) AS svcstops_urban FROM stops INNER JOIN census_blocks USING(blockid) WHERE poptype = 'U' ), "
 		+ "svcstops_rural AS ( SELECT SUM(service) AS svcstops_rural FROM stops INNER JOIN census_blocks USING(blockid) WHERE poptype = 'R' ), "
 		+ "stops_with_arrivals as ( select trips.aid as aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, stop.location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid = trips.aid and stime.trip_id = trips.tripid where stime.arrivaltime > 0 and stime.departuretime > 0 group by trips.aid, stime.stop_id, stop.location ), "
-		+ "undupblocks as ( select :BLOCK_AREAID_FIELD as areaid, block.population:POPYEAR as population, block.poptype, block.blockid, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin( block.location, stops.location, :RADIUS ) where areaid = :AREAID and :BLOCK_GEOID_FIELD = :GEOID group by block.blockid ), "
+		+ "undupblocks as ( select :BLOCK_AREAID_FIELD as areaid, block.population:POPYEAR as population, block.poptype, block.blockid, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin( block.location, stops.location, :RADIUS ) :UNDUPBLOCKS_WHERE group by block.blockid ), "
 		+ "svchrs as ( select COALESCE( min(arrival), -1 ) as fromtime, COALESCE( max(departure), -1 ) as totime from stops_with_arrivals ), "
 		+ "employment as ( select sum(c000_:POPYEAR) as employment, service from undupblocks left join lodes_rac_projection_block using(blockid) group by areaid, service ), "
 		+ "employees as ( select sum(c000) as employees, service from undupblocks left join lodes_blocks_wac using(blockid) group by areaid, service ), "
@@ -4808,6 +4807,7 @@ public class PgisEventManager {
 		+ "select svcmiles, svchours, svcstops_urban, svcstops_rural, upop_los, rpop_los, uspop, rspop, swac, srac, svdays, fromtime, totime from service inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join racserved on true inner join svchrs on true inner join wacserved on true inner join svcstops_urban on true inner join svcstops_rural on true inner join upop_los on true inner join rpop_los on true;"
 		+ "";
 		// query options
+		query = query.replace(":POPYEAR", popYear);
 		query = query.replace(":SELECT_TRIP_LENGTH", select_trip_length);
 		query = query.replace(":TRIP_WHERE", trip_where);
 		query = query.replace(":TRIP_INNER_JOIN", trip_inner_join);
@@ -4815,8 +4815,9 @@ public class PgisEventManager {
 		query = query.replace(":BLOCK_GEOID_FIELD", block_geoid_field);
 		query = query.replace(":UNDUPBLOCKS_WHERE", undupblocks_where);
 		// parameters
-		query = query.replace(":AGENCYID", agencyId);
-		query = query.replace(":GEOID", "");
+		query = query.replace(":AGENCYID", "'"+agencyId+"'");
+		query = query.replace(":AREAID", "'"+areaid+"'");
+		query = query.replace(":GEOID", "'"+geoid+"'");
 		query = query.replace(":RADIUS", String.valueOf(x));
 		query = query.replace(":SERVICE", String.valueOf(LOS));
 
