@@ -35,15 +35,34 @@ http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l
 // OK
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=aft&dbindex=0&popYear=2010&areaId=4101&type=5&username=admin&geotype=-1&geoid=null&nav=stateS-congS-agencyS
 
-https://oregon.tnext.io/TNAtoolAPI-Webapp/GeoCongdistsXreport.html?&areaid=4103&x=0.25&l=2&n=aft&dbindex=12&popYear=2010&nav=stateS-congS
-http://localhost:8080/TNAtoolAPI-Webapp/GeoCongdistsXreport.html?&areaid=4103&x=0.25&l=2&n=aft&dbindex=0&popYear=2010&nav=stateS-congS
 
-// 5 - urban areas
+// 5 - urban - 
 // OK
 https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=00955&type=3&username=admin&geotype=-1&geoid=null&nav=stateS-urbanS-agencyS
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=00955&type=3&username=admin&geotype=-1&geoid=null&nav=stateS-urbanS-agencyS
 
-// 8 - places
-// NOT OK ?????
+// 8 - urban - places
+// OK
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=00955&type=3&username=admin&geotype=2&geoid=4101000&nav=stateS-placeS-urbanS-agencyS
 https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=456&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=00955&type=3&username=admin&geotype=2&geoid=4101000&nav=stateS-placeS-urbanS-agencyS
+
+
+// 6 - urban - counties
+// OK
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=22&x=0.25&l=2&n=agt&dbindex=0&popYear=2010&areaId=78229&type=3&username=admin&geotype=0&geoid=41047&nav=stateS-countyS-urbanS-agencyS
+https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=22&x=0.25&l=2&n=agt&dbindex=12&popYear=2010&areaId=78229&type=3&username=admin&geotype=0&geoid=41047&nav=stateS-countyS-urbanS-agencyS
+
+
+// 10 - urban - congdist
+// OK
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=57&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=51283&type=3&username=admin&geotype=5&geoid=4101&nav=stateS-congS-urbanS-agencyS
+https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=57&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=51283&type=3&username=admin&geotype=5&geoid=4101&nav=stateS-congS-urbanS-agencyS
+
+
+// 9 - urban - odot regions
+// OK
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=57&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=51283&type=3&username=admin&geotype=4&geoid=2a&nav=stateS-regionS-urbanS-agencyS
+https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=57&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=51283&type=3&username=admin&geotype=4&geoid=2a&nav=stateS-regionS-urbanS-agencyS
+
+// 7 - urban - tracts
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=71317&type=3&username=admin&geotype=1&geoid=41051000100&nav=stateS-countyS-tractS-urbanS-agencyS

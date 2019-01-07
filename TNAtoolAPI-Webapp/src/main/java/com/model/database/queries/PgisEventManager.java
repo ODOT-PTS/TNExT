@@ -3811,11 +3811,11 @@ public class PgisEventManager {
 								  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
 								  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
     							  + " 	inner join census_blocks using(blockid)"
-								  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and left(stop.blockid,5)='"+geoid+ "' and poptype='U'),"
+								  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,5)='"+geoid+ "' and poptype='U'),"
 								  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
 								  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
     							  + " 	inner join census_blocks using(blockid)"
-								  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and left(stop.blockid,5)='"+geoid+ "' and poptype='R')," 
+								  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,5)='"+geoid+ "' and poptype='R')," 
 								  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, "
 								  + "	trip.route_id as routeid "
 								  + "	from gtfs_trips trip inner join census_urbans_trip_map maps on trip.id=maps.tripid "
@@ -3846,11 +3846,11 @@ public class PgisEventManager {
 	    						  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
 	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and left(stop.blockid,11)='"+geoid+ "' and poptype='U'),"
+	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,11)='"+geoid+ "' and poptype='U'),"
 	    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
 	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and left(stop.blockid,11)='"+geoid+ "' and poptype='R'),"
+	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,11)='"+geoid+ "' and poptype='R'),"
 	    						  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, "
 	    						  + "	trip.route_id as routeid "
 	    						  + "	from gtfs_trips trip inner join census_urbans_trip_map maps on trip.id=maps.tripid "
@@ -3914,11 +3914,11 @@ public class PgisEventManager {
 	    						  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
 	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and stop.regionid='"+geoid+ "' and poptype='U')," 
+	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.regionid='"+geoid+ "' and poptype='U')," 
 	    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
 	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and stop.regionid='"+geoid+ "' and poptype='R'),"
+	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.regionid='"+geoid+ "' and poptype='R'),"
 	    						  + "regions as (select st_union(shape) as rshape ,odotregionid from census_counties where odotregionid='"+geoid+ "' group by odotregionid),"
 	    						  + "routes as (select max(ST_Length(st_transform(st_intersection(regions.rshape, maps.shape),2993))/1609.34) as length, trip.route_id as routeid "
 	    						  + "	from gtfs_trips trip inner join  census_urbans_trip_map maps on trip.id=maps.tripid cross join regions  "
@@ -3936,7 +3936,7 @@ public class PgisEventManager {
 		    					  querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid,block.urbanid "
 	    							  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+ ") "
 	    							  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    							  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " and congdistid='"+geoid+ "'  "
+	    							  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " and stop.congdistid='"+geoid+ "'  "
 	    							  + "	group by block.blockid)," 
 	    							  + "employment as (select sum(c000_"+popYear+ ") as employment "
 	    							  + "	from census left join lodes_rac_projection_block using(blockid) "
@@ -3947,11 +3947,11 @@ public class PgisEventManager {
 	    							  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
 	    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 		    						  + " 	inner join census_blocks using(blockid)"
-		    						  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and stop.congdistid='"+geoid+ "' and poptype='U'),"
+		    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.congdistid='"+geoid+ "' and poptype='U'),"
 		    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
 	    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
 		    						  + " 	inner join census_blocks using(blockid)"
-		    						  + "	where map.agencyid= '"+agencyId+ "' and urbanid="+id1+ " and stop.congdistid='"+geoid+ "' and poptype='R')," 
+		    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.congdistid='"+geoid+ "' and poptype='R')," 
 	    							  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, trip.route_id as routeid "
 	    							  + "	from gtfs_trips trip inner join census_urbans_trip_map maps on trip.id=maps.tripid "
 	    							  + "	inner join census_congdists_trip_map map on trip.id=map.tripid "
@@ -4098,7 +4098,6 @@ public class PgisEventManager {
 		HashMap<String, String> response = new HashMap<String, String>();
 
 		// Query options
-
 		// select stops, tlength, length
 		String select_trip_length = "trip.stopscount as stops, trip.tlength as tlength, round((trip.length + trip.estlength):: numeric, 2) as length,";
 		// filter trips
@@ -4124,6 +4123,7 @@ public class PgisEventManager {
 			} else if (type == 1)// census tracts
 			{
 				// 3
+				// LEFT()???
 				trip_inner_join = "inner join census_tracts_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
 				trip_where = "and map.tractid = :AREAID ";
 				block_areaid_field = "tractid";
@@ -4147,17 +4147,24 @@ public class PgisEventManager {
 				block_areaid_field = "congdistid";
 				undupblocks_where = "where congdistid = :AREAID ";
 			} else if (type == 3) { // census urbans
-				// select_trip_length = "map.tlength as tlength, (ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993)) / 1609.34) as length,";
+				select_trip_length = "map.tlength as tlength, map.stopscount as stops, (ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/ 1609.34) as length,";
 				if (geotype == 0)// counties
 				{
 					// 6
+					trip_inner_join = "inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_counties_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid";
+					trip_where = "and map.urbanid = :AREAID AND maps.countyid = :GEOID ";
+					block_areaid_field = "urbanid";
+					undupblocks_where = "WHERE urbanid = :AREAID And countyid = :GEOID ";
 				} else if (geotype == 1)// tracts
 				{
 					// 7
+					trip_inner_join = "inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_tracts_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid";
+					trip_where = "and map.urbanid = :AREAID AND maps.tractid = :GEOID ";
+					block_areaid_field = "urbanid";
+					undupblocks_where = "WHERE urbanid = :AREAID And tractid = :GEOID ";
 				} else if (geotype == 2)// places
 				{
 					// 8
-					select_trip_length = "map.tlength as tlength, map.stopscount as stops, (ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/ 1609.34) as length,";
 					trip_inner_join = "inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_places_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid";
 					trip_where = "and map.urbanid = :AREAID AND maps.placeid = :GEOID ";
 					block_areaid_field = "urbanid";
@@ -4171,11 +4178,19 @@ public class PgisEventManager {
 					undupblocks_where = "where urbanid = :AREAID ";
 				} else if (geotype == 4)// ODOT regions
 				{
-					select_trip_length = "map.tlength as tlength, (ST_Length(st_transform(st_intersection(regions.rshape, map.shape), 2993)) / 1609.34) as length,";
 					// 9
+					select_trip_length = "map.tlength as tlength, map.stopscount as stops, (ST_Length(st_transform(st_intersection(regions.rshape, map.shape), 2993)) / 1609.34) as length,";
+					trip_inner_join = "inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid cross join regions";
+					trip_where = "AND map.urbanid = :AREAID ";
+					block_areaid_field = "urbanid";
+					undupblocks_where = "where urbanid = :AREAID And regionid = :GEOID ";
 				} else if (geotype == 5)// congressional districts
 				{
 					// 10
+					trip_inner_join = "inner join census_urbans_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid inner join census_congdists_trip_map maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid";
+					trip_where = "and map.urbanid = :AREAID AND maps.congdistid = :GEOID ";
+					block_areaid_field = "urbanid";
+					undupblocks_where = "WHERE urbanid = :AREAID And congdistid = :GEOID ";					
 				}
 			}
 		}
