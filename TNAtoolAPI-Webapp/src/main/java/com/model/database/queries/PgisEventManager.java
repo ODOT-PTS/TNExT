@@ -4732,23 +4732,34 @@ public class PgisEventManager {
 		HashMap<String, String> response = new HashMap<String, String>();
 
 		// Query options
+
+		// select stops, tlength, length
 		String select_trip_length = "trip.stopscount as stops, trip.tlength as tlength, round((trip.length + trip.estlength):: numeric, 2) as length,";
+		// filter trips
 		String trip_inner_join = "";
 		String trip_where = "";
+		// block filtering
 		String block_areaid_field = "urbanid";
-		String block_geoid_field = "''";
 		String undupblocks_where = "";
-		String service = "";
 
 		if (areaid.equals("null") || areaid == null) {
 			// 1
 			// Default
 		} else {
 			// Queries with AREAID
+			select_trip_length = "map.tlength as tlength, map.stopscount as stops, round((map.length):: numeric, 2) as length,";
 			if (type == 0)// counties
 			{
 				// 2
+				trip_inner_join = "inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+				trip_where = "and map.countyid = :AREAID ";
+				block_areaid_field = "countyid";
+				undupblocks_where = "where countyid = :AREAID ";
 			} else if (type == 1)// census tracts
+				trip_inner_join = "inner join census_tracts_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+				trip_where = "and map.tractid = :AREAID ";
+				block_areaid_field = "tractidid";
+				undupblocks_where = "where tractid = :AREAID ";
 			{
 				// 3
 			} else if (type == 2) {// census places
@@ -4768,8 +4779,7 @@ public class PgisEventManager {
 					// 5
 					select_trip_length = "map.tlength as tlength, round((map.length):: numeric, 2) as length";
 				} else if (geotype == 4)// ODOT regions
-				{
-				
+				{				
 					select_trip_length = "map.tlength as tlength, (ST_Length(st_transform(st_intersection(regions.rshape, map.shape), 2993)) / 1609.34) as length,";
 					// 9
 				} else if (geotype == 5)// congressional districts
@@ -4812,7 +4822,6 @@ public class PgisEventManager {
 		query = query.replace(":TRIP_WHERE", trip_where);
 		query = query.replace(":TRIP_INNER_JOIN", trip_inner_join);
 		query = query.replace(":BLOCK_AREAID_FIELD", block_areaid_field);
-		query = query.replace(":BLOCK_GEOID_FIELD", block_geoid_field);
 		query = query.replace(":UNDUPBLOCKS_WHERE", undupblocks_where);
 		// parameters
 		query = query.replace(":AGENCYID", "'"+agencyId+"'");

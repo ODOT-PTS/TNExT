@@ -1,0 +1,7 @@
+// 2 - counties
+// OK
+https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
+https://oregon.tnext.io/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=TRIMET&day=05/01/2018&key=0.4787237182666255&dbindex=12&popYear=2010&areaId=41051&type=0&l=2&username=admin&x=0.25&geotype=-1&geoid=null
+
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
+http://localhost:8080/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=TRIMET&day=05/01/2018&key=0.4092745675871532&dbindex=0&popYear=2010&areaId=41051&type=0&l=2&username=admin&x=0.25&geotype=-1&geoid=null
