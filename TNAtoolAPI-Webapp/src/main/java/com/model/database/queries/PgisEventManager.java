@@ -4756,14 +4756,18 @@ public class PgisEventManager {
 				block_areaid_field = "countyid";
 				undupblocks_where = "where countyid = :AREAID ";
 			} else if (type == 1)// census tracts
-				trip_inner_join = "inner join census_tracts_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
-				trip_where = "and map.tractid = :AREAID ";
-				block_areaid_field = "tractidid";
-				undupblocks_where = "where tractid = :AREAID ";
 			{
 				// 3
+				trip_inner_join = "inner join census_tracts_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+				trip_where = "and map.tractid = :AREAID ";
+				block_areaid_field = "tractid";
+				undupblocks_where = "where tractid = :AREAID ";
 			} else if (type == 2) {// census places
 				// 4
+				trip_inner_join = "inner join census_places_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+				trip_where = "and map.placeid = :AREAID ";
+				block_areaid_field = "placeid";
+				undupblocks_where = "where placeid = :AREAID ";
 			} else if (type == 3) {// census urbans
 				select_trip_length = "map.tlength as tlength, (ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993)) / 1609.34) as length,";
 				if (geotype == 0)// counties
@@ -4788,8 +4792,16 @@ public class PgisEventManager {
 				}					
 			} else if (type == 4) {// ODOT regions
 				// 11
+				trip_inner_join = "inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+				trip_where = "and map.regionid = :AREAID ";
+				block_areaid_field = "regionid";
+				undupblocks_where = "where regionid = :AREAID ";
 			} else if (type == 5) {// congressional districts
 				// 12
+				trip_inner_join = "inner join census_congdists_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+				trip_where = "and map.congdistid = :AREAID ";
+				block_areaid_field = "congdistid";
+				undupblocks_where = "where congdistid = :AREAID ";
 			}
 		}
 
