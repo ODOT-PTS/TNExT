@@ -1,5 +1,11 @@
+// 1 - default
+// OK2
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=agt&dbindex=0&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
+https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=agt&dbindex=12&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
+
+
 // 2 - counties
-// OK
+// OK2
 https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
 
@@ -34,7 +40,7 @@ http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l
 // 12 - congdist
 // OK
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=aft&dbindex=0&popYear=2010&areaId=4101&type=5&username=admin&geotype=-1&geoid=null&nav=stateS-congS-agencyS
-
+https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=aft&dbindex=12&popYear=2010&areaId=4101&type=5&username=admin&geotype=-1&geoid=null&nav=stateS-congS-agencyS
 
 // 5 - urban - 
 // OK
