@@ -1,0 +1,14 @@
+old
+
+old
+
+ERROR:  column "stop.blockid" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 75:     stop.blockid,
+
+verified this is broken in original
+
+new
+
+ svcmiles | svchours | svcstops_urban | svcstops_rural | upop_los | rpop_los |   uspop   | rspop |   swac    |       srac       |       svdays        | fromtime | totime
+----------+----------+----------------+----------------+----------+----------+-----------+-------+-----------+------------------+---------------------+----------+--------
+ 27835.64 |  7229881 |         248930 |           1484 |   365235 |      233 | 149539558 | 50801 | 444331913 | 88778929.8127361 | {"Tue 01 May 2018"} |    12180 |  97020

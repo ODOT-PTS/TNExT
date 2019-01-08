@@ -3,31 +3,31 @@ with svcids as (
     select
       serviceid_agencyid,
       serviceid_id,
-      'Thu 08 Nov 2018' as day
+      'Tue 01 May 2018' as day
     from
       gtfs_calendars gc
     where
-      startdate :: int <= 20180101
-      and enddate :: int >= 20180101
-      and MONDAY = 1
+      startdate :: int <= 20180501
+      and enddate :: int >= 20180501
+      and tuesday = 1
       and serviceid_agencyid || serviceid_id not in (
         select
           serviceid_agencyid || serviceid_id
         from
           gtfs_calendar_dates
         where
-          date = 20180101
+          date = '20180501'
           and exceptiontype = 2
       )
     union
     select
       serviceid_agencyid,
       serviceid_id,
-      'Thu 08 Nov 2018'
+      'Tue 01 May 2018'
     from
       gtfs_calendar_dates gcd
     where
-      date = 20180101
+      date = '20180501'
       and exceptiontype = 1
   )
 ),
@@ -50,8 +50,8 @@ trips as (
     )
     inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid
   where
-    trip.agencyid = 'AGENCYID'
-    and map.regionid = 'AREAID'
+    trip.agencyid = 'TRIMET' 
+    and map.regionid = '1'
 ),
 service as (
   select
@@ -133,7 +133,7 @@ stops_with_arrivals as (
 ),
 undupblocks as (
   select
-    block.populationPOPYEAR as population,
+    block.population2010 as population,
     block.poptype,
     block.blockid,
     regionid,
@@ -141,10 +141,10 @@ undupblocks as (
   from
     census_blocks block
     inner join stops on st_dwithin(
-      block.location, stops.location, 0.1234
+      block.location, stops.location, 402.335
     )
   where
-    regionid = 'AREAID'
+    regionid = '1'
   group by
     block.blockid
 ),
@@ -163,7 +163,7 @@ svchrs as (
 ),
 employment as (
   select
-    sum(c000_POPYEAR) as employment,
+    sum(c000_2010) as employment,
     service
   from
     undupblocks
@@ -233,7 +233,7 @@ upop_los as (
     undupblocks
   where
     poptype = 'U'
-    AND service >= 1234
+    AND service >= 2
 ),
 rpop_los as (
   select
@@ -245,7 +245,7 @@ rpop_los as (
     undupblocks
   where
     poptype = 'R'
-    AND service >= 1234
+    AND service >= 2
 ),
 svcdays as (
   select
@@ -281,4 +281,4 @@ from
   inner join svcstops_urban on true
   inner join svcstops_rural on true
   inner join upop_los on true
-  inner join rpop_los on true ";
+  inner join rpop_los on true;
