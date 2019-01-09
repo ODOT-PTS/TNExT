@@ -4100,7 +4100,7 @@ public class PgisEventManager {
 		String query = "";
 		query += "with svcids as (" + BuildServiceIDs(date, day, fulldates, agencyId) + "),";
 		query += ""
-		+ "regions as (select st_union(shape) as shape, odotregionid from census_counties where odotregionid = :GEOID group by odotregionid), "		
+		+ "regions as (select st_union(shape) as shape, odotregionid as regionid from census_counties where odotregionid = :GEOID group by odotregionid), "		
 		+ "trips as ( select :SELECT_TRIP_LENGTH trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) :AREAID_JOIN :GEOID_JOIN where trip.agencyid = :AGENCYID :TRIP_WHERE ), "
 		+ "service as ( select COALESCE( sum(length), 0 ) as svcmiles, COALESCE( sum(tlength), 0 ) as svchours, COALESCE( sum(stops), 0 ) as svcstops from trips ), "
 		+ "stops as ( select stop.blockid, trips.aid as aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, stop.location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid = trips.aid and stime.trip_id = trips.tripid group by trips.aid, stime.stop_id, stop.location, stop.blockid ), "
@@ -4150,7 +4150,7 @@ public class PgisEventManager {
 			} else if ((type == 3) && (geotype == -1 || geotype == 3)) {
 				// 5 - census urbans
 			} else if (type == 3) {
-				// GEOID
+				// AREAID AND GEOID
 				select_trip_length = "map.tlength as tlength, map.stopscount as stops, (ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/ 1609.34) as length,";				
 				trip_where = "AND map.:AREAID_FIELD = :AREAID AND maps.:GEOID_FIELD = :GEOID ";
 				geoid_join = "INNER JOIN :GEOID_TABLE maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid";
@@ -4165,7 +4165,6 @@ public class PgisEventManager {
 					// 10 - urban - congressional districts
 				} else if (geotype == 4) {
 					// 9 - urbans - odot regions
-					trip_where = "AND map.:AREAID_FIELD = :AREAID ";
 					geoid_join = "CROSS JOIN regions maps";
 				}
 			}
