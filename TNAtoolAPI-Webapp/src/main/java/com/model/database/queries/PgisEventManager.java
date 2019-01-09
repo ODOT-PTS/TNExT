@@ -3630,432 +3630,153 @@ public class PgisEventManager {
 	 * @param geotype - type of the geographical to be intersected with the original area
 	 * @return
 	 */
-	public static double[] stopsPopMiles(int type,String agencyId, double x, int dbindex, String popYear,String areaid,String geoid,int geotype) 
-    {	
-	  Connection connection = makeConnection(dbindex);
-      Statement stmt = null;     
-      String id1="'"+areaid+"'";
-      String querytext ="";
-     if(areaid == null || areaid.equals("null")){
-      querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid "
-      		  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+ String.valueOf(x)+") "
-      		  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-      		  + "	where map.agencyid= '" + agencyId + "' group by block.blockid), "
-		      + "employment as (select sum(c000_2010) as employment from census left join lodes_rac_projection_block using(blockid)), "
-		      + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid)),"
-		      + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), ruralpop as (select COALESCE(sum(population),0) rpop " 
-		      + "	from census where poptype = 'R'),"
-		      + "urbanstopcount as (select count(stop.id) as urbanstopscount " 
-		      + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-			  + "	inner join census_blocks using(blockid) where map.agencyid= '"+agencyId+"' and poptype='U'), "
-			  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-			  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-			  + "	inner join census_blocks using(blockid) where map.agencyid= '"+agencyId+"' and poptype='R'), "
-			  +"routes as (select distinct on ( routeid) "
-			  +"round((trip.length+trip.estlength)::numeric,2) as length, trip.route_id as routeid, id ,shape  as tripshape "
-			  +"from gtfs_trips trip  where trip.agencyid='"+agencyId+"' order by routeid,length DESC,shape,id), "
-			  + "rrtmiles AS (SELECT SUM(ST_Length(ST_Transform(ST_Intersection(gtfs_trip_segments.shape, census_blocks.shape), 2993))) / 1609.34 as rrtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id INNER JOIN census_blocks ON ST_Intersects(gtfs_trip_segments.shape, census_blocks.shape) WHERE census_blocks.poptype = 'R'),"
-			  + "urtmiles AS (SELECT SUM(ST_Length(ST_Transform(ST_Intersection(gtfs_trip_segments.shape, census_blocks.shape), 2993))) / 1609.34 as urtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id INNER JOIN census_blocks ON ST_Intersects(gtfs_trip_segments.shape, census_blocks.shape) WHERE census_blocks.poptype = 'U'),"
-			  + "rtmiles AS (SELECT SUM(ST_Length(ST_Transform(gtfs_trip_segments.shape, 2993))) / 1609.34 as rtmiles FROM routes INNER JOIN gtfs_trip_segments ON routes.id = gtfs_trip_segments.id)"		  
-			  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-		      + "	COALESCE(rpop,0) as ruralpop,coalesce(employment,0) as rac,coalesce(employees,0) as wac, COALESCE(rtmiles,0) as rtmiles, COALESCE(urtmiles,0) as urtmiles ,COALESCE(rrtmiles,0) as rrtmiles "
-		      + "	from urbanpop inner join ruralpop on true "
-		      + "	inner join rtmiles on true "
-		      + "	inner join urtmiles on true "
-		      + "	inner join rrtmiles on true "
-		      + "	inner join employment on true "
-		      + "	inner join employees  on true "
-		      + "	inner join urbanstopcount on true "
-		      + "	inner join ruralstopcount on true";
-      }
-      else{
-    	  if (type==0){//counties
-    		  querytext=	"with census as (select population"+popYear+" as population, poptype,block.blockid "
-    				    + "from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location,  "+String.valueOf(x)+ ") "
-			    		+ "inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-			    		+ "where map.agencyid= '"+agencyId+ "' And left(block.blockid,5)="+id1+ " "
-			    		+ "group by block.blockid)," 
-			    		+ "employment as (select sum(c000_"+popYear+ ") as employment "
-						+ "		from census left join lodes_rac_projection_block using(blockid) "
-						+ "		group by left(census.blockid,5)), "
-			    		+ "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by left(census.blockid,5)),"
-			    		+ "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-			    		+ "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-			    		+ "urbanstopcount as (select count(stop.id) as urbanstopscount  "
-			    		+ "		from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-			    		+ " 	inner join census_blocks using(blockid)"
-			    		+ "		where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ " and poptype='U')," 
-			    		+ "ruralstopcount as (select count(stop.id) as ruralstopscount  "
-			    		+ "		from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-			    		+ " 	inner join census_blocks using(blockid)"
-			    		+ "		where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ " and poptype='R')," 
-			    		+ "routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid "
-			    		+ "		from gtfs_trips trip inner join census_counties_trip_map maps on trip.id=maps.tripid "
-			    		+ "		where trip.agencyid='"+agencyId+ "' AND maps.countyid="+id1+ "  group by trip.route_id)," 
-			    		+ "rmiles as (select sum(length) as rtmiles from routes) "
-			    		+ "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-			    		+ "COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-			    		+ "		from urbanpop inner join ruralpop on true "
-			    		+ "		inner join rmiles on true "
-			    		+ "		inner join employment on true "
-			    		+ "		inner join employees  on true"
-			    		+ "		inner join urbanstopcount on true"
-			    		+ "		inner join ruralstopcount on true";
-;
-    		  }else if (type==1){//census tracts
-    			  querytext= "with census as (select population"+popYear+ " as population, poptype,block.blockid "
-    					  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+ ") "
-    					  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    					  + "	where map.agencyid= '"+agencyId+ "' And left(block.blockid,11)="+id1+ "group by block.blockid)," 
-    					  + "employment as (select sum(c000_"+popYear+ ") as employment "
-    					  + "	from census left join lodes_rac_projection_block using(blockid) "
-    					  + "	group by left(census.blockid,11)), "
-    					  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by left(census.blockid,11)),"
-    					  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-    					  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-    					  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-    					  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    					  + " 	inner join census_blocks using(blockid)"
-    					  + "	where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ " and poptype='U')," 
-    					  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-    					  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    					  + " 	inner join census_blocks using(blockid)"
-    					  + "	where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ " and poptype='R')," 
-    					  + "routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid "
-    					  + "from gtfs_trips trip inner join census_tracts_trip_map maps on trip.id=maps.tripid "
-    					  + "	where trip.agencyid='"+agencyId+ "' AND maps.tractid="+id1+ "  group by trip.route_id)," 
-    					  + "rmiles as (select sum(length) as rtmiles from routes) "
-    					  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    					  + "	from urbanpop inner join ruralpop on true "
-    					  + "	inner join rmiles on true "
-    					  + "	inner join employment on true "
-    					  + "	inner join employees  on true"
-    					  + "	inner join urbanstopcount on true"
-    					  + "	inner join ruralstopcount on true";
-    		  }else if (type==4){//ODOT regions
-    			  querytext=	"with census as (select population"+popYear+ " as population, poptype,block.blockid,block.regionid "
-    					  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location,  "+String.valueOf(x)+ ") "
-    					  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    					  + "	where map.agencyid= '"+agencyId+ "' And block.regionid="+id1+ " group by block.blockid)," 
-    					  + "employment as (select sum(c000_"+popYear+ ") as employment "
-    					  + "	from census left join lodes_rac_projection_block using(blockid) "
-    					  + "	group by census.regionid), "
-    					  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by  census.regionid),"
-    					  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-    					  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-    					  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-    					  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    					  + " 	inner join census_blocks using(blockid)"
-    					  + "	where map.agencyid= '"+agencyId+ "' and stop.regionid="+id1+ " and poptype='U')," 
-    					  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-    					  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    					  + " 	inner join census_blocks using(blockid)"
-    					  + "	where map.agencyid= '"+agencyId+ "' and stop.regionid="+id1+ " and poptype='R')," 
-    					  + "routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid "
-    					  + "	from gtfs_trips trip inner join  census_counties_trip_map maps on trip.id=maps.tripid "
-    					  + "	where trip.agencyid='"+agencyId+ "' AND maps.regionid="+id1+ "  group by trip.route_id)," 
-    					  + "rmiles as (select sum(length) as rtmiles from routes) "
-    					  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    					  + "	from urbanpop inner join ruralpop on true "
-    					  + "	inner join rmiles on true "
-    					  + "	inner join employment on true "
-    					  + "	inner join employees  on true"
-    					  + "	inner join urbanstopcount on true"
-    					  + "	inner join ruralstopcount on true";
-    			  }else	if (type==3){//census urban
-    				  if(geotype==-1||geotype==3){
-    					  querytext = "with census as (select population"+popYear+ " as population, poptype,block.blockid,block.urbanid "
-    							  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location,  "+String.valueOf(x)+ ") "
-    							  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " group by block.blockid)," 
-    							  + "employment as (select sum(c000_"+popYear+ ") as employment "
-    							  + "	from census left join lodes_rac_projection_block using(blockid) "
-    							  + "	group by urbanid), "
-    							  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by urbanid),"
-    							  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-    							  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-    							  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-    							  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and poptype='U')," 
-    							  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-    							  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and poptype='R')," 
-    							  + "routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid "
-    							  + "	from gtfs_trips trip inner join  census_urbans_trip_map maps on trip.id=maps.tripid "
-    							  + "	where trip.agencyid='"+agencyId+ "' AND maps.urbanid="+id1+ "  group by trip.route_id)," 
-    							  + "rmiles as (select sum(length) as rtmiles from routes) "
-    							  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-    					  }else if (geotype==0){//counties
-    						  querytext= "with census as (select population"+popYear+ " as population, poptype,block.blockid,block.urbanid "
-								  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+ ") "
-								  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-								  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " and left(block.blockid,5)='"+geoid+ "'  "
-								  + "	group by block.blockid)," 
-								  + "employment as (select sum(c000_"+popYear+ ") as employment "
-								  + "	from census left join lodes_rac_projection_block using(blockid) "
-								  + "	group by urbanid), "
-								  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by urbanid),"
-								  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-								  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-								  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-								  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-								  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,5)='"+geoid+ "' and poptype='U'),"
-								  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-								  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-								  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,5)='"+geoid+ "' and poptype='R')," 
-								  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, "
-								  + "	trip.route_id as routeid "
-								  + "	from gtfs_trips trip inner join census_urbans_trip_map maps on trip.id=maps.tripid "
-								  + "	inner join census_counties_trip_map map on trip.id=map.tripid "
-								  + "	where trip.agencyid='"+agencyId+ "' AND maps.urbanid="+id1+ " and map.countyid='"+geoid+ "' "
-								  + "	group by trip.route_id)," 
-								  + "rmiles as (select sum(length) as rtmiles from routes) "
-								  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-		    			  }else if (geotype==1){//tracts
-		    				  querytext=	"with census as (select population"+popYear+ " as population, poptype,block.blockid,block.urbanid "
-	    						  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location,  "+String.valueOf(x)+ ") "
-	    						  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " and left(block.blockid,11)='"+geoid+ "'  "
-	    						  + "	group by block.blockid)," 
-	    						  + "employment as (select sum(c000_"+popYear+ ") as employment "
-	    						  + "	from census left join lodes_rac_projection_block using(blockid) "
-	    						  + "	group by urbanid), "
-	    						  + "employees as (select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) group by urbanid),"
-	    						  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-	    						  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-	    						  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,11)='"+geoid+ "' and poptype='U'),"
-	    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and left(stop.blockid,11)='"+geoid+ "' and poptype='R'),"
-	    						  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, "
-	    						  + "	trip.route_id as routeid "
-	    						  + "	from gtfs_trips trip inner join census_urbans_trip_map maps on trip.id=maps.tripid "
-	    						  + "	inner join census_tracts_trip_map map on trip.id=map.tripid "
-	    						  + "	where trip.agencyid='"+agencyId+ "' AND maps.urbanid="+id1+ " and map.tractid='"+geoid+ "' "
-	    						  + "	group by trip.route_id)," 
-	    						  + "rmiles as (select sum(length) as rtmiles from routes) "
-	    						  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-		    			  }else if (geotype==2){//places
-		    				  querytext = "with census as (select population"+popYear+ " as population, poptype,block.blockid,block.urbanid "
-		    						  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location,  "+String.valueOf(x)+ ") "
-	    						  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " and stop.placeid='"+geoid+ "'  group by block.blockid)," 
-	    						  + "employment as (select sum(c000_"+popYear+ ") as employment "
-	    						  + "	from census left join lodes_rac_projection_block using(blockid) "
-	    						  + "	group by urbanid), "
-	    						  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by urbanid),"
-	    						  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-	    						  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-	    						  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.placeid='"+geoid+ "' and poptype = 'U')," 
-	    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.placeid='"+geoid+ "' and poptype = 'R')," 
-	    						  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, trip.route_id as routeid "
-	    						  + "	from gtfs_trips trip inner join  census_urbans_trip_map maps on trip.id=maps.tripid "
-	    						  + "	inner join census_places_trip_map map on trip.id=map.tripid "
-	    						  + 	"where trip.agencyid='"+agencyId+ "' AND maps.urbanid="+id1+ " and map.placeid='"+geoid+ "' "
-	    						  + "	group by trip.route_id)," 
-	    						  + "rmiles as (select sum(length) as rtmiles from routes) "
-	    						  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-		    			  }else if (geotype==4){//odot regions    		  
-	    				  querytext = "with census as (select population"+popYear+ " as population, poptype,block.blockid,block.urbanid "
-	    						  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+ ") "
-	    						  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + "	where map.agencyid= '"+agencyId+ "' And block.urbanid="+id1+ " and block.regionid='"+geoid+ "'  "
-	    						  + "	group by block.blockid)," 
-	    						  + "employment as (select sum(c000_"+popYear+ ") as employment "
-	    						  + "	from census left join lodes_rac_projection_block using(blockid) "
-	    						  + "	group by urbanid), "
-	    						  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by urbanid),"
-	    						  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-	    						  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-	    						  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.regionid='"+geoid+ "' and poptype='U')," 
-	    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-	    						  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    						  + " 	inner join census_blocks using(blockid)"
-	    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.regionid='"+geoid+ "' and poptype='R'),"
-	    						  + "regions as (select st_union(shape) as rshape ,odotregionid from census_counties where odotregionid='"+geoid+ "' group by odotregionid),"
-	    						  + "routes as (select max(ST_Length(st_transform(st_intersection(regions.rshape, maps.shape),2993))/1609.34) as length, trip.route_id as routeid "
-	    						  + "	from gtfs_trips trip inner join  census_urbans_trip_map maps on trip.id=maps.tripid cross join regions  "
-	    						  + "	where trip.agencyid='"+agencyId+ "' AND maps.urbanid="+id1+ "  group by trip.route_id)," 
-	    						  + "rmiles as (select sum(length) as rtmiles from routes) "
-	    						  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-		    				  }else if (geotype==5){ //congdists
-		    					  querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid,block.urbanid "
-	    							  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+ ") "
-	    							  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-	    							  + "	where map.agencyid= '"+agencyId+ "' And stop.urbanid="+id1+ " and stop.congdistid='"+geoid+ "'  "
-	    							  + "	group by block.blockid)," 
-	    							  + "employment as (select sum(c000_"+popYear+ ") as employment "
-	    							  + "	from census left join lodes_rac_projection_block using(blockid) "
-	    							  + "	group by urbanid), "
-	    							  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by urbanid),"
-	    							  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-	    							  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-	    							  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-	    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-		    						  + " 	inner join census_blocks using(blockid)"
-		    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.congdistid='"+geoid+ "' and poptype='U'),"
-		    						  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-	    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-		    						  + " 	inner join census_blocks using(blockid)"
-		    						  + "	where map.agencyid= '"+agencyId+ "' and stop.urbanid="+id1+ " and stop.congdistid='"+geoid+ "' and poptype='R')," 
-	    							  + "routes as (select max(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as length, trip.route_id as routeid "
-	    							  + "	from gtfs_trips trip inner join census_urbans_trip_map maps on trip.id=maps.tripid "
-	    							  + "	inner join census_congdists_trip_map map on trip.id=map.tripid "
-	    							  + "	where trip.agencyid='"+agencyId+ "' AND maps.urbanid="+id1+ " and map.congdistid='"+geoid+ "' "
-	    							  + "	group by trip.route_id)," 
-	    							  + "rmiles as (select sum(length) as rtmiles from routes) "
-	    							  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-	    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-	    	    					  + "	from urbanpop inner join ruralpop on true "
-	    	    					  + "	inner join rmiles on true "
-	    	    					  + "	inner join employment on true "
-	    	    					  + "	inner join employees on true"
-	    	    					  + "	inner join urbanstopcount on true"
-	    	    					  + "	inner join ruralstopcount on true";
-		    					  }
-    				  }else if (type==2){//census place
-    					  querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid,block.placeid "
-    							  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+") "
-    							  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + "	where map.agencyid= '"+agencyId+"' And stop.placeid="+id1+" group by block.blockid)," 
-    							  + "employment as (select sum(c000_"+popYear+ ") as employment "
-    							  + "	from census left join lodes_rac_projection_block using(blockid) "
-    							  + "	group by census.placeid), "
-    							  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by census.placeid),"
-    							  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-    							  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-    							  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-    							  + "	where map.agencyid= '"+agencyId+ "' and stop.placeid="+id1+ " and poptype='U')," 
-    							  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-    							  + "	where map.agencyid= '"+agencyId+ "' and stop.placeid="+id1+ " and poptype='R')," 
-    							  + "routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid from gtfs_trips trip inner join  census_places_trip_map maps on trip.id=maps.tripid where trip.agencyid='"+agencyId+ "' AND maps.placeid="+id1+ "  group by trip.route_id)," 
-    							  + "rmiles as (select sum(length) as rtmiles from routes) "
-    							  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-    				  }else if (type==5){//census congdist
-    					  querytext = "with census as (select population"+popYear+" as population, poptype,block.blockid,block.congdistid "
-    							  + "	from census_blocks block inner join gtfs_stops stop on st_dwithin(block.location, stop.location, "+String.valueOf(x)+") "
-    							  + "	inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + "	where map.agencyid= '"+agencyId+"' And block.congdistid="+id1+" group by block.blockid)," 
-    							  + "employment as (select sum(c000_"+popYear+ ") as employment "
-    							  + "	from census left join lodes_rac_projection_block using(blockid) "
-    							  + "	group by congdistid), "
-    							  + "employees as (select sum(c000) as employees  from census left join lodes_blocks_wac using(blockid) group by congdistid),"
-    							  + "urbanpop as (select COALESCE(sum(population),0) upop from census where poptype = 'U'), "
-    							  + "ruralpop as (select COALESCE(sum(population),0) rpop from census where poptype = 'R'), "
-    							  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
-    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-    							  + "	where map.agencyid= '"+agencyId+ "' and stop.congdistid="+id1+ " and poptype='U')," 
-    							  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
-    							  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
-    							  + " 	inner join census_blocks using(blockid)"
-    							  + "	where map.agencyid= '"+agencyId+ "' and stop.congdistid="+id1+ " and poptype='R')," 
-    							  + "	routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid "
-    							  + "	from gtfs_trips trip inner join  census_congdists_trip_map maps on trip.id=maps.tripid "
-    							  + "	where trip.agencyid='"+agencyId+ "' AND maps.congdistid="+id1+ "  group by trip.route_id)," 
-    							  + "rmiles as (select sum(length) as rtmiles from routes) "
-    							  + "select COALESCE(urbanstopscount,0) as urbanstopcount, COALESCE(ruralstopscount,0) as ruralstopcount, COALESCE(upop,0) as urbanpop, "
-    	    					  + "	COALESCE(rpop,0) as ruralpop, coalesce(employment,0) as rac,coalesce(employees,0) as wac,COALESCE(rtmiles,0) as rtmiles "
-    	    					  + "	from urbanpop inner join ruralpop on true "
-    	    					  + "	inner join rmiles on true "
-    	    					  + "	inner join employment on true "
-    	    					  + "	inner join employees on true"
-    	    					  + "	inner join urbanstopcount on true"
-    	    					  + "	inner join ruralstopcount on true";
-    				  }
-    	  }
-     double[] results = new double[9];
-    logger.debug(querytext);
-     try {
-        stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(querytext);        
-        while ( rs.next() ) {
-        	results[0] = rs.getLong("urbanstopcount");
-        	results[1] = rs.getLong("ruralstopcount");
-        	results[2] = rs.getLong("urbanpop"); 
-        	results[3] = rs.getLong("ruralpop");
-        	results[4] = Math.round(rs.getFloat("rtmiles")*100.0)/100.0;      
-        	results[5] = rs.getLong("rac");
-        	results[6] = rs.getLong("wac");   
-        	if(areaid == null || areaid.equals("null")){
-        	results[7] = Math.round(rs.getFloat("urtmiles")*100.0)/100.0;        
-        	results[8] = Math.round(rs.getFloat("rrtmiles")*100.0)/100.0;        
-        	}
-        	}
-        rs.close();
-        stmt.close();        
-      } catch ( Exception e ) {
-         e.printStackTrace();
-      }
-      dropConnection(connection);      
-      return results;
-    }
-		
+	public static double[] stopsPopMiles(int type, String agencyId, double x, int dbindex, String popYear,
+			String areaid, String geoid, int geotype) {
+		Connection connection = makeConnection(dbindex);
+		Statement stmt = null;
+		String query = ""
+		+ "with census as ( select population:POPYEAR as population, poptype, :AREAID_FIELD, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, :RADIUS ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = :AGENCYID :CENSUS_WHERE group by block.blockid ),"
+		+ "employment as ( select sum(c000_:POPYEAR) as employment from census left join lodes_rac_projection_block using(blockid) :EMPLOYMENT_GROUP ), "
+		+ "employees as ( select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) :EMPLOYMENT_GROUP ), "
+		+ "urbanpop as ( select COALESCE( sum(population), 0 ) upop from census where poptype = 'U' ), "
+		+ "ruralpop as ( select COALESCE( sum(population), 0 ) rpop from census where poptype = 'R' ), "
+		+ "urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'U' ), "
+		+ "ruralstopcount as ( select count(stop.id) as ruralstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'R' ), "
+		+ "routes as ( select :ROUTES_LENGTH trip.route_id as routeid from gtfs_trips trip :ROUTES_JOIN where trip.agencyid = :AGENCYID :ROUTES_WHERE group by trip.route_id ), "
+		+ "rmiles as ( select sum(length) as rtmiles from routes ) "
+		+ "select COALESCE(urbanstopscount, 0) as urbanstopcount, COALESCE(ruralstopscount, 0) as ruralstopcount, COALESCE(upop, 0) as urbanpop, COALESCE(rpop, 0) as ruralpop, coalesce(employment, 0) as rac, coalesce(employees, 0) as wac, COALESCE(rtmiles, 0) as rtmiles from urbanpop inner join ruralpop on true inner join rmiles on true inner join employment on true inner join employees on true inner join urbanstopcount on true inner join ruralstopcount on true;"
+		+ "";
+
+		String census_where = "";
+		String employment_group = "";
+		String routes_length = "";
+		String routes_join = "";
+		String routes_where = "";
+		String stopcount_where = "";
+
+		if (areaid == null || areaid.equals("null")) {
+			// 1
+		} else {
+			census_where = "AND block.:AREAID_FIELD = :AREAID ";
+			employment_group = "GROUP BY :AREAID_FIELD";
+			stopcount_where = "AND :AREAID_FIELD = :AREAID ";
+			routes_length = "max(round((maps.length):: numeric, 2)) AS length,";
+			routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid";
+			routes_where = "AND maps.:AREAID_FIELD = :AREAID ";
+			if (type == 0) {
+				// 2 - counties
+				// census_where = "And left(block.blockid, 5)= :AREAID ";
+				// employment_group = "left(census.blockid, 5)";
+				// stopcount_where = "and left(stop.blockid, 5)= :AREAID ";
+				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
+				// routes_join = "inner join census_counties_trip_map maps on trip.id = maps.tripid";
+				// routes_where = "AND maps.countyid = :AREAID ";
+			} else if (type == 1) {
+				// 3 - census tracts
+				// census_where = "And left(block.blockid, 11)= :AREAID ";
+				// employment_group = "left(census.blockid, 11)";
+				// stopcount_where = "and left(stop.blockid, 5)= :AREAID ";
+				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
+				// routes_join = "inner join census_tracts_trip_map maps on trip.id = maps.tripid";
+				// routes_where = "AND maps.tractid = :AREAID ";
+			} else if (type == 4) {
+				// 4 - odot regions
+				// census_areaid = "block.regionid";
+				// census_where = "And block.regionid = :AREAID ";
+				// employment_group = "census.regionid";
+				// stopcount_where = "and stop.regionid = :AREAID ";
+				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
+				// routes_join = "inner join census_counties_trip_map maps on trip.id = maps.tripid ";
+				// routes_where = "AND maps.regionid = :AREAID ";
+			} else if (type == 2) {
+				// 11 - census place
+				// census_areaid = "block.placeid";
+				// census_where = "And stop.placeid = :AREAID ";
+				// employment_group = "census.placeid";
+				// stopcount_where = "and stop.placeid = :AREAID ";
+				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
+				// routes_join = "inner join census_places_trip_map maps on trip.id = maps.tripid ";
+				// routes_where = "AND maps.placeid = :AREAID ";
+			} else if (type == 5) {
+				// 12 - census congdist
+				// census_areaid = "block.congdistid";
+				// census_where = "And block.congdistid = :AREAID ";
+				// employment_group = "congdistid";
+				// stopcount_where = "and stop.congdistid = :AREAID ";
+				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
+				// routes_join = "inner join census_congdists_trip_map maps on trip.id = maps.tripid ";
+				// routes_where = "AND maps.congdistid = :AREAID ";
+			} else if ((type == 3) && (geotype == -1 || geotype == 3)) {
+				// 5 - census urbans
+				// census_areaid = "block.urbanid";
+				// census_where = "And stop.urbanid = :AREAID ";
+				// employment_group = "urbanid";
+				// stopcount_where = "and stop.urbanid = :AREAID ";
+				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
+				// routes_join = "inner join census_urbans_trip_map maps on trip.id = maps.tripid ";
+				// routes_where = "AND maps.urbanid = :AREAID ";
+			} else if (type == 3) {
+				if (geotype == -1 || geotype == 3) {
+				} else if (geotype == 0) {
+					// 6 - urbans - counties
+				} else if (geotype == 1) {
+					// 7 - urbans - tracts
+				} else if (geotype == 2) {
+					// 8 - urbans - places
+				} else if (geotype == 4) {
+					// 9 - urbans - odot regions
+				} else if (geotype == 5) { 
+					// 10 - urbans - congdists
+				}
+			}
+		}
+
+		// query fragments
+		query = query.replace(":POPYEAR", popYear);
+		query = query.replace(":CENSUS_WHERE", census_where);
+		query = query.replace(":EMPLOYMENT_GROUP", employment_group);
+		query = query.replace(":ROUTES_LENGTH", routes_length);
+		query = query.replace(":ROUTES_JOIN", routes_join);
+		query = query.replace(":ROUTES_WHERE", routes_where);
+		query = query.replace(":STOPCOUNT_WHERE", stopcount_where);
+		query = query.replace(":AREAID_TABLE", Types.getTripMapTableName(type));
+		query = query.replace(":GEOID_TABLE", Types.getTripMapTableName(geotype));
+		query = query.replace(":AREAID_FIELD", Types.getIdColumnName(type));
+		query = query.replace(":GEOID_FIELD", Types.getIdColumnName(geotype));
+
+		// parameters
+		query = query.replace(":AGENCYID", "'"+agencyId+"'");
+		query = query.replace(":AREAID", "'"+areaid+"'");
+		query = query.replace(":GEOID", "'"+geoid+"'");
+		query = query.replace(":RADIUS", String.valueOf(x));
+
+		double[] results = new double[9];
+		logger.debug(query);
+		try {
+			stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				results[0] = rs.getLong("urbanstopcount");
+				results[1] = rs.getLong("ruralstopcount");
+				results[2] = rs.getLong("urbanpop");
+				results[3] = rs.getLong("ruralpop");
+				results[4] = Math.round(rs.getFloat("rtmiles") * 100.0) / 100.0;
+				results[5] = rs.getLong("rac");
+				results[6] = rs.getLong("wac");
+				if (areaid == null || areaid.equals("null")) {
+					results[7] = Math.round(rs.getFloat("urtmiles") * 100.0) / 100.0;
+					results[8] = Math.round(rs.getFloat("rrtmiles") * 100.0) / 100.0;
+				}
+			}
+			rs.close();
+			stmt.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		dropConnection(connection);
+		return results;
+	}
+
 	public static String BuildServiceIDs(String[] date, String[] day, String[] fulldates, String agencyId) {
 		String query = "";
 		for (int i = 0; i < date.length; i++) {
