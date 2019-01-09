@@ -50,8 +50,8 @@ trips as (
     )
     inner join census_tracts_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid
   where
-    trip.agencyid = 'AGENCYID'
-    and map.tractid = 'AREAID'
+    trip.agencyid = 'TRIMET' 
+    and map.tractid = '41051009000'
 ),
 service as (
   select
@@ -143,7 +143,7 @@ undupblocks as (
       block.location, stops.location, 402.335
     )
   where
-    tractid = 'AREAID'
+    tractid = '41051009000'
   group by
     block.blockid
 ),
@@ -280,4 +280,4 @@ from
   inner join svcstops_urban on true
   inner join svcstops_rural on true
   inner join upop_los on true
-  inner join rpop_los on true ";
+  inner join rpop_los on true;

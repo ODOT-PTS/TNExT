@@ -3716,11 +3716,11 @@ public class PgisEventManager {
     					  + "urbanstopcount as (select count(stop.id) as urbanstopscount "
     					  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
     					  + " 	inner join census_blocks using(blockid)"
-    					  + "	where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ ") and poptype='U'," 
+    					  + "	where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ " and poptype='U')," 
     					  + "ruralstopcount as (select count(stop.id) as ruralstopscount "
     					  + "	from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid=stop.id and map.agencyid_def = stop.agencyid "
     					  + " 	inner join census_blocks using(blockid)"
-    					  + "	where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ ") and poptype='R'," 
+    					  + "	where map.agencyid= '"+agencyId+ "' and left(stop.blockid,5)="+id1+ " and poptype='R')," 
     					  + "routes as (select max(round((maps.length)::numeric,2)) as length, trip.route_id as routeid "
     					  + "from gtfs_trips trip inner join census_tracts_trip_map maps on trip.id=maps.tripid "
     					  + "	where trip.agencyid='"+agencyId+ "' AND maps.tractid="+id1+ "  group by trip.route_id)," 
@@ -4126,16 +4126,11 @@ public class PgisEventManager {
 		String trip_where = "";
 		String undupblocks_where = "";
 		String areaid_join = "";
-		String areaid_field = "";
-		String areaid_table = "";
 		String geoid_join = "";
-		String geoid_table = "";
-		String geoid_field = "";
 
 		if (areaid.equals("null") || areaid == null) {
 			// 1 - Default
 			select_trip_length = "trip.stopscount as stops, trip.tlength as tlength, round((trip.length + trip.estlength):: numeric, 2) as length,";
-			areaid_field = "urbanid"; // filler
 		} else {
 			// AREAID
 			select_trip_length =  "map.tlength as tlength, map.stopscount as stops, round((map.length):: numeric, 2) as length,";
@@ -4144,58 +4139,34 @@ public class PgisEventManager {
 			undupblocks_where = "WHERE :AREAID_FIELD = :AREAID ";
 			if (type == 0) {
 				// 2 - counties
-				areaid_field = "countyid";
-				areaid_table = "census_counties_trip_map";
 			} else if (type == 1) {
 				// 3 - census tracts
-				// LEFT()???
-				areaid_field = "tractid";
-				areaid_table = "census_tracts_trip_map";
 			} else if (type == 2) {
 				// 4 - census places
-				areaid_field = "placeid";
-				areaid_table = "census_places_trip_map";
 			} else if (type == 4) {
 				// 11 - ODOT regions
-				areaid_field = "regionid";
-				areaid_table = "census_counties_trip_map";
 			} else if (type == 5) {
 				// 12 - congressional districts
-				areaid_field = "congdistid";
-				areaid_table = "census_congdists_trip_map";
 			} else if ((type == 3) && (geotype == -1 || geotype == 3)) {
-				// census urbans
-				areaid_table = "census_urbans_trip_map";
-				areaid_field = "urbanid";
+				// 5 - census urbans
 			} else if (type == 3) {
 				// GEOID
-				areaid_table = "census_urbans_trip_map";
-				areaid_field = "urbanid";
 				select_trip_length = "map.tlength as tlength, map.stopscount as stops, (ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/ 1609.34) as length,";				
 				trip_where = "AND map.:AREAID_FIELD = :AREAID AND maps.:GEOID_FIELD = :GEOID ";
 				geoid_join = "INNER JOIN :GEOID_TABLE maps on trip.id = maps.tripid and trip.agencyid = maps.agencyid";
 				undupblocks_where = "WHERE :AREAID_FIELD = :AREAID AND :GEOID_FIELD = :GEOID ";
 				if (geotype == 0) {
 					// 6 - urban - counties
-					geoid_table = "census_counties_trip_map";
-					geoid_field = "countyid";
 				} else if (geotype == 1) {
 					// 7 - urban - tracts
-					geoid_table = "census_tracts_trip_map";
-					geoid_field = "tractid";
 				} else if (geotype == 2) {
 					// 8 - urban - places
-					geoid_table = "census_places_trip_map";
-					geoid_field = "placeid";
 				} else if (geotype == 5) {
 					// 10 - urban - congressional districts
-					geoid_table = "census_congdists_trip_map";
-					geoid_field = "congdistid";
 				} else if (geotype == 4) {
 					// 9 - urbans - odot regions
 					trip_where = "AND map.:AREAID_FIELD = :AREAID ";
 					geoid_join = "CROSS JOIN regions maps";
-					geoid_field = "regionid";
 				}
 			}
 		}
@@ -4207,10 +4178,10 @@ public class PgisEventManager {
 		query = query.replace(":UNDUPBLOCKS_WHERE", undupblocks_where);
 		query = query.replace(":AREAID_JOIN", areaid_join);
 		query = query.replace(":GEOID_JOIN", geoid_join);
-		query = query.replace(":AREAID_TABLE", areaid_table);
-		query = query.replace(":GEOID_TABLE", geoid_table);
-		query = query.replace(":AREAID_FIELD", areaid_field);
-		query = query.replace(":GEOID_FIELD", geoid_field);
+		query = query.replace(":AREAID_TABLE", Types.getTripMapTableName(type));
+		query = query.replace(":GEOID_TABLE", Types.getTripMapTableName(geotype));
+		query = query.replace(":AREAID_FIELD", Types.getIdColumnName(type));
+		query = query.replace(":GEOID_FIELD", Types.getIdColumnName(geotype));
 
 		// parameters
 		query = query.replace(":AGENCYID", "'"+agencyId+"'");

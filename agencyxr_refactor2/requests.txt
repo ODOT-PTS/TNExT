@@ -4,20 +4,15 @@ http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l
 https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaid=null&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-agencyS
 
 // 2 - counties
-// OK2 - sql result verified
+// OK2 - sql result verified - OK3
 https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
 
 // 3 - tracts
-// 
+// sql result verified 
+// broken elsewhere
 https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=41051009000&type=1&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-tractS-agencyS
 http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=41051009000&type=1&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-tractS-agencyS
-
-https://oregon.tnext.io/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=TRIMET&day=05/01/2018&key=0.11414673138691689&dbindex=12&popYear=2010&areaId=41051009000&type=1&l=2&username=admin&x=0.25&geotype=-1&geoid=null
-http://localhost:8080/TNAtoolAPI-Webapp/queries/transit/AgencyXR?agency=TRIMET&day=05/01/2018&key=0.8246000098662136&dbindex=0&popYear=2010&areaId=41051009000&type=1&l=2&username=admin&x=0.25&geotype=-1&geoid=null
-
-https://oregon.tnext.io/TNAtoolAPI-Webapp/AgenXReport.html?&agency=445&x=0.25&l=2&n=eas&dbindex=12&popYear=2010&areaId=41003010600&type=1&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-tractS-agencyS
-http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=445&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=41003010600&type=1&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-tractS-agencyS
 
 // 4 - census places
 // OK2 - sql result verified
