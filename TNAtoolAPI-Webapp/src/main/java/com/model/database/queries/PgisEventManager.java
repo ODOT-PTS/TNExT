@@ -3635,7 +3635,7 @@ public class PgisEventManager {
 		Connection connection = makeConnection(dbindex);
 		Statement stmt = null;
 		String query = ""
-		+ "with census as ( select population:POPYEAR as population, poptype, :AREAID_FIELD, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, :RADIUS ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = :AGENCYID :CENSUS_WHERE group by block.blockid ),"
+		+ "with census as ( select population:POPYEAR as population, poptype, block.:AREAID_FIELD, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, :RADIUS ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = :AGENCYID :CENSUS_WHERE group by block.blockid ),"
 		+ "employment as ( select sum(c000_:POPYEAR) as employment from census left join lodes_rac_projection_block using(blockid) :EMPLOYMENT_GROUP ), "
 		+ "employees as ( select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) :EMPLOYMENT_GROUP ), "
 		+ "urbanpop as ( select COALESCE( sum(population), 0 ) upop from census where poptype = 'U' ), "
@@ -3659,7 +3659,7 @@ public class PgisEventManager {
 		} else {
 			census_where = "AND block.:AREAID_FIELD = :AREAID ";
 			employment_group = "GROUP BY :AREAID_FIELD";
-			stopcount_where = "AND :AREAID_FIELD = :AREAID ";
+			stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID ";
 			routes_length = "max(round((maps.length):: numeric, 2)) AS length,";
 			routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid";
 			routes_where = "AND maps.:AREAID_FIELD = :AREAID ";
@@ -3681,6 +3681,7 @@ public class PgisEventManager {
 				// routes_where = "AND maps.tractid = :AREAID ";
 			} else if (type == 4) {
 				// 4 - odot regions
+				// regionid is ambiguous
 				// census_areaid = "block.regionid";
 				// census_where = "And block.regionid = :AREAID ";
 				// employment_group = "census.regionid";
@@ -3690,6 +3691,7 @@ public class PgisEventManager {
 				// routes_where = "AND maps.regionid = :AREAID ";
 			} else if (type == 2) {
 				// 11 - census place
+				// placeid is ambiguous
 				// census_areaid = "block.placeid";
 				// census_where = "And stop.placeid = :AREAID ";
 				// employment_group = "census.placeid";
@@ -3699,6 +3701,7 @@ public class PgisEventManager {
 				// routes_where = "AND maps.placeid = :AREAID ";
 			} else if (type == 5) {
 				// 12 - census congdist
+				// congdistid is ambiguous
 				// census_areaid = "block.congdistid";
 				// census_where = "And block.congdistid = :AREAID ";
 				// employment_group = "congdistid";
@@ -3708,6 +3711,7 @@ public class PgisEventManager {
 				// routes_where = "AND maps.congdistid = :AREAID ";
 			} else if ((type == 3) && (geotype == -1 || geotype == 3)) {
 				// 5 - census urbans
+				// urbanid is ambiguous
 				// census_areaid = "block.urbanid";
 				// census_where = "And stop.urbanid = :AREAID ";
 				// employment_group = "urbanid";
@@ -3716,8 +3720,12 @@ public class PgisEventManager {
 				// routes_join = "inner join census_urbans_trip_map maps on trip.id = maps.tripid ";
 				// routes_where = "AND maps.urbanid = :AREAID ";
 			} else if (type == 3) {
-				if (geotype == -1 || geotype == 3) {
-				} else if (geotype == 0) {
+				census_where = "AND block.:AREAID_FIELD = :AREAID AND block.:GEOID_FIELD = :GEOID ";
+				stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID AND census_blocks.:GEOID_FIELD = :GEOID ";
+				routes_length = "max(ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993))/ 1609.34) as length, ";
+				routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid INNER JOIN :GEOID_TABLE map ON trip.id = map.tripid ";
+				routes_where = "AND maps.:AREAID_FIELD = :AREAID AND map.:GEOID_FIELD = :GEOID ";
+				if (geotype == 0) {
 					// 6 - urbans - counties
 				} else if (geotype == 1) {
 					// 7 - urbans - tracts
