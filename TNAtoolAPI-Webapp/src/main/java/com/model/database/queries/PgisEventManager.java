@@ -3638,21 +3638,23 @@ public class PgisEventManager {
 		+ "with census as ( select population:POPYEAR as population, poptype, block.:AREAID_FIELD, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, :RADIUS ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = :AGENCYID :CENSUS_WHERE group by block.blockid ),"
 		+ "employment as ( select sum(c000_:POPYEAR) as employment from census left join lodes_rac_projection_block using(blockid) :EMPLOYMENT_GROUP ), "
 		+ "employees as ( select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) :EMPLOYMENT_GROUP ), "
-		+ "urbanpop as ( select COALESCE( sum(population), 0 ) upop from census where poptype = 'U' ), "
-		+ "ruralpop as ( select COALESCE( sum(population), 0 ) rpop from census where poptype = 'R' ), "
+		+ "urbanpop as ( select COALESCE(sum(population), 0) upop from census where poptype = 'U' ), "
+		+ "ruralpop as ( select COALESCE(sum(population), 0) rpop from census where poptype = 'R' ), "
 		+ "urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'U' ), "
 		+ "ruralstopcount as ( select count(stop.id) as ruralstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'R' ), "
-		+ "routes as ( select :ROUTES_LENGTH trip.route_id as routeid from gtfs_trips trip :ROUTES_JOIN where trip.agencyid = :AGENCYID :ROUTES_WHERE group by trip.route_id ), "
-		+ "rmiles as ( select sum(length) as rtmiles from routes ) "
-		+ "select COALESCE(urbanstopscount, 0) as urbanstopcount, COALESCE(ruralstopscount, 0) as ruralstopcount, COALESCE(upop, 0) as urbanpop, COALESCE(rpop, 0) as ruralpop, coalesce(employment, 0) as rac, coalesce(employees, 0) as wac, COALESCE(rtmiles, 0) as rtmiles from urbanpop inner join ruralpop on true inner join rmiles on true inner join employment on true inner join employees on true inner join urbanstopcount on true inner join ruralstopcount on true;"
+		+ "routes AS (SELECT DISTINCT ON(routeid) round((trip.length + trip.estlength):: numeric, 2) AS length, trip.route_id AS routeid, id FROM gtfs_trips trip WHERE trip.agencyid = :AGENCYID ORDER BY routeid, length DESC, id),"
+		+ "segments AS (SELECT ST_Length(ST_Transform(ST_Intersection(segs.shape, blocks.shape), 2993)) as length, blocks.poptype FROM gtfs_trip_segments segs INNER JOIN routes ON segs.id = routes.id :SEGMENTS_JOIN :SEGMENTS_WHERE),"
+		+ "rtmiles as (select sum(length)/1609.34 as rtmiles FROM segments), "
+		+ "urtmiles as (select sum(length)/1609.34 as urtmiles FROM segments WHERE poptype = 'U'), "
+		+ "rrtmiles as (select sum(length)/1609.34 as rrtmiles FROM segments WHERE poptype = 'R') "
+		+ "select COALESCE(urbanstopscount, 0) as urbanstopcount, COALESCE(ruralstopscount, 0) as ruralstopcount, COALESCE(upop, 0) as urbanpop, COALESCE(rpop, 0) as ruralpop, coalesce(employment, 0) as rac, coalesce(employees, 0) as wac, COALESCE(rtmiles, 0) as rtmiles, COALESCE(urtmiles, 0) as urtmiles, COALESCE(rrtmiles, 0) as rrtmiles from urbanpop inner join ruralpop on true inner join rtmiles on true inner join urtmiles on true inner join rrtmiles on true inner join employment on true inner join employees on true inner join urbanstopcount on true inner join ruralstopcount on true;"
 		+ "";
 
 		String census_where = "";
 		String employment_group = "";
-		String routes_length = "";
-		String routes_join = "";
-		String routes_where = "";
 		String stopcount_where = "";
+		String segments_join = "";
+		String segments_where = "";
 
 		if (areaid == null || areaid.equals("null")) {
 			// 1
@@ -3660,9 +3662,8 @@ public class PgisEventManager {
 			census_where = "AND block.:AREAID_FIELD = :AREAID ";
 			employment_group = "GROUP BY :AREAID_FIELD";
 			stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID ";
-			routes_length = "max(round((maps.length):: numeric, 2)) AS length,";
-			routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid";
-			routes_where = "AND maps.:AREAID_FIELD = :AREAID ";
+			segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape)";
+			segments_where = "WHERE census.:AREAID_FIELD = :AREAID ";
 			if (type == 0) {
 				// 2 - counties
 				// census_where = "And left(block.blockid, 5)= :AREAID ";
@@ -3722,9 +3723,10 @@ public class PgisEventManager {
 			} else if (type == 3) {
 				census_where = "AND block.:AREAID_FIELD = :AREAID AND block.:GEOID_FIELD = :GEOID ";
 				stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID AND census_blocks.:GEOID_FIELD = :GEOID ";
-				routes_length = "max(ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993))/ 1609.34) as length, ";
-				routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid INNER JOIN :GEOID_TABLE map ON trip.id = map.tripid ";
-				routes_where = "AND maps.:AREAID_FIELD = :AREAID AND map.:GEOID_FIELD = :GEOID ";
+				// segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape) WHERE census.:AREAID_FIELD = :AREAID ";
+				// routes_length = "max(ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993))/ 1609.34) as length, ";
+				// routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid INNER JOIN :GEOID_TABLE map ON trip.id = map.tripid ";
+				// routes_where = "AND maps.:AREAID_FIELD = :AREAID AND map.:GEOID_FIELD = :GEOID ";
 				if (geotype == 0) {
 					// 6 - urbans - counties
 				} else if (geotype == 1) {
@@ -3743,11 +3745,11 @@ public class PgisEventManager {
 		query = query.replace(":POPYEAR", popYear);
 		query = query.replace(":CENSUS_WHERE", census_where);
 		query = query.replace(":EMPLOYMENT_GROUP", employment_group);
-		query = query.replace(":ROUTES_LENGTH", routes_length);
-		query = query.replace(":ROUTES_JOIN", routes_join);
-		query = query.replace(":ROUTES_WHERE", routes_where);
+		query = query.replace(":SEGMENTS_JOIN", segments_join);
+		query = query.replace(":SEGMENTS_WHERE", segments_where);
 		query = query.replace(":STOPCOUNT_WHERE", stopcount_where);
 		query = query.replace(":AREAID_TABLE", Types.getTripMapTableName(type));
+		query = query.replace(":AREAID_CENSUS_TABLE", Types.getTableName(type));
 		query = query.replace(":GEOID_TABLE", Types.getTripMapTableName(geotype));
 		query = query.replace(":AREAID_FIELD", Types.getIdColumnName(type));
 		query = query.replace(":GEOID_FIELD", Types.getIdColumnName(geotype));
@@ -3771,10 +3773,10 @@ public class PgisEventManager {
 				results[4] = Math.round(rs.getFloat("rtmiles") * 100.0) / 100.0;
 				results[5] = rs.getLong("rac");
 				results[6] = rs.getLong("wac");
-				if (areaid == null || areaid.equals("null")) {
-					results[7] = Math.round(rs.getFloat("urtmiles") * 100.0) / 100.0;
-					results[8] = Math.round(rs.getFloat("rrtmiles") * 100.0) / 100.0;
-				}
+				// if (areaid == null || areaid.equals("null")) {
+				results[7] = Math.round(rs.getFloat("urtmiles") * 100.0) / 100.0;
+				results[8] = Math.round(rs.getFloat("rrtmiles") * 100.0) / 100.0;
+				// }
 			}
 			rs.close();
 			stmt.close();
