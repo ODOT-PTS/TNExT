@@ -3643,7 +3643,7 @@ public class PgisEventManager {
 		+ "urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'U' ), "
 		+ "ruralstopcount as ( select count(stop.id) as ruralstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'R' ), "
 		+ "routes AS (SELECT DISTINCT ON(routeid) round((trip.length + trip.estlength):: numeric, 2) AS length, trip.route_id AS routeid, id FROM gtfs_trips trip WHERE trip.agencyid = :AGENCYID ORDER BY routeid, length DESC, id),"
-		+ "segments AS (SELECT ST_Length(ST_Transform(ST_Intersection(segs.shape, blocks.shape), 2993)) as length, blocks.poptype FROM gtfs_trip_segments segs INNER JOIN routes ON segs.id = routes.id :SEGMENTS_JOIN :SEGMENTS_WHERE),"
+		+ "segments AS (SELECT ST_Length(ST_Transform(ST_Intersection(segs.shape, blocks.shape), 2993)) as length, blocks.poptype FROM gtfs_trip_segments segs INNER JOIN routes ON segs.id = routes.id INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape) :SEGMENTS_JOIN :SEGMENTS_WHERE),"
 		+ "rtmiles as (select sum(length)/1609.34 as rtmiles FROM segments), "
 		+ "urtmiles as (select sum(length)/1609.34 as urtmiles FROM segments WHERE poptype = 'U'), "
 		+ "rrtmiles as (select sum(length)/1609.34 as rrtmiles FROM segments WHERE poptype = 'R') "
@@ -3662,7 +3662,7 @@ public class PgisEventManager {
 			census_where = "AND block.:AREAID_FIELD = :AREAID ";
 			employment_group = "GROUP BY :AREAID_FIELD";
 			stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID ";
-			segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape)";
+			segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape)";
 			segments_where = "WHERE census.:AREAID_FIELD = :AREAID ";
 			if (type == 0) {
 				// 2 - counties
@@ -3723,7 +3723,8 @@ public class PgisEventManager {
 			} else if (type == 3) {
 				census_where = "AND block.:AREAID_FIELD = :AREAID AND block.:GEOID_FIELD = :GEOID ";
 				stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID AND census_blocks.:GEOID_FIELD = :GEOID ";
-				// segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape) WHERE census.:AREAID_FIELD = :AREAID ";
+				segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN :GEOID_CENSUS_TABLE geoid_census ON ST_Intersects(segs.shape, geoid_census.shape) ";
+				segments_where = "WHERE census.:AREAID_FIELD = :AREAID AND geoid_census.:GEOID_FIELD = :GEOID ";
 				// routes_length = "max(ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993))/ 1609.34) as length, ";
 				// routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid INNER JOIN :GEOID_TABLE map ON trip.id = map.tripid ";
 				// routes_where = "AND maps.:AREAID_FIELD = :AREAID AND map.:GEOID_FIELD = :GEOID ";
@@ -3748,10 +3749,9 @@ public class PgisEventManager {
 		query = query.replace(":SEGMENTS_JOIN", segments_join);
 		query = query.replace(":SEGMENTS_WHERE", segments_where);
 		query = query.replace(":STOPCOUNT_WHERE", stopcount_where);
-		query = query.replace(":AREAID_TABLE", Types.getTripMapTableName(type));
 		query = query.replace(":AREAID_CENSUS_TABLE", Types.getTableName(type));
-		query = query.replace(":GEOID_TABLE", Types.getTripMapTableName(geotype));
 		query = query.replace(":AREAID_FIELD", Types.getIdColumnName(type));
+		query = query.replace(":GEOID_CENSUS_TABLE", Types.getTableName(geotype));
 		query = query.replace(":GEOID_FIELD", Types.getIdColumnName(geotype));
 
 		// parameters
