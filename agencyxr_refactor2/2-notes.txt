@@ -23,3 +23,44 @@ new-alt
  svcmiles | svchours | svcstops_urban | svcstops_rural | upop_los | rpop_los |   uspop   | rspop |   swac    |       srac       |       svdays        | fromtime | totime
 ----------+----------+----------------+----------------+----------+----------+-----------+-------+-----------+------------------+---------------------+----------+--------
  55210.86 | 14755790 |         298722 |            496 |   631720 |       83 | 377298234 |  9744 | 576820384 | 250794142.394233 | {"Tue 01 May 2018"} |    12085 |  96480
+
+FINAL
+
+http://localhost:8080/TNAtoolAPI-Webapp/AgenXReport.html?&agency=TRIMET&x=0.25&l=2&n=eas&dbindex=0&popYear=2010&areaId=41051&type=0&username=admin&geotype=-1&geoid=null&nav=stateS-countyS-agencyS
+
+may2018=# with census as ( select population2010 as population, poptype, block.countyid, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, 402.335 ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = 'TRIMET' AND block.countyid = '41051'  group by block.blockid ),employment as ( select sum(c000_2010) as employment from census left join lodes_rac_projection_block using(blockid) GROUP BY countyid ), employees as ( select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) GROUP BY countyid ), urbanpop as ( select COALESCE(sum(population), 0) upop from census where poptype = 'U' ), ruralpop as ( select COALESCE(sum(population), 0) rpop from census where poptype = 'R' ), urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = 'TRIMET' AND census_blocks.countyid = '41051'  and poptype = 'U' ), ruralstopcount as ( select count(stop.id) as ruralstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = 'TRIMET' AND census_blocks.countyid = '41051'  and poptype = 'R' ), routes AS (SELECT DISTINCT ON(routeid) round((trip.length + trip.estlength):: numeric, 2) AS length, trip.route_id AS routeid, id FROM gtfs_trips trip WHERE trip.agencyid = 'TRIMET' ORDER BY routeid, length DESC, id),segments AS (SELECT ST_Length(ST_Transform(ST_Intersection(segs.shape, blocks.shape), 2993)) as length, blocks.poptype FROM gtfs_trip_segments segs INNER JOIN routes ON segs.id = routes.id INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape) INNER JOIN census_counties census ON ST_Intersects(segs.shape, census.shape) WHERE census.countyid = '41051' ),rtmiles as (select sum(length)/1609.34 as rtmiles FROM segments), urtmiles as (select sum(length)/1609.34 as urtmiles FROM segments WHERE poptype = 'U'), rrtmiles as (select sum(length)/1609.34 as rrtmiles FROM segments WHERE poptype = 'R') select COALESCE(urbanstopscount, 0) as urbanstopcount, COALESCE(ruralstopscount, 0) as ruralstopcount, COALESCE(upop, 0) as urbanpop, COALESCE(rpop, 0) as ruralpop, coalesce(employment, 0) as rac, coalesce(employees, 0) as wac, COALESCE(rtmiles, 0) as rtmiles, COALESCE(urtmiles, 0) as urtmiles, COALESCE(rrtmiles, 0) as rrtmiles from urbanpop inner join ruralpop on true inner join rtmiles on true inner join urtmiles on true inner join rrtmiles on true inner join employment on true inner join employees on true inner join urbanstopcount on true inner join ruralstopcount on true;
+ urbanstopcount | ruralstopcount | urbanpop | ruralpop |       rac        |  wac   |     rtmiles      |     urtmiles     |     rrtmiles
+----------------+----------------+----------+----------+------------------+--------+------------------+------------------+------------------
+           4202 |             15 |   631720 |       83 | 410229.370266793 | 377810 | 637.397498155604 | 633.022114246022 | 4.37538390958285
+
+may2018=# with census as ( select population2010 as population, poptype, block.countyid, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, 402.335 ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = 'TRIMET' AND block.countyid = '41051'  group by block.blockid ),employment as ( select sum(c000_2010) as employment from census left join lodes_rac_projection_block using(blockid) GROUP BY countyid ), employees as ( select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) GROUP BY countyid ), urbanpop as ( select COALESCE(sum(population), 0) upop from census where poptype = 'U' ), ruralpop as ( select COALESCE(sum(population), 0) rpop from census where poptype = 'R' ), urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = 'TRIMET' AND census_blocks.countyid = '41051'  and poptype = 'U' ), ruralstopcount as ( select count(stop.id) as ruralstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = 'TRIMET' AND census_blocks.countyid = '41051'  and poptype = 'R' ), routes AS (SELECT DISTINCT ON(routeid) round((trip.length + trip.estlength):: numeric, 2) AS length, trip.route_id AS routeid, id FROM gtfs_trips trip WHERE trip.agencyid = 'TRIMET' ORDER BY routeid, length DESC, id),segments AS (SELECT ST_Length(ST_Transform(ST_Intersection(segs.shape, blocks.shape), 2993)) as length, blocks.poptype FROM gtfs_trip_segments segs INNER JOIN routes ON segs.id = routes.id INNER JOIN census_blocks blocks ON ST_Intersects(segs.shape, blocks.shape) INNER JOIN census_counties census ON ST_Intersects(segs.shape, census.shape) WHERE census.countyid = '41051' ),rtmiles as (select sum(length)/1609.34 as rtmiles FROM segments), urtmiles as (select sum(length)/1609.34 as urtmiles FROM segments WHERE poptype = 'U'), rrtmiles as (select sum(length)/1609.34 as rrtmiles FROM segments WHERE poptype = 'R') select COALESCE(urbanstopscount, 0) as urbanstopcount, COALESCE(ruralstopscount, 0) as ruralstopcount, COALESCE(upop, 0) as urbanpop, COALESCE(rpop, 0) as ruralpop, coalesce(employment, 0) as rac, coalesce(employees, 0) as wac, COALESCE(rtmiles, 0) as rtmiles, COALESCE(urtmiles, 0) as urtmiles, COALESCE(rrtmiles, 0) as rrtmiles from urbanpop inner join ruralpop on true inner join rtmiles on true inner join urtmiles on true inner join rrtmiles on true inner join employment on true inner join employees on true inner join urbanstopcount on true inner join ruralstopcount on true;
+ urbanstopcount | ruralstopcount | urbanpop | ruralpop |       rac        |  wac   |     rtmiles      |     urtmiles     |     rrtmiles
+----------------+----------------+----------+----------+------------------+--------+------------------+------------------+------------------
+           4202 |             15 |   631720 |       83 | 410229.370266793 | 377810 | 637.397498155604 | 633.022114246022 | 4.37538390958285
+
+Metric	Value
+Agency ID	TRIMET
+Agency Name	TriMet
+Route Miles	637.4
+Urban Route Miles	633.02
+Rural Route Miles	4.38
+Route Stops	4,217
+Urban Stops	4,202
+Rural Stops	15
+Stops Per Route Mile	6.6159
+Service Hours (3)	4,098.83
+Service Miles(3)	55,210.86
+Urban Population Served(1)	631,720
+Rural Population Served(1)	83
+Urban Population Served at Level of Service(1)(2)(3)	631,720
+Rural Population Served at Level of Service(1)(2)(3)	83
+Employment Served (RAC)(1)	410,229
+Employees Served (WAC)(1)	377,810
+Urban Service Stops(3)	298,722
+Rural Service Stops(3)	496
+Urban Population Served By Service(1)(3)	377,298,240
+Rural Population Served By Service(1)(3)	9,744
+Employment Served By Service (RAC)(1)(3)	250,794,144
+Employees Served By Service (WAC)(1)(3)	576,820,350
+Service Days(3)	Tue 01 May 2018
+Hours of Service(3)	03:21AM-+1:02:48AM           
