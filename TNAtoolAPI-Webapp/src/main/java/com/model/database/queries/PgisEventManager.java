@@ -3662,8 +3662,8 @@ public class PgisEventManager {
 			census_where = "AND block.:AREAID_FIELD = :AREAID ";
 			employment_group = "GROUP BY :AREAID_FIELD";
 			stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID ";
-			segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape)";
-			segments_where = "WHERE census.:AREAID_FIELD = :AREAID ";
+			segments_join = ""; // "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape)";
+			segments_where = "WHERE blocks.:AREAID_FIELD = :AREAID ";
 			if (type == 0) {
 				// 2 - counties
 				// census_where = "And left(block.blockid, 5)= :AREAID ";
@@ -3723,8 +3723,8 @@ public class PgisEventManager {
 			} else if (type == 3) {
 				census_where = "AND block.:AREAID_FIELD = :AREAID AND block.:GEOID_FIELD = :GEOID ";
 				stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID AND census_blocks.:GEOID_FIELD = :GEOID ";
-				segments_join = "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN :GEOID_CENSUS_TABLE geoid_census ON ST_Intersects(segs.shape, geoid_census.shape) ";
-				segments_where = "WHERE census.:AREAID_FIELD = :AREAID AND geoid_census.:GEOID_FIELD = :GEOID ";
+				segments_join = ""; // "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN :GEOID_CENSUS_TABLE geoid_census ON ST_Intersects(segs.shape, geoid_census.shape) ";
+				segments_where = "WHERE blocks.:AREAID_FIELD = :AREAID AND blocks.:GEOID_FIELD = :GEOID ";
 				// routes_length = "max(ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993))/ 1609.34) as length, ";
 				// routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid INNER JOIN :GEOID_TABLE map ON trip.id = map.tripid ";
 				// routes_where = "AND maps.:AREAID_FIELD = :AREAID AND map.:GEOID_FIELD = :GEOID ";

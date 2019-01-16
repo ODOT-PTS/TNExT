@@ -78,13 +78,13 @@ may2018=# with svcids as ((select serviceid_agencyid, serviceid_id, 'Tue 01 May 
 Metric	Value
 Agency ID	TRIMET
 Agency Name	TriMet
-Route Miles	7.61
-Urban Route Miles	7.61
+Route Miles	2.62
+Urban Route Miles	2.62
 Rural Route Miles	0
 Route Stops	39
 Urban Stops	39
 Rural Stops	0
-Stops Per Route Mile	5.1248
+Stops Per Route Mile	14.8855
 Service Hours (3)	25.82
 Service Miles(3)	288.69
 Urban Population Served(1)	9,621
@@ -100,6 +100,6 @@ Rural Population Served By Service(1)(3)	0
 Employment Served By Service (RAC)(1)(3)	2,418,075
 Employees Served By Service (WAC)(1)(3)	765,008
 Service Days(3)	Tue 01 May 2018
-Hours of Service(3)	04:01AM-+1:02:20AM                
+Hours of Service(3)	04:01AM-+1:02:20AM             
 
 Route miles off???

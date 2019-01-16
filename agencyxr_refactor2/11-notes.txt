@@ -98,4 +98,4 @@ Employees Served By Service (WAC)(1)(3)	932,358,020
 Service Days(3)	Tue 01 May 2018
 Hours of Service(3)	03:21AM-+1:02:57AM           
 
-Somewhat higher route miles
+Somewhat higher route miles - the difference appears to be because the join on census_counties_trip_map only selects the section of the trip that is the highest on a per county basis; e.g. if a trip crosses two counties, only the length from the longer county is measured
