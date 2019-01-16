@@ -3666,68 +3666,21 @@ public class PgisEventManager {
 			segments_where = "WHERE blocks.:AREAID_FIELD = :AREAID ";
 			if (type == 0) {
 				// 2 - counties
-				// census_where = "And left(block.blockid, 5)= :AREAID ";
-				// employment_group = "left(census.blockid, 5)";
-				// stopcount_where = "and left(stop.blockid, 5)= :AREAID ";
-				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
-				// routes_join = "inner join census_counties_trip_map maps on trip.id = maps.tripid";
-				// routes_where = "AND maps.countyid = :AREAID ";
 			} else if (type == 1) {
 				// 3 - census tracts
-				// census_where = "And left(block.blockid, 11)= :AREAID ";
-				// employment_group = "left(census.blockid, 11)";
-				// stopcount_where = "and left(stop.blockid, 5)= :AREAID ";
-				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
-				// routes_join = "inner join census_tracts_trip_map maps on trip.id = maps.tripid";
-				// routes_where = "AND maps.tractid = :AREAID ";
 			} else if (type == 4) {
 				// 4 - odot regions
-				// regionid is ambiguous
-				// census_areaid = "block.regionid";
-				// census_where = "And block.regionid = :AREAID ";
-				// employment_group = "census.regionid";
-				// stopcount_where = "and stop.regionid = :AREAID ";
-				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
-				// routes_join = "inner join census_counties_trip_map maps on trip.id = maps.tripid ";
-				// routes_where = "AND maps.regionid = :AREAID ";
 			} else if (type == 2) {
 				// 11 - census place
-				// placeid is ambiguous
-				// census_areaid = "block.placeid";
-				// census_where = "And stop.placeid = :AREAID ";
-				// employment_group = "census.placeid";
-				// stopcount_where = "and stop.placeid = :AREAID ";
-				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
-				// routes_join = "inner join census_places_trip_map maps on trip.id = maps.tripid ";
-				// routes_where = "AND maps.placeid = :AREAID ";
 			} else if (type == 5) {
 				// 12 - census congdist
-				// congdistid is ambiguous
-				// census_areaid = "block.congdistid";
-				// census_where = "And block.congdistid = :AREAID ";
-				// employment_group = "congdistid";
-				// stopcount_where = "and stop.congdistid = :AREAID ";
-				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
-				// routes_join = "inner join census_congdists_trip_map maps on trip.id = maps.tripid ";
-				// routes_where = "AND maps.congdistid = :AREAID ";
 			} else if ((type == 3) && (geotype == -1 || geotype == 3)) {
 				// 5 - census urbans
-				// urbanid is ambiguous
-				// census_areaid = "block.urbanid";
-				// census_where = "And stop.urbanid = :AREAID ";
-				// employment_group = "urbanid";
-				// stopcount_where = "and stop.urbanid = :AREAID ";
-				// routes_length = "max(round((maps.length):: numeric, 2)) as length,";
-				// routes_join = "inner join census_urbans_trip_map maps on trip.id = maps.tripid ";
-				// routes_where = "AND maps.urbanid = :AREAID ";
 			} else if (type == 3) {
 				census_where = "AND block.:AREAID_FIELD = :AREAID AND block.:GEOID_FIELD = :GEOID ";
 				stopcount_where = "AND census_blocks.:AREAID_FIELD = :AREAID AND census_blocks.:GEOID_FIELD = :GEOID ";
-				segments_join = ""; // "INNER JOIN :AREAID_CENSUS_TABLE census ON ST_Intersects(segs.shape, census.shape) INNER JOIN :GEOID_CENSUS_TABLE geoid_census ON ST_Intersects(segs.shape, geoid_census.shape) ";
+				segments_join = "";
 				segments_where = "WHERE blocks.:AREAID_FIELD = :AREAID AND blocks.:GEOID_FIELD = :GEOID ";
-				// routes_length = "max(ST_Length(st_transform(st_intersection(maps.shape, map.shape), 2993))/ 1609.34) as length, ";
-				// routes_join = "INNER JOIN :AREAID_TABLE maps ON trip.id = maps.tripid INNER JOIN :GEOID_TABLE map ON trip.id = map.tripid ";
-				// routes_where = "AND maps.:AREAID_FIELD = :AREAID AND map.:GEOID_FIELD = :GEOID ";
 				if (geotype == 0) {
 					// 6 - urbans - counties
 				} else if (geotype == 1) {
