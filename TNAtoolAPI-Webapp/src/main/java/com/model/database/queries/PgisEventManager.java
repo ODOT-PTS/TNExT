@@ -3638,10 +3638,10 @@ public class PgisEventManager {
 		+ "with census as ( select population:POPYEAR as population, poptype, block.:AREAID_FIELD, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, :RADIUS ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = :AGENCYID :CENSUS_WHERE group by block.blockid ),"
 		+ "employment as (  select     sum(c000_:POPYEAR) as employment,    poptype  from     census     left join lodes_rac_projection_block using(blockid)    group by poptype), "
 		+ "employees as (  select     sum(c000) as employees,    poptype  from     census     left join lodes_blocks_wac using(blockid)    group by poptype), "
-		+ "uxrac as (    select employment as uxrac from employment where poptype = 'U'), "
-		+ "rxrac as (    select employment as rxrac from employment where poptype = 'R'), "
-		+ "uxwac as (    select employees as uxwac from employees where poptype = 'U'), "
-		+ "rxwac as (    select employees as rxwac from employees where poptype = 'R'), "
+		+ "uxrac as (    select sum(employment) as uxrac from employment where poptype = 'U'), "
+		+ "rxrac as (    select sum(employment) as rxrac from employment where poptype = 'R'), "
+		+ "uxwac as (    select sum(employees) as uxwac from employees where poptype = 'U'), "
+		+ "rxwac as (    select sum(employees) as rxwac from employees where poptype = 'R'), "
 		+ "urbanpop as ( select COALESCE(sum(population), 0) upop from census where poptype = 'U' ), "
 		+ "ruralpop as ( select COALESCE(sum(population), 0) rpop from census where poptype = 'R' ), "
 		+ "urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'U' ), "
@@ -3651,7 +3651,7 @@ public class PgisEventManager {
 		+ "rtmiles as (select sum(length)/1609.34 as rtmiles FROM segments), "
 		+ "urtmiles as (select sum(length)/1609.34 as urtmiles FROM segments WHERE poptype = 'U'), "
 		+ "rrtmiles as (select sum(length)/1609.34 as rrtmiles FROM segments WHERE poptype = 'R') "
-		+ "select   COALESCE(urbanstopscount, 0) as urbanstopcount,   COALESCE(ruralstopscount, 0) as ruralstopcount,   COALESCE(upop, 0) as urbanpop,   COALESCE(rpop, 0) as ruralpop,   coalesce(uxrac, 0) as uxrac,   coalesce(rxrac, 0) as rxrac,   coalesce(uxwac, 0) as uxwac,   coalesce(rxwac, 0) as rxwac,   COALESCE(rtmiles, 0) as rtmiles,   COALESCE(urtmiles, 0) as urtmiles,   COALESCE(rrtmiles, 0) as rrtmiles from   urbanpop   inner join ruralpop on true   inner join rtmiles on true   inner join urtmiles on true   inner join rrtmiles on true   inner join uxrac on true  inner join rxrac on true  inner join uxwac on true  inner join rxwac on true  inner join urbanstopcount on true   inner join ruralstopcount on true;"
+		+ "select   COALESCE(urbanstopscount, 0) as urbanstopcount,   COALESCE(ruralstopscount, 0) as ruralstopcount,   COALESCE(upop, 0) as urbanpop,   COALESCE(rpop, 0) as ruralpop,   coalesce(uxrac, 0) as uxrac,   coalesce(rxrac, 0) as rxrac,   coalesce(uxwac, 0) as uxwac,   coalesce(rxwac, 0) as rxwac,   COALESCE(rtmiles, 0) as rtmiles,   COALESCE(urtmiles, 0) as urtmiles,   COALESCE(rrtmiles, 0) as rrtmiles from   urbanpop   inner join ruralpop on true   inner join rtmiles on true   inner join urtmiles on true   inner join rrtmiles on true   left join uxrac on true  left join rxrac on true  left join uxwac on true  left join rxwac on true  inner join urbanstopcount on true   inner join ruralstopcount on true;"
 		+ "";
 
 		String census_where = "";
@@ -3814,7 +3814,7 @@ public class PgisEventManager {
 		+ "upop_los as ( select COALESCE( sum(population), 0 ) as upop_los, SUM(landarea) AS urbanlandarea_los from undupblocks where poptype = 'U' AND service >= :SERVICE ), "
 		+ "rpop_los as ( select COALESCE( sum(population), 0 ) as rpop_los, SUM(landarea) AS rurallandarea_los from undupblocks where poptype = 'R' AND service >= :SERVICE ), "
 		+ "svcdays as ( select COALESCE( array_agg(distinct day)::text, '-' ) as svdays from svcids ) "
-		+ "select   svcmiles,   svchours,   svcstops_urban,   svcstops_rural,   upop_los,   urbanlandarea_los,   rpop_los,   rurallandarea_los,   uspop,   urbanlandarea_served,   rspop,   rurallandarea_served,   uracatlos,   rracatlos,  uracserved,   rracserved,  uwacatlos,   rwacatlos,  uwacserved,   rwacserved,  svdays,   fromtime,   totime from   service   inner join upopserved on true   inner join rpopserved on true   inner join svcdays on true   inner join uracatlos on true  inner join rracatlos on true  inner join uracserved on true  inner join rracserved on true  inner join uwacatlos on true  inner join rwacatlos on true  inner join uwacserved on true  inner join rwacserved on true  inner join svchrs on true   inner join svcstops_urban on true   inner join svcstops_rural on true   inner join upop_los on true   inner join rpop_los on true"
+		+ "select   svcmiles,   svchours,   svcstops_urban,   svcstops_rural,   upop_los,   urbanlandarea_los,   rpop_los,   rurallandarea_los,   uspop,   urbanlandarea_served,   rspop,   rurallandarea_served,   uracatlos,   rracatlos,  uracserved,   rracserved,  uwacatlos,   rwacatlos,  uwacserved,   rwacserved,  svdays,   fromtime,   totime from   service   inner join upopserved on true   inner join rpopserved on true   inner join svcdays on true   left join uracatlos on true  left join rracatlos on true  left join uracserved on true  left join rracserved on true  left join uwacatlos on true  left join rwacatlos on true  left join uwacserved on true  left join rwacserved on true  inner join svchrs on true   inner join svcstops_urban on true   inner join svcstops_rural on true   inner join upop_los on true   inner join rpop_los on true"
 		+ "";
 
 		// Query options
