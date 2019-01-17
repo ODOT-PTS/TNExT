@@ -47,7 +47,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-
 import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1613,6 +1612,15 @@ public class Queries {
 			logger.error(e);
 		}
 		progVal.remove(key);
+		return response;
+	}
+
+	@GET
+	@Path("/getBestServiceWindow")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public Object getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("dbindex") Integer dbindex) {
+		PgisEventManager.getBestServiceWindow(start, end, dbindex);
+		AgencyXR response = new AgencyXR();
 		return response;
 	}
 

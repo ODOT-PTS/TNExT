@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.time.LocalDate;
+import java.time.DayOfWeek;
 
 import org.apache.log4j.Logger;
 
@@ -139,6 +141,41 @@ public class PgisEventManager {
 		}
 	}
 	
+	// Get best service day window
+	public static void getBestServiceWindow(String start, String end, int dbindex) {
+		logger.info("start:"+start);
+		logger.info("end:"+end);
+		LocalDate startDate = LocalDate.parse(start);
+		LocalDate endDate = LocalDate.parse(end);
+		List<LocalDate> totalDates = new ArrayList<>();
+		while (!startDate.isAfter(endDate)) {
+			totalDates.add(startDate);
+			startDate = startDate.plusDays(1);
+		}
+		logger.info("totalDates:");
+		logger.info(totalDates);
+
+		Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+		Connection connection = makeConnection(dbindex);
+		for (LocalDate date : totalDates) {
+			logger.info(date);
+			DayOfWeek dow = date.getDayOfWeek();
+			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow.toString()+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength), COUNT(tripid) FROM trips GROUP BY aid;";
+			try {
+				PreparedStatement ps = connection.prepareStatement(query);
+				ps.setString(1, "20180501");
+				ps.setString(2, "20180501");
+				ps.setString(3, "20180501");
+				ps.setString(4, "20180501");
+				logger.info("getBestServiceWindow query:\n "+ ps.toString());
+				ps.executeUpdate();
+				ps.close();
+			} catch ( Exception e ) {
+				logger.error(e);
+			}	
+		}
+	}
+
 	/////GEO AREA EXTENDED REPORTS QUERIES
 	
 	///// CONNECTED AGENCIES ON-MAP REPORT QUERIES
