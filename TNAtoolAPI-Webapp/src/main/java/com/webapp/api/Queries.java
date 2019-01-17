@@ -1535,12 +1535,9 @@ public class Queries {
 		response.StopCount = String.valueOf(Math.round(StopsPopMiles[0] + StopsPopMiles[1]));
 		response.UPopWithinX = String.valueOf(Math.round(StopsPopMiles[2]));
 		response.RPopWithinX = String.valueOf(Math.round(StopsPopMiles[3]));
-		response.racWithinX = String.valueOf(Math.round(StopsPopMiles[5]));
-		response.wacWithinX = String.valueOf(Math.round(StopsPopMiles[6]));
-
 		double RouteMiles = StopsPopMiles[4];
-		double URouteMiles = StopsPopMiles[7];
-		double RRouteMiles = StopsPopMiles[8];
+		double URouteMiles = StopsPopMiles[5];
+		double RRouteMiles = StopsPopMiles[6];
 		response.RouteMiles = String.valueOf(RouteMiles);
 		response.URouteMiles = String.valueOf(URouteMiles);
 		response.RRouteMiles = String.valueOf(RRouteMiles);
@@ -1558,6 +1555,12 @@ public class Queries {
 					days, fulldates, agency, x, LOS, dbindex, popYear, areaid, type,
 					-1, null);
 		}
+		response.racWithinX = String.valueOf(Math.round(StopsPopMiles[7]+StopsPopMiles[8]));
+		response.wacWithinX = String.valueOf(Math.round(StopsPopMiles[9]+StopsPopMiles[10]));
+		response.UracWithinX = String.valueOf(Math.round(StopsPopMiles[7]));
+		response.RracWithinX = String.valueOf(Math.round(StopsPopMiles[8]));
+		response.UwacWithinX = String.valueOf(Math.round(StopsPopMiles[9]));
+		response.RwacWithinX = String.valueOf(Math.round(StopsPopMiles[10]));
 
 		index += 6;
 		setprogVal(key, (int) Math.round(index * 100 / totalLoad));
@@ -1566,11 +1569,28 @@ public class Queries {
 		response.UrbanServiceStops = ServiceMetrics.get("svcstops_urban");
 		response.RuralServiceStops = ServiceMetrics.get("svcstops_rural");
 		response.UPopServedByService = ServiceMetrics.get("uspop");
-		response.RPopServedByService = ServiceMetrics.get("rspop");
-		response.UPopLos = ServiceMetrics.get("upop_los");
-		response.RPopLos = ServiceMetrics.get("rpop_los");
-		response.racServedByService = ServiceMetrics.get("srac");
-		response.wacServedByService = ServiceMetrics.get("swac");
+		response.RPopServedByService = ServiceMetrics.get("rspop");						
+		response.UPopServedAtLoService = ServiceMetrics.get("upop_los");
+		response.RPopServedAtLoService = ServiceMetrics.get("rpop_los");
+
+		response.racServedAtLoService = ServiceMetrics.get("racatlos");
+		response.UracServedAtLoService = ServiceMetrics.get("uracatlos");
+		response.RracServedAtLoService = ServiceMetrics.get("rracatlos");
+		response.wacServedAtLoService = ServiceMetrics.get("wacatlos");
+		response.UwacServedAtLoService = ServiceMetrics.get("uwacatlos");
+		response.RwacServedAtLoService = ServiceMetrics.get("rwacatlos");
+		response.racServedByService = ServiceMetrics.get("racserved");
+		response.UracServedByService = ServiceMetrics.get("uracserved");
+		response.RracServedByService = ServiceMetrics.get("rracserved");
+		response.wacServedByService = ServiceMetrics.get("wacserved");
+		response.UwacServedByService = ServiceMetrics.get("uwacserved");
+		response.RwacServedByService = ServiceMetrics.get("rwacserved");
+
+		response.ULandareaAtLoService = ServiceMetrics.get("urbanlandarea_los");
+		response.RLandareaAtLoService = ServiceMetrics.get("rurallandarea_los");
+		response.ULandareaWithinX = ServiceMetrics.get("urbanlandarea_served");
+		response.RLandareaWithinX = ServiceMetrics.get("rurallandarea_served");
+
 		String serviceDays = ServiceMetrics.get("svcdays");
 		if (serviceDays.length() > 2) {
 			serviceDays = serviceDays.replace("\"", "");

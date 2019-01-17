@@ -3636,8 +3636,12 @@ public class PgisEventManager {
 		Statement stmt = null;
 		String query = ""
 		+ "with census as ( select population:POPYEAR as population, poptype, block.:AREAID_FIELD, block.blockid from census_blocks block inner join gtfs_stops stop on st_dwithin( block.location, stop.location, :RADIUS ) inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid where map.agencyid = :AGENCYID :CENSUS_WHERE group by block.blockid ),"
-		+ "employment as ( select sum(c000_:POPYEAR) as employment from census left join lodes_rac_projection_block using(blockid) :EMPLOYMENT_GROUP ), "
-		+ "employees as ( select sum(c000) as employees from census left join lodes_blocks_wac using(blockid) :EMPLOYMENT_GROUP ), "
+		+ "employment as (  select     sum(c000_:POPYEAR) as employment,    poptype  from     census     left join lodes_rac_projection_block using(blockid)    group by poptype), "
+		+ "employees as (  select     sum(c000) as employees,    poptype  from     census     left join lodes_blocks_wac using(blockid)    group by poptype), "
+		+ "uxrac as (    select employment as uxrac from employment where poptype = 'U'), "
+		+ "rxrac as (    select employment as rxrac from employment where poptype = 'R'), "
+		+ "uxwac as (    select employees as uxwac from employees where poptype = 'U'), "
+		+ "rxwac as (    select employees as rxwac from employees where poptype = 'R'), "
 		+ "urbanpop as ( select COALESCE(sum(population), 0) upop from census where poptype = 'U' ), "
 		+ "ruralpop as ( select COALESCE(sum(population), 0) rpop from census where poptype = 'R' ), "
 		+ "urbanstopcount as ( select count(stop.id) as urbanstopscount from gtfs_stops stop inner join gtfs_stop_service_map map on map.stopid = stop.id and map.agencyid_def = stop.agencyid inner join census_blocks using(blockid) where map.agencyid = :AGENCYID :STOPCOUNT_WHERE and poptype = 'U' ), "
@@ -3647,7 +3651,7 @@ public class PgisEventManager {
 		+ "rtmiles as (select sum(length)/1609.34 as rtmiles FROM segments), "
 		+ "urtmiles as (select sum(length)/1609.34 as urtmiles FROM segments WHERE poptype = 'U'), "
 		+ "rrtmiles as (select sum(length)/1609.34 as rrtmiles FROM segments WHERE poptype = 'R') "
-		+ "select COALESCE(urbanstopscount, 0) as urbanstopcount, COALESCE(ruralstopscount, 0) as ruralstopcount, COALESCE(upop, 0) as urbanpop, COALESCE(rpop, 0) as ruralpop, coalesce(employment, 0) as rac, coalesce(employees, 0) as wac, COALESCE(rtmiles, 0) as rtmiles, COALESCE(urtmiles, 0) as urtmiles, COALESCE(rrtmiles, 0) as rrtmiles from urbanpop inner join ruralpop on true inner join rtmiles on true inner join urtmiles on true inner join rrtmiles on true inner join employment on true inner join employees on true inner join urbanstopcount on true inner join ruralstopcount on true;"
+		+ "select   COALESCE(urbanstopscount, 0) as urbanstopcount,   COALESCE(ruralstopscount, 0) as ruralstopcount,   COALESCE(upop, 0) as urbanpop,   COALESCE(rpop, 0) as ruralpop,   coalesce(uxrac, 0) as uxrac,   coalesce(rxrac, 0) as rxrac,   coalesce(uxwac, 0) as uxwac,   coalesce(rxwac, 0) as rxwac,   COALESCE(rtmiles, 0) as rtmiles,   COALESCE(urtmiles, 0) as urtmiles,   COALESCE(rrtmiles, 0) as rrtmiles from   urbanpop   inner join ruralpop on true   inner join rtmiles on true   inner join urtmiles on true   inner join rrtmiles on true   inner join uxrac on true  inner join rxrac on true  inner join uxwac on true  inner join rxwac on true  inner join urbanstopcount on true   inner join ruralstopcount on true;"
 		+ "";
 
 		String census_where = "";
@@ -3713,7 +3717,7 @@ public class PgisEventManager {
 		query = query.replace(":GEOID", "'"+geoid+"'");
 		query = query.replace(":RADIUS", String.valueOf(x));
 
-		double[] results = new double[9];
+		double[] results = new double[11];
 		logger.debug(query);
 		try {
 			stmt = connection.createStatement();
@@ -3724,12 +3728,12 @@ public class PgisEventManager {
 				results[2] = rs.getLong("urbanpop");
 				results[3] = rs.getLong("ruralpop");
 				results[4] = Math.round(rs.getFloat("rtmiles") * 100.0) / 100.0;
-				results[5] = rs.getLong("rac");
-				results[6] = rs.getLong("wac");
-				// if (areaid == null || areaid.equals("null")) {
-				results[7] = Math.round(rs.getFloat("urtmiles") * 100.0) / 100.0;
-				results[8] = Math.round(rs.getFloat("rrtmiles") * 100.0) / 100.0;
-				// }
+				results[5] = Math.round(rs.getFloat("urtmiles") * 100.0) / 100.0;
+				results[6] = Math.round(rs.getFloat("rrtmiles") * 100.0) / 100.0;
+				results[7] = rs.getLong("uxrac");
+				results[8] = rs.getLong("rxrac");
+				results[9] = rs.getLong("uxwac");
+				results[10] = rs.getLong("rxwac");
 			}
 			rs.close();
 			stmt.close();
@@ -3791,18 +3795,26 @@ public class PgisEventManager {
 		+ "svcstops_urban AS ( SELECT SUM(service) AS svcstops_urban FROM stops INNER JOIN census_blocks USING(blockid) WHERE poptype = 'U' ), "
 		+ "svcstops_rural AS ( SELECT SUM(service) AS svcstops_rural FROM stops INNER JOIN census_blocks USING(blockid) WHERE poptype = 'R' ), "
 		+ "stops_with_arrivals as ( select trips.aid as aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, stop.location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid = trips.aid and stime.trip_id = trips.tripid where stime.arrivaltime > 0 and stime.departuretime > 0 group by trips.aid, stime.stop_id, stop.location ), "
-		+ "undupblocks as ( select :AREAID_FIELD as areaid, block.population:POPYEAR as population, block.poptype, block.blockid, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin( block.location, stops.location, :RADIUS ) :UNDUPBLOCKS_WHERE group by block.blockid ), "
+		+ "undupblocks as ( select :AREAID_FIELD as areaid, block.population:POPYEAR as population, block.poptype, block.landarea, block.blockid, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin( block.location, stops.location, :RADIUS ) :UNDUPBLOCKS_WHERE group by block.blockid ), "
 		+ "svchrs as ( select COALESCE( min(arrival), -1 ) as fromtime, COALESCE( max(departure), -1 ) as totime from stops_with_arrivals ), "
-		+ "employment as ( select sum(c000_:POPYEAR) as employment, service from undupblocks left join lodes_rac_projection_block using(blockid) group by areaid, service ), "
-		+ "employees as ( select sum(c000) as employees, service from undupblocks left join lodes_blocks_wac using(blockid) group by areaid, service ), "
-		+ "racserved as ( select COALESCE( sum(employment * service), 0 ) as srac from employment ), "
-		+ "wacserved as ( select COALESCE( sum(employees * service), 0 ) as swac from employees ), "
-		+ "upopserved as ( select COALESCE( sum(population * service), 0 ) as uspop from undupblocks where poptype = 'U' ), "
-		+ "rpopserved as ( select COALESCE( sum(population * service), 0 ) as rspop from undupblocks where poptype = 'R' ), "		
-		+ "upop_los as ( select COALESCE( sum(population), 0 ) as upop_los from undupblocks where poptype = 'U' AND service >= :SERVICE ), "
-		+ "rpop_los as ( select COALESCE( sum(population), 0 ) as rpop_los from undupblocks where poptype = 'R' AND service >= :SERVICE ), "
+		+ "employment as (  select     sum(c000_2010) as employment,     service, poptype   from     undupblocks     left join lodes_rac_projection_block using(blockid)   group by     areaid,     service, poptype), "
+		+ "employees as (  select     sum(c000) as employees,     service, poptype  from     undupblocks     left join lodes_blocks_wac using(blockid)   group by     areaid,     service, poptype), "
+
+		+ "uracatlos as (  select     COALESCE(      sum(employment),       0    ) as uracatlos   from     employment  WHERE poptype = 'U'), "
+		+ "rracatlos as (  select     COALESCE(      sum(employment),       0    ) as rracatlos   from     employment  WHERE poptype = 'R'), "
+		+ "uracserved as (  select     COALESCE(      sum(employment * service),       0    ) as uracserved   from     employment  WHERE poptype = 'U'), "
+		+ "rracserved as (  select     COALESCE(      sum(employment * service),       0    ) as rracserved   from     employment  WHERE poptype = 'R'), "
+		+ "uwacatlos as (  select     COALESCE(      sum(employees),       0    ) as uwacatlos   from     employees  WHERE poptype = 'U'), "
+		+ "rwacatlos as (  select     COALESCE(      sum(employees),       0    ) as rwacatlos   from     employees  WHERE poptype = 'R'), "
+		+ "uwacserved as (  select     COALESCE(      sum(employees * service),       0    ) as uwacserved   from     employees  WHERE poptype = 'U'), "
+		+ "rwacserved as (  select     COALESCE(      sum(employees * service),       0    ) as rwacserved   from     employees  WHERE poptype = 'R'), "
+
+		+ "upopserved as ( select COALESCE( sum(population * service), 0 ) as uspop, SUM(landarea) as urbanlandarea_served from undupblocks where poptype = 'U' ), "
+		+ "rpopserved as ( select COALESCE( sum(population * service), 0 ) as rspop, SUM(landarea) as rurallandarea_served from undupblocks where poptype = 'R' ), "		
+		+ "upop_los as ( select COALESCE( sum(population), 0 ) as upop_los, SUM(landarea) AS urbanlandarea_los from undupblocks where poptype = 'U' AND service >= :SERVICE ), "
+		+ "rpop_los as ( select COALESCE( sum(population), 0 ) as rpop_los, SUM(landarea) AS rurallandarea_los from undupblocks where poptype = 'R' AND service >= :SERVICE ), "
 		+ "svcdays as ( select COALESCE( array_agg(distinct day)::text, '-' ) as svdays from svcids ) "
-		+ "select svcmiles, svchours, svcstops_urban, svcstops_rural, upop_los, rpop_los, uspop, rspop, swac, srac, svdays, fromtime, totime from service inner join upopserved on true inner join rpopserved on true inner join svcdays on true inner join racserved on true inner join svchrs on true inner join wacserved on true inner join svcstops_urban on true inner join svcstops_rural on true inner join upop_los on true inner join rpop_los on true;"
+		+ "select   svcmiles,   svchours,   svcstops_urban,   svcstops_rural,   upop_los,   urbanlandarea_los,   rpop_los,   rurallandarea_los,   uspop,   urbanlandarea_served,   rspop,   rurallandarea_served,   uracatlos,   rracatlos,  uracserved,   rracserved,  uwacatlos,   rwacatlos,  uwacserved,   rwacserved,  svdays,   fromtime,   totime from   service   inner join upopserved on true   inner join rpopserved on true   inner join svcdays on true   inner join uracatlos on true  inner join rracatlos on true  inner join uracserved on true  inner join rracserved on true  inner join uwacatlos on true  inner join rwacatlos on true  inner join uwacserved on true  inner join rwacserved on true  inner join svchrs on true   inner join svcstops_urban on true   inner join svcstops_rural on true   inner join upop_los on true   inner join rpop_los on true"
 		+ "";
 
 		// Query options
@@ -3881,15 +3893,31 @@ public class PgisEventManager {
 				response.put("svchours", String.valueOf(Math.round(rs.getLong("svchours") / 36.00) / 100.00));
 				response.put("svcstops_rural", String.valueOf(rs.getLong("svcstops_rural")));
 				response.put("svcstops_urban", String.valueOf(rs.getLong("svcstops_urban")));
-				response.put("uspop", String.valueOf(rs.getFloat("uspop")));
-				response.put("rspop", String.valueOf(rs.getFloat("rspop")));
-				response.put("upop_los", String.valueOf(rs.getFloat("upop_los")));
-				response.put("rpop_los", String.valueOf(rs.getFloat("rpop_los")));
-				response.put("srac", String.valueOf((int) rs.getFloat("srac")));
-				response.put("swac", String.valueOf(rs.getFloat("swac")));
+				response.put("uspop", String.valueOf(rs.getLong("uspop")));
+				response.put("rspop", String.valueOf(rs.getLong("rspop")));
+				response.put("upop_los", String.valueOf(rs.getLong("upop_los")));
+				response.put("rpop_los", String.valueOf(rs.getLong("rpop_los")));				
+
+				response.put("racatlos", String.valueOf(rs.getLong("uracatlos") + rs.getLong("rracatlos")));
+				response.put("racserved", String.valueOf(rs.getLong("uracserved") + rs.getLong("rracserved")));
+				response.put("wacatlos", String.valueOf(rs.getLong("uwacatlos") + rs.getLong("rwacatlos")));
+				response.put("wacserved", String.valueOf(rs.getLong("uwacserved") + rs.getLong("rwacserved")));
+
+				response.put("uracatlos", String.valueOf(rs.getLong("uracatlos")));
+				response.put("rracatlos", String.valueOf(rs.getLong("rracatlos")));
+				response.put("uracserved", String.valueOf(rs.getLong("uracserved")));
+				response.put("rracserved", String.valueOf(rs.getLong("rracserved")));
+				response.put("uwacatlos", String.valueOf(rs.getLong("uwacatlos")));
+				response.put("rwacatlos", String.valueOf(rs.getLong("rwacatlos")));
+				response.put("uwacserved", String.valueOf(rs.getLong("uwacserved")));
+
 				response.put("svcdays", String.valueOf(rs.getString("svdays")));
 				response.put("fromtime", String.valueOf(rs.getInt("fromtime")));
 				response.put("totime", String.valueOf(rs.getInt("totime")));
+				response.put("urbanlandarea_served", String.valueOf((int)rs.getFloat("urbanlandarea_served")));
+				response.put("rurallandarea_served", String.valueOf((int)rs.getFloat("rurallandarea_served")));
+				response.put("urbanlandarea_los", String.valueOf((int)rs.getFloat("urbanlandarea_los")));
+				response.put("rurallandarea_los", String.valueOf((int)rs.getFloat("rurallandarea_los")));
 			}
 			rs.close();
 			stmt.close();
