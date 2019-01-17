@@ -3797,7 +3797,7 @@ public class PgisEventManager {
 		+ "stops_with_arrivals as ( select trips.aid as aid, stime.stop_id as stopid, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, stop.location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid = trips.aid and stime.trip_id = trips.tripid where stime.arrivaltime > 0 and stime.departuretime > 0 group by trips.aid, stime.stop_id, stop.location ), "
 		+ "undupblocks as ( select :AREAID_FIELD as areaid, block.population:POPYEAR as population, block.poptype, block.landarea, block.blockid, sum(stops.service) as service from census_blocks block inner join stops on st_dwithin( block.location, stops.location, :RADIUS ) :UNDUPBLOCKS_WHERE group by block.blockid ), "
 		+ "svchrs as ( select COALESCE( min(arrival), -1 ) as fromtime, COALESCE( max(departure), -1 ) as totime from stops_with_arrivals ), "
-		+ "employment as (  select     sum(c000_2010) as employment,     service, poptype   from     undupblocks     left join lodes_rac_projection_block using(blockid)   group by     areaid,     service, poptype), "
+		+ "employment as (  select     sum(c000_:POPYEAR) as employment,     service, poptype   from     undupblocks     left join lodes_rac_projection_block using(blockid)   group by     areaid,     service, poptype), "
 		+ "employees as (  select     sum(c000) as employees,     service, poptype  from     undupblocks     left join lodes_blocks_wac using(blockid)   group by     areaid,     service, poptype), "
 
 		+ "uracatlos as (  select     COALESCE(      sum(employment),       0    ) as uracatlos   from     employment  WHERE poptype = 'U'), "
