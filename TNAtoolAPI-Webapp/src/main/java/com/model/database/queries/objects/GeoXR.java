@@ -241,7 +241,8 @@ public class GeoXR {
 	@XmlAttribute
     @JsonSerialize
     public String RPopServedAtLoService;
-	@XmlAttribute
+
+    @XmlAttribute
     @JsonSerialize
     public String racServedByService;
 	
