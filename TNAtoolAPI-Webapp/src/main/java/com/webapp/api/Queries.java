@@ -1618,11 +1618,10 @@ public class Queries {
 	@GET
 	@Path("/getBestServiceWindow")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Object getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("dbindex") Integer dbindex) {
-		PgisEventManager.getBestServiceWindow(start, end, dbindex);
-		AgencyXR response = new AgencyXR();
-		return response;
-	}
+	public Map<String, Double> getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("window") Integer window, @QueryParam("dbindex") Integer dbindex) {
+		Map<String, Double> result = PgisEventManager.getBestServiceWindow(start, end, window, dbindex);
+		return result;
+	}	
 
 	/**
 	 * Generates The Stops report for agency agency and route geographic area

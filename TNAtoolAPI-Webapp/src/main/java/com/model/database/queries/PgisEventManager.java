@@ -145,7 +145,7 @@ public class PgisEventManager {
 	}
 	
 	// Get best service day window
-	public static void getBestServiceWindow(String start, String end, int dbindex) {
+	public static Map<String, Double> getBestServiceWindow(String start, String end, int windowSize, int dbindex) {
 		LocalDate startDate = LocalDate.parse(start);
 		LocalDate endDate = LocalDate.parse(end);
 		List<LocalDate> totalDates = new ArrayList<>();
@@ -154,12 +154,13 @@ public class PgisEventManager {
 			startDate = startDate.plusDays(1);
 		}
 		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
-		Map<String, Map<String, Double>> map = new HashMap<String, Map<String, Double>>();
 		Connection connection = makeConnection(dbindex);
+		List<String> keys = new ArrayList<String>();
+		List<Map<String,Double>> values = new ArrayList<Map<String,Double>>();
 		for (LocalDate date : totalDates) {
-			logger.info(date);
 			String dow = date.getDayOfWeek().name();
 			String d = date.format(dtformat);
+			keys.add(d);
 			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength) as tlength, COUNT(tripid) FROM trips GROUP BY aid;";
 			Map<String, Double> m = new HashMap<String, Double>();
 			PreparedStatement ps;
@@ -169,7 +170,6 @@ public class PgisEventManager {
 				ps.setString(2, d);
 				ps.setString(3, d);
 				ps.setString(4, d);
-				logger.info("getBestServiceWindow query:\n "+ ps.toString());
 				ResultSet rs = ps.executeQuery();
 				while (rs.next()) {
 					m.put(rs.getString("aid"), rs.getDouble("tlength"));
@@ -179,62 +179,54 @@ public class PgisEventManager {
 			} catch ( Exception e ) {
 				logger.error(e);
 			}
-			map.put(d, m);	
+			values.add(m);
 		}
 		logger.info("result:");
-		logger.info(map);
+		logger.info(values);
 		// Get max time for agency
 		Map<String, Double> agencymax = new HashMap<String, Double>();
-		for (Map.Entry<String,Map<String, Double>> entry : map.entrySet()) {
-			for (Map.Entry<String,Double> m : entry.getValue().entrySet()) {
-				String agency = m.getKey();
-				if (m.getValue() > agencymax.getOrDefault(agency, 0.0)) {
-					agencymax.put(agency, m.getValue());
-				}
+		for (int i=0; i<keys.size(); i++) {
+			for (Map.Entry<String,Double> entry : values.get(i).entrySet()) {
+				String agency = entry.getKey();
+				if (entry.getValue() > agencymax.getOrDefault(agency, 0.0)) {
+					agencymax.put(agency, entry.getValue());
+				}				
 			}
 		}
 		logger.info("agencymax:");
 		logger.info(agencymax);
 		// Normalize and sum for each day
-		Map<String, Double> window = new HashMap<String, Double>();	
-		for (Map.Entry<String,Map<String, Double>> entry : map.entrySet()) {
+		List<Double> window = new ArrayList<Double>();
+		List<Double> score = new ArrayList<Double>();
+		for (int i=0; i<keys.size(); i++) {
 			Double sum = 0.0;
-			Map<String, Double> day = entry.getValue();
-			for (Map.Entry<String,Double> m : day.entrySet()) {
-				Double amax = agencymax.getOrDefault(m.getKey(), 0.0);
+			for (Map.Entry<String,Double> entry : values.get(i).entrySet()) {
+				Double amax = agencymax.getOrDefault(entry.getKey(), 0.0);
 				Double norm = 0.0;
 				if (amax > 0) {
-					norm = m.getValue() / amax;
+					norm = entry.getValue() / amax;
 				}
 				sum += norm;
 			}
-			window.put(entry.getKey(), sum);
-		}
-		logger.info("Window:");
-		logger.info(window);
-		for (Map.Entry<String, Double> entry : window.entrySet()) {
-			logger.info(entry.getKey()+": "+entry.getValue());
+			window.add(sum);
 		}
 		// Search the window
-		Map<String, Double> score = new HashMap<String, Double>();
-		List<String> keys = new ArrayList<String>(window.keySet());
-		Collections.sort(keys);
-		Integer windowSize = 7;
+		Map<String, Double> result = new HashMap<String, Double>();
 		for (int i=0; i<=keys.size()-windowSize; i++) {
 			Double sum = 0.0;
 			for (int j=0; j<windowSize; j++) {
-				logger.info("   "+i+": "+j+" = "+keys.get(i+j));
-				sum += window.get(keys.get(i+j));
+				sum += window.get(i+j);
+				logger.info("   "+i+": "+j+" = "+keys.get(i+j)+" : "+window.get(i+j));
 			}
-			logger.info(keys.get(i)+": "+sum.toString());
-			score.put(keys.get(i), sum);
+			score.add(sum);
+			result.put(keys.get(i), sum);
 		}
-		logger.info("Score:");
-		for (int i=0; i<keys.size(); i++) {
-			logger.info(keys.get(i)+": "+score.get(keys.get(i)));
+		// Find best day
+		for (int i=0; i<score.size(); i++) {
+			logger.info(keys.get(i)+": "+score.get(i));
 		}
-		// Find window
 		dropConnection(connection);
+		return result;
 	}
 
 	/////GEO AREA EXTENDED REPORTS QUERIES
