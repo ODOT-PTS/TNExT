@@ -206,7 +206,9 @@ public class PgisEventManager {
 				if (amax > 0) {
 					norm = entry.getValue() / amax;
 				}
-				sum += norm;
+				if (norm > 0.25) {
+					sum += 1;
+				}
 			}
 			window.add(sum);
 		}
@@ -218,6 +220,7 @@ public class PgisEventManager {
 				sum += window.get(i+j);
 				logger.info("   "+i+": "+j+" = "+keys.get(i+j)+" : "+window.get(i+j));
 			}
+			sum = sum/windowSize; 
 			score.add(sum);
 			result.put(keys.get(i), sum);
 		}
