@@ -40,6 +40,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
+import java.time.format.DateTimeFormatter;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
@@ -143,8 +146,6 @@ public class PgisEventManager {
 	
 	// Get best service day window
 	public static void getBestServiceWindow(String start, String end, int dbindex) {
-		logger.info("start:"+start);
-		logger.info("end:"+end);
 		LocalDate startDate = LocalDate.parse(start);
 		LocalDate endDate = LocalDate.parse(end);
 		List<LocalDate> totalDates = new ArrayList<>();
@@ -152,28 +153,88 @@ public class PgisEventManager {
 			totalDates.add(startDate);
 			startDate = startDate.plusDays(1);
 		}
-		logger.info("totalDates:");
-		logger.info(totalDates);
-
-		Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
+		Map<String, Map<String, Double>> map = new HashMap<String, Map<String, Double>>();
 		Connection connection = makeConnection(dbindex);
 		for (LocalDate date : totalDates) {
 			logger.info(date);
-			DayOfWeek dow = date.getDayOfWeek();
-			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow.toString()+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength), COUNT(tripid) FROM trips GROUP BY aid;";
+			String dow = date.getDayOfWeek().name();
+			String d = date.format(dtformat);
+			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength) as tlength, COUNT(tripid) FROM trips GROUP BY aid;";
+			Map<String, Double> m = new HashMap<String, Double>();
+			PreparedStatement ps;
 			try {
-				PreparedStatement ps = connection.prepareStatement(query);
-				ps.setString(1, "20180501");
-				ps.setString(2, "20180501");
-				ps.setString(3, "20180501");
-				ps.setString(4, "20180501");
+				ps = connection.prepareStatement(query);
+				ps.setString(1, d);
+				ps.setString(2, d);
+				ps.setString(3, d);
+				ps.setString(4, d);
 				logger.info("getBestServiceWindow query:\n "+ ps.toString());
-				ps.executeUpdate();
+				ResultSet rs = ps.executeQuery();
+				while (rs.next()) {
+					m.put(rs.getString("aid"), rs.getDouble("tlength"));
+				}
+				rs.close();
 				ps.close();
 			} catch ( Exception e ) {
 				logger.error(e);
-			}	
+			}
+			map.put(d, m);	
 		}
+		logger.info("result:");
+		logger.info(map);
+		// Get max time for agency
+		Map<String, Double> agencymax = new HashMap<String, Double>();
+		for (Map.Entry<String,Map<String, Double>> entry : map.entrySet()) {
+			for (Map.Entry<String,Double> m : entry.getValue().entrySet()) {
+				String agency = m.getKey();
+				if (m.getValue() > agencymax.getOrDefault(agency, 0.0)) {
+					agencymax.put(agency, m.getValue());
+				}
+			}
+		}
+		logger.info("agencymax:");
+		logger.info(agencymax);
+		// Normalize and sum for each day
+		Map<String, Double> window = new HashMap<String, Double>();	
+		for (Map.Entry<String,Map<String, Double>> entry : map.entrySet()) {
+			Double sum = 0.0;
+			Map<String, Double> day = entry.getValue();
+			for (Map.Entry<String,Double> m : day.entrySet()) {
+				Double amax = agencymax.getOrDefault(m.getKey(), 0.0);
+				Double norm = 0.0;
+				if (amax > 0) {
+					norm = m.getValue() / amax;
+				}
+				sum += norm;
+			}
+			window.put(entry.getKey(), sum);
+		}
+		logger.info("Window:");
+		logger.info(window);
+		for (Map.Entry<String, Double> entry : window.entrySet()) {
+			logger.info(entry.getKey()+": "+entry.getValue());
+		}
+		// Search the window
+		Map<String, Double> score = new HashMap<String, Double>();
+		List<String> keys = new ArrayList<String>(window.keySet());
+		Collections.sort(keys);
+		Integer windowSize = 7;
+		for (int i=0; i<=keys.size()-windowSize; i++) {
+			Double sum = 0.0;
+			for (int j=0; j<windowSize; j++) {
+				logger.info("   "+i+": "+j+" = "+keys.get(i+j));
+				sum += window.get(keys.get(i+j));
+			}
+			logger.info(keys.get(i)+": "+sum.toString());
+			score.put(keys.get(i), sum);
+		}
+		logger.info("Score:");
+		for (int i=0; i<keys.size(); i++) {
+			logger.info(keys.get(i)+": "+score.get(keys.get(i)));
+		}
+		// Find window
+		dropConnection(connection);
 	}
 
 	/////GEO AREA EXTENDED REPORTS QUERIES
