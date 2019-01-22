@@ -183,6 +183,8 @@ public class PgisEventManager {
 		}
 		logger.info("result:");
 		logger.info(values);
+		List<Map<String, Double>> dowmax = new ArrayList<Map<String,Double>>();
+
 		// Get max time for agency
 		Map<String, Double> agencymax = new HashMap<String, Double>();
 		for (int i=0; i<keys.size(); i++) {
@@ -200,14 +202,19 @@ public class PgisEventManager {
 		List<Double> score = new ArrayList<Double>();
 		for (int i=0; i<keys.size(); i++) {
 			Double sum = 0.0;
-			for (Map.Entry<String,Double> entry : values.get(i).entrySet()) {
-				Double amax = agencymax.getOrDefault(entry.getKey(), 0.0);
+			Map<String, Double> day = values.get(i);
+			for (Map.Entry<String,Double> entry : agencymax.entrySet()) {
+				// Double amax = agencymax.getOrDefault(entry.getKey(), 0.0);
+				Double amax = entry.getValue();
+				Double aday = day.getOrDefault(entry.getKey(), 0.0);
 				Double norm = 0.0;
 				if (amax > 0) {
-					norm = entry.getValue() / amax;
+					norm = aday / amax;
 				}
-				if (norm > 0.25) {
+				if (norm > 0.20) {
 					sum += 1;
+				} else {
+					logger.info(keys.get(i)+": agency: "+entry.getKey()+" has less than 20% of max service: "+aday+" / "+amax);
 				}
 			}
 			window.add(sum);
