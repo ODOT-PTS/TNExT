@@ -41,8 +41,7 @@ import java.util.Map.Entry;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -93,6 +92,7 @@ import com.model.database.queries.objects.TitleVIDataList;
 import com.model.database.queries.objects.VariantListm;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.util.Types;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -155,13 +155,18 @@ public class PgisEventManager {
 		}
 		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
 		Connection connection = makeConnection(dbindex);
-		List<String> keys = new ArrayList<String>();
 		List<Map<String,Double>> values = new ArrayList<Map<String,Double>>();
+		List<Map<String,Double>> dowmax = new ArrayList<Map<String,Double>>();
+		while(dowmax.size() < 7) {
+			Map<String,Double>dow = new HashMap<String,Double>();
+			dowmax.add(dow);
+		}
+		Set<String> agencies = new HashSet<String>();
+
 		for (LocalDate date : totalDates) {
-			String dow = date.getDayOfWeek().name();
+			DayOfWeek dow = date.getDayOfWeek();
 			String d = date.format(dtformat);
-			keys.add(d);
-			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength) as tlength, COUNT(tripid) FROM trips GROUP BY aid;";
+			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow.name()+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength) as tlength, COUNT(tripid) FROM trips GROUP BY aid;";
 			Map<String, Double> m = new HashMap<String, Double>();
 			PreparedStatement ps;
 			try {
@@ -172,7 +177,14 @@ public class PgisEventManager {
 				ps.setString(4, d);
 				ResultSet rs = ps.executeQuery();
 				while (rs.next()) {
-					m.put(rs.getString("aid"), rs.getDouble("tlength"));
+					String agency = rs.getString("aid");
+					Double value = rs.getDouble("tlength");
+					Double amax = dowmax.get(dow.getValue()-1).getOrDefault(agency, 0.0);
+					if (value > amax) {
+						dowmax.get(dow.getValue()-1).put(agency, value);
+					}
+					m.put(agency, value);
+					agencies.add(agency);
 				}
 				rs.close();
 				ps.close();
@@ -183,58 +195,95 @@ public class PgisEventManager {
 		}
 		logger.info("result:");
 		logger.info(values);
-		List<Map<String, Double>> dowmax = new ArrayList<Map<String,Double>>();
+		logger.info("dowmax:");
+		logger.info(dowmax);
 
-		// Get max time for agency
-		Map<String, Double> agencymax = new HashMap<String, Double>();
-		for (int i=0; i<keys.size(); i++) {
-			for (Map.Entry<String,Double> entry : values.get(i).entrySet()) {
-				String agency = entry.getKey();
-				if (entry.getValue() > agencymax.getOrDefault(agency, 0.0)) {
-					agencymax.put(agency, entry.getValue());
-				}				
-			}
+		ArrayList<String> sortagencies = new ArrayList<String>();
+		for (String s : agencies) {
+			sortagencies.add(s);
 		}
-		logger.info("agencymax:");
-		logger.info(agencymax);
-		// Normalize and sum for each day
-		List<Double> window = new ArrayList<Double>();
-		List<Double> score = new ArrayList<Double>();
-		for (int i=0; i<keys.size(); i++) {
-			Double sum = 0.0;
-			Map<String, Double> day = values.get(i);
-			for (Map.Entry<String,Double> entry : agencymax.entrySet()) {
-				// Double amax = agencymax.getOrDefault(entry.getKey(), 0.0);
-				Double amax = entry.getValue();
-				Double aday = day.getOrDefault(entry.getKey(), 0.0);
+
+		Double[][] table = new Double[sortagencies.size()][totalDates.size()];
+		for (int i=0; i<sortagencies.size(); i++) {
+			String row = ""; // new String[totalDates.size()];
+			String agency = sortagencies.get(i);
+			for (int j=0; j<totalDates.size(); j++) {
+				Double amax = dowmax.get(totalDates.get(i).getDayOfWeek().getValue()-1).getOrDefault(agency, 0.0);
+				Double dvalue = values.get(j).getOrDefault(agency, 0.0);
 				Double norm = 0.0;
 				if (amax > 0) {
-					norm = aday / amax;
+					norm = dvalue / amax;
 				}
-				if (norm > 0.20) {
-					sum += 1;
+				table[i][j] = norm;
+				if (dvalue > 0) {
+					row = row + "#";
 				} else {
-					logger.info(keys.get(i)+": agency: "+entry.getKey()+" has less than 20% of max service: "+aday+" / "+amax);
+					row = row + " ";
 				}
 			}
-			window.add(sum);
-		}
-		// Search the window
-		Map<String, Double> result = new HashMap<String, Double>();
-		for (int i=0; i<=keys.size()-windowSize; i++) {
-			Double sum = 0.0;
-			for (int j=0; j<windowSize; j++) {
-				sum += window.get(i+j);
-				logger.info("   "+i+": "+j+" = "+keys.get(i+j)+" : "+window.get(i+j));
+			String lp = ""+agency;
+			while (lp.length()<10) {
+				lp = lp + " ";
 			}
-			sum = sum/windowSize; 
-			score.add(sum);
-			result.put(keys.get(i), sum);
+			lp = lp.substring(0,10);
+			System.out.println(lp+":"+row);
 		}
-		// Find best day
-		for (int i=0; i<score.size(); i++) {
-			logger.info(keys.get(i)+": "+score.get(i));
+
+		for (int i=0;i<totalDates.size()-windowSize;i++) {
+			Double sum = 0.0;
+			for (int a=0;a<sortagencies.size();a++) {
+				Double asum = 0.0;
+				for (int j=0;j<windowSize;j++) {
+					if (table[a][i+j] > 0) {
+						asum += 1.0;
+					}
+				}
+				if (asum >= 5.0) {
+					sum += 1.0;
+				}
+			}
+			System.out.println("day "+totalDates.get(i)+": "+sum);
 		}
+
+		// Normalize and sum for each day
+		// List<Double> window = new ArrayList<Double>();
+		// for (int i=0; i<totalDates.size(); i++) {
+		// 	logger.info("calculating score for day:"+totalDates.get(i));
+		// 	Map<String,Double> daymax = dowmax.get(totalDates.get(i).getDayOfWeek().getValue()-1);
+		// 	Double sum = 0.0;
+		// 	for (Map.Entry<String,Double> entry : values.get(i).entrySet()) {
+		// 		String agency = entry.getKey();
+		// 		Double dvalue = entry.getValue();
+		// 		Double amax = daymax.getOrDefault(agency, 0.0);
+		// 		Double norm = 0.0;
+		// 		if (amax > 0) {
+		// 			norm = dvalue / amax;
+		// 		}
+		// 		if (norm > 0.20) {
+		// 			sum += 1.0;
+		// 		}
+		// 		logger.info("  agency: "+agency+" dvalue: "+dvalue+" amax: "+amax+" score: "+norm);
+		// 	}
+		// 	window.add(sum);
+		// }
+
+		// Search the window
+		// List<Double> score = new ArrayList<Double>();
+		Map<String, Double> result = new HashMap<String, Double>();
+		// for (int i=0; i<=totalDates.size()-windowSize; i++) {
+		// 	Double sum = 0.0;
+		// 	for (int j=0; j<windowSize; j++) {
+		// 		sum += window.get(i+j);
+		// 		logger.info("   "+i+": "+j+" = "+totalDates.get(i+j)+" : "+window.get(i+j));
+		// 	}
+		// 	sum = sum/windowSize; 
+		// 	score.add(sum);
+		// 	// result.put(keys.get(i), sum);
+		// }
+		// // Find best day
+		// for (int i=0; i<score.size(); i++) {
+		// 	logger.info(totalDates.get(i)+": "+score.get(i));
+		// }
 		dropConnection(connection);
 		return result;
 	}
