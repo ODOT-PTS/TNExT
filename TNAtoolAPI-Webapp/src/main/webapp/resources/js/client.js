@@ -1872,7 +1872,7 @@ function updateListDialog(agenciesIds){
 					$mylist.append("<div id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>" + a + "-" + b + "</a></p></div>");
 				}
 			}
-			$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Default Week:</b>"+df["startdate"]+"</p></div>");
+			$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Default Date:</b> "+df["startdate"]+"</p></div>");
 		}
 	});
 	$('a').click(function(e){
