@@ -5843,81 +5843,85 @@ public class PgisEventManager {
 			Connection  connection = makeConnection(dbindex);
 			String query="";
 			Statement stmt = null;
+			String defaultDate = DatabaseConfig.getConfig(dbindex).getDefaultDate();
 		
-		Map<String,Daterange> r = new LinkedHashMap<String,Daterange>();
-			query ="select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
-		int start =0;
-		int end =1000000000;
-		int starta =0;
-		int enda =1000000000;
+			Map<String, Daterange> r = new LinkedHashMap<String, Daterange>();
+			query = "select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
+			int start = 0;
+			int end = 1000000000;
+			int starta = 0;
+			int enda = 1000000000;
 			try {
 				stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery(query); 
-			
-				
-				while ( rs.next() ) {
-					Daterange a =  new Daterange();
-					a.agencyids=rs.getString("agencyids");
-					a.agencynames=rs.getString("agencynames");
-					
-				a.feedname=rs.getString("feedname");
-				a.startdate=rs.getInt("startdate");
-				a.syear =  a.startdate/ 10000;
-				a.smonth = (a.startdate % 10000) / 100;
-				a.sday = a.startdate % 100;
-				a.enddate=rs.getInt("enddate");
-				a.eyear =   a.enddate/ 10000;
-				a.emonth = ( a.enddate % 10000) / 100;
-				a.eday =  a.enddate % 100;
-				r.put(a.feedname, a);
-				if(a.startdate>start && a.startdate<end) 
-				{start=a.startdate;
-				}
-				if(a.enddate<end && a.enddate>start)
-				{
-				end=a.enddate;
-				}
-				
+				ResultSet rs = stmt.executeQuery(query);
+
+				while (rs.next()) {
+					Daterange a = new Daterange();
+					a.agencyids = rs.getString("agencyids");
+					a.agencynames = rs.getString("agencynames");
+
+					a.feedname = rs.getString("feedname");
+					a.startdate = rs.getInt("startdate");
+					a.syear = a.startdate / 10000;
+					a.smonth = (a.startdate % 10000) / 100;
+					a.sday = a.startdate % 100;
+					a.enddate = rs.getInt("enddate");
+					a.eyear = a.enddate / 10000;
+					a.emonth = (a.enddate % 10000) / 100;
+					a.eday = a.enddate % 100;
+					r.put(a.feedname, a);
+					if (a.startdate > start && a.startdate < end) {
+						start = a.startdate;
+					}
+					if (a.enddate < end && a.enddate > start) {
+						end = a.enddate;
+					}
+
 				}
 				rs.close();
-				stmt.close(); 
+				stmt.close();
 				dropConnection(connection);
-		int u=0;
-				
-			for (Entry<String, Daterange> entry : r.entrySet()) {
-			u=u+1;
-				if( entry.getValue().startdate<=end && entry.getValue().enddate>=start )
-			{
-		//				  start=20260101;
-		//				  end=20160101;
-			starta=starta+1;
-							}
-		
-			
-			}
-		
-			if(u!=starta)
-			{
-				start=20250101;
-			end=20250101;
-			}
-			Daterange a =  new Daterange();
-			a.feedname="Overlap";
-		
-			a.startdate=start;
-				a.syear =  start/ 10000;
+				int u = 0;
+
+				for (Entry<String, Daterange> entry : r.entrySet()) {
+					u = u + 1;
+					if (entry.getValue().startdate <= end && entry.getValue().enddate >= start) {
+						// start=20260101;
+						// end=20160101;
+						starta = starta + 1;
+					}
+
+				}
+
+				if (u != starta) {
+					start = 20250101;
+					end = 20250101;
+				}
+				Daterange a = new Daterange();
+				a.feedname = "Overlap";
+
+				a.startdate = start;
+				a.syear = start / 10000;
 				a.smonth = (start % 10000) / 100;
 				a.sday = start % 100;
-				a.enddate=end;
-				a.eyear =   end/ 10000;
-				a.emonth = ( end % 10000) / 100;
-				a.eday =  end % 100;
+				a.enddate = end;
+				a.eyear = end / 10000;
+				a.emonth = (end % 10000) / 100;
+				a.eday = end % 100;
 				r.put(a.feedname, a);
-			}
-			catch ( Exception e ) {
+
+				Daterange d = new Daterange();
+				d.feedname = "Default";
+				try {
+					d.startdate = Integer.parseInt(defaultDate);
+				} catch (NumberFormatException e) {
+					d.startdate = a.startdate;
+				}
+				r.put(d.feedname, d);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			return r;	
+			return r;
 		}
 		
 		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {

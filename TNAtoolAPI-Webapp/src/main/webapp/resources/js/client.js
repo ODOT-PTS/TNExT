@@ -1856,30 +1856,23 @@ function updateListDialog(agenciesIds){
 		datatype: 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex,
 		async: false,
-		success: function(item){
-		
-			$.each(item, function(i,item){
-			if(item.feedname=="Overlap")	
-				{
-				var a=item.smonth+"/"+item.sday+"/"+item.syear;
-			    var b=item.emonth+"/"+item.eday+"/"+item.eyear;
+		success: function (item) {
+			var df = item["Default"];
+
+			var overlap = item["Overlap"];
+			var a = overlap.smonth + "/" + overlap.sday + "/" + overlap.syear;
+			var b = overlap.emonth + "/" + overlap.eday + "/" + overlap.eyear;
+			if (typeof a != 'undefined') {
+				$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Valid Date Range:</b></p></div>");
+
+				if (a == "1/1/2025") {
+					$mylist.append("<div  id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>No valid date range</a></p></div>");
 				}
-			
-			if (typeof a != 'undefined')
-				{
-				$mylist.append( "<div id='valid'><p style='margin-left:2.5%'><b>Valid Date Range:</b></p></div>" );
-				
-				if(a=="1/1/2025")
-					{
-					$mylist.append( "<div  id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>No valid date range</a></p></div>" );
-					}
-				else{
-					$mylist.append( "<div id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>"+a+"-"+b+"</a></p></div>" );
+				else {
+					$mylist.append("<div id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>" + a + "-" + b + "</a></p></div>");
 				}
-		
-				}
-				});	
-			 
+			}
+			$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Default Week:</b>"+df["startdate"]+"</p></div>");
 		}
 	});
 	$('a').click(function(e){
