@@ -89,6 +89,7 @@ import com.model.database.queries.objects.StopR;
 import com.model.database.queries.objects.TitleVIData;
 import com.model.database.queries.objects.TitleVIDataFloat;
 import com.model.database.queries.objects.TitleVIDataList;
+import com.model.database.queries.objects.ServiceLevel;
 import com.model.database.queries.objects.VariantListm;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.util.Types;
@@ -145,7 +146,8 @@ public class PgisEventManager {
 	}
 	
 	// Get best service day window
-	public static Map<String, Double> getBestServiceWindow(String start, String end, int windowSize, int dbindex) {
+	public static ServiceLevel getBestServiceWindow(String start, String end, int windowSize, int dbindex) {
+		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
 		LocalDate startDate = LocalDate.parse(start);
 		LocalDate endDate = LocalDate.parse(end);
 		List<LocalDate> totalDates = new ArrayList<>();
@@ -153,7 +155,7 @@ public class PgisEventManager {
 			totalDates.add(startDate);
 			startDate = startDate.plusDays(1);
 		}
-		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
+
 		Connection connection = makeConnection(dbindex);
 		List<Map<String,Double>> values = new ArrayList<Map<String,Double>>();
 		List<Map<String,Double>> dowmax = new ArrayList<Map<String,Double>>();
@@ -193,45 +195,33 @@ public class PgisEventManager {
 			}
 			values.add(m);
 		}
-		logger.info("result:");
-		logger.info(values);
-		logger.info("dowmax:");
-		logger.info(dowmax);
 
-		ArrayList<String> sortagencies = new ArrayList<String>();
+		ArrayList<String> sortedAgencies = new ArrayList<String>();
 		for (String s : agencies) {
-			sortagencies.add(s);
+			sortedAgencies.add(s);
 		}
 
-		Double[][] table = new Double[sortagencies.size()][totalDates.size()];
-		for (int i=0; i<sortagencies.size(); i++) {
-			String row = ""; // new String[totalDates.size()];
-			String agency = sortagencies.get(i);
+		Double[][] table = new Double[sortedAgencies.size()][totalDates.size()];
+		for (int i=0; i<sortedAgencies.size(); i++) {
+			String agency = sortedAgencies.get(i);
 			for (int j=0; j<totalDates.size(); j++) {
-				Double amax = dowmax.get(totalDates.get(i).getDayOfWeek().getValue()-1).getOrDefault(agency, 0.0);
 				Double dvalue = values.get(j).getOrDefault(agency, 0.0);
-				Double norm = 0.0;
-				if (amax > 0) {
-					norm = dvalue / amax;
-				}
-				table[i][j] = norm;
-				if (dvalue > 0) {
-					row = row + "#";
-				} else {
-					row = row + " ";
-				}
+				// Normalize
+				// Double amax = dowmax.get(totalDates.get(i).getDayOfWeek().getValue()-1).getOrDefault(agency, 0.0);
+				// Double norm = 0.0;
+				// if (amax > 0) {
+				// 	norm = dvalue / amax;
+				// }
+				table[i][j] = dvalue;
 			}
-			String lp = ""+agency;
-			while (lp.length()<10) {
-				lp = lp + " ";
-			}
-			lp = lp.substring(0,10);
-			System.out.println(lp+":"+row);
 		}
 
+		Double[] scores = new Double[totalDates.size()];
+		Double maxScore = 0.0;
+		LocalDate bestDate = totalDates.get(0);
 		for (int i=0;i<totalDates.size()-windowSize;i++) {
 			Double sum = 0.0;
-			for (int a=0;a<sortagencies.size();a++) {
+			for (int a=0;a<sortedAgencies.size();a++) {
 				Double asum = 0.0;
 				for (int j=0;j<windowSize;j++) {
 					if (table[a][i+j] > 0) {
@@ -242,50 +232,25 @@ public class PgisEventManager {
 					sum += 1.0;
 				}
 			}
-			System.out.println("day "+totalDates.get(i)+": "+sum);
+			scores[i] = sum;
+			if (sum > maxScore) {
+				maxScore = sum;
+				bestDate = totalDates.get(i);
+			}
 		}
 
-		// Normalize and sum for each day
-		// List<Double> window = new ArrayList<Double>();
-		// for (int i=0; i<totalDates.size(); i++) {
-		// 	logger.info("calculating score for day:"+totalDates.get(i));
-		// 	Map<String,Double> daymax = dowmax.get(totalDates.get(i).getDayOfWeek().getValue()-1);
-		// 	Double sum = 0.0;
-		// 	for (Map.Entry<String,Double> entry : values.get(i).entrySet()) {
-		// 		String agency = entry.getKey();
-		// 		Double dvalue = entry.getValue();
-		// 		Double amax = daymax.getOrDefault(agency, 0.0);
-		// 		Double norm = 0.0;
-		// 		if (amax > 0) {
-		// 			norm = dvalue / amax;
-		// 		}
-		// 		if (norm > 0.20) {
-		// 			sum += 1.0;
-		// 		}
-		// 		logger.info("  agency: "+agency+" dvalue: "+dvalue+" amax: "+amax+" score: "+norm);
-		// 	}
-		// 	window.add(sum);
-		// }
-
-		// Search the window
-		// List<Double> score = new ArrayList<Double>();
-		Map<String, Double> result = new HashMap<String, Double>();
-		// for (int i=0; i<=totalDates.size()-windowSize; i++) {
-		// 	Double sum = 0.0;
-		// 	for (int j=0; j<windowSize; j++) {
-		// 		sum += window.get(i+j);
-		// 		logger.info("   "+i+": "+j+" = "+totalDates.get(i+j)+" : "+window.get(i+j));
-		// 	}
-		// 	sum = sum/windowSize; 
-		// 	score.add(sum);
-		// 	// result.put(keys.get(i), sum);
-		// }
-		// // Find best day
-		// for (int i=0; i<score.size(); i++) {
-		// 	logger.info(totalDates.get(i)+": "+score.get(i));
-		// }
+		ServiceLevel ret = new ServiceLevel();		
+		ret.scores = scores;
+		ret.values = table;
+		ret.bestDate = bestDate.format(dtformat);
+		ret.agencies = new String[sortedAgencies.size()];
+		ret.agencies = sortedAgencies.toArray(ret.agencies);
+		ret.dates = new String[totalDates.size()];
+		for (int i=0; i<totalDates.size(); i++) {
+			ret.dates[i] = totalDates.get(i).format(dtformat);
+		}
 		dropConnection(connection);
-		return result;
+		return ret;
 	}
 
 	/////GEO AREA EXTENDED REPORTS QUERIES
@@ -5873,86 +5838,79 @@ public class PgisEventManager {
 		 return(r);
 		 }
 	
-		public static Map<String, Daterange> daterange( int dbindex) 
-				throws FactoryException, TransformException	{
-			Connection  connection = makeConnection(dbindex);
-			String query="";
+		public static Map<String, Daterange> daterange(int dbindex) throws FactoryException, TransformException {
+			Connection connection = makeConnection(dbindex);
+			String query = "";
 			Statement stmt = null;
-		
-		 Map<String,Daterange> r = new LinkedHashMap<String,Daterange>();
-			query ="select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
-		int start =0;
-		int end =1000000000;
-		int starta =0;
-		int enda =1000000000;
+
+			Map<String, Daterange> r = new LinkedHashMap<String, Daterange>();
+			query = "select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
+			int start = 0;
+			int end = 1000000000;
+			int starta = 0;
+			int enda = 1000000000;
 			try {
-		        stmt = connection.createStatement();
-		        ResultSet rs = stmt.executeQuery(query); 
-		     
-		        
-		        while ( rs.next() ) {
-		        	Daterange a =  new Daterange();
-		        	a.agencyids=rs.getString("agencyids");
-		        	a.agencynames=rs.getString("agencynames");
-			        
-		        a.feedname=rs.getString("feedname");
-		        a.startdate=rs.getInt("startdate");
-		         a.syear =  a.startdate/ 10000;
-		        a.smonth = (a.startdate % 10000) / 100;
-		        a.sday = a.startdate % 100;
-		        a.enddate=rs.getInt("enddate");
-		         a.eyear =   a.enddate/ 10000;
-		         a.emonth = ( a.enddate % 10000) / 100;
-		         a.eday =  a.enddate % 100;
-		        r.put(a.feedname, a);
-		       if(a.startdate>start && a.startdate<end) 
-		       {start=a.startdate;
-		       }
-		       if(a.enddate<end && a.enddate>start)
-		       {
-		       end=a.enddate;
-		       }
-		       
-		        }
-				 rs.close();
-				 stmt.close(); 
-				 dropConnection(connection);
-	int u=0;
-				 
-			for (Entry<String, Daterange> entry : r.entrySet()) {
-			u=u+1;
-				if( entry.getValue().startdate<=end && entry.getValue().enddate>=start )
-			  {
-//				  start=20260101;
-//				  end=20160101;
-			  starta=starta+1;
-				  		  }
-		
-			
+				stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
+
+				while (rs.next()) {
+					Daterange a = new Daterange();
+					a.agencyids = rs.getString("agencyids");
+					a.agencynames = rs.getString("agencynames");
+
+					a.feedname = rs.getString("feedname");
+					a.startdate = rs.getInt("startdate");
+					a.syear = a.startdate / 10000;
+					a.smonth = (a.startdate % 10000) / 100;
+					a.sday = a.startdate % 100;
+					a.enddate = rs.getInt("enddate");
+					a.eyear = a.enddate / 10000;
+					a.emonth = (a.enddate % 10000) / 100;
+					a.eday = a.enddate % 100;
+					r.put(a.feedname, a);
+					if (a.startdate > start && a.startdate < end) {
+						start = a.startdate;
+					}
+					if (a.enddate < end && a.enddate > start) {
+						end = a.enddate;
+					}
+
+				}
+				rs.close();
+				stmt.close();
+				dropConnection(connection);
+				int u = 0;
+
+				for (Entry<String, Daterange> entry : r.entrySet()) {
+					u = u + 1;
+					if (entry.getValue().startdate <= end && entry.getValue().enddate >= start) {
+						// start=20260101;
+						// end=20160101;
+						starta = starta + 1;
+					}
+
+				}
+
+				if (u != starta) {
+					start = 20250101;
+					end = 20250101;
+				}
+				Daterange a = new Daterange();
+				a.feedname = "Overlap";
+
+				a.startdate = start;
+				a.syear = start / 10000;
+				a.smonth = (start % 10000) / 100;
+				a.sday = start % 100;
+				a.enddate = end;
+				a.eyear = end / 10000;
+				a.emonth = (end % 10000) / 100;
+				a.eday = end % 100;
+				r.put(a.feedname, a);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		
-			if(u!=starta)
-			{
-				start=20250101;
-			  end=20250101;
-			}
-			Daterange a =  new Daterange();
-			a.feedname="Overlap";
-		
-			a.startdate=start;
-		         a.syear =  start/ 10000;
-		        a.smonth = (start % 10000) / 100;
-		        a.sday = start % 100;
-		        a.enddate=end;
-		         a.eyear =   end/ 10000;
-		         a.emonth = ( end % 10000) / 100;
-		         a.eday =  end % 100;
-		        r.put(a.feedname, a);
-			}
-			 catch ( Exception e ) {
-				 e.printStackTrace();
-			}
-			return r;	
+			return r;
 		}
 
 		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {

@@ -154,6 +154,7 @@ import com.model.database.queries.objects.Tract;
 import com.model.database.queries.objects.TransitError;
 import com.model.database.queries.objects.TripSchedule;
 import com.model.database.queries.objects.Urban;
+import com.model.database.queries.objects.ServiceLevel;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.timingcon.ConTrip;
 import com.model.database.queries.timingcon.TripTime;
@@ -1618,9 +1619,8 @@ public class Queries {
 	@GET
 	@Path("/getBestServiceWindow")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-	public Map<String, Double> getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("window") Integer window, @QueryParam("dbindex") Integer dbindex) {
-		Map<String, Double> result = PgisEventManager.getBestServiceWindow(start, end, window, dbindex);
-		return result;
+	public ServiceLevel getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("window") Integer window, @QueryParam("dbindex") Integer dbindex) {
+		return PgisEventManager.getBestServiceWindow(start, end, window, dbindex);
 	}	
 
 	/**
