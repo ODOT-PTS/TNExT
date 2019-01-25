@@ -360,8 +360,12 @@ String.prototype.strip = function () {
  */
 function getMetadata() {
 	// Get selected dates
-	var dates = $('#datepicker').multiDatesPicker('getDates');
-	var keyName = setDates(dates.join(","));
+	var keyName;
+	var picker = $("#datepicker");
+	if (picker.length > 0) {
+	    var dates = picker.multiDatesPicker('getDates');
+	    keyName = setDates(dates.join(","));
+	}
 
 	/*
 	 * Appending metadata
