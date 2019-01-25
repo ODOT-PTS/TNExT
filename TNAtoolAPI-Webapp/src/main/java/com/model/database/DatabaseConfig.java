@@ -49,7 +49,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class DatabaseConfig {
     final static Logger logger = Logger.getLogger(DatabaseConfig.class);    
     private static TreeMap<Integer, DatabaseConfig> dbConfigs;
-    private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2".split(",");
+    private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2,defaultDate".split(",");
     static {
         try {
             loadDbInfo(); 
@@ -254,6 +254,7 @@ public class DatabaseConfig {
     private String censusMappingSource = "";
     private String gtfsMappingSource1 = "";
     private String gtfsMappingSource2 = "";
+    private String defaultDate = "";
 
     public DatabaseConfig() {
     }
@@ -294,6 +295,7 @@ public class DatabaseConfig {
         setCensusMappingSource(row[7]);
         setGtfsMappingSource1(row[8]);
         setGtfsMappingSource2(row[9]);
+        setDefaultDate(row[10]);
     }
 
     public String[] toArray() {
@@ -317,6 +319,7 @@ public class DatabaseConfig {
         m.put("censusMappingSource", getCensusMappingSource());
         m.put("gtfsMappingSource1", getGtfsMappingSource1());
         m.put("gtfsMappingSource2", getGtfsMappingSource2());
+        m.put("defaultDate", getDefaultDate());
         return m;
     }
 
@@ -331,6 +334,7 @@ public class DatabaseConfig {
         setCensusMappingSource(m.get("censusMappingSource"));
         setGtfsMappingSource1(m.get("gtfsMappingSource1"));
         setGtfsMappingSource2(m.get("gtfsMappingSource2"));
+        setDefaultDate(m.get("defaultDate"));
     }
 
     // For external clients
@@ -391,6 +395,10 @@ public class DatabaseConfig {
         return gtfsMappingSource2;
     }
 
+    public String getDefaultDate() {
+        return defaultDate;
+    }
+
     public void setDatabaseIndex(Integer value) {
         this.databaseIndex = value;
     }
@@ -432,5 +440,9 @@ public class DatabaseConfig {
 
     public void setGtfsMappingSource2(String value) {
         this.gtfsMappingSource2 = value;
+    }
+
+    public void setDefaultDate(String value) {
+        this.defaultDate = value;
     }
 }
