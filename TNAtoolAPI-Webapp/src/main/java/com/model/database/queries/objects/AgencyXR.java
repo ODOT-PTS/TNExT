@@ -71,14 +71,6 @@ public class AgencyXR {
 	
 	@XmlAttribute
     @JsonSerialize
-    public String UPopLos;
-	
-	@XmlAttribute
-    @JsonSerialize
-    public String RPopLos;
-	
-	@XmlAttribute
-    @JsonSerialize
     public String racWithinX;
 	
 	@XmlAttribute
@@ -101,7 +93,6 @@ public class AgencyXR {
     @JsonSerialize
     public String StopPerRouteMile;
 	
-
 	@XmlAttribute
     @JsonSerialize
     public String RuralServiceStops;
@@ -117,15 +108,23 @@ public class AgencyXR {
 	@XmlAttribute
     @JsonSerialize
     public String RPopServedByService;
-	
-	@XmlAttribute
+	   
+    @XmlAttribute
     @JsonSerialize
-    public String racServedByService;
-	
-	@XmlAttribute
+    public String ULandareaWithinX;
+
+     @XmlAttribute
     @JsonSerialize
-    public String wacServedByService;
-	
+    public String RLandareaWithinX;    
+
+    @XmlAttribute
+    @JsonSerialize
+    public String ULandareaAtLoService;
+
+    @XmlAttribute
+    @JsonSerialize
+    public String RLandareaAtLoService;
+
 	@XmlAttribute
     @JsonSerialize
     public String AreaServed; 
@@ -141,4 +140,94 @@ public class AgencyXR {
 	@XmlAttribute
     @JsonSerialize
     public String ServiceDays;
+
+    //
+    @XmlAttribute
+    @JsonSerialize
+    public String UPopServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RPopServedAtLoService;
+
+    //
+	@XmlAttribute
+    @JsonSerialize
+    public String UracWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RracWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RwacWithinX;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UwacWithinX;
+
+    //    	
+    @XmlAttribute
+    @JsonSerialize
+    public String racServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UracServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RracServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String racServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String totalracServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String totalwacServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UracServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RracServedAtLoService;
+	@XmlAttribute
+    @JsonSerialize
+    public String wacServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UwacServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RwacServedByService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String wacServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String UwacServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+    public String RwacServedAtLoService;
+	
+	@XmlAttribute
+    @JsonSerialize
+	public String RacAtLoService;
+ 
+	@XmlAttribute
+    @JsonSerialize
+	public String WacAtLoService;	
 }

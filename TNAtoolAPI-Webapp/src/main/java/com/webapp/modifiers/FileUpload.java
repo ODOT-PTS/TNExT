@@ -210,7 +210,6 @@ public class FileUpload extends HttpServlet {
 						
 						statement = c.createStatement();
 						
-						statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE username = '"+esu+"';");
 				  } catch (SQLException e) {
 						System.out.println(e.getMessage());
 						
@@ -1258,8 +1257,6 @@ public class FileUpload extends HttpServlet {
 			c = dbConfig.getConnection();
 			statement = c.createStatement();
 			
-			statement.executeUpdate("DELETE FROM gtfs_selected_feeds WHERE feedname = '"+feedDel+"';");
-			statement.executeUpdate("DELETE FROM gtfs_uploaded_feeds WHERE feedname = '"+feedDel+"';");
 			
 			updateQuota(username);
 			

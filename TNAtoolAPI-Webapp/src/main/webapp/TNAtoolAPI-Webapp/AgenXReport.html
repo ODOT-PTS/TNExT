@@ -98,8 +98,8 @@
 										+ '</td></tr><tr><td class="metric">Service Miles<span class="IOSym">(3)</span></td><td>'+ numberconv(item.ServiceMiles)
 										+ '</td></tr><tr><td class="metric">Urban Population Served<span class="IOSym">(1)</span></td><td>'+ numberconv(item.UPopWithinX)
 										+ '</td></tr><tr><td class="metric">Rural Population Served<span class="IOSym">(1)</span></td><td>'+ numberconv(item.RPopWithinX)
-										+ '</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.UPopLos)
-										+ '</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.RPopLos)
+										+ '</td></tr><tr><td class="metric">Urban Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.UPopServedAtLoService)
+										+ '</td></tr><tr><td class="metric">Rural Population Served at Level of Service<span class="IOSym">(1)(2)(3)</span></td><td>'+ numberconv(item.RPopServedAtLoService)
 										+ '</td></tr><tr><td class="metric">Employment Served (RAC)<span class="IOSym">(1)</span></td><td>' + numberconv(item.racWithinX) + '</td></tr>';
 								if (popYear > 2010) {
 									html += '<td class="metric">Employees Served (WAC)<span class="IOSym">(1)</span></td><td>N/A</td></tr>';
@@ -120,6 +120,7 @@
 								progressbar.remove();
 								
 								// datatables setting
+								buildPopTable(item, $("table#RT > tbody"));
 								tableProperties.paging = false;
 								tableProperties.ordering = false;
 								table = buildDatatables();

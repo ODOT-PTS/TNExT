@@ -67,8 +67,15 @@ public class UpdateEventManager {
 	        		+ "WITH ("
 	        		+ "  OIDS=FALSE);");
 	        stmt.executeUpdate("ALTER TABLE gtfs_pg_users"
-	        		+ "  OWNER TO postgres;");
-	        
+	        		+ "  OWNER TO postgres;");			
+			stmt.executeUpdate(""
+					+" CREATE TABLE user_selected_agencies ("
+					+" 	username text NOT NULL,"
+					+" 	agency_id text NOT NULL,"
+					+" 	hidden boolean DEFAULT false,"
+					+" 	CONSTRAINT user_selected_agencies_pkey PRIMARY KEY (username, agency_id)"
+					+" );");
+			stmt.executeUpdate("ALTER TABLE user_selected_agencies OWNER TO postgres;");	
 	        stmt.executeUpdate("CREATE TABLE gtfs_uploaded_feeds("
 	        		+ "  feedname text NOT NULL,"
 	        		+ "  username text,"
@@ -82,20 +89,7 @@ public class UpdateEventManager {
 	        		+ "WITH ("
 	        		+ "  OIDS=FALSE);");
 	        stmt.executeUpdate("ALTER TABLE gtfs_uploaded_feeds"
-	        		+ "  OWNER TO postgres;");
-	        
-	        stmt.executeUpdate("CREATE TABLE gtfs_selected_feeds("
-	        		+ "  username text NOT NULL,"
-	        		+ "  feedname text NOT NULL,"
-	        		+ "  agency_id text,"
-	        		+ "  CONSTRAINT selected_feeds_pkey PRIMARY KEY (username, feedname),"
-	        		+ "  CONSTRAINT gtfs_selected_feeds_username_fkey FOREIGN KEY (username)"
-	        		+ "      REFERENCES gtfs_pg_users (username) MATCH SIMPLE"
-	        		+ "      ON UPDATE NO ACTION ON DELETE NO ACTION)"
-	        		+ "WITH ("
-	        		+ "  OIDS=FALSE);");
-	        stmt.executeUpdate("ALTER TABLE gtfs_selected_feeds"
-	        		+ "  OWNER TO postgres;");
+	        		+ "  OWNER TO postgres;");	        
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
@@ -652,7 +646,7 @@ public class UpdateEventManager {
 				+ "		ST_SetSRID(ST_MakeLine(ST_PointN(a.shape, n - 1), ST_PointN(a.shape, n)), 4326) AS shape"
 				+ "  FROM gtfs_trips AS a"
 				+ "  CROSS JOIN generate_series(2, ST_NPoints(a.shape)) AS n"
-				+ "  WHERE a.agencyid = '"+agencyId+"';"
+				+ "  WHERE a.shapeid_agencyid = '"+agencyId+"';"
 			);
 			stmt.executeUpdate("ALTER TABLE gtfs_trip_segments ENABLE TRIGGER ALL;");
 			stmt.close();
@@ -973,7 +967,7 @@ public class UpdateEventManager {
 				stmt.executeUpdate("DROP TABLE census_counties_trip_map;");
 			}
 		  }catch ( Exception e ) {
-			  e.printStackTrace();
+			  // e.printStackTrace();
 		  }finally{
 	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
 	      }
