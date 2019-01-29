@@ -79,19 +79,11 @@ function addModifyDB(j, index, existing){
 	html+="<label>Password:</label><br>";
 	html+="<input type='text' id='"+dbInfo[0][6]+"' value='"+info[6]+"' required style='width:90%;font-size:80%'><br><br>";
 
+	html+="<label>Best Service Date:</label><br>";
+	html+="<input type='text' id='defaultDate' value='"+info[10]+"' required style='width:90%;font-size:80%'><br><br>";
+
 	html+="<input type='submit' id='dialogSubmit' tabindex='-1' style='position:absolute; top:-1000px'>";
 	$('#dialogFields').html(html);
-//	if(ind!=-1){
-//		$('#'+dbInfo[0][4]+"n").prop('disabled', true);
-//	}
-	$('#connectionURLn').keyup(function () { 
-		$('#'+dbInfo[0][2]).val($('#'+dbInfo[0][4]+'n').val()+".cfg.xml"); 
-		$('#'+dbInfo[0][3]).val($('#'+dbInfo[0][4]+'n').val()+".cfg.xml"); 
-		});
-	$('#connectionURLn').change(function () { 
-		$('#'+dbInfo[0][2]).val($('#'+dbInfo[0][4]+'n').val()+".cfg.xml"); 
-		$('#'+dbInfo[0][3]).val($('#'+dbInfo[0][4]+'n').val()+".cfg.xml"); 
-		});
 	
 	 form = dialog.find( "form" ).on( "submit", function( event ) {
 	    event.preventDefault();
@@ -99,7 +91,8 @@ function addModifyDB(j, index, existing){
 	    var user = $('#'+dbInfo[0][5]).val();
 	    var pass = $('#'+dbInfo[0][6]).val();
 	    var cURL = "jdbc:postgresql://"+$('#'+dbInfo[0][4]).val()+":"+$('#'+dbInfo[0][4]+"p").val()+"/";
-	    var db = $('#'+dbInfo[0][4]+"n").val();
+		var db = $('#'+dbInfo[0][4]+"n").val();
+		var defaultDate = $("defaultDate").val();
 	    var regex = new RegExp("^[a-z][a-z0-9\_]+$");
 	    var oldURL = info[4];
 	    var olddbname = info[1];
@@ -150,17 +143,10 @@ function runQueries(index){
         dataType: "json",
         async: false,
         success: function(d) {
-			$.ajax({
-				type: "GET",
-				url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateBestServiceWindow?&db="+db,
-				dataType: "json",
-				async: false,						
-				success: function(d) {
-					location.reload(true);
-				}
-			})
+        	location.reload(true);
         }
 	});
+	
 }
 
 /*function addPsqlFunctions(index){
@@ -203,7 +189,7 @@ function addExistingDb(){
 	newDB[0] --; 
 	newDB[2] = defaultInfo[2]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
 	newDB[3] = defaultInfo[3]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
-	newDB[4]= "jdbc:postgresql://"+newDB[4]+":"+$('#'+dbInfo[0][4]+"p").val()+"/"+$('#'+dbInfo[0][4]+"n").val();
+	newDB[4] = "jdbc:postgresql://"+newDB[4]+":"+$('#'+dbInfo[0][4]+"p").val()+"/"+$('#'+dbInfo[0][4]+"n").val();
 	newDB[7] = defaultInfo[7];
 	newDB[8] = defaultInfo[8];
 	newDB[9] = defaultInfo[9];
@@ -2073,7 +2059,9 @@ $(document).ready(function(){
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='femp'></td></tr>"+
             			"<tr><td><input type='button' class='update dbButtons-class no_css single' value='Run Update Queries' style='background-color: rgba(0, 111, 128, 0.21);' onclick='runUpdates("+i+")'></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='update'></td></tr>"+
-            			"<tr><td><input type='button' class='activate dbButtons-class no_css single' value='Activate Database' style='background-color: rgba(4, 128, 0, 0.48);' onclick='activeDeactive("+i+")'></td>"+
+            			"<tr><td><input type='button' class='updateBestServiceWindow dbButtons-class no_css single' value='Find Best Service Window' style='background-color: rgba(0, 111, 128, 0.21);' onclick='updateBestServiceWindow("+i-1+")'></td>"+
+            			"<td></tr>"+
+						"<tr><td><input type='button' class='activate dbButtons-class no_css single' value='Activate Database' style='background-color: rgba(4, 128, 0, 0.48);' onclick='activeDeactive("+i+")'></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='activate'></td></tr>"+
             			"<tr><td><input type='button' class='modify dbButtons-class no_css single' value='Modify Database Information' style='background-color:rgba(128, 87, 0, 0.46)' onclick='addModifyDB("+i+", "+dbInfo[i][0]+")'></td>"+
             			"<td></td></tr>"+

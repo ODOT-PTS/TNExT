@@ -120,7 +120,9 @@ public class DatabaseConfig {
     }
 
     public static void updateConfig(DatabaseConfig dbConfig) {
-
+        if (dbConfigs.containsKey(dbConfig.getDatabaseIndex())) {
+            dbConfigs.put(dbConfig.getDatabaseIndex(), dbConfig);
+        }
     }
 
     public static void addConfig(DatabaseConfig dbConfig) {

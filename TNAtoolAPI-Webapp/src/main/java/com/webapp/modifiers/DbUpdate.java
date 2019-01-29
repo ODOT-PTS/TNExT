@@ -1031,54 +1031,39 @@ public class DbUpdate {
   public Object addExistingDB(@QueryParam("db") String db) {
     String[] dbInfo = db.split(",");
     String[] p;
-
-    //		PDBerror error = new PDBerror();
     String DBError = "";
-
-    boolean b = false;
-    p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    String url = "";
-    for (int k = 0; k < p.length - 1; k++) {
-      url += p[k] + "/";
-    }
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
+    DatabaseConfig dbConfig = new DatabaseConfig();
+    dbConfig.fromArray(dbInfo);
+    int found = 0;
+    Connection connection = dbConfig.getConnection();
     try {
-      c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
-      statement = c.createStatement();
-      rs = statement.executeQuery("SELECT 1 AS result FROM pg_database WHERE datname='" + name + "';");
-
-      if (rs.next()) {
-        if (rs.getInt("result") == 1) {
-          DBError = "Database was successfully added";
-        } else {
-          DBError = "Database " + name + " could not be found.";
-        }
+      String q1 = "SELECT 1 AS result FROM pg_database WHERE datname=?";
+      PreparedStatement ps;
+      ps = connection.prepareStatement(q1);
+      ps.setString(0, dbConfig.getDbName());
+      ResultSet rs = ps.executeQuery();
+      while (rs.next()) {
+        found += 1;
       }
-      // ian: todo: update config
+      rs.close();
+      ps.close();
     } catch (SQLException e) {
-      logger.error(e);
-      // } catch (IOException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
+      DBError = "Failed to check if database existed";
+      return DBError;
     } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
+      try { connection.close(); } catch (SQLException e) {}
+    }
+    
+    if (found > 0) {
+      try {
+        DatabaseConfig.updateConfig(dbConfig);
+        DatabaseConfig.saveDbInfo();
+        DBError = "Database was successfully updated";
+      } catch (IOException e) {
+        DBError = "Database was found, but could not be updated";
+      }
+    } else {
+      DBError = "Database was not found";
     }
     logger.debug(DBError);
     return DBError;
