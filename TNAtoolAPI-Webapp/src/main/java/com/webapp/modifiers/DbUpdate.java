@@ -101,6 +101,7 @@ import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.DatabaseStatus;
 import com.model.database.queries.util.Hutil;
 import com.model.database.queries.util.StateInits;
+import com.model.database.queries.objects.ServiceLevel;
 import com.webapp.api.Queries;
 
 @Path("/dbupdate")
@@ -3397,10 +3398,28 @@ public class DbUpdate {
   }
 
   @GET
+  @Path("/updateBestServiceWindow")
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+  public Object updateBestServiceWindow(@QueryParam("db") String db, @QueryParam("username") String username) {
+    // Update the default date
+    PDBerror error = new PDBerror();
+    String[] dbInfo = db.split(",");
+    DatabaseConfig dbc = DatabaseConfig.getConfig(dbInfo[0]);
+    ServiceLevel sl = PgisEventManager.getBestServiceWindow(null, null, 7, dbc.getDatabaseIndex());
+    dbc.setDefaultDate(sl.bestDate);
+    try {
+      DatabaseConfig.saveDbInfo();
+    } catch(IOException e) {
+      logger.error("failed to save dbconfig:"+e);
+      error.DBError = e.getMessage();
+    }
+    return error;
+  }
+
+  @GET
   @Path("/updateFeeds")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object updateFeeds(@QueryParam("db") String db, @QueryParam("username") String username) {
-
     String[] dbInfo = db.split(",");
     Connection c = null;
     Statement statement = null;
@@ -3409,6 +3428,7 @@ public class DbUpdate {
     //		List<String> feeds = new ArrayList<String>();
     PDBerror lists = new PDBerror();
 
+    
     try {
       c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();

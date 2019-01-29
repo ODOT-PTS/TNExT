@@ -148,15 +148,42 @@ public class PgisEventManager {
 	// Get best service day window
 	public static ServiceLevel getBestServiceWindow(String start, String end, int windowSize, int dbindex) {
 		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
-		LocalDate startDate = LocalDate.parse(start);
-		LocalDate endDate = LocalDate.parse(end);
+		Connection connection = makeConnection(dbindex);
+
+		// Get the feed window
+		String minFeedStartDate = "";
+		String maxFeedEndDate = "";
+		try {
+			String q1 = "SELECT min(startdate) as startdate, max(enddate) as enddate FROM gtfs_feed_info;";
+			PreparedStatement ps;
+			ps = connection.prepareStatement(q1);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				minFeedStartDate = rs.getString("startdate");
+				maxFeedEndDate = rs.getString("enddate");
+			}
+		} catch (SQLException e) {
+			logger.error(e);
+		}
+		if (start == null) {
+			start = minFeedStartDate;
+		}
+		if (end == null) {
+			end = maxFeedEndDate;
+		}
+		if (windowSize < 1) {
+			windowSize = 7;
+		}
+		
+		// Parse the dates
+		LocalDate startDate = LocalDate.parse(start, dtformat);
+		LocalDate endDate = LocalDate.parse(end, dtformat);
 		List<LocalDate> totalDates = new ArrayList<>();
 		while (!startDate.isAfter(endDate)) {
 			totalDates.add(startDate);
 			startDate = startDate.plusDays(1);
 		}
 
-		Connection connection = makeConnection(dbindex);
 		List<Map<String,Double>> values = new ArrayList<Map<String,Double>>();
 		List<Map<String,Double>> dowmax = new ArrayList<Map<String,Double>>();
 		while(dowmax.size() < 7) {

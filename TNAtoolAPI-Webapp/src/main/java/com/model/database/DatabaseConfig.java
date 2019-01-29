@@ -292,10 +292,18 @@ public class DatabaseConfig {
         setConnectionUrl(row[4]);
         setUsername(row[5]);
         setPassword(row[6]);
-        setCensusMappingSource(row[7]);
-        setGtfsMappingSource1(row[8]);
-        setGtfsMappingSource2(row[9]);
-        setDefaultDate(row[10]);
+        if (row.length > 7) {
+            setCensusMappingSource(row[7]);
+        }
+        if (row.length > 8) {
+            setGtfsMappingSource1(row[8]);
+        }
+        if (row.length > 9) {
+            setGtfsMappingSource2(row[9]);
+        }        
+        if (row.length > 10) {
+            setDefaultDate(row[10]);
+        }
     }
 
     public String[] toArray() {

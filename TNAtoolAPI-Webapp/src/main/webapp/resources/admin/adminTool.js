@@ -150,10 +150,17 @@ function runQueries(index){
         dataType: "json",
         async: false,
         success: function(d) {
-        	location.reload(true);
+			$.ajax({
+				type: "GET",
+				url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateBestServiceWindow?&db="+db,
+				dataType: "json",
+				async: false,						
+				success: function(d) {
+					location.reload(true);
+				}
+			})
         }
 	});
-	
 }
 
 /*function addPsqlFunctions(index){
