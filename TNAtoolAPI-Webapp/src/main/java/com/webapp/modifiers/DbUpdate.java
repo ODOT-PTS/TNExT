@@ -904,57 +904,6 @@ public class DbUpdate {
   }
 
   @GET
-  @Path("/updateDB")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object updateDB(@QueryParam("db") String db, @QueryParam("oldName") String oldName,
-      @QueryParam("oldcfgSpatial") String oldcfgSpatial, @QueryParam("oldcfgTransit") String oldcfgTransit)
-      throws IOException {
-    String[] dbInfo = db.split(",");
-
-    String[] p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    String url = "";
-    for (int k = 0; k < p.length - 1; k++) {
-      url += p[k] + "/";
-    }
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    PDBerror error = new PDBerror();
-    error.DBError = "";
-    try {
-      c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
-      statement = c.createStatement();
-      rs = statement
-          .executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='" + oldName + "'");
-      statement.executeUpdate("ALTER DATABASE " + oldName + " RENAME TO " + name);
-      error.DBError = "Database was successfully updated";
-      // ian: todo: update config
-    } catch (SQLException e) {
-      logger.error(e);
-      error.DBError = e.getMessage();
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-
-    return error;
-  }
-
-  @GET
   @Path("/addDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object addDB(@QueryParam("db") String db) {
@@ -1026,44 +975,92 @@ public class DbUpdate {
   }
 
   @GET
-  @Path("/addExistingDB")
+  @Path("/updateDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object addExistingDB(@QueryParam("db") String db) {
+  public Object updateDB(@QueryParam("db") String db) {
     String[] dbInfo = db.split(",");
-    String[] p;
     String DBError = "";
-    DatabaseConfig dbConfig = new DatabaseConfig();
-    dbConfig.fromArray(dbInfo);
-    int found = 0;
-    Connection connection = dbConfig.getConnection();
+    DatabaseConfig oldConfig = DatabaseConfig.getConfig(dbInfo[0]);
+    DatabaseConfig newConfig = new DatabaseConfig();
+    newConfig.fromArray(dbInfo);
+
+    String oldDatabase = oldConfig.getDatabase();
+    String newDatabase = newConfig.getDatabase();
+    
+    // Just double check
+    if (oldConfig.getDatabaseIndex() != newConfig.getDatabaseIndex()) {
+      DBError = "Index mismatch";
+      return DBError;
+    }
+
+    Boolean oldExists = false;
+    Boolean newExists = false;
+    Connection connection = null;
     try {
+      connection = oldConfig.getConnection();
       String q1 = "SELECT 1 AS result FROM pg_database WHERE datname=?";
       PreparedStatement ps;
+      ResultSet rs;
       ps = connection.prepareStatement(q1);
-      ps.setString(0, dbConfig.getDbName());
-      ResultSet rs = ps.executeQuery();
+      ps.setString(1, oldDatabase);
+      rs = ps.executeQuery();
       while (rs.next()) {
-        found += 1;
+        oldExists = true;
+      }
+      rs.close();
+      ps.setString(1, newDatabase);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        newExists = true;
       }
       rs.close();
       ps.close();
     } catch (SQLException e) {
+      logger.error(e);
       DBError = "Failed to check if database existed";
       return DBError;
     } finally {
       try { connection.close(); } catch (SQLException e) {}
     }
-    
-    if (found > 0) {
-      try {
-        DatabaseConfig.updateConfig(dbConfig);
-        DatabaseConfig.saveDbInfo();
-        DBError = "Database was successfully updated";
-      } catch (IOException e) {
-        DBError = "Database was found, but could not be updated";
+
+    if (oldExists == false) {
+      DBError = "Database not found";
+      return DBError;
+    }
+
+    // Do we need to rename the database?
+    // This is not recommended.
+    if (!oldDatabase.equals(newDatabase)) {
+      if (newExists == true) {
+        DBError = "Could not rename database from "+oldDatabase+" to "+newDatabase+"; new database name already exists";
+        return DBError;
       }
-    } else {
-      DBError = "Database was not found";
+      try {
+        // DatabaseConfig renameConfig = new DatabaseConfig();
+        String curl = "jdbc:postgresql://" + newConfig.getHost() + ":" + newConfig.getPort() + "/";
+        connection = DriverManager.getConnection(curl, newConfig.getUsername(), newConfig.getPassword());
+        PreparedStatement ps = connection.prepareStatement("select pg_terminate_backend(pid) from pg_stat_activity where datname=?");
+        ps.setString(1, oldDatabase);
+        ps.executeQuery();
+        ps.close();
+        connection.createStatement().executeUpdate("ALTER DATABASE " + oldDatabase + " RENAME TO " + newDatabase);
+      } catch (SQLException e) {
+        logger.error(e);
+        DBError = "Failed to rename database";
+        return DBError;  
+      } finally {
+        try { connection.close(); } catch (SQLException e) {}
+      }
+    }
+
+    // Update dbInfo.csv
+    try {
+      DatabaseConfig.updateConfig(newConfig);
+      DatabaseConfig.saveDbInfo();
+      DBError = "Database was successfully updated";
+    } catch (IOException e) {
+      logger.error(e);
+      DBError = "Database was found, but could not be updated";
     }
     logger.debug(DBError);
     return DBError;

@@ -92,7 +92,6 @@ function addModifyDB(j, index, existing){
 	    var pass = $('#'+dbInfo[0][6]).val();
 	    var cURL = "jdbc:postgresql://"+$('#'+dbInfo[0][4]).val()+":"+$('#'+dbInfo[0][4]+"p").val()+"/";
 		var db = $('#'+dbInfo[0][4]+"n").val();
-		var defaultDate = $("defaultDate").val();
 	    var regex = new RegExp("^[a-z][a-z0-9\_]+$");
 	    var oldURL = info[4];
 	    var olddbname = info[1];
@@ -119,12 +118,7 @@ function addModifyDB(j, index, existing){
 	        		        return;
 	        		    }
 	        		}
-	        		if(existing==1){
-	        			addExistingDb();
-	        		}else{
-	        			addDB();
-	        		}
-	        		
+        			addDB();	        		
 	        	}else{
 	        		alert(d.DBError);
 	        	}
@@ -180,70 +174,29 @@ function addIndex(index){
 function dSubmit(){
 	$('#dialogSubmit').click();
 }
-
-function addExistingDb(){
-	var newDB = [];
-	for(var i=0; i<dbInfo[0].length; i++){
-    	newDB.push($('#'+dbInfo[0][i]).val());
-    }
-	newDB[0] --; 
-	newDB[2] = defaultInfo[2]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
-	newDB[3] = defaultInfo[3]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
-	newDB[4] = "jdbc:postgresql://"+newDB[4]+":"+$('#'+dbInfo[0][4]+"p").val()+"/"+$('#'+dbInfo[0][4]+"n").val();
-	newDB[7] = defaultInfo[7];
-	newDB[8] = defaultInfo[8];
-	newDB[9] = defaultInfo[9];
-    var db = newDB.toString();
-    $.ajax({
-        type: "GET",
-        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addExistingDB?&db="+db,
-        dataType: "text",
-        async: false,
-        success: function(d) {
-        	alert(d);
-	    	location.reload(true);
-        }
-    });
-}
 function addDB(){
 	var newDB = [];
 	for(var i=0; i<dbInfo[0].length; i++){
     	newDB.push($('#'+dbInfo[0][i]).val());
-    }
-	newDB[0] --; 
-	newDB[2] = defaultInfo[2]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
-	newDB[3] = defaultInfo[3]+$('#'+dbInfo[0][4]+"n").val()+".cfg.xml";
+	}
+	newDB[0] --;
 	newDB[4]= "jdbc:postgresql://"+newDB[4]+":"+$('#'+dbInfo[0][4]+"p").val()+"/"+$('#'+dbInfo[0][4]+"n").val();
-	newDB[7] = defaultInfo[7];
-	newDB[8] = defaultInfo[8];
-	newDB[9] = defaultInfo[9];
-    var db = newDB.toString();
-	if(ind!=-1){
-		var oldcfgSpatial = dbInfo[ind+1][2];
-		var oldcfgTransit = dbInfo[ind+1][3];
-		$.ajax({
-	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateDB?&db="+db+"&oldName="+oldName+"&oldcfgSpatial="+oldcfgSpatial+"&oldcfgTransit="+oldcfgTransit,
-	        dataType: "json",
-	        async: false,
-	        success: function(d) {
-	        	alert(d.DBError);
-		    	location.reload(true);
-	        }
-	    });
-	}else{
-		$.ajax({
-	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/addDB?&db="+db,
-	        dataType: "json",
-	        async: false,
-	        success: function(d) {
-	        	alert(d.DBError);
-		    	location.reload(true);
-	        }
-	    });
-	} 
-}
+	var db = newDB.toString();
+	var url = "/TNAtoolAPI-Webapp/modifiers/dbupdate/addDB?&db="+db;
+	if (newDB[0] != -1) {
+		url = "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateDB?&db="+db;
+	}
+	$.ajax({
+		type: "GET",
+		url: url,
+		dataType: "json",
+		async: false,
+		success: function(d) {
+			alert(d.DBError);
+			location.reload(true);
+		}
+	});
+} 
 
 function stringToDate(str){
 	if(str==null){
