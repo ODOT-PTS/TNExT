@@ -1815,6 +1815,12 @@ function updateListDialog(agenciesIds){
 	var aList = $( "li[type='agency']" );
 	var count = aList.length;
 	var today = currentDateFormatted();
+	if (key != undefined && key.length >= 3) {
+		var d = getDates(key.substr(0,3));
+		today = d.substr(6,4) + d.substr(0,2) + d.substr(3,2);
+	}
+	console.log(today);
+	var todayFmt = today.substr(4,2) + '/' + today.substr(6, 2) + '/' + today.substr(0,4);
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
@@ -1850,20 +1856,18 @@ function updateListDialog(agenciesIds){
 		$('.jstree-no-dots').append(html);
 	}
 	
-	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red color have an expired GTFS feed</i></p></div>" );
+	$mylist.append( "<div id='listLegend'><p style='font-size: 90%;margin-left:2%;color:red;margin-top:1%'>-<i>Agencies in red have expired feeds on " + todayFmt + "</i></p></div>" );
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex,
 		async: false,
 		success: function (item) {
-			var df = item["Default"];
-
 			var overlap = item["Overlap"];
 			var a = overlap.smonth + "/" + overlap.sday + "/" + overlap.syear;
 			var b = overlap.emonth + "/" + overlap.eday + "/" + overlap.eyear;
 			if (typeof a != 'undefined') {
-				$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Valid Date Range:</b></p></div>");
+				$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>All feeds have service from:</b></p></div>");
 
 				if (a == "1/1/2025") {
 					$mylist.append("<div  id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>No valid date range</a></p></div>");
@@ -1872,7 +1876,22 @@ function updateListDialog(agenciesIds){
 					$mylist.append("<div id='valid'><p style='margin-left:2.5%'><a href=''/TNAtoolAPI-Webapp/queries/transit/Daterange?&dbindex='+dbindex' type='RC'>" + a + "-" + b + "</a></p></div>");
 				}
 			}
-			$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Default Date:</b> "+df["startdate"]+"</p></div>");
+
+			var df = item["Default"];
+			var dd = df['startdate'];
+			if (dd != undefined) {
+				dd = String(dd);
+				if (dd.length == 8) {
+					var ddFmt = dd.substr(4,2) + '/' + dd.substr(6,2) + '/' + dd.substr(0,4);
+					$mylist.append("<div id='valid'><p style='margin-left:2.5%'><b>Best service week:</b></p></div>");
+					$mylist.append("<div id='valid'><p style='margin-left:2.5%'><a id='setBestServiceWeek' href=''>" + ddFmt + "</a></p></div>");
+					$("#setBestServiceWeek").click(function() {
+						$("#datepicker").multiDatesPicker('resetDates');	 
+						$("#datepicker").multiDatesPicker('addDates', ddFmt);	 
+						updatepicker();
+					});	
+				}
+			}
 		}
 	});
 	$('a').click(function(e){
