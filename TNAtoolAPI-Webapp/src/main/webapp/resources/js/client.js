@@ -1877,8 +1877,7 @@ function updateListDialog(agenciesIds){
 				}
 			}
 
-			var df = item["Default"];
-			var dd = df['startdate'];
+			var dd = (item["Default"] || {}).startdate;
 			if (dd != undefined) {
 				dd = String(dd);
 				if (dd.length == 8) {

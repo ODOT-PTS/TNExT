@@ -216,11 +216,15 @@ function addDB(existing){
 	$.ajax({
 		type: "GET",
 		url: url,
-		dataType: "json",
+		dataType: "text",
 		async: false,
 		success: function(d) {
-			alert(d.DBError);
-			location.reload(true);
+			if (d.DBError) {
+				alert(d.DBError);
+			} else {
+				alert("Success");
+				location.reload(true);
+			}			
 		}
 	});
 } 

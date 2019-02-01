@@ -5937,14 +5937,15 @@ public class PgisEventManager {
 				a.eday = end % 100;
 				r.put(a.feedname, a);
 
-				Daterange d = new Daterange();
-				d.feedname = "Default";
-				try {
-					d.startdate = Integer.parseInt(defaultDate);
-				} catch (NumberFormatException e) {
-					d.startdate = a.startdate;
+				if (defaultDate.length() == 8) {
+					Daterange d = new Daterange();
+					d.feedname = "Default";
+					try {
+						d.startdate = Integer.parseInt(defaultDate);
+						r.put(d.feedname, d);	
+					} catch (NumberFormatException e) {
+					}					
 				}
-				r.put(d.feedname, d);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
