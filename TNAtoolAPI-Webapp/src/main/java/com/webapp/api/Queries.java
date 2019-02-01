@@ -47,7 +47,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-
 import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServletRequest;
@@ -155,6 +154,7 @@ import com.model.database.queries.objects.Tract;
 import com.model.database.queries.objects.TransitError;
 import com.model.database.queries.objects.TripSchedule;
 import com.model.database.queries.objects.Urban;
+import com.model.database.queries.objects.ServiceLevel;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.timingcon.ConTrip;
 import com.model.database.queries.timingcon.TripTime;
@@ -1615,6 +1615,13 @@ public class Queries {
 		progVal.remove(key);
 		return response;
 	}
+
+	@GET
+	@Path("/getBestServiceWindow")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public ServiceLevel getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("window") Integer window, @QueryParam("dbindex") Integer dbindex) {
+		return PgisEventManager.getBestServiceWindow(start, end, window, dbindex);
+	}	
 
 	/**
 	 * Generates The Stops report for agency agency and route geographic area

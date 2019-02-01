@@ -38,6 +38,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -85,9 +89,11 @@ import com.model.database.queries.objects.StopR;
 import com.model.database.queries.objects.TitleVIData;
 import com.model.database.queries.objects.TitleVIDataFloat;
 import com.model.database.queries.objects.TitleVIDataList;
+import com.model.database.queries.objects.ServiceLevel;
 import com.model.database.queries.objects.VariantListm;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.util.Types;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -139,6 +145,141 @@ public class PgisEventManager {
 		}
 	}
 	
+	// Get best service day window
+	public static ServiceLevel getBestServiceWindow(String start, String end, int windowSize, int dbindex) {
+		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("yyyyMMdd");
+		Connection connection = makeConnection(dbindex);
+
+		// Get the feed window
+		String minFeedStartDate = "";
+		String maxFeedEndDate = "";
+		try {
+			String q1 = "SELECT min(startdate) as startdate, max(enddate) as enddate FROM gtfs_feed_info;";
+			PreparedStatement ps;
+			ps = connection.prepareStatement(q1);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				minFeedStartDate = rs.getString("startdate");
+				maxFeedEndDate = rs.getString("enddate");
+			}
+		} catch (SQLException e) {
+			logger.error(e);
+		}
+		if (start == null) {
+			start = minFeedStartDate;
+		}
+		if (end == null) {
+			end = maxFeedEndDate;
+		}
+		if (windowSize < 1) {
+			windowSize = 7;
+		}
+		
+		// Parse the dates
+		LocalDate startDate = LocalDate.parse(start, dtformat);
+		LocalDate endDate = LocalDate.parse(end, dtformat);
+		List<LocalDate> totalDates = new ArrayList<>();
+		while (!startDate.isAfter(endDate)) {
+			totalDates.add(startDate);
+			startDate = startDate.plusDays(1);
+		}
+
+		List<Map<String,Double>> values = new ArrayList<Map<String,Double>>();
+		List<Map<String,Double>> dowmax = new ArrayList<Map<String,Double>>();
+		while(dowmax.size() < 7) {
+			Map<String,Double>dow = new HashMap<String,Double>();
+			dowmax.add(dow);
+		}
+		Set<String> agencies = new HashSet<String>();
+
+		for (LocalDate date : totalDates) {
+			DayOfWeek dow = date.getDayOfWeek();
+			String d = date.format(dtformat);
+			String query = "with svcids as ( ( select serviceid_agencyid, serviceid_id from gtfs_calendars gc where startdate <= ? and enddate >= ? and "+dow.name()+" = 1 and serviceid_agencyid || serviceid_id not in ( select serviceid_agencyid || serviceid_id from gtfs_calendar_dates where date = ? and exceptiontype = 2 ) union select serviceid_agencyid, serviceid_id from gtfs_calendar_dates gcd where date = ? and exceptiontype = 1 ) ), trips as ( select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round( (trip.length + trip.estlength):: numeric, 2 ) as length, trip.tlength as tlength, trip.stopscount as stops from svcids inner join gtfs_trips trip using( serviceid_agencyid, serviceid_id ) ) SELECT aid, SUM(tlength) as tlength, COUNT(tripid) FROM trips GROUP BY aid;";
+			Map<String, Double> m = new HashMap<String, Double>();
+			PreparedStatement ps;
+			try {
+				ps = connection.prepareStatement(query);
+				ps.setString(1, d);
+				ps.setString(2, d);
+				ps.setString(3, d);
+				ps.setString(4, d);
+				ResultSet rs = ps.executeQuery();
+				while (rs.next()) {
+					String agency = rs.getString("aid");
+					Double value = rs.getDouble("tlength");
+					Double amax = dowmax.get(dow.getValue()-1).getOrDefault(agency, 0.0);
+					if (value > amax) {
+						dowmax.get(dow.getValue()-1).put(agency, value);
+					}
+					m.put(agency, value);
+					agencies.add(agency);
+				}
+				rs.close();
+				ps.close();
+			} catch ( Exception e ) {
+				logger.error(e);
+			}
+			values.add(m);
+		}
+
+		ArrayList<String> sortedAgencies = new ArrayList<String>();
+		for (String s : agencies) {
+			sortedAgencies.add(s);
+		}
+
+		Double[][] table = new Double[sortedAgencies.size()][totalDates.size()];
+		for (int i=0; i<sortedAgencies.size(); i++) {
+			String agency = sortedAgencies.get(i);
+			for (int j=0; j<totalDates.size(); j++) {
+				Double dvalue = values.get(j).getOrDefault(agency, 0.0);
+				// Normalize
+				// Double amax = dowmax.get(totalDates.get(i).getDayOfWeek().getValue()-1).getOrDefault(agency, 0.0);
+				// Double norm = 0.0;
+				// if (amax > 0) {
+				// 	norm = dvalue / amax;
+				// }
+				table[i][j] = dvalue;
+			}
+		}
+
+		Double[] scores = new Double[totalDates.size()];
+		Double maxScore = 0.0;
+		LocalDate bestDate = totalDates.get(0);
+		for (int i=0;i<totalDates.size()-windowSize;i++) {
+			Double sum = 0.0;
+			for (int a=0;a<sortedAgencies.size();a++) {
+				Double asum = 0.0;
+				for (int j=0;j<windowSize;j++) {
+					if (table[a][i+j] > 0) {
+						asum += 1.0;
+					}
+				}
+				if (asum >= 5.0) {
+					sum += 1.0;
+				}
+			}
+			scores[i] = sum;
+			if (sum > maxScore) {
+				maxScore = sum;
+				bestDate = totalDates.get(i);
+			}
+		}
+
+		ServiceLevel ret = new ServiceLevel();		
+		ret.scores = scores;
+		ret.values = table;
+		ret.bestDate = bestDate.format(dtformat);
+		ret.agencies = new String[sortedAgencies.size()];
+		ret.agencies = sortedAgencies.toArray(ret.agencies);
+		ret.dates = new String[totalDates.size()];
+		for (int i=0; i<totalDates.size(); i++) {
+			ret.dates[i] = totalDates.get(i).format(dtformat);
+		}
+		dropConnection(connection);
+		return ret;
+	}
+
 	/////GEO AREA EXTENDED REPORTS QUERIES
 	
 	///// CONNECTED AGENCIES ON-MAP REPORT QUERIES
@@ -5724,88 +5865,93 @@ public class PgisEventManager {
 		 return(r);
 		 }
 	
-		public static Map<String, Daterange> daterange( int dbindex) 
-				throws FactoryException, TransformException	{
+		 public static Map<String, Daterange> daterange( int dbindex) 
+		 throws FactoryException, TransformException	{
 			Connection  connection = makeConnection(dbindex);
 			String query="";
 			Statement stmt = null;
+			String defaultDate = DatabaseConfig.getConfig(dbindex).getDefaultDate();
 		
-		 Map<String,Daterange> r = new LinkedHashMap<String,Daterange>();
-			query ="select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
-		int start =0;
-		int end =1000000000;
-		int starta =0;
-		int enda =1000000000;
+			Map<String, Daterange> r = new LinkedHashMap<String, Daterange>();
+			query = "select feedname,startdate,enddate,agencynames,agencyids from gtfs_feed_info";
+			int start = 0;
+			int end = 1000000000;
+			int starta = 0;
+			int enda = 1000000000;
 			try {
-		        stmt = connection.createStatement();
-		        ResultSet rs = stmt.executeQuery(query); 
-		     
-		        
-		        while ( rs.next() ) {
-		        	Daterange a =  new Daterange();
-		        	a.agencyids=rs.getString("agencyids");
-		        	a.agencynames=rs.getString("agencynames");
-			        
-		        a.feedname=rs.getString("feedname");
-		        a.startdate=rs.getInt("startdate");
-		         a.syear =  a.startdate/ 10000;
-		        a.smonth = (a.startdate % 10000) / 100;
-		        a.sday = a.startdate % 100;
-		        a.enddate=rs.getInt("enddate");
-		         a.eyear =   a.enddate/ 10000;
-		         a.emonth = ( a.enddate % 10000) / 100;
-		         a.eday =  a.enddate % 100;
-		        r.put(a.feedname, a);
-		       if(a.startdate>start && a.startdate<end) 
-		       {start=a.startdate;
-		       }
-		       if(a.enddate<end && a.enddate>start)
-		       {
-		       end=a.enddate;
-		       }
-		       
-		        }
-				 rs.close();
-				 stmt.close(); 
-				 dropConnection(connection);
-	int u=0;
-				 
-			for (Entry<String, Daterange> entry : r.entrySet()) {
-			u=u+1;
-				if( entry.getValue().startdate<=end && entry.getValue().enddate>=start )
-			  {
-//				  start=20260101;
-//				  end=20160101;
-			  starta=starta+1;
-				  		  }
-		
-			
-			}
-		
-			if(u!=starta)
-			{
-				start=20250101;
-			  end=20250101;
-			}
-			Daterange a =  new Daterange();
-			a.feedname="Overlap";
-		
-			a.startdate=start;
-		         a.syear =  start/ 10000;
-		        a.smonth = (start % 10000) / 100;
-		        a.sday = start % 100;
-		        a.enddate=end;
-		         a.eyear =   end/ 10000;
-		         a.emonth = ( end % 10000) / 100;
-		         a.eday =  end % 100;
-		        r.put(a.feedname, a);
-			}
-			 catch ( Exception e ) {
-				 e.printStackTrace();
-			}
-			return r;	
-		}
+				stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
 
+				while (rs.next()) {
+					Daterange a = new Daterange();
+					a.agencyids = rs.getString("agencyids");
+					a.agencynames = rs.getString("agencynames");
+
+					a.feedname = rs.getString("feedname");
+					a.startdate = rs.getInt("startdate");
+					a.syear = a.startdate / 10000;
+					a.smonth = (a.startdate % 10000) / 100;
+					a.sday = a.startdate % 100;
+					a.enddate = rs.getInt("enddate");
+					a.eyear = a.enddate / 10000;
+					a.emonth = (a.enddate % 10000) / 100;
+					a.eday = a.enddate % 100;
+					r.put(a.feedname, a);
+					if (a.startdate > start && a.startdate < end) {
+						start = a.startdate;
+					}
+					if (a.enddate < end && a.enddate > start) {
+						end = a.enddate;
+					}
+
+				}
+				rs.close();
+				stmt.close();
+				dropConnection(connection);
+				int u = 0;
+
+				for (Entry<String, Daterange> entry : r.entrySet()) {
+					u = u + 1;
+					if (entry.getValue().startdate <= end && entry.getValue().enddate >= start) {
+						// start=20260101;
+						// end=20160101;
+						starta = starta + 1;
+					}
+
+				}
+
+				if (u != starta) {
+					start = 20250101;
+					end = 20250101;
+				}
+				Daterange a = new Daterange();
+				a.feedname = "Overlap";
+
+				a.startdate = start;
+				a.syear = start / 10000;
+				a.smonth = (start % 10000) / 100;
+				a.sday = start % 100;
+				a.enddate = end;
+				a.eyear = end / 10000;
+				a.emonth = (end % 10000) / 100;
+				a.eday = end % 100;
+				r.put(a.feedname, a);
+
+				if (defaultDate.length() == 8) {
+					Daterange d = new Daterange();
+					d.feedname = "Default";
+					try {
+						d.startdate = Integer.parseInt(defaultDate);
+						r.put(d.feedname, d);	
+					} catch (NumberFormatException e) {
+					}					
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return r;
+		}
+		
 		public static Map<String,Agencyselect> setHiddenAgencies(int dbindex, String username, String[] agency_ids) throws SQLException, FactoryException, TransformException {
 			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
 			Connection connection = db.getConnection();
