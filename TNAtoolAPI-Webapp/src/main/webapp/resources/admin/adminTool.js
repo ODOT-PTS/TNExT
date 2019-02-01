@@ -79,8 +79,10 @@ function addModifyDB(j, index, existing){
 	html+="<label>Password:</label><br>";
 	html+="<input type='text' id='"+dbInfo[0][6]+"' value='"+info[6]+"' required style='width:90%;font-size:80%'><br><br>";
 
-	html+="<label>Best Service Date:</label><br>";
-	html+="<input type='text' id='defaultDate' value='"+info[10]+"' required style='width:90%;font-size:80%'><br><br>";
+	if (existing == true) {
+		html+="<label>Best Service Date:</label><br>";
+		html+="<input type='text' id='defaultDate' value='"+info[10]+"' required style='width:90%;font-size:80%'><br><br>";	
+	}
 
 	html+="<input type='submit' id='dialogSubmit' tabindex='-1' style='position:absolute; top:-1000px'>";
 	$('#dialogFields').html(html);
@@ -118,7 +120,7 @@ function addModifyDB(j, index, existing){
 	        		        return;
 	        		    }
 	        		}
-        			addDB();	        		
+        			addDB(existing);	        		
 	        	}else{
 	        		alert(d.DBError);
 	        	}
@@ -141,6 +143,31 @@ function runQueries(index){
         }
 	});
 	
+}
+
+function updateBestServiceWindow(index) {
+		inProcess = true;
+	$('#otherFeedbackMessage').html('<img src="../resources/images/loadingGif.gif" alt="loading" style="width:20px;height:20px">'
+									+'Finding the week with the best average service for all feeds.'
+									+'<br>This process takes up to a few minutes.');
+	otherFeedbackDialog.dialog("open");
+
+	$.ajax({
+        type: "GET",
+        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateBestServiceWindow?&db="+index,
+        dataType: "json",
+        async: true,
+        success: function(d) {
+			$('#otherFeedbackMessage').html("Successfully updated best service date: "+d.metadata);
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);			
+		},
+		error: function(d) {
+			$('#otherFeedbackMessage').html("Error updating best service date: "+d);
+        	inProcess = false;
+        	otherFeedbackDialog.dialog('option', 'buttons', closeButton);			
+		}
+	});
 }
 
 /*function addPsqlFunctions(index){
@@ -174,7 +201,7 @@ function addIndex(index){
 function dSubmit(){
 	$('#dialogSubmit').click();
 }
-function addDB(){
+function addDB(existing){
 	var newDB = [];
 	for(var i=0; i<dbInfo[0].length; i++){
     	newDB.push($('#'+dbInfo[0][i]).val());
@@ -183,7 +210,7 @@ function addDB(){
 	newDB[4]= "jdbc:postgresql://"+newDB[4]+":"+$('#'+dbInfo[0][4]+"p").val()+"/"+$('#'+dbInfo[0][4]+"n").val();
 	var db = newDB.toString();
 	var url = "/TNAtoolAPI-Webapp/modifiers/dbupdate/addDB?&db="+db;
-	if (newDB[0] != -1) {
+	if (existing == true) {
 		url = "/TNAtoolAPI-Webapp/modifiers/dbupdate/updateDB?&db="+db;
 	}
 	$.ajax({
@@ -2012,11 +2039,11 @@ $(document).ready(function(){
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='femp'></td></tr>"+
             			"<tr><td><input type='button' class='update dbButtons-class no_css single' value='Run Update Queries' style='background-color: rgba(0, 111, 128, 0.21);' onclick='runUpdates("+i+")'></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='update'></td></tr>"+
-            			"<tr><td><input type='button' class='updateBestServiceWindow dbButtons-class no_css single' value='Find Best Service Window' style='background-color: rgba(0, 111, 128, 0.21);' onclick='updateBestServiceWindow("+i-1+")'></td>"+
-            			"<td></tr>"+
+            			"<tr><td><input type='button' class='updateBestServiceWindow dbButtons-class no_css single' value='Find Best Service Week' style='background-color: rgba(0, 111, 128, 0.21);' onclick='updateBestServiceWindow("+(i-1)+")'></td>"+
+            			"<td></td></tr>"+
 						"<tr><td><input type='button' class='activate dbButtons-class no_css single' value='Activate Database' style='background-color: rgba(4, 128, 0, 0.48);' onclick='activeDeactive("+i+")'></td>"+
             			"<td><img src='../resources/images/check.png' alt='dataset status' style='width: 1.2em;margin-left: 0.3em;' class='activate'></td></tr>"+
-            			"<tr><td><input type='button' class='modify dbButtons-class no_css single' value='Modify Database Information' style='background-color:rgba(128, 87, 0, 0.46)' onclick='addModifyDB("+i+", "+dbInfo[i][0]+")'></td>"+
+            			"<tr><td><input type='button' class='modify dbButtons-class no_css single' value='Modify Database Information' style='background-color:rgba(128, 87, 0, 0.46)' onclick='addModifyDB("+i+", "+dbInfo[i][0]+", true)'></td>"+
             			"<td></td></tr>"+
             			"<tr><td><input type='button' class='delete dbButtons-class no_css single' value='Delete Database' style='background-color:rgba(205, 10, 10, 0.65)' onclick='deleteDb("+dbInfo[i][0]+")'></td>"+
             			"<td></td></tr>"+
