@@ -3391,6 +3391,7 @@ public class DbUpdate {
     dbc.setDefaultDate(sl.bestDate);
     try {
       DatabaseConfig.saveDbInfo();
+      error.metadata.add(sl.bestDate);
     } catch(IOException e) {
       logger.error("failed to save dbconfig:"+e);
       error.DBError = e.getMessage();
