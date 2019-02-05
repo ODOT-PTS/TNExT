@@ -188,7 +188,7 @@ function runAjaxAreas(ind,areaType,fileName){
 						"\"" + addPercent(numberconv(d.wacUnServed)) + "\"," +
 						"\"" + d.wacServedByService + "\",";
 				}else
-					csvContetn += "N/A,N/A,N/A,N/A,N/A,N/A";
+					csvContent += "N/A,N/A,N/A,N/A,N/A,N/A";
 				csvContent += "\"" + (d.ConnectedCommunities).replace(/County/g,'') +  "\","  +
 					"\"" + d.HoursOfService + "\"," +
 					"\"" + d.MinFare + "\"," +
