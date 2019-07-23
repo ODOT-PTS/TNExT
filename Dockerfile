@@ -19,7 +19,7 @@ ADD ./TNAtoolAPI-Webapp/pom.xml /app/pom.xml
 RUN cd /app && mvn dependency:go-offline
 # Build tnext
 ADD ./TNAtoolAPI-Webapp /app
-RUN cd /app && mvn clean install -Dmaven.repo.local=/data/m2cache
+RUN cd /app && mvn clean install
 RUN cp /app/target/TNAtoolAPI-Webapp-0.0.1-SNAPSHOT.war ${CATALINA_BASE}/webapps/ROOT.war
 
 # tnast config
