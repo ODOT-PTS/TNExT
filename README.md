@@ -13,6 +13,21 @@ This repository is provides a set of [Docker containers](https://www.docker.com/
 2. Clone a local copy of this repository: `git clone https://github.com/ODOT-PTS/TNExT.git`
 3. Start a Docker Compose right: `docker-compose up`
 
+## Creating a new installation from a database snapshot
+
+1. `docker-compose build` to prepare images
+2. Add a database snapshot to the `./data` directory, which will be mounted as `/data` inside the tnext container.
+3. Create the database, e.g. may2018: `docker-compose run tnext createdb may2018`
+4. Import the database: `docker-compose run tnext pg_restore -v -Fc -d may2018 /data/may2018.backup`
+5. Create a config file listing this database, as `./conf/admin/resources/dbInfo.csv`, adjusting parameters as necessary:
+
+```
+databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2,defaultDate
+0,May 2018,,,jdbc:postgresql://db:5432/may2018,postgres,postgres,,,,20180428
+```
+
+6. Start normally: `docker-compose up` and access at http://localhost:8080
+
 ## Running using local system dependencies
 
 The following software packages must be installed on a computer to be able to host an instance of TNExT:
