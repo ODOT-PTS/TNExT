@@ -40,7 +40,7 @@ var areaId = getURIParameter("areaid");
 var geoid = getURIParameter("geoid");
 var route = getURIParameter("route");
 var agency = getURIParameter("agency");
-var rc = parseInt(getURIParameter("rc")) || -1;
+var rc = Number.isNaN(parseInt(getURIParameter("rc"))) ? -1 : parseInt(getURIParameter("rc"));
 var stime = getURIParameter("stime") || "";
 var etime = getURIParameter("etime") || "";
 var table;
@@ -79,7 +79,7 @@ $(document).ready(function(){
 	progressBar();		
 	$('button.feedpicker').click(feedPickerShow);
     feedPickerUpdateStatus();
-	
+
 	go(key);
 	  $('input.timepicker').timepicker({timeFormat: 'H:mm',scrollbar:true});
 	  $('input.timepicker1').timepicker({timeFormat: 'H:mm',scrollbar:true});
