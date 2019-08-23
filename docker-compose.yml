@@ -11,10 +11,9 @@ services:
     volumes:
      - ./nginx/tnext.conf:/etc/nginx/conf.d/tnext.conf
     ports:
-      - "8080"
+     - "8079:8080"
     links:
-      - tnext      
-
+     - tnext      
   db:
     restart: always
     command: postgres
