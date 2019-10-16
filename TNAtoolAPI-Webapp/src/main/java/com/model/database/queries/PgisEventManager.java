@@ -4692,7 +4692,7 @@ public class PgisEventManager {
 					+ "stopids inner join gtfs_stops stop on st_within(stop.location,ST_GeomFromText('"+targetGeometry+"',2993))=true where stop.id = stopids.stopid and stop.agencyid=stopids.aid_def),";			
 		}
 		mainquery+="stopsas as (select agency.name as agency, stops.* from stops inner join gtfs_agencies agency on agency.id = stops.aid order by aid, stopid), "
-				+ "stopsa as (select stopsas.*, array_agg(blockid) blks from stopsas , census_blocks where st_dwithin(census_blocks.location, loc,"+losR+") group by stopsas.agency, stopsas.aid, stopsas.routes, stopsas.stopid, stopsas.name, stopsas.location, stopsas.loc, stopsas.svc)"
+				+ "stopsa as (select stopsas.*, array_agg(blockid) blks from stopsas left join census_blocks on st_dwithin(census_blocks.location, loc,"+losR+") group by stopsas.agency, stopsas.aid, stopsas.routes, stopsas.stopid, stopsas.name, stopsas.location, stopsas.loc, stopsas.svc)"
 				+ "select * from stopsa";
 		try{
 			PreparedStatement stmt = connection.prepareStatement(mainquery);

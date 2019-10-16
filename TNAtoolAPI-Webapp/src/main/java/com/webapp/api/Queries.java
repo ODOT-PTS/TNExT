@@ -493,7 +493,7 @@ public class Queries {
 					"	FROM gtfs_routes AS routes 	 " +
 					"	INNER JOIN gtfs_trips AS trips ON routes.id = trips.route_id 	 " +
 					"	INNER JOIN gtfs_agencies AS agencies ON routes.agencyid = agencies.id   " +
-					"	INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = routes.agencyid  " +
+					"	INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE ?::text = ANY(string_to_array(agencyids, ','))) AS feeds ON feeds.aid = routes.agencyid  " +
 					"	WHERE trips.agencyid = ? " +
 					") ";
 				String qShape = "SELECT * FROM (" + q + " SELECT * FROM routes ORDER BY (route_id)) AS pgsql2shp;";
@@ -575,7 +575,7 @@ public class Queries {
 					"		INNER JOIN gtfs_stop_service_map AS map ON gtfs_stops.id = map.stopid AND gtfs_stops.agencyid = map.agencyid_def " +
 					"		INNER JOIN gtfs_stop_times ON gtfs_stops.id = gtfs_stop_times.stop_id AND gtfs_stops.agencyid = gtfs_stop_times.stop_agencyid " +
 					"		INNER JOIN gtfs_agencies ON gtfs_agencies.id = ? " +
-					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE agencyids LIKE '%' || ? || '%') AS feeds ON feeds.aid = map.agencyid " +					
+					"		INNER JOIN (SELECT ?::text AS aid, startdate,enddate FROM gtfs_feed_info WHERE ?::text = ANY(string_to_array(agencyids, ','))) AS feeds ON feeds.aid = map.agencyid " +
 					"		WHERE map.agencyid = ? " +
 					") " +
 					"";
