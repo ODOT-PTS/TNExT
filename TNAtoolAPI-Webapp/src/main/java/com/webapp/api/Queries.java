@@ -2979,7 +2979,7 @@ public class Queries {
 		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[6])/employees)))/100.0);
 		
 		HashMap<String, String> servicemetrics = PgisEventManager.UAreasServiceMetrics(sdates, days, fulldates, popmin,popmax, getUsername(), L, x, dbindex, popYear);
-		logger.debug("servicemetrics: ", servicemetrics);
+		logger.debug("Annie servicemetrics : " + servicemetrics);
 		index +=6;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		double ServiceMiles = Float.parseFloat(servicemetrics.get("svcmiles"));
