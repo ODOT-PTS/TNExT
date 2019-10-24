@@ -11,13 +11,13 @@ services:
     volumes:
      - ./nginx/tnext.conf:/etc/nginx/conf.d/tnext.conf
     ports:
-      - "8080"
+      - "8080:8080"
     links:
       - tnext      
 
   db:
     restart: always
-    command: postgres
+    command: postgres --log_statement=all
     image: mdillon/postgis:9.6
     environment:
       POSTGRES_USER: postgres
@@ -35,7 +35,8 @@ services:
       PGPASSWORD: postgres
       PGHOST: db
     volumes:
-      - conf:/app/conf
+      - ./data:/data
+      - ./conf:/app/conf
     ports:
       - "8080"
     links:
