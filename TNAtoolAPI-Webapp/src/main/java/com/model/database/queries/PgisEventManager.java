@@ -3731,6 +3731,7 @@ public class PgisEventManager {
     		+"      inner join racatlos on true"
     		+"      inner join wacatlos on true"; 
       try {
+		logger.debug("Annie query: " + query);
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
         while ( rs.next() ) {

@@ -2936,11 +2936,13 @@ public class Queries {
     	long population = 0;
     	long LandArea = 0;
     	long employment=emp[0];
-    	long employees =emp[1];
+		long employees =emp[1];
+		logger.debug("Annie urbans length: " + urbans.size());
     	for (Urban inst: urbans){
     		population += inst.getPopulation();
     		LandArea +=inst.getLandarea();
-    	}
+		}
+		logger.debug("Annie population: " + population);
     	index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	x = x * 1609.34;    	
@@ -2977,6 +2979,7 @@ public class Queries {
 		response.wacUnServed = String.valueOf(Math.round(1E4-((10000.00*(stopspop[6])/employees)))/100.0);
 		
 		HashMap<String, String> servicemetrics = PgisEventManager.UAreasServiceMetrics(sdates, days, fulldates, popmin,popmax, getUsername(), L, x, dbindex, popYear);
+		logger.debug("servicemetrics: ", servicemetrics);
 		index +=6;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
 		double ServiceMiles = Float.parseFloat(servicemetrics.get("svcmiles"));
