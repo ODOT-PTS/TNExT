@@ -316,9 +316,7 @@ public static void updateSessions(){
 		public static List<Urban> geturbansbypopbet(int popmin,int popmax, int sessionindex, String popYear) throws FactoryException, TransformException {			
 			session[sessionindex].beginTransaction();
 			String hql = "from Urban where population"+popYear+" BETWEEN '"+popmin+"' AND '"+popmax+"'";
-			logger.debug("Annie hql: " + hql);
 			Query q = session[sessionindex].createQuery(hql);
-			logger.debug("Annie q: " + q);
 			@SuppressWarnings("unchecked")
 			List<Urban> results = (List<Urban>) q.list();
 	        Hutil.getSessionFactory()[sessionindex].close();

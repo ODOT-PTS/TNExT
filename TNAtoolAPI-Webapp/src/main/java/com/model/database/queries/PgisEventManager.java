@@ -113,7 +113,6 @@ public class PgisEventManager {
 	 * @return Connection
 	 */
 	public static Connection makeConnection(int dbindex){
-		logger.debug("Annie DBconfig tostring: " + DatabaseConfig.getConfig(dbindex).toString());
 		return DatabaseConfig.getConfig(dbindex).getConnection();
 	}
 
@@ -3732,12 +3731,9 @@ public class PgisEventManager {
     		+"      inner join racatlos on true"
     		+"      inner join wacatlos on true"; 
       try {
-		logger.debug("Annie query: " + query);
         stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);        
         while ( rs.next() ) {
-			logger.debug("Annie String.valueOf(rs.getLong(upoplos)): " + String.valueOf(rs.getInt("upoplos")));
-			logger.debug("Annie String.valueOf(rs.getLong(upoplos)): " + String.valueOf(rs.getLong("upoplos")));
         	response.put("svcmiles", String.valueOf(rs.getFloat("svcmiles")));
         	response.put("svchours", String.valueOf(Math.round(rs.getLong("svchours")/36.00)/100.00));
         	response.put("svcstops", String.valueOf(rs.getLong("svcstops")));
