@@ -2936,11 +2936,11 @@ public class Queries {
     	long population = 0;
     	long LandArea = 0;
     	long employment=emp[0];
-    	long employees =emp[1];
+		long employees =emp[1];
     	for (Urban inst: urbans){
     		population += inst.getPopulation();
     		LandArea +=inst.getLandarea();
-    	}
+		}
     	index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	x = x * 1609.34;    	
