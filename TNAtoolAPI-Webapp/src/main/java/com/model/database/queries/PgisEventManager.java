@@ -5978,7 +5978,7 @@ public class PgisEventManager {
 			return Agencyget(dbindex, username);
 		}
 
-		public static Map<String,Agencyselect> removeAHiddenAgencies(int dbindex, String username) 
+		public static Map<String,Agencyselect> removeHiddenAgencies(int dbindex, String username) 
 		throws SQLException, FactoryException, TransformException {
 			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
 			Connection connection = db.getConnection();
