@@ -1845,8 +1845,7 @@ function updateListDialog(agenciesIds){
 	              "Shawn's Rideshare",
 	              "South Clackamas Transportation District",
 	              "Warm Springs Transit"];
-	
-	if (!w_qstringd && getSession()=='admin'){
+	if (!w_qstringd){
 		var html = 	"<br><br><p style='margin-left:3%'><b>Agencies with no GTFS feed:</b></p>";
 		html +=	"<ul style='margin-bottom: 20px;'>";
 		for(var i=0; i<noGTFS.length; i++){
