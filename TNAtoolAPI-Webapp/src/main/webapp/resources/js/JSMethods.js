@@ -1245,6 +1245,8 @@ function setHiddenAgencies() {
 }
 
 function feedPickerShow() {
+	// Annie: Ideally these would be initialized when new sessions 
+	// and database connections are made
 	initializeUserSelectedAgenciesIfNeeded()
 	feedPickerGetAgencies();
 	$('#feedpicker').dialog( {

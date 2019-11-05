@@ -5978,6 +5978,26 @@ public class PgisEventManager {
 			return Agencyget(dbindex, username);
 		}
 
+		public static Map<String,Agencyselect> removeHiddenAgencies(int dbindex, String username) 
+		throws SQLException, FactoryException, TransformException {
+			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
+			Connection connection = db.getConnection();
+			String query = ""
+				+ " DELETE FROM user_selected_agencies"
+				+ " WHERE username = ?::text";
+			try {
+				PreparedStatement ps = connection.prepareStatement(query);
+				ps.setString(1, username);
+				logger.info("removeHiddenAgencies query:\n "+ ps.toString());
+				ps.executeUpdate();
+				ps.close();
+			} catch ( Exception e ) {
+				logger.error(e);
+			}
+
+			return Agencyget(dbindex, username);
+		}
+
 		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
 				throws FactoryException, TransformException	{
 			Connection  connection = makeConnection(dbindex);
