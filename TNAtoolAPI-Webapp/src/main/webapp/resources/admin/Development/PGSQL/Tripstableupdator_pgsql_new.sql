@@ -1,6 +1,7 @@
 ﻿/*creating this index makes a huge difference*/
 create INDEX trips_shapeids on gtfs_trips (shapeid_agencyid,shapeid_id);
 create unique index tripids on gtfs_trips (agencyid,id);
+create index trips_serviceids on gtfs_trips (serviceid_id,serviceid_agencyid);
 
 /*Eficient update queries for trips table:*/
 
