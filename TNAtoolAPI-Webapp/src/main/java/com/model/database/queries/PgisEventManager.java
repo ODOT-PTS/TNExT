@@ -1389,6 +1389,390 @@ public class PgisEventManager {
 		}
 	    return results;
 	}
+
+	/**
+	 * Queries Title VI data on a given area (based on the reportType)
+	 * 
+	 * @param reportType - determines whether the report is on agencies or geographical areas 
+	 * @param dates - array of the dates to report on
+	 * @param day - array of days of the week associated with selected dates
+	 * @param fulldatess - array of selected dates in full format
+	 * @param radius - search radius
+	 * @param L - minimum level of service
+	 * @param dbindex - database index
+	 * @param username - user session
+	 * @return TitleVIDataList
+	 */
+	public static TitleVIDataList getTitleVIDataNonAgency(String reportType, String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
+		Connection connection = makeConnection(dbindex);
+		
+		String tripsViewQuery = "";
+
+		tripsViewQuery = "CREATE TEMP VIEW trips_tmp_view AS "
+			+ " with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), svcids AS (";
+		for (int i = 0; i < dates.length; i++){
+			tripsViewQuery+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+				+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+				+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+				+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+			if ( i + 1 <dates.length)
+				tripsViewQuery += " union all ";
+		} 
+		tripsViewQuery+=") select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+			+"	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+			+"	inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid";
+	    
+		String criteria1 = "";
+		String criteria2 = ""; 
+		String criteria3 = "";
+		String criteria4 = "";
+		String criteria5 = "";
+		if (reportType.equals("Counties")){
+			criteria1 = "LEFT(blockid,5)";
+			criteria2 = "census_counties"; 
+			criteria3 = "census_counties"; 
+			criteria4 = "countyid";
+			criteria5 = "census_counties.cname";
+		}else if(reportType.equals("Census Places")){
+			criteria1 = "placeid";
+			criteria2 = "census_places"; 
+			criteria3 = "census_places";
+			criteria4 = "placeid";
+			criteria5 = "census_places.pname";
+		}else if(reportType.equals("Congressional Districts")){
+			criteria1 = "congdistid";
+			criteria2 = "census_congdists"; 
+			criteria3 = "census_congdists";
+			criteria4 = "congdistid";
+			criteria5 = "census_congdists.cname";
+		}else if(reportType.equals("Urban Areas")){
+			criteria1 = "urbanid";
+			criteria2 = "census_urbans"; 
+			criteria3 = "census_urbans";
+			criteria4 = "urbanid";
+			criteria5 = "census_urbans.uname";
+		}else if(reportType.equals("ODOT Transit Regions")){
+			criteria1 = "regionid";
+			criteria2 = "regions";
+			criteria3 = "(SELECT odotregionid AS regionid, SUM(population) AS population FROM census_counties GROUP BY odotregionid) AS regions"; 
+			criteria4 = "regionid";
+			criteria5 = "'Region ' || regions.regionid";
+		}
+		
+		String popAtLOSQuery = "with stopsatlos1 AS ("
+			+ " 	SELECT "
+			+ " 		stime.stop_agencyid AS aid,"
+			+ " 		stime.stop_id AS stopid,"
+			+ " 		count(trips_tmp_view.aid) AS service"
+			+ " 	FROM gtfs_stop_times stime"
+			+ " 	INNER JOIN trips_tmp_view"
+			+ " 		ON stime.trip_agencyid =trips_tmp_view.aid"
+			+ " 		AND stime.trip_id=trips_tmp_view.tripid"
+			+ " 	GROUP BY  stime.stop_agencyid, stime.stop_id"
+			+ " 	HAVING count(trips_tmp_view.aid)>= " + L + " ), "
+			+ " stopsatlos as ("
+			+ " 	select "
+			+ " 		stopsatlos1.*,"
+			+ " 		gtfs_stops.location"
+			+ " 	from stopsatlos1"
+			+ " 	JOIN gtfs_stops "
+			+ " 		on gtfs_stops.agencyid = stopsatlos1.aid"
+			+ " 		and gtfs_stops.id = stopsatlos1.stopid ), "
+			+ " popatlos as (select "
+			+ "	  english ,"
+			+ "	  spanish ,"
+			+ "	  indo_european ,"
+			+ "	  asian_and_pacific_island ,"
+			+ "	  other_languages ,"
+			+ "   below_poverty ,"
+			+ "	  above_poverty ,"
+			+ "	  with_disability ,"
+			+ "	  without_disability ,"
+			+ "	  from5to17 ,"
+			+ "	  from18to64 ,"
+			+ "	  above65 ,"
+			+ "	  black_or_african_american ,"
+			+ "	  american_indian_and_alaska_native ,"
+			+ "	  asian ,"
+			+ "	  native_hawaiian_and_other_pacific_islander ,"
+			+ "	  other_races ,"
+			+ "	  two_or_more ,"
+			+ "	  white ,"
+			+ "	  hispanic_or_latino ,"
+			+ " title_vi_blocks_float.blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid "
+			+ "	from title_vi_blocks_float inner join stopsatlos on st_dwithin(title_vi_blocks_float.location,stopsatlos.location,"+radius+")"
+			+ "	inner join census_blocks blocks ON title_vi_blocks_float.blockid = blocks.blockid GROUP BY title_vi_blocks_float.blockid, blocks.urbanid, blocks.regionid, blocks.congdistid, blocks.placeid), "
+			+ " popatlos1 as (select "
+			+ "   SUM(english) AS english_atlos,"
+			+ "   SUM(spanish) AS spanish_atlos,"
+			+ "	  SUM(indo_european) AS indo_european_atlos,"
+			+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_atlos,"
+			+ "	  SUM(other_languages) AS other_languages_atlos,"
+			+ "	  SUM(below_poverty) AS below_poverty_atlos,"
+			+ "	  SUM(above_poverty) AS above_poverty_atlos,"
+			+ "	  SUM(with_disability) AS with_disability_atlos,"
+			+ "	  SUM(without_disability) AS without_disability_atlos,"
+			+ "	  SUM(from5to17) AS from5to17_atlos,"
+			+ "	  SUM(from18to64) AS from18to64_atlos,"
+			+ "	  SUM(above65) AS above65_atlos,"
+			+ "	  SUM(black_or_african_american) AS black_or_african_american_atlos,"
+			+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_atlos,"
+			+ "	  SUM(asian) AS asian_atlos,"
+			+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_atlos,"
+			+ "	  SUM(other_races) AS other_races_atlos,"
+			+ "	  SUM(two_or_more) AS two_or_more_atlos,"
+			+ "	  SUM(white) AS white_atlos,"
+			+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_atlos,"
+			+ " " + criteria1 + " AS " + criteria4 + " FROM popatlos GROUP BY " + criteria1 + ")"
+			+ " select popatlos1.*, " + criteria2 + "." + criteria4 + " AS areaid, " + criteria5 + " AS areaname "
+			+ " FROM " + criteria3
+			+ " LEFT JOIN popatlos1 USING(" + criteria4 + ")";
+
+		String popServedQuery = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a "
+			+ " LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '" + username + "' "
+			+ " AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), "
+		    + " stops1 AS ("
+			+ " 	SELECT "
+			+ " 		stime.stop_agencyid AS aid,"
+			+ " 		stime.stop_id AS stopid,"
+			+ " 		min(stime.arrivaltime) AS arrival,"
+			+ " 		max(stime.departuretime) AS departure,"
+			+ " 		count(trips_tmp_view.aid) AS service"
+			+ " 	FROM gtfs_stop_times stime"
+			+ " 	INNER JOIN trips_tmp_view"
+			+ " 		ON stime.trip_agencyid =trips_tmp_view.aid"
+			+ " 		AND stime.trip_id=trips_tmp_view.tripid"
+			+ " 	WHERE stime.arrivaltime>0"
+			+ " 	AND stime.departuretime>0"
+			+ " 	GROUP BY  stime.stop_agencyid, stime.stop_id),"
+			+ " stops as ("
+			+ " 	select "
+			+ " 		stops1.*,"
+			+ " 		gtfs_stops.location"
+			+ " 	from stops1"
+			+ " 	JOIN gtfs_stops "
+			+ " 		on gtfs_stops.agencyid = stops1.aid"
+			+ " 		and gtfs_stops.id = stops1.stopid ),"
+			+ " popserved as (select "
+			+ "	  english*(stops.service) AS english,"
+			+ "	  spanish*(stops.service) AS spanish,"
+			+ "	  indo_european*(stops.service) AS indo_european,"
+			+ "	  asian_and_pacific_island*(stops.service) AS asian_and_pacific_island,"
+			+ "	  other_languages*(stops.service) AS other_languages,"
+			+ "	  below_poverty*(stops.service) AS below_poverty,"
+			+ "	  above_poverty*(stops.service) AS above_poverty,"
+			+ "	  with_disability*(stops.service) AS with_disability,"
+			+ "	  without_disability*(stops.service) AS without_disability,"
+			+ "	  from5to17*(stops.service) AS from5to17,"
+			+ "	  from18to64*(stops.service) AS from18to64,"
+			+ "	  above65*(stops.service) AS above65,"
+			+ "	  black_or_african_american*(stops.service) AS black_or_african_american,"
+			+ "	  american_indian_and_alaska_native*(stops.service) AS american_indian_and_alaska_native,"
+			+ "	  asian*(stops.service) AS asian,"
+			+ "	  native_hawaiian_and_other_pacific_islander*(stops.service) AS native_hawaiian_and_other_pacific_islander,"
+			+ "	  other_races*(stops.service) AS other_races,"
+			+ "	  two_or_more*(stops.service) AS two_or_more,"
+			+ "	  white*(stops.service) AS white,"
+			+ "	  hispanic_or_latino*(stops.service) AS hispanic_or_latino, "
+			+ "	  blocks.blockid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid  "
+			+ "	from title_vi_blocks_float blocks inner join stops on st_dwithin(blocks.location, stops.location,"+radius+") "
+			+ "	inner join census_blocks ON blocks.blockid=census_blocks.blockid "
+			+ "	group by stops.service, blocks.blockid,census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid), "
+			+ " popserved1 as (select "
+			+ "   SUM(english) AS english_served,"
+			+ "	  SUM(spanish) AS spanish_served,"
+			+ "	  SUM(indo_european) AS indo_european_served,"
+			+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_served,"
+			+ "	  SUM(other_languages) AS other_languages_served,"
+			+ "	  SUM(below_poverty) AS below_poverty_served,"
+			+ "	  SUM(above_poverty) AS above_poverty_served,"
+			+ "	  SUM(with_disability) AS with_disability_served,"
+			+ "	  SUM(without_disability) AS without_disability_served,"
+			+ "	  SUM(from5to17) AS from5to17_served,"
+			+ "	  SUM(from18to64) AS from18to64_served,"
+			+ "	  SUM(above65) AS above65_served,"
+			+ "	  SUM(black_or_african_american) AS black_or_african_american_served,"
+			+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_served,"
+			+ "	  SUM(asian) AS asian_served,"
+			+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_served,"
+			+ "	  SUM(other_races) AS other_races_served,"
+			+ "	  SUM(two_or_more) AS two_or_more_served,"
+			+ "	  SUM(white) AS white_served,"
+			+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_served,"
+			+ " " + criteria1 + " AS " + criteria4 + " from popserved GROUP BY " + criteria1 + "), "
+			+ " tempstops as (select id, agencyid, blockid, location from gtfs_stops stop inner join aids on stop.agencyid = aids.aid),  "
+			+ " census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid  "
+			+ " from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+")  "
+			+ " group by block.blockid),  "
+			+ " popwithinx as (select  "
+			+ "	  SUM(english) AS english_withinx,"
+			+ "	  SUM(spanish) AS spanish_withinx,"
+			+ "	  SUM(indo_european) AS indo_european_withinx,"
+			+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_withinx,"
+			+ "	  SUM(other_languages) AS other_languages_withinx,"
+			+ "	  SUM(below_poverty) AS below_poverty_withinx,"
+			+ "	  SUM(above_poverty) AS above_poverty_withinx,"
+			+ "	  SUM(with_disability) AS with_disability_withinx,"
+			+ "	  SUM(without_disability) AS without_disability_withinx,"
+			+ "	  SUM(from5to17) AS from5to17_withinx,"
+			+ "	  SUM(from18to64) AS from18to64_withinx,"
+			+ "	  SUM(above65) AS above65_withinx,"
+			+ "	  SUM(black_or_african_american) AS black_or_african_american_withinx,"
+			+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_withinx,"
+			+ "	  SUM(asian) AS asian_withinx,"
+			+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_withinx,"
+			+ "	  SUM(other_races) AS other_races_withinx,"
+			+ "	  SUM(two_or_more) AS two_or_more_withinx,"
+			+ "	  SUM(white) AS white_withinx,"
+			+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_withinx,"
+			+ " " + criteria1 + " AS " + criteria4 + " FROM census INNER JOIN title_vi_blocks_float USING(blockid) GROUP BY " + criteria4 + "), "
+			+ " totalpop AS (SELECT title_vi_blocks_float.*, LEFT(title_vi_blocks_float.blockid,5) AS countyid, census_blocks.urbanid, census_blocks.regionid, census_blocks.congdistid, census_blocks.placeid "
+			+ "	FROM title_vi_blocks_float INNER JOIN census_blocks USING(blockid)), "
+			+ " totalpop1 AS (SELECT "
+			+ "	  SUM(english) AS english,"
+			+ "   SUM(spanish) AS spanish,"
+			+ "	  SUM(indo_european) AS indo_european,"
+			+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island,"
+			+ "	  SUM(other_languages) AS other_languages,"
+			+ "	  SUM(below_poverty) AS below_poverty,"
+			+ "	  SUM(above_poverty) AS above_poverty,"
+			+ "	  SUM(with_disability) AS with_disability,"
+			+ "	  SUM(without_disability) AS without_disability,"
+			+ "	  SUM(from5to17) AS from5to17,"
+			+ "	  SUM(from18to64) AS from18to64,"
+			+ "	  SUM(above65) AS above65,"
+			+ "	  SUM(black_or_african_american) AS black_or_african_american,"
+			+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native,"
+			+ "	  SUM(asian) AS asian,"
+			+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander,"
+			+ "	  SUM(other_races) AS other_races,"
+			+ "	  SUM(two_or_more) AS two_or_more,"
+			+ "	  SUM(white) AS white,"
+			+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino,"
+			+ 	  criteria4
+			+ " FROM totalpop GROUP BY " + criteria4 + ") "
+			+ " select popserved1.*, popwithinx.*, totalpop1.*, " + criteria2 + "." + criteria4 + " AS areaid, " + criteria5 + " AS areaname "
+			+ " FROM " + criteria3 + " LEFT JOIN popserved1 USING(" + criteria4 + ") "
+			+ " LEFT JOIN popwithinx USING(" + criteria4 + ") "
+			+ " LEFT JOIN totalpop1 USING(" + criteria4 + ")";
+
+		String dropTripsViewQuery = "DROP VIEW trips_tmp_view";
+
+		TitleVIDataList results = new TitleVIDataList();
+
+	    try {
+
+			PreparedStatement createTripsViewStatement = connection.prepareStatement(tripsViewQuery);
+			PreparedStatement popLOSStatement = connection.prepareStatement(popAtLOSQuery);
+			PreparedStatement popServedStatement = connection.prepareStatement(popServedQuery);
+			PreparedStatement dropTripsViewStatement = connection.prepareStatement(dropTripsViewQuery);
+
+			createTripsViewStatement.execute();
+			
+			ResultSet popLOSRs = popLOSStatement.executeQuery();
+
+			while (popLOSRs.next()) {
+				TitleVIData titleVIRow = new TitleVIData();		
+				titleVIRow.id = popLOSRs.getString("areaid");
+				titleVIRow.name = popLOSRs.getString("areaname");
+				titleVIRow.english_atlos = popLOSRs.getInt("english_atlos");
+				titleVIRow.spanish_atlos = popLOSRs.getInt("spanish_atlos");
+				titleVIRow.indo_european_atlos = popLOSRs.getInt("indo_european_atlos");
+				titleVIRow.asian_and_pacific_island_atlos = popLOSRs.getInt("asian_and_pacific_island_atlos");
+				titleVIRow.other_languages_atlos = popLOSRs.getInt("other_languages_atlos");
+				titleVIRow.below_poverty_atlos = popLOSRs.getInt("below_poverty_atlos");
+				titleVIRow.above_poverty_atlos = popLOSRs.getInt("above_poverty_atlos");
+				titleVIRow.with_disability_atlos = popLOSRs.getInt("with_disability_atlos");
+				titleVIRow.without_disability_atlos = popLOSRs.getInt("without_disability_atlos");
+				titleVIRow.from5to17_atlos = popLOSRs.getInt("from5to17_atlos");
+				titleVIRow.from18to64_atlos = popLOSRs.getInt("from18to64_atlos");
+				titleVIRow.above65_atlos = popLOSRs.getInt("above65_atlos");
+				titleVIRow.black_or_african_american_atlos = popLOSRs.getInt("black_or_african_american_atlos");
+				titleVIRow.american_indian_and_alaska_native_atlos = popLOSRs.getInt("american_indian_and_alaska_native_atlos");
+				titleVIRow.asian_atlos = popLOSRs.getInt("asian_atlos");
+				titleVIRow.native_hawaiian_and_other_pacific_islander_atlos = popLOSRs.getInt("native_hawaiian_and_other_pacific_islander_atlos");
+				titleVIRow.other_races_atlos = popLOSRs.getInt("other_races_atlos");
+				titleVIRow.two_or_more_atlos = popLOSRs.getInt("two_or_more_atlos");
+				titleVIRow.white_atlos = popLOSRs.getInt("white_atlos");
+				titleVIRow.hispanic_or_latino_atlos = popLOSRs.getInt("hispanic_or_latino_atlos");
+				results.TitleVIDataList.add(titleVIRow);
+			}
+
+			ResultSet popServedRs = popServedStatement.executeQuery();
+			while (popServedRs.next()) {
+				String id = popServedRs.getString("areaid");
+				TitleVIData row = results.getTitleVIDataFromId(id);
+				row.english = popServedRs.getInt("english");
+				row.spanish = popServedRs.getInt("spanish");
+				row.indo_european = popServedRs.getInt("indo_european");
+				row.asian_and_pacific_island = popServedRs.getInt("asian_and_pacific_island");
+				row.other_languages = popServedRs.getInt("other_languages");
+				row.below_poverty = popServedRs.getInt("below_poverty");
+				row.above_poverty = popServedRs.getInt("above_poverty");
+				row.with_disability = popServedRs.getInt("with_disability");
+				row.without_disability = popServedRs.getInt("without_disability");
+				row.from5to17 = popServedRs.getInt("from5to17");
+				row.from18to64 = popServedRs.getInt("from18to64");
+				row.above65 = popServedRs.getInt("above65");
+				row.black_or_african_american = popServedRs.getInt("black_or_african_american");
+				row.american_indian_and_alaska_native = popServedRs.getInt("american_indian_and_alaska_native");
+				row.asian = popServedRs.getInt("asian");
+				row.native_hawaiian_and_other_pacific_islander = popServedRs.getInt("native_hawaiian_and_other_pacific_islander");
+				row.other_races = popServedRs.getInt("other_races");
+				row.two_or_more = popServedRs.getInt("two_or_more");
+				row.white = popServedRs.getInt("white");
+				row.hispanic_or_latino = popServedRs.getInt("hispanic_or_latino");
+				row.english_served = popServedRs.getInt("english_served");
+				row.spanish_served = popServedRs.getInt("spanish_served");
+				row.indo_european_served = popServedRs.getInt("indo_european_served");
+				row.asian_and_pacific_island_served = popServedRs.getInt("asian_and_pacific_island_served");
+				row.other_languages_served = popServedRs.getInt("other_languages_served");
+				row.below_poverty_served = popServedRs.getInt("below_poverty_served");
+				row.above_poverty_served = popServedRs.getInt("above_poverty_served");
+				row.with_disability_served = popServedRs.getInt("with_disability_served");
+				row.without_disability_served = popServedRs.getInt("without_disability_served");
+				row.from5to17_served = popServedRs.getInt("from5to17_served");
+				row.from18to64_served = popServedRs.getInt("from18to64_served");
+				row.above65_served = popServedRs.getInt("above65_served");
+				row.black_or_african_american_served = popServedRs.getInt("black_or_african_american_served");
+				row.american_indian_and_alaska_native_served = popServedRs.getInt("american_indian_and_alaska_native_served");
+				row.asian_served = popServedRs.getInt("asian_served");
+				row.native_hawaiian_and_other_pacific_islander_served = popServedRs.getInt("native_hawaiian_and_other_pacific_islander_served");
+				row.other_races_served = popServedRs.getInt("other_races_served");
+				row.two_or_more_served = popServedRs.getInt("two_or_more_served");
+				row.white_served = popServedRs.getInt("white_served");
+				row.hispanic_or_latino_served = popServedRs.getInt("hispanic_or_latino_served");
+				row.english_withinx = popServedRs.getInt("english_withinx");
+				row.spanish_withinx = popServedRs.getInt("spanish_withinx");
+				row.indo_european_withinx = popServedRs.getInt("indo_european_withinx");
+				row.asian_and_pacific_island_withinx = popServedRs.getInt("asian_and_pacific_island_withinx");
+				row.other_languages_withinx = popServedRs.getInt("other_languages_withinx");
+				row.below_poverty_withinx = popServedRs.getInt("below_poverty_withinx");
+				row.above_poverty_withinx = popServedRs.getInt("above_poverty_withinx");
+				row.with_disability_withinx = popServedRs.getInt("with_disability_withinx");
+				row.without_disability_withinx = popServedRs.getInt("without_disability_withinx");
+				row.from5to17_withinx = popServedRs.getInt("from5to17_withinx");
+				row.from18to64_withinx = popServedRs.getInt("from18to64_withinx");
+				row.above65_withinx = popServedRs.getInt("above65_withinx");
+				row.black_or_african_american_withinx = popServedRs.getInt("black_or_african_american_withinx");
+				row.american_indian_and_alaska_native_withinx = popServedRs.getInt("american_indian_and_alaska_native_withinx");
+				row.asian_withinx = popServedRs.getInt("asian_withinx");
+				row.native_hawaiian_and_other_pacific_islander_withinx = popServedRs.getInt("native_hawaiian_and_other_pacific_islander_withinx");
+				row.other_races_withinx = popServedRs.getInt("other_races_withinx");
+				row.two_or_more_withinx = popServedRs.getInt("two_or_more_withinx");
+				row.white_withinx = popServedRs.getInt("white_withinx");
+				row.hispanic_or_latino_withinx = popServedRs.getInt("hispanic_or_latino_withinx");
+			}
+
+			dropTripsViewStatement.execute();
+
+		}catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		dropConnection(connection);    	
+	    return results;
+	}
 	
 	/**
 	 * Queries Title VI data on a given area (based on the reportType)
@@ -1900,11 +2284,263 @@ public class PgisEventManager {
 			  i.hispanic_or_latino_atlos = rs.getInt("hispanic_or_latino_atlos");
 			  results.TitleVIDataList.add(i);
 			}
-		    dropConnection(connection);    	
-			}catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		}catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		dropConnection(connection);    	
+	    return results;
+	}
+
+
+	/**
+	 * Queries Title VI data on a given area (based on the reportType)
+	 * 
+	 * @param dates - array of the dates to report on
+	 * @param day - array of days of the week associated with selected dates
+	 * @param fulldatess - array of selected dates in full format
+	 * @param radius - search radius
+	 * @param L - minimum level of service
+	 * @param dbindex - database index
+	 * @param username - user session
+	 * @return TitleVIDataList
+	 */
+	public static TitleVIDataList getTitleVIDataAgencies( String[] dates, String[] day, String[] fulldates, double radius, int L, int dbindex, String username){
+		TitleVIDataList results = new TitleVIDataList();
+		Connection connection = makeConnection(dbindex);
+
+	    Statement stmt = null;
+	    String query = "";
+	    
+		query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), svcids as (";
+		for (int i=0; i<dates.length; i++){
+			query+= "(select serviceid_agencyid, serviceid_id, '"+fulldates[i]+"' as day from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid where "
+				+ "startdate::int<="+dates[i]+" and enddate::int>="+dates[i]+" and "+day[i]+" = 1 and serviceid_agencyid||serviceid_id not in (select "
+				+ "serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='"+dates[i]+"' and exceptiontype=2) union select serviceid_agencyid, serviceid_id, '"
+				+ fulldates[i] + "' from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='"+dates[i]+"' and exceptiontype=1)";
+			if (i+1<dates.length)
+				query+=" union all ";
+		} 
+		query += "), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, map.stopscount as stops "
+		+ " from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) "
+		+ " inner join census_counties_trip_map map on trip.id = map.tripid and trip.agencyid = map.agencyid), "
+		+ " stops as (select stime.trip_agencyid as aid, stime.stop_id as stopid, stop.location as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service "
+		+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+		+ " inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where stime.arrivaltime>0 and stime.departuretime>0 and stop.agencyid in (select aid from aids)	"
+		+ " group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location), "
+		+ " stopsatlostemp as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location as location, count(trips.aid) as service "
+		+ " from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id "
+		+ "	inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+L+"), "
+		+ " stopsatlos0 AS (select map.agencyid, stopsatlostemp.stopid, stopsatlostemp.location, stopsatlostemp.service "
+		+ " FROM stopsatlostemp INNER JOIN gtfs_stop_service_map AS map ON stopsatlostemp.stopid = map.stopid AND stopsatlostemp.aid = map.agencyid_def), "
+		+ " popatlos as (select   "
+		+ "	  english ,"
+		+ "	  spanish ,"
+		+ "	  indo_european ,"
+		+ "	  asian_and_pacific_island ,"
+		+ "	  other_languages ,"
+		+ "	  below_poverty ,"
+		+ "	  above_poverty ,"
+		+ "	  with_disability ,"
+		+ "	  without_disability ,"
+		+ "	  from5to17 ,"
+		+ "	  from18to64 ,"
+		+ "	  above65 ,"
+		+ "	  black_or_african_american ,"
+		+ "	  american_indian_and_alaska_native ,"
+		+ "	  asian ,"
+		+ "	  native_hawaiian_and_other_pacific_islander ,"
+		+ "	  other_races ,"
+		+ "	  two_or_more ,"
+		+ "	  white ,"
+		+ "	  hispanic_or_latino ,"
+		+ "	  t6.blockid,"
+		+ "	  stopsatlos0.agencyid "
+		+ " from title_vi_blocks_float AS t6 inner join stopsatlos0 on st_dwithin(t6.location,stopsatlos0.location,"+radius+") GROUP BY t6.blockid,agencyid), "
+		+ " popatlos1 as (select  SUM(english) AS english_atlos,"
+		+ "   SUM(spanish) AS spanish_atlos,"
+		+ "	  SUM(indo_european) AS indo_european_atlos,"
+		+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_atlos,"
+		+ "	  SUM(other_languages) AS other_languages_atlos,"
+		+ "	  SUM(below_poverty) AS below_poverty_atlos,"
+		+ "	  SUM(above_poverty) AS above_poverty_atlos,"
+		+ "	  SUM(with_disability) AS with_disability_atlos,"
+		+ "	  SUM(without_disability) AS without_disability_atlos,"
+		+ "	  SUM(from5to17) AS from5to17_atlos,"
+		+ "	  SUM(from18to64) AS from18to64_atlos,"
+		+ "	  SUM(above65) AS above65_atlos,"
+		+ "	  SUM(black_or_african_american) AS black_or_african_american_atlos,"
+		+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_atlos,"
+		+ "	  SUM(asian) AS asian_atlos,"
+		+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_atlos,"
+		+ "	  SUM(other_races) AS other_races_atlos,"
+		+ "	  SUM(two_or_more) AS two_or_more_atlos,"
+		+ "	  SUM(white) AS white_atlos,"
+		+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_atlos,"
+		+ "	  agencyid AS aid "
+		+ "	FROM popatlos GROUP BY agencyid),"
+		+ " tempstops0 as (select id, agencyid, blockid, location "
+		+ " from gtfs_stops stop inner join aids on stop.agencyid = aids.aid),"
+		+ " tempstops AS (SELECT tempstops0.id, map.agencyid, tempstops0.blockid, tempstops0.location "
+		+ "	FROM tempstops0 INNER JOIN  gtfs_stop_service_map AS map ON tempstops0.id = map.stopid AND tempstops0.agencyid = map.agencyid_def), "
+		+ " census as (select block.blockid, block.urbanid, block.regionid, block.congdistid, block.placeid "
+		+ "	from census_blocks block inner join tempstops on st_dwithin(block.location, tempstops.location, "+radius+")"
+		+ "	group by block.blockid),"
+		+ " popwithinx0 as (select english ,"
+		+ "	  spanish ,"
+		+ "	  indo_european ,"
+		+ "	  asian_and_pacific_island ,"
+		+ "	  other_languages ,"
+		+ "  below_poverty ,"
+		+ "	  above_poverty ,"
+		+ "	  with_disability ,"
+		+ "	  without_disability ,"
+		+ "	  from5to17 ,"
+		+ "	  from18to64 ,"
+		+ "	  above65 ,"
+		+ "	  black_or_african_american ,"
+		+ "	  american_indian_and_alaska_native ,"
+		+ "	  asian ,"
+		+ "	  native_hawaiian_and_other_pacific_islander ,"
+		+ "	  other_races ,"
+		+ "	  two_or_more ,"
+		+ "	  white ,"
+		+ "	  hispanic_or_latino ,"
+		+ "	  t6.blockid,"
+		+ "	  agencyid "
+		+ "from tempstops INNER JOIN title_vi_blocks_float AS t6 ON ST_Dwithin(t6.location, tempstops.location, "+radius+") GROUP BY agencyid, t6.blockid),"
+		+ "popwithinx as (select SUM(english) AS english_withinx,"
+		+ "	  SUM(spanish) AS spanish_withinx,"
+		+ "	  SUM(indo_european) AS indo_european_withinx,"
+		+ "	  SUM(asian_and_pacific_island) AS asian_and_pacific_island_withinx,"
+		+ "	  SUM(other_languages) AS other_languages_withinx,"
+		+ "	  SUM(below_poverty) AS below_poverty_withinx,"
+		+ "	  SUM(above_poverty) AS above_poverty_withinx,"
+		+ "	  SUM(with_disability) AS with_disability_withinx,"
+		+ "	  SUM(without_disability) AS without_disability_withinx,"
+		+ "	  SUM(from5to17) AS from5to17_withinx,"
+		+ "	  SUM(from18to64) AS from18to64_withinx,"
+		+ "	  SUM(above65) AS above65_withinx,"
+		+ "	  SUM(black_or_african_american) AS black_or_african_american_withinx,"
+		+ "	  SUM(american_indian_and_alaska_native) AS american_indian_and_alaska_native_withinx,"
+		+ "	  SUM(asian) AS asian_withinx,"
+		+ "	  SUM(native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_withinx,"
+		+ "	  SUM(other_races) AS other_races_withinx,"
+		+ "	  SUM(two_or_more) AS two_or_more_withinx,"
+		+ "	  SUM(white) AS white_withinx,"
+		+ "	  SUM(hispanic_or_latino) AS hispanic_or_latino_withinx,"
+		+ "	  agencyid AS aid"
+		+ "	  FROM popwithinx0 GROUP BY agencyid),"
+		+ "popserved0 AS(select aid,"
+		+ " 		MAX(service) AS maxservice,"
+		+ "		t6.blockid"
+		+ "		from stops inner join title_vi_blocks_float AS t6 ON st_dwithin(t6.location, stops.location,"+radius+")"
+		+ "		GROUP BY aid, blockid),"
+		+ "popserved AS (SELECT "
+		+ "	  aid,"
+		+ "	  SUM(maxservice*english) AS english_served,"
+		+ "	  SUM(maxservice*spanish) AS spanish_served,"
+		+ "	  SUM(maxservice*indo_european) AS indo_european_served,"
+		+ "	  SUM(maxservice*asian_and_pacific_island) AS asian_and_pacific_island_served,"
+		+ "	  SUM(maxservice*other_languages) AS other_languages_served,"
+		+ "	  SUM(maxservice*below_poverty) AS below_poverty_served,"
+		+ "	  SUM(maxservice*above_poverty) AS above_poverty_served,"
+		+ "	  SUM(maxservice*with_disability) AS with_disability_served,"
+		+ "	  SUM(maxservice*without_disability) AS without_disability_served,"
+		+ "	  SUM(maxservice*from5to17) AS from5to17_served,"
+		+ "	  SUM(maxservice*from18to64) AS from18to64_served,"
+		+ "	  SUM(maxservice*above65) AS above65_served,"
+		+ "	  SUM(maxservice*black_or_african_american) AS black_or_african_american_served,"
+		+ "	  SUM(maxservice*american_indian_and_alaska_native) AS american_indian_and_alaska_native_served,"
+		+ "	  SUM(maxservice*asian) AS asian_served,"
+		+ "	  SUM(maxservice*native_hawaiian_and_other_pacific_islander) AS native_hawaiian_and_other_pacific_islander_served,"
+		+ "	  SUM(maxservice*other_races) AS other_races_served,"
+		+ "	  SUM(maxservice*two_or_more) AS two_or_more_served,"
+		+ "	  SUM(maxservice*white) AS white_served,"
+		+ "	  SUM(maxservice*hispanic_or_latino) AS hispanic_or_latino_served "
+		+ "	FROM popserved0 INNER JOIN title_vi_blocks_float USING(blockid) GROUP BY aid) "
+		+ "SELECT agencies.name AS agency_name, agencies.id AS agency_id, popserved.*, popatlos1.*, popwithinx.* "
+		+ "from gtfs_agencies AS agencies LEFT JOIN popwithinx ON agencies.id=aid "
+		+ "LEFT JOIN popatlos1 USING(aid) "			
+		+ "LEFT JOIN popserved USING(aid) "
+		+ "WHERE agencies.defaultid IN (SELECT aid FROM aids) "
+		+ "ORDER BY agencies.id ";
+
+	    try {
+			stmt = connection.createStatement();
+			
+			ResultSet rs = stmt.executeQuery(query); 		
+			while (rs.next()){
+				TitleVIData i = new TitleVIData();				
+				i.id = rs.getString("agency_id");
+				i.name = rs.getString("agency_name");
+				i.english_served = rs.getInt("english_served");
+				i.spanish_served = rs.getInt("spanish_served");
+				i.indo_european_served = rs.getInt("indo_european_served");
+				i.asian_and_pacific_island_served = rs.getInt("asian_and_pacific_island_served");
+				i.other_languages_served = rs.getInt("other_languages_served");
+				i.below_poverty_served = rs.getInt("below_poverty_served");
+				i.above_poverty_served = rs.getInt("above_poverty_served");
+				i.with_disability_served = rs.getInt("with_disability_served");
+				i.without_disability_served = rs.getInt("without_disability_served");
+				i.from5to17_served = rs.getInt("from5to17_served");
+				i.from18to64_served = rs.getInt("from18to64_served");
+				i.above65_served = rs.getInt("above65_served");
+				i.black_or_african_american_served = rs.getInt("black_or_african_american_served");
+				i.american_indian_and_alaska_native_served = rs.getInt("american_indian_and_alaska_native_served");
+				i.asian_served = rs.getInt("asian_served");
+				i.native_hawaiian_and_other_pacific_islander_served = rs.getInt("native_hawaiian_and_other_pacific_islander_served");
+				i.other_races_served = rs.getInt("other_races_served");
+				i.two_or_more_served = rs.getInt("two_or_more_served");
+				i.white_served = rs.getInt("white_served");
+				i.hispanic_or_latino_served = rs.getInt("hispanic_or_latino_served");
+				i.english_withinx = rs.getInt("english_withinx");
+				i.spanish_withinx = rs.getInt("spanish_withinx");
+				i.indo_european_withinx = rs.getInt("indo_european_withinx");
+				i.asian_and_pacific_island_withinx = rs.getInt("asian_and_pacific_island_withinx");
+				i.other_languages_withinx = rs.getInt("other_languages_withinx");
+				i.below_poverty_withinx = rs.getInt("below_poverty_withinx");
+				i.above_poverty_withinx = rs.getInt("above_poverty_withinx");
+				i.with_disability_withinx = rs.getInt("with_disability_withinx");
+				i.without_disability_withinx = rs.getInt("without_disability_withinx");
+				i.from5to17_withinx = rs.getInt("from5to17_withinx");
+				i.from18to64_withinx = rs.getInt("from18to64_withinx");
+				i.above65_withinx = rs.getInt("above65_withinx");
+				i.black_or_african_american_withinx = rs.getInt("black_or_african_american_withinx");
+				i.american_indian_and_alaska_native_withinx = rs.getInt("american_indian_and_alaska_native_withinx");
+				i.asian_withinx = rs.getInt("asian_withinx");
+				i.native_hawaiian_and_other_pacific_islander_withinx = rs.getInt("native_hawaiian_and_other_pacific_islander_withinx");
+				i.other_races_withinx = rs.getInt("other_races_withinx");
+				i.two_or_more_withinx = rs.getInt("two_or_more_withinx");
+				i.white_withinx = rs.getInt("white_withinx");
+				i.hispanic_or_latino_withinx = rs.getInt("hispanic_or_latino_withinx");
+				i.english_atlos = rs.getInt("english_atlos");
+				i.spanish_atlos = rs.getInt("spanish_atlos");
+				i.indo_european_atlos = rs.getInt("indo_european_atlos");
+				i.asian_and_pacific_island_atlos = rs.getInt("asian_and_pacific_island_atlos");
+				i.other_languages_atlos = rs.getInt("other_languages_atlos");
+				i.below_poverty_atlos = rs.getInt("below_poverty_atlos");
+				i.above_poverty_atlos = rs.getInt("above_poverty_atlos");
+				i.with_disability_atlos = rs.getInt("with_disability_atlos");
+				i.without_disability_atlos = rs.getInt("without_disability_atlos");
+				i.from5to17_atlos = rs.getInt("from5to17_atlos");
+				i.from18to64_atlos = rs.getInt("from18to64_atlos");
+				i.above65_atlos = rs.getInt("above65_atlos");
+				i.black_or_african_american_atlos = rs.getInt("black_or_african_american_atlos");
+				i.american_indian_and_alaska_native_atlos = rs.getInt("american_indian_and_alaska_native_atlos");
+				i.asian_atlos = rs.getInt("asian_atlos");
+				i.native_hawaiian_and_other_pacific_islander_atlos = rs.getInt("native_hawaiian_and_other_pacific_islander_atlos");
+				i.other_races_atlos = rs.getInt("other_races_atlos");
+				i.two_or_more_atlos = rs.getInt("two_or_more_atlos");
+				i.white_atlos = rs.getInt("white_atlos");
+				i.hispanic_or_latino_atlos = rs.getInt("hispanic_or_latino_atlos");
+				results.TitleVIDataList.add(i);
 			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		dropConnection(connection);    	
 	    return results;
 	}
 	

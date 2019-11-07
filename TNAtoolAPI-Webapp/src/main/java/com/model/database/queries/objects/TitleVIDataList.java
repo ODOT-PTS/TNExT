@@ -35,4 +35,12 @@ public class TitleVIDataList {
 	@XmlElement(name = "TitleVIDataList")
 	public List<TitleVIData> TitleVIDataList = new ArrayList<TitleVIData>();
 	
+	public TitleVIData getTitleVIDataFromId(String id) {
+		for (TitleVIData dataElement : TitleVIDataList) {
+			if (dataElement.id.equals(id)) {
+				return dataElement;
+			}
+		}
+		throw new IllegalStateException("Id " + id + " not found in TitleVIDataList");
+	}
 }

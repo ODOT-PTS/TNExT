@@ -2491,8 +2491,13 @@ public class Queries {
 		String[] fulldates = fulldate(dates);
 		String[] sdates = datedays[0];
 		String[] days = datedays[1];
-		results = PgisEventManager.getTitleVIData(reportType, sdates, days,
-				fulldates, radius, L, dbindex, getUsername());
+		if (reportType.contains("Agencies")) {
+			results = PgisEventManager.getTitleVIDataAgencies(sdates, days,
+					fulldates, radius, L, dbindex, getUsername());
+		} else {
+			results = PgisEventManager.getTitleVIDataNonAgency(reportType, sdates, days,
+					fulldates, radius, L, dbindex, getUsername());
+		}
 		results.metadata = "Report Type: "
 				+ reportType
 				+ " Title VI Report;Report Date:"
