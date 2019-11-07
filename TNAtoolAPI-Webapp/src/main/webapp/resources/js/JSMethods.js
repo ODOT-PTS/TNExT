@@ -1134,9 +1134,44 @@ function feedPickerGetAgencies() {
 		type : 'GET',
 		datatype : 'json',
 		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
-		success : function(d) {
-			feedPickerBuild(feedPickerProcessAgencies(d));
+		success : function(agencies) {
+			feedPickerBuild(feedPickerProcessAgencies(agencies));
 		}
+	});
+}
+
+function initializeUserSelectedAgenciesIfNeeded() {
+	$.ajax({
+		type : 'GET',
+		datatype : 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex='+dbindex+'&username='+getSession(),
+		success : function(agencies) {
+			var userSelectedAgenciesNotTracked = true
+			$.each(agencies, function(key, agency) {
+				// if any agency's hidden status is set the user selection has been tracked
+				if (agency.Hidden != null) {
+					userSelectedAgenciesNotTracked = false
+				}
+			})
+			if (userSelectedAgenciesNotTracked) {
+				initializeSelectedAgencies()
+			}
+		}
+	});
+}
+
+function initializeSelectedAgencies() {
+	var emptyListOfAgencies = '' // hide no agencies upon initialization
+	$.ajax({
+		type: 'GET',
+		// datatype: 'json',
+		url : '/TNAtoolAPI-Webapp/queries/transit/setHiddenAgencies?dbindex='+dbindex+'&username='+getSession()+'&agencies='+emptyListOfAgencies,
+		async: false,
+		success: function(item){
+		},
+		error: function() {
+			alert("There was an error setting the hidden feed list.");
+		}	
 	});
 }
 
@@ -1210,6 +1245,9 @@ function setHiddenAgencies() {
 }
 
 function feedPickerShow() {
+	// Annie: Ideally these would be initialized when new sessions 
+	// and database connections are made
+	initializeUserSelectedAgenciesIfNeeded()
 	feedPickerGetAgencies();
 	$('#feedpicker').dialog( {
 		width: window.innerWidth * 0.8,

@@ -47,7 +47,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-
 import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServletRequest;
@@ -155,6 +154,7 @@ import com.model.database.queries.objects.Tract;
 import com.model.database.queries.objects.TransitError;
 import com.model.database.queries.objects.TripSchedule;
 import com.model.database.queries.objects.Urban;
+import com.model.database.queries.objects.ServiceLevel;
 import com.model.database.queries.objects.agencyCluster;
 import com.model.database.queries.timingcon.ConTrip;
 import com.model.database.queries.timingcon.TripTime;
@@ -1616,6 +1616,13 @@ public class Queries {
 		return response;
 	}
 
+	@GET
+	@Path("/getBestServiceWindow")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+	public ServiceLevel getBestServiceWindow(@QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("window") Integer window, @QueryParam("dbindex") Integer dbindex) {
+		return PgisEventManager.getBestServiceWindow(start, end, window, dbindex);
+	}	
+
 	/**
 	 * Generates The Stops report for agency agency and route geographic area
 	 * geographic area and agency geographic area and route and agency
@@ -2484,8 +2491,13 @@ public class Queries {
 		String[] fulldates = fulldate(dates);
 		String[] sdates = datedays[0];
 		String[] days = datedays[1];
-		results = PgisEventManager.getTitleVIData(reportType, sdates, days,
-				fulldates, radius, L, dbindex, getUsername());
+		if (reportType.contains("Agencies")) {
+			results = PgisEventManager.getTitleVIDataAgencies(sdates, days,
+					fulldates, radius, L, dbindex, getUsername());
+		} else {
+			results = PgisEventManager.getTitleVIDataNonAgency(reportType, sdates, days,
+					fulldates, radius, L, dbindex, getUsername());
+		}
 		results.metadata = "Report Type: "
 				+ reportType
 				+ " Title VI Report;Report Date:"
@@ -2929,11 +2941,11 @@ public class Queries {
     	long population = 0;
     	long LandArea = 0;
     	long employment=emp[0];
-    	long employees =emp[1];
+		long employees =emp[1];
     	for (Urban inst: urbans){
     		population += inst.getPopulation();
     		LandArea +=inst.getLandarea();
-    	}
+		}
     	index++;
 		setprogVal(key, (int) Math.round(index*100/totalLoad));
     	x = x * 1609.34;    	

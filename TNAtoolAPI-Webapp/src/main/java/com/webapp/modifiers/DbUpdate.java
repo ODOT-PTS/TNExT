@@ -101,6 +101,7 @@ import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.DatabaseStatus;
 import com.model.database.queries.util.Hutil;
 import com.model.database.queries.util.StateInits;
+import com.model.database.queries.objects.ServiceLevel;
 import com.webapp.api.Queries;
 
 @Path("/dbupdate")
@@ -903,57 +904,6 @@ public class DbUpdate {
   }
 
   @GET
-  @Path("/updateDB")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object updateDB(@QueryParam("db") String db, @QueryParam("oldName") String oldName,
-      @QueryParam("oldcfgSpatial") String oldcfgSpatial, @QueryParam("oldcfgTransit") String oldcfgTransit)
-      throws IOException {
-    String[] dbInfo = db.split(",");
-
-    String[] p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    String url = "";
-    for (int k = 0; k < p.length - 1; k++) {
-      url += p[k] + "/";
-    }
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    PDBerror error = new PDBerror();
-    error.DBError = "";
-    try {
-      c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
-      statement = c.createStatement();
-      rs = statement
-          .executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='" + oldName + "'");
-      statement.executeUpdate("ALTER DATABASE " + oldName + " RENAME TO " + name);
-      error.DBError = "Database was successfully updated";
-      // ian: todo: update config
-    } catch (SQLException e) {
-      logger.error(e);
-      error.DBError = e.getMessage();
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-
-    return error;
-  }
-
-  @GET
   @Path("/addDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object addDB(@QueryParam("db") String db) {
@@ -1025,59 +975,92 @@ public class DbUpdate {
   }
 
   @GET
-  @Path("/addExistingDB")
+  @Path("/updateDB")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object addExistingDB(@QueryParam("db") String db) {
+  public Object updateDB(@QueryParam("db") String db) {
     String[] dbInfo = db.split(",");
-    String[] p;
-
-    //		PDBerror error = new PDBerror();
     String DBError = "";
+    DatabaseConfig oldConfig = DatabaseConfig.getConfig(dbInfo[0]);
+    DatabaseConfig newConfig = new DatabaseConfig();
+    newConfig.fromArray(dbInfo);
 
-    boolean b = false;
-    p = dbInfo[4].split("/");
-    String name = p[p.length - 1];
-    String url = "";
-    for (int k = 0; k < p.length - 1; k++) {
-      url += p[k] + "/";
+    String oldDatabase = oldConfig.getDatabase();
+    String newDatabase = newConfig.getDatabase();
+    
+    // Just double check
+    if (oldConfig.getDatabaseIndex() != newConfig.getDatabaseIndex()) {
+      DBError = "Index mismatch";
+      return DBError;
     }
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    try {
-      c = DriverManager.getConnection(url, dbInfo[5], dbInfo[6]);
-      statement = c.createStatement();
-      rs = statement.executeQuery("SELECT 1 AS result FROM pg_database WHERE datname='" + name + "';");
 
-      if (rs.next()) {
-        if (rs.getInt("result") == 1) {
-          DBError = "Database was successfully added";
-        } else {
-          DBError = "Database " + name + " could not be found.";
-        }
+    Boolean oldExists = false;
+    Boolean newExists = false;
+    Connection connection = null;
+    try {
+      connection = oldConfig.getConnection();
+      String q1 = "SELECT 1 AS result FROM pg_database WHERE datname=?";
+      PreparedStatement ps;
+      ResultSet rs;
+      ps = connection.prepareStatement(q1);
+      ps.setString(1, oldDatabase);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        oldExists = true;
       }
-      // ian: todo: update config
+      rs.close();
+      ps.setString(1, newDatabase);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        newExists = true;
+      }
+      rs.close();
+      ps.close();
     } catch (SQLException e) {
       logger.error(e);
-      // } catch (IOException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
+      DBError = "Failed to check if database existed";
+      return DBError;
     } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
+      try { connection.close(); } catch (SQLException e) {}
+    }
+
+    if (oldExists == false) {
+      DBError = "Database not found";
+      return DBError;
+    }
+
+    // Do we need to rename the database?
+    // This is not recommended.
+    if (!oldDatabase.equals(newDatabase)) {
+      if (newExists == true) {
+        DBError = "Could not rename database from "+oldDatabase+" to "+newDatabase+"; new database name already exists";
+        return DBError;
+      }
+      try {
+        // DatabaseConfig renameConfig = new DatabaseConfig();
+        String curl = "jdbc:postgresql://" + newConfig.getHost() + ":" + newConfig.getPort() + "/";
+        connection = DriverManager.getConnection(curl, newConfig.getUsername(), newConfig.getPassword());
+        PreparedStatement ps = connection.prepareStatement("select pg_terminate_backend(pid) from pg_stat_activity where datname=?");
+        ps.setString(1, oldDatabase);
+        ps.executeQuery();
+        ps.close();
+        connection.createStatement().executeUpdate("ALTER DATABASE " + oldDatabase + " RENAME TO " + newDatabase);
+      } catch (SQLException e) {
+        logger.error(e);
+        DBError = "Failed to rename database";
+        return DBError;  
+      } finally {
+        try { connection.close(); } catch (SQLException e) {}
+      }
+    }
+
+    // Update dbInfo.csv
+    try {
+      DatabaseConfig.updateConfig(newConfig);
+      DatabaseConfig.saveDbInfo();
+      DBError = "Database was successfully updated";
+    } catch (IOException e) {
+      logger.error(e);
+      DBError = "Database was found, but could not be updated";
     }
     logger.debug(DBError);
     return DBError;
@@ -3397,10 +3380,29 @@ public class DbUpdate {
   }
 
   @GET
+  @Path("/updateBestServiceWindow")
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+  public Object updateBestServiceWindow(@QueryParam("db") String db, @QueryParam("username") String username) {
+    // Update the default date
+    PDBerror error = new PDBerror();
+    String[] dbInfo = db.split(",");
+    DatabaseConfig dbc = DatabaseConfig.getConfig(dbInfo[0]);
+    ServiceLevel sl = PgisEventManager.getBestServiceWindow(null, null, 7, dbc.getDatabaseIndex());
+    dbc.setDefaultDate(sl.bestDate);
+    try {
+      DatabaseConfig.saveDbInfo();
+      error.metadata.add(sl.bestDate);
+    } catch(IOException e) {
+      logger.error("failed to save dbconfig:"+e);
+      error.DBError = e.getMessage();
+    }
+    return error;
+  }
+
+  @GET
   @Path("/updateFeeds")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object updateFeeds(@QueryParam("db") String db, @QueryParam("username") String username) {
-
     String[] dbInfo = db.split(",");
     Connection c = null;
     Statement statement = null;
@@ -3409,6 +3411,7 @@ public class DbUpdate {
     //		List<String> feeds = new ArrayList<String>();
     PDBerror lists = new PDBerror();
 
+    
     try {
       c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
       statement = c.createStatement();

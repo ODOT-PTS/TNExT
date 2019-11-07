@@ -775,6 +775,8 @@ public class UpdateEventManager {
 			stmt.executeUpdate("create INDEX trips_shapeids on gtfs_trips (shapeid_agencyid,shapeid_id);");
 			stmt.executeUpdate("DROP INDEX IF EXISTS tripids");
 			stmt.executeUpdate("create unique index tripids on gtfs_trips (agencyid,id);");			
+			stmt.executeUpdate("DROP INDEX IF EXISTS trips_serviceids");
+			stmt.executeUpdate("create index trips_serviceids on gtfs_trips (serviceid_id,serviceid_agencyid);");
 		  }catch ( Exception e ) {
 			  //logger.debug( e.getClass().getName()+": "+ e.getMessage() );
 		  }finally{

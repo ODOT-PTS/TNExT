@@ -74,6 +74,8 @@ import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.AddRemoveFeed;
 import com.model.database.queries.objects.UserSession;
 
+import org.apache.log4j.Logger;
+
 /**
  * Servlet implementation class FileUpload
  */
@@ -83,6 +85,7 @@ public class FileUpload extends HttpServlet {
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
 	private static final DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
+	final static Logger logger = Logger.getLogger(FileUpload.class);
 	// private static final String dbRL = db.getConnectionUrl(); 
 	// private static final String dbUSER = db.getUsername();
 	// private static final String dbPASS = db.getPassword();
@@ -224,12 +227,12 @@ public class FileUpload extends HttpServlet {
 		}else if(getSessionUser!=null){//get session id
 			UserSession us = new UserSession();
 			HttpSession session = request.getSession(false);
-			if (session == null || session.getAttribute("username")==null){
+			if (session == null || session.getId()==null){
 				us.User = "admin";
 			}else{
-				us.User = (String) session.getAttribute("username");
+				us.User = (String) session.getId();
 			}
-			
+
 			try {
 	    		obj.put("username", us.User);
 	    		out.print(obj);
