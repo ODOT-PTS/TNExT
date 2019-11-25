@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
-RUN apt-get update -y && apt-get install openjdk-8-jdk maven tomcat8 libpq-dev postgresql-client-10 python-psycopg2 -y
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install openjdk-8-jdk maven tomcat8 libpq-dev postgresql-client-10 python-psycopg2 postgis -y
+
 
 ARG DBINFO_CSV="TNAtoolAPI-Webapp/src/main/resources/admin/resources/dbInfo.template.csv"
 ARG TOMCAT_USERS_XML="TNAtoolAPI-Webapp/src/main/resources/admin/resources/tomcat-users.template.xml"
