@@ -233,8 +233,8 @@ function runAjaxAgency(ind, fileName){
 				+ d.ServiceMiles + ','
 				+ d.UPopWithinX + ',' 
 				+ d.RPopWithinX + ','
-				+ d.UPopLos + ','
-				+ d.RPopLos + ','
+				+ d.UPopServedAtLoService + ','
+				+ d.RPopServedAtLoService + ','
 				+ d.racWithinX + ',';
 			if (popYear > 2010)
 				csvContetn += 'N/A,';
