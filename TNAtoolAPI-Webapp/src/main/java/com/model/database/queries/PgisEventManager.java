@@ -6129,7 +6129,7 @@ public class PgisEventManager {
 			return Agencyget(dbindex, username);
 		}
 
-		public static Map<String,Agencyselect> removeHiddenAgencies(int dbindex, String username) 
+		public static void removeHiddenAgencies(int dbindex, String username) 
 		throws SQLException, FactoryException, TransformException {
 			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
 			Connection connection = db.getConnection();
@@ -6146,18 +6146,47 @@ public class PgisEventManager {
 				logger.error(e);
 			}
 			connection.close();
-
-			return Agencyget(dbindex, username);
 		}
+
+		public static void ensureDBSessionInitialized(int dbindex, String username) {
+			Connection  connection = makeConnection(dbindex);
+			String query="";
+			PreparedStatement stmt = null;
+
+			query = ""
+			+ " INSERT INTO user_selected_agencies (username, agency_id, hidden) ("
+			+ "   SELECT '" + username + "', gtfs_agencies.defaultid, false"
+			+ "   FROM gtfs_agencies "
+			+ " ) ON CONFLICT (username, agency_id) DO NOTHING"
+			+ "";
+
+			logger.info("ensureDBSessionInitialized query: " + query);
+
+			try {
+		        stmt = connection.prepareStatement(query);
+		        stmt.executeUpdate(); 
+				stmt.close(); 
+				dropConnection(connection);
+			}
+			 catch ( Exception e ) {
+				 e.printStackTrace();
+			}
+		}
+
 
 		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
 				throws FactoryException, TransformException	{
+
+			// Kind of a hack, but this is the only place I found that guarantees
+			// selected agencies are initialized and that has access to dbindex and username 
+			// -- Annie
+			ensureDBSessionInitialized(dbindex, username);
 			Connection  connection = makeConnection(dbindex);
 			String query="";
 			Statement stmt = null;
 		
-		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
-			// query ="select id,name,defaultid from gtfs_agencies";
+			Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
+
 			query = "SELECT a.id,a.name,a.defaultid,b.hidden,f.feedname,f.startdate,f.enddate FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) INNER JOIN gtfs_feed_info f ON f.defaultid = a.defaultid ORDER BY name";
 
 			try {

@@ -114,9 +114,7 @@ public class FileUpload extends HttpServlet {
 	    String username = request.getParameter("username");
 		String feedDel = request.getParameter("feedname");
 		String listName = request.getParameter("list");
-		String setSessionUser = request.getParameter("setSessionUser");
 		String getSessionUser = request.getParameter("getSessionUser");
-		String endSessionUser = request.getParameter("endSessionUser");
 		String getURLpath = request.getParameter("getURLpath");
 		String email = request.getParameter("email");
 		String firstname = request.getParameter("firstname");
@@ -127,7 +125,7 @@ public class FileUpload extends HttpServlet {
 		String justAddedFeeds = request.getParameter("justAddedFeeds");
 		String runPlayground = request.getParameter("runPlayground");
 		String getIp = request.getParameter("getIp");
-		
+
 		if(getIp!=null){
 			
 			try {
@@ -204,45 +202,18 @@ public class FileUpload extends HttpServlet {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-		}else if(endSessionUser!=null){//sign out
-			HttpSession session = request.getSession(false);
-			  if (session != null) {
-				  String esu = (String) session.getAttribute("username");
-				  try {
-						c = dbConfig.getConnection();
-						
-						statement = c.createStatement();
-						
-				  } catch (SQLException e) {
-						System.out.println(e.getMessage());
-						
-					} finally {
-						if (rs != null) try { rs.close(); } catch (SQLException e) {}
-						if (statement != null) try { statement.close(); } catch (SQLException e) {}
-						if (c != null) try { c.close(); } catch (SQLException e) {}
-					}
-				  session.invalidate();
-			  }
+		
+		
 			  
 		}else if(getSessionUser!=null){//get session id
-			UserSession us = new UserSession();
-			HttpSession session = request.getSession(false);
-			if (session == null || session.getId()==null){
-				us.User = "admin";
-			}else{
-				us.User = (String) session.getId();
-			}
+			HttpSession session = request.getSession();
 
 			try {
-	    		obj.put("username", us.User);
-	    		out.print(obj);
+				obj.put("username", session.getId());
+				out.print(obj);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-		}else if(setSessionUser!=null){//set session id
-			HttpSession session = request.getSession(true);
-            session.setAttribute("username", setSessionUser);
-            session.setMaxInactiveInterval(10*60);
             
 		}else if(email!=null){// send confirmation email
 		      String to = email;

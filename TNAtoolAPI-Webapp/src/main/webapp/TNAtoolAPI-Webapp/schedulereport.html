@@ -51,7 +51,7 @@ $(document).ready(function(){
 	$.ajax({
 		type: 'GET',
 		datatype: 'json',
-		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&agency='+w_qstring,
+		url: '/TNAtoolAPI-Webapp/queries/transit/calendarRange?dbindex='+dbindex+'&agency='+w_qstring+'&username='+getSession(),
 		async: false,
 		success: function(d){
 			startDate = d.Startdate;

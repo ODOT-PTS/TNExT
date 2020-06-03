@@ -4,4 +4,4 @@
     timeout: 600
 - test:
     referer: /?&n=--&dbindex=0
-    url: /TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex=0
+    url: /TNAtoolAPI-Webapp/queries/transit/Agencyget?&dbindex=0&username=admin
