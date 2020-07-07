@@ -1722,26 +1722,26 @@ public class PgisEventManager {
 				row.two_or_more = popServedRs.getInt("two_or_more");
 				row.white = popServedRs.getInt("white");
 				row.hispanic_or_latino = popServedRs.getInt("hispanic_or_latino");
-				row.english_served = popServedRs.getInt("english_served");
-				row.spanish_served = popServedRs.getInt("spanish_served");
-				row.indo_european_served = popServedRs.getInt("indo_european_served");
-				row.asian_and_pacific_island_served = popServedRs.getInt("asian_and_pacific_island_served");
-				row.other_languages_served = popServedRs.getInt("other_languages_served");
-				row.below_poverty_served = popServedRs.getInt("below_poverty_served");
-				row.above_poverty_served = popServedRs.getInt("above_poverty_served");
-				row.with_disability_served = popServedRs.getInt("with_disability_served");
-				row.without_disability_served = popServedRs.getInt("without_disability_served");
-				row.from5to17_served = popServedRs.getInt("from5to17_served");
-				row.from18to64_served = popServedRs.getInt("from18to64_served");
-				row.above65_served = popServedRs.getInt("above65_served");
-				row.black_or_african_american_served = popServedRs.getInt("black_or_african_american_served");
-				row.american_indian_and_alaska_native_served = popServedRs.getInt("american_indian_and_alaska_native_served");
-				row.asian_served = popServedRs.getInt("asian_served");
-				row.native_hawaiian_and_other_pacific_islander_served = popServedRs.getInt("native_hawaiian_and_other_pacific_islander_served");
-				row.other_races_served = popServedRs.getInt("other_races_served");
-				row.two_or_more_served = popServedRs.getInt("two_or_more_served");
-				row.white_served = popServedRs.getInt("white_served");
-				row.hispanic_or_latino_served = popServedRs.getInt("hispanic_or_latino_served");
+				row.english_served = popServedRs.getLong("english_served");
+				row.spanish_served = popServedRs.getLong("spanish_served");
+				row.indo_european_served = popServedRs.getLong("indo_european_served");
+				row.asian_and_pacific_island_served = popServedRs.getLong("asian_and_pacific_island_served");
+				row.other_languages_served = popServedRs.getLong("other_languages_served");
+				row.below_poverty_served = popServedRs.getLong("below_poverty_served");
+				row.above_poverty_served = popServedRs.getLong("above_poverty_served");
+				row.with_disability_served = popServedRs.getLong("with_disability_served");
+				row.without_disability_served = popServedRs.getLong("without_disability_served");
+				row.from5to17_served = popServedRs.getLong("from5to17_served");
+				row.from18to64_served = popServedRs.getLong("from18to64_served");
+				row.above65_served = popServedRs.getLong("above65_served");
+				row.black_or_african_american_served = popServedRs.getLong("black_or_african_american_served");
+				row.american_indian_and_alaska_native_served = popServedRs.getLong("american_indian_and_alaska_native_served");
+				row.asian_served = popServedRs.getLong("asian_served");
+				row.native_hawaiian_and_other_pacific_islander_served = popServedRs.getLong("native_hawaiian_and_other_pacific_islander_served");
+				row.other_races_served = popServedRs.getLong("other_races_served");
+				row.two_or_more_served = popServedRs.getLong("two_or_more_served");
+				row.white_served = popServedRs.getLong("white_served");
+				row.hispanic_or_latino_served = popServedRs.getLong("hispanic_or_latino_served");
 				row.english_withinx = popServedRs.getInt("english_withinx");
 				row.spanish_withinx = popServedRs.getInt("spanish_withinx");
 				row.indo_european_withinx = popServedRs.getInt("indo_european_withinx");
@@ -2185,7 +2185,7 @@ public class PgisEventManager {
       		+"trip.id = map.tripid and trip.agencyid = map.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"'),service as (select COALESCE(sum(length),0) as svcmiles,"
       		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
       		+ "stop.location as location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and "
-      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by "
+      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "+criteria+"='"+areaId+"' group by "
       		+ "stime.stop_agencyid, stime.stop_id, stop.location having count(trips.aid)>="+LOS+"),stops as (select stime.stop_agencyid as aid, stime.stop_id as stopid, stop.location "
       		+ "as location, min(stime.arrivaltime) as arrival, max(stime.departuretime) as departure, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times "
       		+ "stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "
@@ -6129,7 +6129,7 @@ public class PgisEventManager {
 			return Agencyget(dbindex, username);
 		}
 
-		public static Map<String,Agencyselect> removeHiddenAgencies(int dbindex, String username) 
+		public static void removeHiddenAgencies(int dbindex, String username) 
 		throws SQLException, FactoryException, TransformException {
 			DatabaseConfig db = DatabaseConfig.getConfig(dbindex);
 			Connection connection = db.getConnection();
@@ -6146,18 +6146,47 @@ public class PgisEventManager {
 				logger.error(e);
 			}
 			connection.close();
-
-			return Agencyget(dbindex, username);
 		}
+
+		public static void ensureDBSessionInitialized(int dbindex, String username) {
+			Connection  connection = makeConnection(dbindex);
+			String query="";
+			PreparedStatement stmt = null;
+
+			query = ""
+			+ " INSERT INTO user_selected_agencies (username, agency_id, hidden) ("
+			+ "   SELECT '" + username + "', gtfs_agencies.defaultid, false"
+			+ "   FROM gtfs_agencies "
+			+ " ) ON CONFLICT (username, agency_id) DO NOTHING"
+			+ "";
+
+			logger.info("ensureDBSessionInitialized query: " + query);
+
+			try {
+		        stmt = connection.prepareStatement(query);
+		        stmt.executeUpdate(); 
+				stmt.close(); 
+				dropConnection(connection);
+			}
+			 catch ( Exception e ) {
+				 e.printStackTrace();
+			}
+		}
+
 
 		public static Map<String,Agencyselect> Agencyget(int dbindex, String username) 
 				throws FactoryException, TransformException	{
+
+			// Kind of a hack, but this is the only place I found that guarantees
+			// selected agencies are initialized and that has access to dbindex and username 
+			// -- Annie
+			ensureDBSessionInitialized(dbindex, username);
 			Connection  connection = makeConnection(dbindex);
 			String query="";
 			Statement stmt = null;
 		
-		 Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
-			// query ="select id,name,defaultid from gtfs_agencies";
+			Map<String,Agencyselect> r = new LinkedHashMap<String,Agencyselect>();
+
 			query = "SELECT a.id,a.name,a.defaultid,b.hidden,f.feedname,f.startdate,f.enddate FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) INNER JOIN gtfs_feed_info f ON f.defaultid = a.defaultid ORDER BY name";
 
 			try {
