@@ -4711,13 +4711,13 @@ public class PgisEventManager {
 	public static HashMap<String, KeyClusterHashMap> getClusters(double radius, int dbindex, String username){
 		HashMap<String, KeyClusterHashMap> y = new HashMap<String, KeyClusterHashMap>();
 		String query = "WITH aids AS (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), "
-				+ " stops0 AS (SELECT stops1.id AS stop1, stops2.id AS stop2,stops1.id || ':' || stops1.agencyid AS clusterid, stops1.agencyid AS agencyid1, stops2.id || ':' || stops2.agencyid AS stop, stops2.agencyid AS agencyid2"
+				+ " stops0 AS (SELECT stops1.id AS stop1, stops2.id AS stop2,stops1.id || ':' || stops1.agencyid AS clusterid, stops1.agencyid AS agencyid_def1, stops2.id || ':' || stops2.agencyid AS stop, stops2.agencyid AS agencyid_def2"
 				+ " FROM gtfs_stops AS stops1 LEFT JOIN gtfs_stops AS stops2	"
 				+ " ON ST_Dwithin(stops1.location, stops2.location, " + radius + ")),"
-				+ " stops1 AS (SELECT stops0.* FROM stops0 INNER JOIN aids ON agencyid1 IN (aids.aid)),"
-				+ " stops2 AS (SELECT stops1.* FROM stops1 INNER JOIN aids ON agencyid2 IN (aids.aid)),"
-				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid_def),"
-				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid_def)"
+				+ " stops1 AS (SELECT stops0.* FROM stops0 INNER JOIN aids ON agencyid_def1 IN (aids.aid)),"
+				+ " stops2 AS (SELECT stops1.* FROM stops1 INNER JOIN aids ON agencyid_def2 IN (aids.aid)),"
+				+ " stops3 AS (SELECT stops2.*, map.agencyid as agencyid1 FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid_def1=map.agencyid_def),"
+				+ " stops4 AS (SELECT stops3.*, map.agencyid as agencyid2 FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid_def2=map.agencyid_def)"
 				+ " SELECT stops4.clusterid, array_agg(stop) AS stops, array_agg(distinct agencyid2) AS agencies FROM stops4 GROUP BY clusterid"; 
 		Statement stmt = null;
 		try {
