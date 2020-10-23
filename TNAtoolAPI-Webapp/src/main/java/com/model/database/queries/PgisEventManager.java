@@ -2167,7 +2167,7 @@ public class PgisEventManager {
       } else if (geotype==1){//census tract
     	  geocriteria = "left(blockid,11)";    	 
       } else {// census place, urban area, ODOT region, or congressional district    	  
-    	  geocriteria = Types.getIdColumnName(type);
+    	  geocriteria = Types.getIdColumnName(geotype);
       }
       
       String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), svcids as (";
@@ -2225,7 +2225,7 @@ public class PgisEventManager {
     	 query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
     	      		+ "map.stopscount as stops,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1 from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
     	      		+"trip.id = map.tripid and trip.agencyid = map.agencyid inner join "+Types.getTripMapTableName(geotype)+ " maps on "
-    	      		+"trip.id = maps.tripid and trip.agencyid = maps.agencyid where map."+Types.getIdColumnName(type)+"='"+areaId+"' And maps."+Types.getIdColumnName(geotype)+"='"+geoid+"' ),service as (select COALESCE(sum(s1),0) as svcmiles,"
+    	      		+"trip.id = maps.tripid and trip.agencyid = maps.agencyid and st_intersects(maps.shape,map.shape) where map."+Types.getIdColumnName(type)+"='"+areaId+"' And maps."+Types.getIdColumnName(geotype)+"='"+geoid+"' ),service as (select COALESCE(sum(s1),0) as svcmiles,"
     	      		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
     	      		+ "stop.location as location, count(trips.aid) as service from gtfs_stops stop inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and "
     	      		+ "stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid group by "
@@ -2235,8 +2235,8 @@ public class PgisEventManager {
     	      		+ "stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id inner join trips on stime.trip_agencyid =trips.aid and stime.trip_id=trips.tripid where "
     	      		+ "stime.arrivaltime>0 and stime.departuretime>0 group by stime.stop_agencyid, stime.stop_id, stop.location),"
     	      		+"stops1 as (select stopid,blockid,service from stops join gtfs_stops on stopid=id ),"
-    	      		+ "rsvc as (select sum(coalesce(service,0)) as rsvcstops  from census_blocks join stops1 using(blockid) where poptype= 'R' And  "+Types.getIdColumnName(geotype)+"='"+geoid+"'),"
-    	      		 + "usvc as (select sum(coalesce(service,0)) as usvcstops  from census_blocks join stops1 using(blockid) where poptype= 'U' And  "+Types.getIdColumnName(geotype)+"='"+geoid+"'),"
+    	      		+ "rsvc as (select sum(coalesce(service,0)) as rsvcstops  from census_blocks join stops1 using(blockid) where poptype= 'R' And  "+Types.getIdColumnName(geotype)+"='"+geoid+"' and "+Types.getIdColumnName(type)+"='"+areaId+"'),"
+    	      		 + "usvc as (select sum(coalesce(service,0)) as usvcstops  from census_blocks join stops1 using(blockid) where poptype= 'U' And  "+Types.getIdColumnName(geotype)+"='"+geoid+"' and "+Types.getIdColumnName(type)+"='"+areaId+"'),"
     	           + "svchrs as (select COALESCE(min(arrival),-1) as fromtime, COALESCE(max(departure),-1) as totime from stops), concom as (select distinct map."+Types.getIdColumnName(type)+" from "
     	      		+Types.getTripMapTableName(type)+" map inner join trips on trips.aid=map.agencyid and trips.tripid=map.tripid),concomnames as (select coalesce(string_agg(distinct "
     	      		+Types.getNameColumn(type)+",'; ' order by "+Types.getNameColumn(type)+"),'-') as connections from concom inner join "+Types.getTableName(type)+" using("
@@ -4711,13 +4711,13 @@ public class PgisEventManager {
 	public static HashMap<String, KeyClusterHashMap> getClusters(double radius, int dbindex, String username){
 		HashMap<String, KeyClusterHashMap> y = new HashMap<String, KeyClusterHashMap>();
 		String query = "WITH aids AS (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true), "
-				+ " stops0 AS (SELECT stops1.id AS stop1, stops2.id AS stop2,stops1.id || ':' || stops1.agencyid AS clusterid, stops1.agencyid AS agencyid1, stops2.id || ':' || stops2.agencyid AS stop, stops2.agencyid AS agencyid2"
+				+ " stops0 AS (SELECT stops1.id AS stop1, stops2.id AS stop2,stops1.id || ':' || stops1.agencyid AS clusterid, stops1.agencyid AS agencyid_def1, stops2.id || ':' || stops2.agencyid AS stop, stops2.agencyid AS agencyid_def2"
 				+ " FROM gtfs_stops AS stops1 LEFT JOIN gtfs_stops AS stops2	"
 				+ " ON ST_Dwithin(stops1.location, stops2.location, " + radius + ")),"
-				+ " stops1 AS (SELECT stops0.* FROM stops0 INNER JOIN aids ON agencyid1 IN (aids.aid)),"
-				+ " stops2 AS (SELECT stops1.* FROM stops1 INNER JOIN aids ON agencyid2 IN (aids.aid)),"
-				+ " stops3 AS (SELECT stops2.* FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid1=map.agencyid_def),"
-				+ " stops4 AS (SELECT stops3.* FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid2=map.agencyid_def)"
+				+ " stops1 AS (SELECT stops0.* FROM stops0 INNER JOIN aids ON agencyid_def1 IN (aids.aid)),"
+				+ " stops2 AS (SELECT stops1.* FROM stops1 INNER JOIN aids ON agencyid_def2 IN (aids.aid)),"
+				+ " stops3 AS (SELECT stops2.*, map.agencyid as agencyid1 FROM stops2 INNER JOIN gtfs_stop_service_map AS map ON stop1=map.stopid AND stops2.agencyid_def1=map.agencyid_def),"
+				+ " stops4 AS (SELECT stops3.*, map.agencyid as agencyid2 FROM stops3 INNER JOIN gtfs_stop_service_map AS map ON stop2=map.stopid AND stops3.agencyid_def2=map.agencyid_def)"
 				+ " SELECT stops4.clusterid, array_agg(stop) AS stops, array_agg(distinct agencyid2) AS agencies FROM stops4 GROUP BY clusterid"; 
 		Statement stmt = null;
 		try {
