@@ -1284,7 +1284,7 @@ public class Queries {
 				+ "	INNER JOIN gtfs_agencies AS agencies ON tripswithintimewindow.tripagencyid = agencies.id "
 				+ "	INNER JOIN gtfs_routes AS routes ON tripswithintimewindow.route_agencyid = routes.agencyid "
 				+ "	AND tripswithintimewindow.routeid = routes.id "
-				+ "	INNER JOIN gtfs_stops AS stops ON stopid1 = stops.id AND stops.agencyid IN (SELECT id FROM gtfs_agencies WHERE defaultid = '" + agencyId + "') ";
+				+ "	INNER JOIN gtfs_stops AS stops ON stopid1 = stops.id AND stops.agencyid IN (SELECT defaultid FROM gtfs_agencies WHERE id = '" + agencyId + "') ";
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
 			ConTrip e = new ConTrip();
