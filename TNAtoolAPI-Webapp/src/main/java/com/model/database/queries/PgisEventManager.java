@@ -778,7 +778,7 @@ public class PgisEventManager {
 					i.cd04within = rs.getInt("cd04withinx");
 					i.cs01within = rs.getInt("cs01withinx");
 					i.cs02within = rs.getInt("cs02withinx");
-					i.c000served = rs.getInt("c000served");
+					i.c000served = rs.getLong("c000served");
 					i.ca01served = rs.getInt("ca01served");
 					i.ca02served = rs.getInt("ca02served");
 					i.ca03served = rs.getInt("ca03served");
@@ -1297,7 +1297,7 @@ public class PgisEventManager {
 						i.cd04within = rs.getInt("cd04withinx");
 						i.cs01within = rs.getInt("cs01withinx");
 						i.cs02within = rs.getInt("cs02withinx");
-						i.c000served = rs.getInt("c000served");
+						i.c000served = rs.getLong("c000served");
 						i.ca01served = rs.getInt("ca01served");
 						i.ca02served = rs.getInt("ca02served");
 						i.ca03served = rs.getInt("ca03served");
@@ -5228,7 +5228,7 @@ public class PgisEventManager {
 		RouteListm rinstance = new RouteListm();
 		VariantListm tinstance = new VariantListm();
 		Attr attribute = new Attr();
-		Connection connection = makeConnection(dbindex);		
+		Connection connection = makeConnection(dbindex);	
 		String mainquery ="";		
 		if (day!=null){
 			//the query with dates
@@ -5285,7 +5285,7 @@ public class PgisEventManager {
 			boolean achanged;
 			while (rs.next()) {	 
 				achanged=false;
-				aid = rs.getString("aid");					        	
+				aid = rs.getString("aid");	
 	        	if (!(caid.equals(aid))){
 	        		achanged = true;
 					if (agencies_cntr>0){
