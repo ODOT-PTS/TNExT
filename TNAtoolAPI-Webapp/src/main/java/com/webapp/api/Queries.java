@@ -188,6 +188,7 @@ public class Queries {
 	 */
 	public static void updateDefaultDBindex() {
 		default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
+		dbsize = DatabaseConfig.getConfigSize();
 		menuResponse = new AgencyRouteList[DatabaseConfig.getConfigSize()];
 	}
 	
