@@ -3,3 +3,4 @@ data
 conf
 docker-compose.override.yml
 .DS_Store
+ENVIRONMENT_VARS.sh
