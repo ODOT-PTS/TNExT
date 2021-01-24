@@ -1018,7 +1018,7 @@ public class FileUpload extends HttpServlet {
 		for(String sqlFileName: sqlFiles) {
 			String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			path = path + "../../../../webapp/resources/admin/Development/PGSQL/" + sqlFileName;
-			DbUpdate.runSqlFromFile(path, dbConfig.getConnectionUrl(), dbConfig.getUsername(), dbConfig.getPassword());
+			DbUpdate.runSqlFromFile(path, dbConfig.getConnectionUrl());
 		}
 		
 		return "Feed updated";

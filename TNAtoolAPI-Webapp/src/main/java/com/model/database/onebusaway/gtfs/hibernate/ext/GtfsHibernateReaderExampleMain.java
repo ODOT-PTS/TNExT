@@ -293,8 +293,8 @@ public class GtfsHibernateReaderExampleMain {
     Configuration config = new Configuration();
     config = config.configure(inputFile);
     config.setProperty("hibernate.connection.url", db.getConnectionUrl());
-    config.setProperty("hibernate.connection.username", db.getUsername());
-    config.setProperty("hibernate.connection.password", db.getUsername());
+    config.setProperty("hibernate.connection.username", DatabaseConfig.getUsername());
+    config.setProperty("hibernate.connection.password", DatabaseConfig.getPassword());
     SessionFactory sessionFactory = config.buildSessionFactory();
     sessions[db.getDatabaseIndex()] = sessionFactory;
     return new HibernateGtfsFactory(sessionFactory);
