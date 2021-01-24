@@ -131,6 +131,10 @@ public class PgisEventManager {
 		}
 		return response;
 	}
+	
+	public static Connection makeConnectionByUrl(String url) throws SQLException {
+		return makeConnectionByUrl(url, DatabaseConfig.getUsername(), DatabaseConfig.getPassword());
+	}
 
 	/**
 	 * Drops the connection

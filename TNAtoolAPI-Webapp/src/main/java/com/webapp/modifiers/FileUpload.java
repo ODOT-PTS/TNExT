@@ -686,8 +686,8 @@ public class FileUpload extends HttpServlet {
 		
 		args[0] = "--driverClass=\"org.postgresql.Driver\"";
 		args[1] = "--url=\""+dbConfig.getConnectionUrl()+"\"";
-		args[2] = "--username=\""+dbConfig.getUsername()+"\"";
-		args[3] = "--password=\""+dbConfig.getPassword()+"\"";
+		args[2] = "--username=\""+DatabaseConfig.getUsername()+"\"";
+		args[3] = "--password=\""+DatabaseConfig.getPassword()+"\"";
 		args[4] = feed;
 		
 		boolean b = true;

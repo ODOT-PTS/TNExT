@@ -149,6 +149,14 @@ public class DatabaseConfig {
         }
     }
 
+    public static String getUsername() {
+        return System.getenv("POSTGRES_USER");
+    }
+
+    public static String getPassword() {
+        return System.getenv("POSTGRES_PASSWORD");
+    }
+
 	public static void deactivateDb(int i) {
 		// String[] newElement;
 		// for(Map.Entry<String, String[]> entry : infoMap.entrySet()) {
@@ -251,8 +259,6 @@ public class DatabaseConfig {
     private String spatialConfigPath = "";
     private String configPath = "";
     private String connectionUrl = "";
-    private String username = "";
-    private String password = "";
     private String censusMappingSource = "";
     private String gtfsMappingSource1 = "";
     private String gtfsMappingSource2 = "";
@@ -292,8 +298,6 @@ public class DatabaseConfig {
         setSpatialConfigPath(row[2]);
         setConfigPath(row[3]);
         setConnectionUrl(row[4]);
-        setUsername(row[5]);
-        setPassword(row[6]);
         if (row.length > 7) {
             setCensusMappingSource(row[7]);
         }
@@ -339,8 +343,6 @@ public class DatabaseConfig {
         setSpatialConfigPath(m.get("spatialConfigPaths"));
         setConfigPath(m.get("ConfigPaths"));
         setConnectionUrl(m.get("connectionURL"));
-        setUsername(m.get("username"));
-        setPassword(m.get("password"));
         setCensusMappingSource(m.get("censusMappingSource"));
         setGtfsMappingSource1(m.get("gtfsMappingSource1"));
         setGtfsMappingSource2(m.get("gtfsMappingSource2"));
@@ -385,14 +387,6 @@ public class DatabaseConfig {
         return connectionUrl;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     public String getCensusMappingSource() {
         return censusMappingSource;
     }
@@ -430,14 +424,6 @@ public class DatabaseConfig {
 
     public void setConnectionUrl(String value) {
         this.connectionUrl = value;
-    }
-
-    public void setUsername(String value) {
-        this.username = value;
-    }
-
-    public void setPassword(String value) {
-        this.password = value;
     }
 
     public void setCensusMappingSource(String value) {

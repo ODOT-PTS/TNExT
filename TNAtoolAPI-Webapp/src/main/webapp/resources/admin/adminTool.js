@@ -74,10 +74,9 @@ function addModifyDB(j, index, existing){
 	html+="<label>Connection Port:</label><br>";
 	html+="<input type='text' id='"+dbInfo[0][4]+"p"+"' value='"+urlV[1]+"' required style='width:90%;font-size:80%'><br><br>";
 	
-	html+="<label>Username:</label><br>";
-	html+="<input type='text' id='"+dbInfo[0][5]+"' value='"+info[5]+"' required style='width:90%;font-size:80%'><br><br>";
-	html+="<label>Password:</label><br>";
-	html+="<input type='text' id='"+dbInfo[0][6]+"' value='"+info[6]+"' required style='width:90%;font-size:80%'><br><br>";
+	// Placeholders to maintain dbInfo length/structure upon submit -- not real values
+	html+="<input type='hidden' id='"+dbInfo[0][5]+"' value='username' required>";
+	html+="<input type='hidden' id='"+dbInfo[0][6]+"' value='password' required>";
 
 	if (existing == true) {
 		html+="<label>Best Service Date:</label><br>";
@@ -88,10 +87,10 @@ function addModifyDB(j, index, existing){
 	$('#dialogFields').html(html);
 	
 	 form = dialog.find( "form" ).on( "submit", function( event ) {
-	    event.preventDefault();
+		event.preventDefault();
 	    var dbname = $('#'+dbInfo[0][1]).val();
-	    var user = $('#'+dbInfo[0][5]).val();
-	    var pass = $('#'+dbInfo[0][6]).val();
+	    // var user = $('#'+dbInfo[0][5]).val();
+	    // var pass = $('#'+dbInfo[0][6]).val();
 	    var cURL = "jdbc:postgresql://"+$('#'+dbInfo[0][4]).val()+":"+$('#'+dbInfo[0][4]+"p").val()+"/";
 		var db = $('#'+dbInfo[0][4]+"n").val();
 	    var regex = new RegExp("^[a-z][a-z0-9\_]+$");
@@ -106,7 +105,7 @@ function addModifyDB(j, index, existing){
 	    }
 	    $.ajax({
 	        type: "GET",
-	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkInput?&dbname="+dbname+"&cURL="+cURL+"&user="+user+"&pass="+pass+"&db="+db+"&oldURL="+oldURL+"&olddbname="+olddbname,
+	        url: "/TNAtoolAPI-Webapp/modifiers/dbupdate/checkInput?&dbname="+dbname+"&cURL="+cURL+"&db="+db+"&oldURL="+oldURL+"&olddbname="+olddbname,
 	        dataType: "json",
 	        async: false,
 	        success: function(d) {
@@ -2010,8 +2009,6 @@ $(document).ready(function(){
 //            	html += "<tr><td>Display Name: </td><td>"+dbInfo[i][1]+"</td></tr>";
             	html += "<tr><td>Connection URL: </td><td>"+connection[connection.length-2].split(":")[0]+"</td></tr>";
             	html += "<tr><td>Connection Port: </td><td>"+connection[connection.length-2].split(":")[1]+"</td></tr>";
-            	html += "<tr><td>Username: </td><td>"+dbInfo[i][5]+"</td></tr>";
-            	html += "<tr><td>Password: </td><td>"+dbInfo[i][6]+"</td></tr>";
 
             	html += "</table></div></td>";
             	html += "<td><div id='dbButtons"+i+"' style='font-size:85%'><table>" +

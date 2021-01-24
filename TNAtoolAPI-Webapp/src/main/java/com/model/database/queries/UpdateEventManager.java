@@ -741,7 +741,7 @@ public class UpdateEventManager {
 	 */
 	public static void addFunction(Connection connection, String[] dbInfo){
 		logger.info("addFunction");
-		DbUpdate.runSqlFromResource("admin/resources/Functions.sql", dbInfo[4], dbInfo[5], dbInfo[6]);
+		DbUpdate.runSqlFromResource("admin/resources/Functions.sql", dbInfo[4]);
 	}
 	
 	/**

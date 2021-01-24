@@ -646,8 +646,8 @@ public class Queries {
 					"-f", shapePath,
 					"-h", db.getHost(),
 					"-p", db.getPort(),
-					"-u", db.getUsername(),
-					"-P", db.getPassword(),
+					"-u", DatabaseConfig.getUsername(),
+					"-P", DatabaseConfig.getPassword(),
 					db.getDatabase(),
 					query.get(j)
 				};
