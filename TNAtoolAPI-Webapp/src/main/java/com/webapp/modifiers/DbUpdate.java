@@ -2883,11 +2883,11 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     String[] fileNames = { "b03002", "b16004", "b17021", "b18101", "b19037" };
     String[] copyColumn = new String[5];
@@ -2940,50 +2940,50 @@ public class DbUpdate {
 
       sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_1.sql";
       sqlPath = sqlPath.substring(1, sqlPath.length());
-      runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+      runSqlFromFile(sqlPath, dbInfo[4]);
 
       copySqlCommand(copyColumn[i], path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
       sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_2.sql";
       sqlPath = sqlPath.substring(1, sqlPath.length());
-      runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+      runSqlFromFile(sqlPath, dbInfo[4]);
     }
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float31.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float4.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float5.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     if (message.equals("")) {
       message = "done";
@@ -3040,13 +3040,13 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     path = path + "../../src/main/webapp/resources/admin/uploads/emp/wac.csv";
@@ -3054,13 +3054,13 @@ public class DbUpdate {
     source = new File(path);
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
@@ -3118,7 +3118,7 @@ public class DbUpdate {
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)", path,
         dbInfo[4], dbInfo[5], dbInfo[6]);
@@ -3126,12 +3126,12 @@ public class DbUpdate {
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
@@ -3188,7 +3188,7 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand(
         "counties_future_pop(countyid,population2015,population2020,population2025,population2030,population2035,population2040,population2045,population2050)",
@@ -3196,31 +3196,31 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
@@ -3273,13 +3273,13 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("counties_regions(countyid,regionid,regionname)", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
@@ -3870,7 +3870,7 @@ public class DbUpdate {
     }
   }
 
-  public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+  public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl) {
     logger.info("runSqlFromFile: " + sqlFilePath);
     // 1. read file
     String sql = "";

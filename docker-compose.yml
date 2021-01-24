@@ -19,7 +19,7 @@ services:
     restart: always
     command: postgres --log_statement=all
     image: mdillon/postgis:9.6
-    env_file: ENVIRONMENT_VARS.sh
+    env_file: ENVIRONMENT_VARS.env
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -28,7 +28,7 @@ services:
   tnext:
     build: .
     restart: always
-    env_file: ENVIRONMENT_VARS.sh
+    env_file: ENVIRONMENT_VARS.env
     volumes:
       - ./data:/data
       - ./conf:/app/conf
