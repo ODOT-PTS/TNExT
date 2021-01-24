@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 export PGHOST=db
-export PGUSER=postgres
-export PGPASSWORD=postgres
 
 /scripts/wait-for-it.sh db:5432 --timeout=30 -- echo "db ready"
 
