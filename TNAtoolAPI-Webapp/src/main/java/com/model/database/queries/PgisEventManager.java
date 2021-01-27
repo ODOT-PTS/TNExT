@@ -2227,7 +2227,7 @@ public class PgisEventManager {
      else
      {
     	 query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
-    	      		+ "map.stopscount as stops,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1 from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
+    	      		+ "map.stopscount as stops,(ST_Length(st_transform(st_intersection(st_buffer(maps.shape, .01 * 1609.34), map.shape),2993))/1609.34) as s1 from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
     	      		+"trip.id = map.tripid and trip.agencyid = map.agencyid inner join "+Types.getTripMapTableName(geotype)+ " maps on "
     	      		+"trip.id = maps.tripid and trip.agencyid = maps.agencyid and st_intersects(maps.shape,map.shape) where map."+Types.getIdColumnName(type)+"='"+areaId+"' And maps."+Types.getIdColumnName(geotype)+"='"+geoid+"' ),service as (select COALESCE(sum(s1),0) as svcmiles,"
     	      		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
