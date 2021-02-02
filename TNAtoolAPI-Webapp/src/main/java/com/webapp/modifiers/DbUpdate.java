@@ -73,7 +73,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.tomcat.util.http.fileupload.FileDeleteStrategy;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -107,7 +108,7 @@ import com.webapp.api.Queries;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-  final static Logger logger = Logger.getLogger(DbUpdate.class);
+  final static Logger logger = LogManager.getLogger(DbUpdate.class);
   private final static int USER_COUNT = 10;
   private final static int QUOTA = 10000000;
   private final static DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();

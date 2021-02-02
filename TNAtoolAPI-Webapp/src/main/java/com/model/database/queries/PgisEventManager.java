@@ -43,7 +43,8 @@ import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -102,7 +103,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class PgisEventManager {
-	final static Logger logger = Logger.getLogger(PgisEventManager.class);	
+	final static Logger logger = LogManager.getLogger(PgisEventManager.class);	
 
 	//public static Connection connection;
 

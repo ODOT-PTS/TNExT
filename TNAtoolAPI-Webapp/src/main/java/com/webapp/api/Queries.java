@@ -67,7 +67,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.codehaus.jettison.json.JSONException;
@@ -165,7 +166,7 @@ import com.webapp.modifiers.DbUpdate;
 @Path("/transit")
 @XmlRootElement
 public class Queries {
-	final static Logger logger = Logger.getLogger(Queries.class);
+	final static Logger logger = LogManager.getLogger(Queries.class);
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
 	private static int default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();

@@ -27,7 +27,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -58,7 +59,7 @@ import org.onebusaway.gtfs.model.*;
 
 
 public class GtfsHibernateReaderExampleMain { 
-  final static Logger logger = Logger.getLogger(GtfsHibernateReaderExampleMain.class);
+  final static Logger logger = LogManager.getLogger(GtfsHibernateReaderExampleMain.class);
   private GtfsMutableRelationalDao dao;
   public static HibernateGtfsFactory[] factory = new HibernateGtfsFactory[DatabaseConfig.getConfigSize()];
   public static SessionFactory[] sessions = new SessionFactory[DatabaseConfig.getConfigSize()];

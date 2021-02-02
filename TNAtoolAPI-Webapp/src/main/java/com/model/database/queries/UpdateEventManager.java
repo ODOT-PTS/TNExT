@@ -28,12 +28,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.webapp.modifiers.DbUpdate;
 
 public class UpdateEventManager {
-	final static Logger logger = Logger.getLogger(UpdateEventManager.class);	
+	final static Logger logger = LogManager.getLogger(UpdateEventManager.class);	
 
 	/**
 	 *Adds additional spatial methods to the current database

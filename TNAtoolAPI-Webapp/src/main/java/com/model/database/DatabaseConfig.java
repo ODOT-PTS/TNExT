@@ -41,13 +41,14 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class DatabaseConfig {
-    final static Logger logger = Logger.getLogger(DatabaseConfig.class);    
+    final static Logger logger = LogManager.getLogger(DatabaseConfig.class);    
     private static TreeMap<Integer, DatabaseConfig> dbConfigs;
     private static String[] fields = "databaseIndex,dbnames,spatialConfigPaths,ConfigPaths,connectionURL,username,password,censusMappingSource,gtfsMappingSource1,gtfsMappingSource2,defaultDate".split(",");
     static {

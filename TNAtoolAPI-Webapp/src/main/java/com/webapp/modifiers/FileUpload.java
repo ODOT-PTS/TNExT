@@ -74,7 +74,8 @@ import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.AddRemoveFeed;
 import com.model.database.queries.objects.UserSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Servlet implementation class FileUpload
@@ -85,7 +86,7 @@ public class FileUpload extends HttpServlet {
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
 	private static final DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
-	final static Logger logger = Logger.getLogger(FileUpload.class);
+	final static Logger logger = LogManager.getLogger(FileUpload.class);
 	// private static final String dbRL = db.getConnectionUrl(); 
 	// private static final String dbUSER = db.getUsername();
 	// private static final String dbPASS = db.getPassword();
