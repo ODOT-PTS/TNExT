@@ -26,7 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.onebusaway.gtfs.model.*;
 
@@ -52,7 +53,7 @@ import com.model.database.queries.objects.ParknRide;
 import com.model.database.queries.objects.TransitConnection;
 
 public class SpatialEventManager {
-	final static Logger logger = Logger.getLogger(SpatialEventManager.class);
+	final static Logger logger = LogManager.getLogger(SpatialEventManager.class);
 
 	/**
 	 * returns a list of park and rides that are located within

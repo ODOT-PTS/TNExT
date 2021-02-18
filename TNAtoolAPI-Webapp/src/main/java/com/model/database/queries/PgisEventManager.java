@@ -43,7 +43,8 @@ import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -102,7 +103,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class PgisEventManager {
-	final static Logger logger = Logger.getLogger(PgisEventManager.class);	
+	final static Logger logger = LogManager.getLogger(PgisEventManager.class);	
 
 	//public static Connection connection;
 
@@ -130,6 +131,10 @@ public class PgisEventManager {
 			throw e;
 		}
 		return response;
+	}
+	
+	public static Connection makeConnectionByUrl(String url) throws SQLException {
+		return makeConnectionByUrl(url, DatabaseConfig.getUsername(), DatabaseConfig.getPassword());
 	}
 
 	/**
@@ -778,7 +783,7 @@ public class PgisEventManager {
 					i.cd04within = rs.getInt("cd04withinx");
 					i.cs01within = rs.getInt("cs01withinx");
 					i.cs02within = rs.getInt("cs02withinx");
-					i.c000served = rs.getInt("c000served");
+					i.c000served = rs.getLong("c000served");
 					i.ca01served = rs.getInt("ca01served");
 					i.ca02served = rs.getInt("ca02served");
 					i.ca03served = rs.getInt("ca03served");
@@ -1297,7 +1302,7 @@ public class PgisEventManager {
 						i.cd04within = rs.getInt("cd04withinx");
 						i.cs01within = rs.getInt("cs01withinx");
 						i.cs02within = rs.getInt("cs02withinx");
-						i.c000served = rs.getInt("c000served");
+						i.c000served = rs.getLong("c000served");
 						i.ca01served = rs.getInt("ca01served");
 						i.ca02served = rs.getInt("ca02served");
 						i.ca03served = rs.getInt("ca03served");
@@ -2223,7 +2228,7 @@ public class PgisEventManager {
      else
      {
     	 query +="), trips as (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid, round((map.length)::numeric,2) as length, map.tlength as tlength, "
-    	      		+ "map.stopscount as stops,(ST_Length(st_transform(st_intersection(maps.shape, map.shape),2993))/1609.34) as s1 from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
+    	      		+ "map.stopscount as stops,(ST_Length(st_transform(st_intersection(st_buffer(maps.shape, .0005 * 1609.34), map.shape),2993))/1609.34) as s1 from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id) inner join "+Types.getTripMapTableName(type)+ " map on "
     	      		+"trip.id = map.tripid and trip.agencyid = map.agencyid inner join "+Types.getTripMapTableName(geotype)+ " maps on "
     	      		+"trip.id = maps.tripid and trip.agencyid = maps.agencyid and st_intersects(maps.shape,map.shape) where map."+Types.getIdColumnName(type)+"='"+areaId+"' And maps."+Types.getIdColumnName(geotype)+"='"+geoid+"' ),service as (select COALESCE(sum(s1),0) as svcmiles,"
     	      		+ " COALESCE(sum(tlength),0) as svchours, COALESCE(sum(stops),0) as svcstops from trips),stopsatlos as (select stime.stop_agencyid as aid, stime.stop_id as stopid, "
@@ -5228,7 +5233,7 @@ public class PgisEventManager {
 		RouteListm rinstance = new RouteListm();
 		VariantListm tinstance = new VariantListm();
 		Attr attribute = new Attr();
-		Connection connection = makeConnection(dbindex);		
+		Connection connection = makeConnection(dbindex);	
 		String mainquery ="";		
 		if (day!=null){
 			//the query with dates
@@ -5285,7 +5290,7 @@ public class PgisEventManager {
 			boolean achanged;
 			while (rs.next()) {	 
 				achanged=false;
-				aid = rs.getString("aid");					        	
+				aid = rs.getString("aid");	
 	        	if (!(caid.equals(aid))){
 	        		achanged = true;
 					if (agencies_cntr>0){

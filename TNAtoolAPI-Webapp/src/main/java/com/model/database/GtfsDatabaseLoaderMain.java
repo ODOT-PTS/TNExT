@@ -24,7 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -40,7 +41,7 @@ import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import com.webapp.modifiers.DbUpdate;
 
 public class GtfsDatabaseLoaderMain {
-  final static Logger logger = Logger.getLogger(GtfsDatabaseLoaderMain.class);
+  final static Logger logger = LogManager.getLogger(GtfsDatabaseLoaderMain.class);
 
   private static final String ARG_DRIVER_CLASS = "driverClass";
 

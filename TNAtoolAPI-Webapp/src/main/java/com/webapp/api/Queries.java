@@ -67,7 +67,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.codehaus.jettison.json.JSONException;
@@ -165,7 +166,7 @@ import com.webapp.modifiers.DbUpdate;
 @Path("/transit")
 @XmlRootElement
 public class Queries {
-	final static Logger logger = Logger.getLogger(Queries.class);
+	final static Logger logger = LogManager.getLogger(Queries.class);
 	private static final double STOP_SEARCH_RADIUS = 0.1;
 	private static final int LEVEL_OF_SERVICE = 2;
 	private static int default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
@@ -188,6 +189,7 @@ public class Queries {
 	 */
 	public static void updateDefaultDBindex() {
 		default_dbindex = DatabaseConfig.getLastConfig().getDatabaseIndex();
+		dbsize = DatabaseConfig.getConfigSize();
 		menuResponse = new AgencyRouteList[DatabaseConfig.getConfigSize()];
 	}
 	
@@ -645,8 +647,8 @@ public class Queries {
 					"-f", shapePath,
 					"-h", db.getHost(),
 					"-p", db.getPort(),
-					"-u", db.getUsername(),
-					"-P", db.getPassword(),
+					"-u", DatabaseConfig.getUsername(),
+					"-P", DatabaseConfig.getPassword(),
 					db.getDatabase(),
 					query.get(j)
 				};
@@ -1284,7 +1286,7 @@ public class Queries {
 				+ "	INNER JOIN gtfs_agencies AS agencies ON tripswithintimewindow.tripagencyid = agencies.id "
 				+ "	INNER JOIN gtfs_routes AS routes ON tripswithintimewindow.route_agencyid = routes.agencyid "
 				+ "	AND tripswithintimewindow.routeid = routes.id "
-				+ "	INNER JOIN gtfs_stops AS stops ON stopid1 = stops.id AND stops.agencyid IN (SELECT id FROM gtfs_agencies WHERE defaultid = '" + agencyId + "') ";
+				+ "	INNER JOIN gtfs_stops AS stops ON stopid1 = stops.id AND stops.agencyid IN (SELECT defaultid FROM gtfs_agencies WHERE id = '" + agencyId + "') ";
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next()) {
 			ConTrip e = new ConTrip();

@@ -30,7 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
@@ -49,7 +50,7 @@ import com.model.database.DatabaseConfig;
 
 @WebServlet(urlPatterns = "/TNAtoolAPI-Webapp/admin")
 public class Admin extends HttpServlet {
-	final static Logger logger = Logger.getLogger(Admin.class);
+	final static Logger logger = LogManager.getLogger(Admin.class);
 	
 	// GET
 	@Override

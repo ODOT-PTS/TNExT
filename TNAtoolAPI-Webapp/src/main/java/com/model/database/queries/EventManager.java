@@ -29,7 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.model.database.queries.util.Hutil;
 import com.model.database.queries.util.Types;
@@ -47,7 +48,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 
 public class EventManager {	
-	final static Logger logger = Logger.getLogger(EventManager.class);	
+	final static Logger logger = LogManager.getLogger(EventManager.class);	
 private	static Session[] session = new Session[Hutil.getSessionFactory().length];
 static{
 	for (int scnt=0; scnt< session.length; scnt++){

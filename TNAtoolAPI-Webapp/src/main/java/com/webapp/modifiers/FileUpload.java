@@ -74,7 +74,8 @@ import com.model.database.queries.UpdateEventManager;
 import com.model.database.queries.objects.AddRemoveFeed;
 import com.model.database.queries.objects.UserSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Servlet implementation class FileUpload
@@ -85,7 +86,7 @@ public class FileUpload extends HttpServlet {
 	private final static String psqlPath = "C:/Program Files/PostgreSQL/9.3/bin/";
 	private static final long serialVersionUID = 1L;
 	private static final DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
-	final static Logger logger = Logger.getLogger(FileUpload.class);
+	final static Logger logger = LogManager.getLogger(FileUpload.class);
 	// private static final String dbRL = db.getConnectionUrl(); 
 	// private static final String dbUSER = db.getUsername();
 	// private static final String dbPASS = db.getPassword();
@@ -686,8 +687,8 @@ public class FileUpload extends HttpServlet {
 		
 		args[0] = "--driverClass=\"org.postgresql.Driver\"";
 		args[1] = "--url=\""+dbConfig.getConnectionUrl()+"\"";
-		args[2] = "--username=\""+dbConfig.getUsername()+"\"";
-		args[3] = "--password=\""+dbConfig.getPassword()+"\"";
+		args[2] = "--username=\""+DatabaseConfig.getUsername()+"\"";
+		args[3] = "--password=\""+DatabaseConfig.getPassword()+"\"";
 		args[4] = feed;
 		
 		boolean b = true;
@@ -1018,7 +1019,7 @@ public class FileUpload extends HttpServlet {
 		for(String sqlFileName: sqlFiles) {
 			String path = UpdateEventManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			path = path + "../../../../webapp/resources/admin/Development/PGSQL/" + sqlFileName;
-			DbUpdate.runSqlFromFile(path, dbConfig.getConnectionUrl(), dbConfig.getUsername(), dbConfig.getPassword());
+			DbUpdate.runSqlFromFile(path, dbConfig.getConnectionUrl());
 		}
 		
 		return "Feed updated";

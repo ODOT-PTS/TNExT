@@ -19,9 +19,7 @@ services:
     restart: always
     command: postgres --log_statement=all
     image: mdillon/postgis:9.6
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    env_file: ENVIRONMENT_VARS.env
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -30,10 +28,7 @@ services:
   tnext:
     build: .
     restart: always
-    environment:
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      PGHOST: db
+    env_file: ENVIRONMENT_VARS.env
     volumes:
       - ./data:/data
       - ./conf:/app/conf

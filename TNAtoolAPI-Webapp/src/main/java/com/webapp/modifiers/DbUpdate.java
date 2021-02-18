@@ -73,7 +73,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.tomcat.util.http.fileupload.FileDeleteStrategy;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -107,7 +108,7 @@ import com.webapp.api.Queries;
 @Path("/dbupdate")
 @XmlRootElement
 public class DbUpdate {
-  final static Logger logger = Logger.getLogger(DbUpdate.class);
+  final static Logger logger = LogManager.getLogger(DbUpdate.class);
   private final static int USER_COUNT = 10;
   private final static int QUOTA = 10000000;
   private final static DatabaseConfig dbConfig = DatabaseConfig.getLastConfig();
@@ -157,7 +158,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET activated = true;");
     } catch (SQLException e) {
@@ -194,7 +195,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET " + fieldName + " = " + b + ";");
     } catch (SQLException e) {
@@ -226,7 +227,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE database_status SET activated = false;");
     } catch (SQLException e) {
@@ -732,8 +733,8 @@ public class DbUpdate {
   @Path("/checkInput")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object checkInput(@QueryParam("dbname") String dbname, @QueryParam("cURL") String cURL,
-      @QueryParam("db") String db, @QueryParam("user") String user, @QueryParam("pass") String pass,
-      @QueryParam("oldURL") String oldURL, @QueryParam("olddbname") String olddbname) throws IOException {
+      @QueryParam("db") String db, @QueryParam("oldURL") String oldURL, @QueryParam("olddbname") String olddbname
+    ) throws IOException {
     PDBerror b = new PDBerror();
     b.DBError = "true";
     List<String> dbnames = new ArrayList<String>(); 
@@ -750,7 +751,8 @@ public class DbUpdate {
 
     Connection c = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(cURL, user, pass);
+      // c = PgisEventManager.makeConnectionByUrl(cURL, user, pass);
+      c = PgisEventManager.makeConnectionByUrl(cURL);
     } catch (SQLException e) {
       logger.error(e);
       b.DBError = e.getMessage();
@@ -779,7 +781,7 @@ public class DbUpdate {
     String name = dbConfig.getDatabase();
     String dropurl = "jdbc:postgresql://" + dbConfig.getHost() + ":" + dbConfig.getPort() + "/";
     try {
-      c = PgisEventManager.makeConnectionByUrl(dropurl, dbConfig.getUsername(), dbConfig.getPassword());
+      c = PgisEventManager.makeConnectionByUrl(dropurl);
       statement = c.createStatement();
       rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='" + name + "'");
       statement.executeUpdate("DROP DATABASE " + name);
@@ -825,7 +827,7 @@ public class DbUpdate {
     ResultSet rs = null;
     String[] dbInfo = db.split(",");
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT activated FROM database_status");
       rs.next();
@@ -866,7 +868,7 @@ public class DbUpdate {
     ResultSet rs = null;
     String[] dbInfo = db.split(",");
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM database_status");
       rs.next();
@@ -914,15 +916,15 @@ public class DbUpdate {
     dbConfig.setDatabaseIndex(dbInfo[0]);
     dbConfig.setDbName(dbInfo[1]);
     dbConfig.setConnectionUrl(dbInfo[4]);
-    dbConfig.setUsername(dbInfo[5]);
-    dbConfig.setPassword(dbInfo[6]);
+    // dbConfig.setUsername(dbInfo[5]);
+    // dbConfig.setPassword(dbInfo[6]);
     String name = dbConfig.getDatabase();
     String createurl = "jdbc:postgresql://" + dbConfig.getHost() + ":" + dbConfig.getPort() + "/";
 
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(createurl, dbConfig.getUsername(), dbConfig.getPassword());
+      c = PgisEventManager.makeConnectionByUrl(createurl);
       statement = c.createStatement();
       statement.executeUpdate("CREATE DATABASE " + name);
       statement.close();
@@ -1038,7 +1040,7 @@ public class DbUpdate {
       try {
         // DatabaseConfig renameConfig = new DatabaseConfig();
         String curl = "jdbc:postgresql://" + newConfig.getHost() + ":" + newConfig.getPort() + "/";
-        connection = DriverManager.getConnection(curl, newConfig.getUsername(), newConfig.getPassword());
+        connection = DriverManager.getConnection(curl, DatabaseConfig.getUsername(), DatabaseConfig.getPassword());
         PreparedStatement ps = connection.prepareStatement("select pg_terminate_backend(pid) from pg_stat_activity where datname=?");
         ps.setString(1, oldDatabase);
         ps.executeQuery();
@@ -1077,7 +1079,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_feed_info limit 1;");
 
@@ -1118,7 +1120,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_uploaded_feeds where updated=FALSE limit 1;");
 
@@ -1160,7 +1162,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror response = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery(
           "SELECT distinct(Left(blockid,2)) stateid from title_vi_blocks_float WHERE with_disability IS NOT NULL order by stateid;");
@@ -1213,7 +1215,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror response = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(Left(countyid,2)) stateid FROM parknride order by stateid;");
 
@@ -1263,7 +1265,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM parknride WHERE left(countyid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
@@ -1296,7 +1298,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM title_vi_blocks_float WHERE left(blockid,2)='" + stateid + "';");
       statement.executeUpdate("VACUUM");
@@ -1329,7 +1331,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       //			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
       statement.executeUpdate("DELETE FROM lodes_blocks_wac WHERE left(blockid,2)='" + stateid + "';");
@@ -1363,7 +1365,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       //			statement.executeUpdate("DROP TABLE IF EXISTS lodes_blocks_rac;");
       statement.executeUpdate("DELETE FROM lodes_blocks_rac WHERE left(blockid,2)='" + stateid + "';");
@@ -1398,7 +1400,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM lodes_rac_projection_block WHERE left(blockid,2)='" + stateid + "';");
       statement.executeUpdate("DELETE FROM lodes_rac_projection_county WHERE left(countyid,2)='" + stateid + "';");
@@ -1432,7 +1434,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("UPDATE census_blocks SET "
           + "population2015 = NULL, population2020 = NULL, population2025 = NULL, population2030 = NULL, "
@@ -1486,7 +1488,7 @@ public class DbUpdate {
     Statement statement = null;
     PDBerror response = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_blocks_wac order by stateid;");
       while (rs.next()) {
@@ -1556,7 +1558,7 @@ public class DbUpdate {
     Statement statement = null;
     PDBerror response = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement
           .executeQuery("SELECT distinct(Left(blockid,2)) stateid FROM lodes_rac_projection_block order by stateid;");
@@ -1623,7 +1625,7 @@ public class DbUpdate {
     Integer value;
     PDBerror response = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
 
       //			rs = statement.executeQuery("SELECT population2040 FROM census_blocks where population2040 is null limit 1;");
@@ -1708,7 +1710,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror response = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
 
       rs = statement
@@ -1770,7 +1772,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
 
       rs = statement.executeQuery("SELECT * FROM census_blocks limit 1;");
@@ -1856,7 +1858,7 @@ public class DbUpdate {
     ResultSet rs = null;
     ArrayList<String> stateids = new ArrayList<String>();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT DISTINCT(stateid) states FROM census_states;");
       while (rs.next()) {
@@ -1883,7 +1885,7 @@ public class DbUpdate {
     }
     dbInfo = dbTo.split(",");
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       switch (section) {
       case "census":
@@ -1972,7 +1974,7 @@ public class DbUpdate {
     }
 
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       statement.executeUpdate("VACUUM");
     } catch (SQLException e) {
@@ -2014,7 +2016,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       statement.executeUpdate("DELETE FROM census_states WHERE stateid = '" + stateid + "';");
@@ -2084,7 +2086,7 @@ public class DbUpdate {
     dbInfo[4] += dbURL[dbURL.length - 1];
     StateInits st = new StateInits();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       statement.executeUpdate("TRUNCATE TABLE census_states;");
@@ -2135,7 +2137,7 @@ public class DbUpdate {
 
     dbInfo = db.split(",");
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       statement.executeUpdate("DROP TABLE IF EXISTS census_states;");
@@ -2201,7 +2203,7 @@ public class DbUpdate {
     }
 
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       statement.executeUpdate("VACUUM;");
@@ -2305,7 +2307,7 @@ public class DbUpdate {
         { "gtfs_feed_info", "defaultid" } };
 
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
 
@@ -2543,7 +2545,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
 
@@ -2644,7 +2646,7 @@ public class DbUpdate {
     String agencyIds = "";
 
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
@@ -2696,7 +2698,7 @@ public class DbUpdate {
               + defaultId + "' group by serviceid_agencyid),"
               + "calendardates as (select serviceid_agencyid as agencyid, min(date::int) as calstart, max(date::int) as calend from gtfs_calendar_dates where serviceid_agencyid='"
               + defaultId + "' group by serviceid_agencyid),"
-              + "calendar as (select cals.agencyid, least(cals.calstart, calds.calstart) as calstart, greatest(cals.calend, calds.calend) as calend from calendars cals full join calendardates calds using(agencyid)) "
+              + "calendar as (select coalesce(cals.agencyid, calds.agencyid) as agencyid, least(cals.calstart, calds.calstart) as calstart, greatest(cals.calend, calds.calend) as calend from calendars cals full join calendardates calds using(agencyid)) "
               + "update gtfs_feed_info set startdate= calendar.calstart::varchar , enddate=calendar.calend::varchar from calendar where defaultid = agencyid;");
 
       statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize,updated) "
@@ -2748,7 +2750,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     //		ResultSet rs = null;
-    c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+    c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
     try {
       statement = c.createStatement();
       statement.executeUpdate("CREATE TABLE IF NOT EXISTS parknride(" + "pnrid integer NOT NULL, "
@@ -2882,11 +2884,11 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     String[] fileNames = { "b03002", "b16004", "b17021", "b18101", "b19037" };
     String[] copyColumn = new String[5];
@@ -2939,50 +2941,50 @@ public class DbUpdate {
 
       sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_1.sql";
       sqlPath = sqlPath.substring(1, sqlPath.length());
-      runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+      runSqlFromFile(sqlPath, dbInfo[4]);
 
       copySqlCommand(copyColumn[i], path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
       sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_2.sql";
       sqlPath = sqlPath.substring(1, sqlPath.length());
-      runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+      runSqlFromFile(sqlPath, dbInfo[4]);
     }
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float31.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float4.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float5.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     if (message.equals("")) {
       message = "done";
@@ -2991,7 +2993,7 @@ public class DbUpdate {
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "title6");
       statement.executeUpdate("VACUUM");
@@ -3039,13 +3041,13 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     path = path + "../../src/main/webapp/resources/admin/uploads/emp/wac.csv";
@@ -3053,18 +3055,18 @@ public class DbUpdate {
     source = new File(path);
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "employment");
       statement.executeUpdate("VACUUM");
@@ -3117,7 +3119,7 @@ public class DbUpdate {
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)", path,
         dbInfo[4], dbInfo[5], dbInfo[6]);
@@ -3125,17 +3127,17 @@ public class DbUpdate {
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path
         + "../../src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "future_emp");
       statement.executeUpdate("VACUUM");
@@ -3187,7 +3189,7 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand(
         "counties_future_pop(countyid,population2015,population2020,population2025,population2030,population2035,population2040,population2045,population2050)",
@@ -3195,36 +3197,36 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "future_pop");
       statement.executeUpdate("VACUUM");
@@ -3272,18 +3274,18 @@ public class DbUpdate {
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("counties_regions(countyid,regionid,regionname)", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
     sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
-    runSqlFromFile(sqlPath, dbInfo[4], dbInfo[5], dbInfo[6]);
+    runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
     Statement statement = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       addMetadata(stateid, metadata, c, "region");
       statement.executeUpdate("VACUUM");
@@ -3349,7 +3351,7 @@ public class DbUpdate {
     Statement statement = null;
     String message = "done";
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
 
       logger.debug(agency);
@@ -3413,7 +3415,7 @@ public class DbUpdate {
 
     
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
       rs = statement.executeQuery(
           "SELECT gfi.defaultid agency, guf.feedname feed, guf.feedsize size FROM gtfs_feed_info gfi join gtfs_uploaded_feeds guf "
@@ -3479,7 +3481,7 @@ public class DbUpdate {
         { "gtfs_stops", "agencyid" }, { "gtfs_routes", "defaultid" }, { "gtfs_agencies", "defaultid" },
         { "gtfs_feed_info", "defaultid" } };
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
       statement = c.createStatement();
 
       for (int i = 0; i < defAgencyIds.length; i++) {
@@ -3521,7 +3523,7 @@ public class DbUpdate {
     Boolean b = true;
     PDBerror error = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT * FROM gtfs_feed_info;");
@@ -3573,7 +3575,7 @@ public class DbUpdate {
     ResultSet rs = null;
     PDBerror results = new PDBerror();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks order by stateid;");
@@ -3630,7 +3632,7 @@ public class DbUpdate {
     }
     dbInfo[4] += dbURL[dbURL.length - 1];
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT distinct(stateid) stateids FROM census_blocks_ref order by stateid;");
@@ -3689,7 +3691,7 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4], dbInfo[5], dbInfo[6]);
+      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
 
       statement = c.createStatement();
       rs = statement.executeQuery("SELECT feedname FROM gtfs_feed_info;");
@@ -3869,7 +3871,7 @@ public class DbUpdate {
     }
   }
 
-  public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+  public static boolean runSqlFromFile(String sqlFilePath, String dbConnectionUrl) {
     logger.info("runSqlFromFile: " + sqlFilePath);
     // 1. read file
     String sql = "";
@@ -3884,7 +3886,7 @@ public class DbUpdate {
 
     try {
       // 2. open DB connection
-      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
+      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl);
       Statement statement = c.createStatement();
       // 3. run SQL statement
       ResultSet rs = statement.executeQuery(sql);
@@ -3897,7 +3899,7 @@ public class DbUpdate {
     return true;
   }
 
-  public static boolean runSqlFromResource(String resourcePath, String dbConnectionUrl, String dbUser, String dbPassword) {
+  public static boolean runSqlFromResource(String resourcePath, String dbConnectionUrl) {
     logger.info("runSqlFromResource: "+resourcePath);
     // 1. read file
     File f = DatabaseConfig.getResource(resourcePath);
@@ -3913,7 +3915,7 @@ public class DbUpdate {
 
     try {
       // 2. open DB connection
-      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
+      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl);
       Statement statement = c.createStatement();
       // 3. run SQL statement
       ResultSet rs = statement.executeQuery(sql);
@@ -3986,7 +3988,7 @@ public class DbUpdate {
       String dbPassword) {
     logger.info("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
     try {
-      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl, dbUser, dbPassword);
+      Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl);
       Statement statement = c.createStatement();
       statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
       return true;

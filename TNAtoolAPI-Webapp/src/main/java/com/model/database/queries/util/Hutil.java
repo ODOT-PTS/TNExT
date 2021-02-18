@@ -19,7 +19,8 @@ package com.model.database.queries.util;
 import java.net.URL;
 import java.io.File;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.hibernate.*;
 import org.hibernate.cfg.*;
@@ -28,7 +29,7 @@ import com.model.database.Databases;
 import com.model.database.DatabaseConfig;
 
 public class Hutil {
-    final static Logger logger = Logger.getLogger(Hutil.class);
+    final static Logger logger = LogManager.getLogger(Hutil.class);
 	private static SessionFactory[] sessionFactory = new SessionFactory[DatabaseConfig.getConfigSize()];	
 
     static {
@@ -58,8 +59,8 @@ public class Hutil {
         Configuration config = new Configuration();
         config = config.configure(inputFile);
         config.setProperty("hibernate.connection.url", db.getConnectionUrl());
-        config.setProperty("hibernate.connection.username", db.getUsername());
-        config.setProperty("hibernate.connection.password", db.getUsername());
+        config.setProperty("hibernate.connection.username", DatabaseConfig.getUsername());
+        config.setProperty("hibernate.connection.password", DatabaseConfig.getPassword());
         SessionFactory sessionFactory = config.buildSessionFactory();
         return sessionFactory;
     }
