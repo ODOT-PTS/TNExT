@@ -4634,13 +4634,13 @@ public class Queries {
 		day = datedays[1][0];
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 		Statement stmt = connection.createStatement();
-		String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = '"+username+"' AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true),"
+		String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = ? AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true)," // username
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
-				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = '" + agencyID1 + "'"
-				+ " 	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day + "= 1 and serviceid_agencyid||serviceid_id "
-				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = ?" // agencyID1
+				+ " 	where startdate::int<=? and enddate::int>=? and ?= 1 and serviceid_agencyid||serviceid_id " // fulldate, fulldate, day
+				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date=? and exceptiontype=2)" // fulldate
 				+ "	union select serviceid_agencyid, serviceid_id "
-				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = '" + agencyID1 + "' where date='" + fulldate + "' and exceptiontype=1),"
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = ? where date=? and exceptiontype=1)," // agencyID1, fulldate
 				+ " trips AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
 				+ "	from svcids inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
 				+ " a1stops AS (select stime.trip_agencyid as agencyid, gtfs_agencies.name as agencyname, stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location"
@@ -4651,15 +4651,15 @@ public class Queries {
 				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon),"
 				+ " svcids1 as (select serviceid_agencyid, serviceid_id"
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid"
-				+ "	where startdate::int<=" + fulldate + " and enddate::int>=" + fulldate + " and " + day  + "= 1 and gc.serviceid_agencyid = '" + agencyID2 + "'"
-				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date='" + fulldate + "' and exceptiontype=2)"
+				+ "	where startdate::int<=? and enddate::int>=? and ?= 1 and gc.serviceid_agencyid = ?" // fulldate, fulldate, day, agencyID1
+				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date=? and exceptiontype=2)" // fulldate
 				+ " union select serviceid_agencyid, serviceid_id"
-				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date='" + fulldate + "' and exceptiontype=1 and gcd.serviceid_agencyid = '" + agencyID2 + "' ),"
+				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date=? and exceptiontype=1 and gcd.serviceid_agencyid = ? )," // fulldate, agencyID1
 				+ " trips1 AS (select trip.agencyid as aid, trip.id as tripid, trip.route_id as routeid"
 				+ " from svcids1 inner join gtfs_trips trip using(serviceid_agencyid, serviceid_id)),"
 				+ " a2stops AS (select a1stops.agencyid AS a1id, a1stops.agencyname AS a1name, stime.trip_agencyid as a2id, gtfs_agencies.name as a2name,"
 				+ " stime.stop_id as stopid, stop.name as name, stop.lat, stop.lon, stop.location as location, ST_DISTANCE(stop.location, a1stops.location)::NUMERIC AS dist"
-				+ " from gtfs_stops stop inner join a1stops on ST_DISTANCE(stop.location, a1stops.location) < " + radius 
+				+ " from gtfs_stops stop inner join a1stops on ST_DISTANCE(stop.location, a1stops.location) < ?" // radius 
 				+ "	inner join gtfs_stop_times stime on stime.stop_agencyid = stop.agencyid and stime.stop_id = stop.id"
 				+ "	inner join trips1 on stime.trip_agencyid =trips1.aid and stime.trip_id=trips1.tripid"
 				+ "	inner join gtfs_agencies ON stime.trip_agencyid = gtfs_agencies.id"
@@ -4669,6 +4669,24 @@ public class Queries {
 				+ "	FROM a2stops "
 				+ "	GROUP BY a1id, a1name, a2id, a2name";
 //		logger.debug(query);
+		PreparedStatement statement = connection.prepareStatement(query);
+		statement.setString(1, username);
+		statement.setString(2, agencyID1);
+		statement.setInt(3, Integer.parseInt(fulldate));
+		statement.setInt(4, Integer.parseInt(fulldate));
+		statement.setString(5, day);
+		statement.setString(6, fulldate);
+		statement.setString(7, agencyID1);
+		statement.setString(8, fulldate);
+		statement.setInt(9, Integer.parseInt(fulldate));
+		statement.setInt(10, Integer.parseInt(fulldate));
+		statement.setString(11, day);
+		statement.setString(12, agencyID1);
+		statement.setString(13, fulldate);
+		statement.setString(14, fulldate);
+		statement.setString(15, agencyID1);
+		statement.setDouble(16, radius);
+
 		ResultSet rs = stmt.executeQuery(query);
 		rs.next();
 		double connections = rs.getInt("connections");
