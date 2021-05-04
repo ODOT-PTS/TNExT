@@ -783,7 +783,9 @@ public class DbUpdate {
     try {
       c = PgisEventManager.makeConnectionByUrl(dropurl);
       statement = c.createStatement();
-      rs = statement.executeQuery("select pg_terminate_backend(pid) from pg_stat_activity where datname='" + name + "'");
+      PreparedStatement terminateStmt = c.prepareStatement("select pg_terminate_backend(pid) from pg_stat_activity where datname=?");
+      terminateStmt.setString(1, name);
+      rs = terminateStmt.executeQuery();
       statement.executeUpdate("DROP DATABASE " + name);
       b.DBError = "Database was successfully deleted";
       // remove config
@@ -938,8 +940,10 @@ public class DbUpdate {
           + "activated boolean," + "gtfs_feeds boolean," + "census boolean," + "employment boolean,"
           + "parknride boolean," + "title6 boolean," + "future_emp boolean," + "future_pop boolean," + "region boolean,"
           + "update_process boolean," + "CONSTRAINT database_status_pkey PRIMARY KEY (name));");
-      statement.executeUpdate("INSERT INTO database_status " + "VALUES ('" + name
-          + "', false, false, false, false, false, false, false, false, false, false);");
+      PreparedStatement statusInsertStmt = c.prepareStatement("INSERT INTO database_status " + "VALUES (?,"
+        + "false, false, false, false, false, false, false, false, false, false);");
+      statusInsertStmt.setString(1, name);
+      statusInsertStmt.executeUpdate();
       statement.executeUpdate("CREATE TABLE database_metadata (" + "stateid character varying(2)," + "census text,"
           + "employment text," + "parknride text," + "title6 text," + "future_emp text," + "future_pop text,"
           + "region text," + "CONSTRAINT database_metadata_pkey PRIMARY KEY (stateid));");
@@ -1170,12 +1174,17 @@ public class DbUpdate {
       while (rs.next()) {
         response.stateids.add(rs.getString("stateid"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement title6Stmt = c.prepareStatement("SELECT title6 FROM database_metadata WHERE stateid=?");
       for (String id : response.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        title6Stmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT title6 FROM database_metadata WHERE stateid='" + id + "';");
+        rs.close();
+        rs = title6Stmt.executeQuery();
         if (rs.next()) {
           response.metadata.add(rs.getString("title6"));
         }
@@ -1222,12 +1231,17 @@ public class DbUpdate {
       while (rs.next()) {
         response.stateids.add(rs.getString("stateid"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement pnrStmt = c.prepareStatement("SELECT parknride FROM database_metadata WHERE stateid=?");
       for (String id : response.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT parknride FROM database_metadata WHERE stateid='" + id + "';");
+        rs.close();
+        pnrStmt.setString(1, id);
+        rs = pnrStmt.executeQuery();
         if (rs.next()) {
           response.metadata.add(rs.getString("parknride"));
         }
@@ -1494,12 +1508,18 @@ public class DbUpdate {
       while (rs.next()) {
         response.stateids.add(rs.getString("stateid"));
       }
+      
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement employmentStmt = c.prepareStatement("SELECT employment FROM database_metadata WHERE stateid=?");
       for (String id : response.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT employment FROM database_metadata WHERE stateid='" + id + "';");
+        employmentStmt.setString(1, id);
+        rs.close();
+        rs = employmentStmt.executeQuery();
         if (rs.next()) {
           response.metadata.add(rs.getString("employment"));
         }
@@ -1509,11 +1529,14 @@ public class DbUpdate {
         response.agencies.add(rs.getString("stateid"));
       }
       for (String id : response.agencies) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.feeds.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT employment FROM database_metadata WHERE stateid='" + id + "';");
+        employmentStmt.setString(1, id);
+        rs.close();
+        rs = employmentStmt.executeQuery();
         if (rs.next()) {
           response.sizes.add(rs.getString("employment"));
         }
@@ -1565,12 +1588,17 @@ public class DbUpdate {
       while (rs.next()) {
         response.stateids.add(rs.getString("stateid"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement fempStmt = c.prepareStatement("SELECT future_emp FROM database_metadata WHERE stateid=?");
       for (String id : response.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT future_emp FROM database_metadata WHERE stateid='" + id + "';");
+        rs.close();
+        fempStmt.setString(1, id);
+        rs = fempStmt.executeQuery();
         if (rs.next()) {
           response.metadata.add(rs.getString("future_emp"));
         }
@@ -1663,12 +1691,17 @@ public class DbUpdate {
       while (rs.next()) {
         response.stateids.add(rs.getString("stateid"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement fpopStmt = c.prepareStatement("SELECT future_pop FROM database_metadata WHERE stateid=?");
       for (String id : response.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT future_pop FROM database_metadata WHERE stateid='" + id + "';");
+        rs.close();
+        fpopStmt.setString(1, id);
+        rs = fpopStmt.executeQuery();
         if (rs.next()) {
           response.metadata.add(rs.getString("future_pop"));
         }
@@ -1718,12 +1751,17 @@ public class DbUpdate {
       while (rs.next()) {
         response.stateids.add(rs.getString("stateid"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement regionStmt = c.prepareStatement("SELECT region FROM database_metadata WHERE stateid=?");
       for (String id : response.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           response.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT region FROM database_metadata WHERE stateid='" + id + "';");
+        rs.close();
+        regionStmt.setString(1, id);
+        rs = regionStmt.executeQuery();
         if (rs.next()) {
           response.metadata.add(rs.getString("region"));
         }
@@ -2652,13 +2690,18 @@ public class DbUpdate {
       rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
       if (rs.next()) {
         String tmpAgencyId = rs.getString("id");
-        rs = statement.executeQuery("SELECT * FROM gtfs_routes where agencyid = '" + tmpAgencyId + "' limit 1;");
+        PreparedStatement routesStmt = c.prepareStatement("SELECT * FROM gtfs_routes where agencyid = ? limit 1");
+        routesStmt.setString(1, tmpAgencyId);
+        rs.close();
+        rs = routesStmt.executeQuery();
         if (rs.next()) {
           defaultId = rs.getString("defaultid");
         }
-        statement.executeUpdate("UPDATE gtfs_agencies SET defaultid = '" + defaultId + "' WHERE defaultid IS NULL;");
+        PreparedStatement agenciesUpdateStmt = c.prepareStatement("UPDATE gtfs_agencies SET defaultid = ? WHERE defaultid IS NULL;");
+        agenciesUpdateStmt.setString(1, defaultId);
+        agenciesUpdateStmt.executeUpdate();
       }
-
+      rs.close();
       rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where added IS NULL;");
 
       while (rs.next()) {
@@ -2670,7 +2713,9 @@ public class DbUpdate {
       agencyIds = removeLastChar(agencyIds);
       statement.executeUpdate("UPDATE gtfs_agencies SET added='added' WHERE added IS NULL;");
 
-      rs = statement.executeQuery("SELECT * FROM gtfs_feed_info Where defaultid = '" + defaultId + "';");
+      PreparedStatement feedInfoStmt = c.prepareStatement("SELECT * FROM gtfs_feed_info Where defaultid = ?");
+      feedInfoStmt.setString(1, defaultId);
+      rs = feedInfoStmt.executeQuery();
       if (!rs.next()) {
         rs = statement.executeQuery("SELECT gid FROM gtfs_feed_info;");
         List<String> ids = new ArrayList<String>();
@@ -2685,24 +2730,39 @@ public class DbUpdate {
           gid = r.nextInt(High - Low) + Low;
         } while (ids.contains(Integer.toString(gid)));
         String sql = "INSERT INTO gtfs_feed_info "
-            + "(gid,publishername,publisherurl,lang,startdate,enddate,version,defaultid,agencyids,agencynames,feedname) "
-            + "VALUES (" + Integer.toString(gid) + ",'N/A','N/A','N/A','N/A','N/A','N/A','" + defaultId + "','"
-            + agencyIds + "','" + agencyNames + "','" + feedname + "')";
-        statement.executeUpdate(sql);
+          + "(gid,publishername,publisherurl,lang,startdate,enddate,version,defaultid,agencyids,agencynames,feedname) "
+          + "VALUES (?,'N/A','N/A','N/A','N/A','N/A','N/A',?,'"
+          + "?,?,?)";
+        PreparedStatement insertInfoStmt = c.prepareStatement(sql);
+        insertInfoStmt.setInt(1, gid);
+        insertInfoStmt.setString(2, defaultId);
+        insertInfoStmt.setString(3, agencyIds);
+        insertInfoStmt.setString(4, agencyNames);
+        insertInfoStmt.setString(5, feedname);
+        insertInfoStmt.executeUpdate();
       } else {
-        statement.executeUpdate(
-            "UPDATE gtfs_feed_info SET feedname = '" + feedname + "' WHERE defaultid = '" + defaultId + "';");
+        PreparedStatement updateFeedStmt = c.prepareStatement("UPDATE gtfs_feed_info SET feedname = ? WHERE defaultid = ?");
+        updateFeedStmt.setString(1, feedname);
+        updateFeedStmt.setString(2, defaultId);
+        updateFeedStmt.executeUpdate();
       }
-      statement.executeUpdate(
-          "with calendars as (select serviceid_agencyid as agencyid, min(startdate::int) as calstart, max(enddate::int) as calend from gtfs_calendars where serviceid_agencyid='"
-              + defaultId + "' group by serviceid_agencyid),"
-              + "calendardates as (select serviceid_agencyid as agencyid, min(date::int) as calstart, max(date::int) as calend from gtfs_calendar_dates where serviceid_agencyid='"
-              + defaultId + "' group by serviceid_agencyid),"
+      PreparedStatement datesStmt = c.prepareStatement(
+        "with calendars as (select serviceid_agencyid as agencyid, min(startdate::int) as calstart, max(enddate::int) as calend from gtfs_calendars where serviceid_agencyid=?"
+              + " group by serviceid_agencyid),"
+              + "calendardates as (select serviceid_agencyid as agencyid, min(date::int) as calstart, max(date::int) as calend from gtfs_calendar_dates where serviceid_agencyid=?"
+              + " group by serviceid_agencyid),"
               + "calendar as (select coalesce(cals.agencyid, calds.agencyid) as agencyid, least(cals.calstart, calds.calstart) as calstart, greatest(cals.calend, calds.calend) as calend from calendars cals full join calendardates calds using(agencyid)) "
-              + "update gtfs_feed_info set startdate= calendar.calstart::varchar , enddate=calendar.calend::varchar from calendar where defaultid = agencyid;");
+              + "update gtfs_feed_info set startdate= calendar.calstart::varchar , enddate=calendar.calend::varchar from calendar where defaultid = agencyid;"
+      );
+      datesStmt.setString(1, defaultId);
+      datesStmt.setString(2, defaultId);
+      datesStmt.executeUpdate();
 
-      statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize,updated) "
-          + "VALUES ('" + feedname + "','admin',False,'" + feedsize + "', False);");
+      PreparedStatement uploadedStmt = c.prepareStatement("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize,updated) "
+        + "VALUES (?,'admin',False,?, False);");
+      uploadedStmt.setString(1, feedname);
+      uploadedStmt.setInt(2, Integer.parseInt(feedsize));
+      uploadedStmt.executeUpdate();
 
       //UpdateEventManager.updateTables(To BE DELETED, defaultId);
     } catch (SQLException e) {
@@ -3582,12 +3642,17 @@ public class DbUpdate {
       while (rs.next()) {
         results.stateids.add(rs.getString("stateids"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states WHERE stateid=?");
+      PreparedStatement censusStmt = c.prepareStatement("SELECT census FROM database_metadata WHERE stateid=?");
       for (String id : results.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           results.states.add(rs.getString("sname"));
         }
-        rs = statement.executeQuery("SELECT census FROM database_metadata WHERE stateid='" + id + "';");
+        rs.close();
+        censusStmt.setString(1, id);
+        rs = censusStmt.executeQuery();
         if (rs.next()) {
           results.metadata.add(rs.getString("census"));
         }
@@ -3639,8 +3704,10 @@ public class DbUpdate {
       while (rs.next()) {
         results.stateids.add(rs.getString("stateids"));
       }
+      PreparedStatement nameStmt = c.prepareStatement("SELECT sname FROM census_states_ref WHERE stateid=?");
       for (String id : results.stateids) {
-        rs = statement.executeQuery("SELECT sname FROM census_states_ref WHERE stateid='" + id + "';");
+        nameStmt.setString(1, id);
+        rs = nameStmt.executeQuery();
         if (rs.next()) {
           results.states.add(rs.getString("sname"));
         }

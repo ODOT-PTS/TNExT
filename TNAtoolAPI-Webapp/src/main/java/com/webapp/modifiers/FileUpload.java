@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -557,13 +558,17 @@ public class FileUpload extends HttpServlet {
 			feedname = removeLastChar(feedname);
 		}
 		Connection c = null;
-		Statement statement = null;
+		PreparedStatement statement = null;
 		try {
 			c = dbConfig.getConnection();
-			statement = c.createStatement();
-			statement.executeUpdate("INSERT INTO gtfs_modified_feeds"
-								  + " (username,feedname,feedsize,deleted,added,filename)"
-								  + " VALUES ('"+username+"','"+feedname+"','"+feedsize+"',FALSE,TRUE,'"+filename+"');");
+			statement = c.prepareStatement("INSERT INTO gtfs_modified_feeds"
+				+ " (username,feedname,feedsize,deleted,added,filename)"
+				+ " VALUES (?,?,?,FALSE,TRUE,?)");
+			statement.setString(1, username);
+			statement.setString(2, feedname);
+			statement.setLong(3, feedsize);
+			statement.setString(4, filename);
+			statement.executeUpdate();
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -645,14 +650,18 @@ public class FileUpload extends HttpServlet {
 		try {
 			c = dbConfig.getConnection();
 			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT gtfs_feed_info.feedname FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
-					+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
-					+ "WHERE gtfs_uploaded_feeds.username='"+username+"';");
+			PreparedStatement uploadedFeedStmt = c.prepareStatement("SELECT gtfs_feed_info.feedname FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
+				+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
+				+ "WHERE gtfs_uploaded_feeds.username=?");
+			uploadedFeedStmt.setString(1, username);
+			ResultSet rs = uploadedFeedStmt.executeQuery();
 			while ( rs.next() ) {
 				names.add(rs.getString("feedname"));
 			}
 			
-			rs = statement.executeQuery("SELECT feedname FROM gtfs_modified_feeds WHERE username='"+username+"';");
+			PreparedStatement modifiedFeedStmt = c.prepareStatement("SELECT feedname FROM gtfs_modified_feeds WHERE username=?");
+			modifiedFeedStmt.setString(1, username);
+			rs = modifiedFeedStmt.executeQuery();
 			while ( rs.next() ) {
 				names.add(rs.getString("feedname"));
 			}
@@ -704,6 +713,7 @@ public class FileUpload extends HttpServlet {
 		
 		Connection c = null;
 		Statement statement = null;
+		ResultSet agencyRS = null;
 		ResultSet rs = null;
 		String defaultId = "";
 		String agencyNames = "";
@@ -713,14 +723,20 @@ public class FileUpload extends HttpServlet {
 			c = dbConfig.getConnection();
 			
 			statement = c.createStatement();
-			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
-			if ( rs.next() ) {
-				String tmpAgencyId = rs.getString("id");
-				rs = statement.executeQuery("SELECT * FROM gtfs_routes where agencyid = '"+tmpAgencyId+"' limit 1;");
+			agencyRS = statement.executeQuery("SELECT * FROM gtfs_agencies Where defaultid IS NULL;");
+			if ( agencyRS.next() ) {
+				String tmpAgencyId = agencyRS.getString("id");
+				PreparedStatement routeStmt = c.prepareStatement("SELECT * FROM gtfs_routes where agencyid = ? limit 1;");
+				routeStmt.setString(1, tmpAgencyId);
+
+				rs = routeStmt.executeQuery();
 				if ( rs.next() ) {
 					defaultId = rs.getString("defaultid");
 				}
-				statement.executeUpdate("UPDATE gtfs_agencies SET defaultid = '"+defaultId+"' WHERE defaultid IS NULL;");
+				PreparedStatement agencyUpdateStmt = c.prepareStatement("UPDATE gtfs_agencies SET defaultid = ? WHERE defaultid IS NULL;");
+				agencyUpdateStmt.setString(1, defaultId);
+				agencyUpdateStmt.executeUpdate();
+				rs.close();
 			}
 			
 			rs = statement.executeQuery("SELECT * FROM gtfs_agencies Where added IS NULL;");
@@ -734,7 +750,9 @@ public class FileUpload extends HttpServlet {
 			agencyIds = removeLastChar(agencyIds);
 			statement.executeUpdate("UPDATE gtfs_agencies SET added='added' WHERE added IS NULL;");
 			
-			rs = statement.executeQuery("SELECT * FROM gtfs_feed_info Where defaultid = '"+defaultId+"';");
+			PreparedStatement feedsStmt = c.prepareStatement("SELECT * FROM gtfs_feed_info Where defaultid = ?");
+			feedsStmt.setString(1, defaultId);
+			rs = feedsStmt.executeQuery();
 			if (!rs.next() ){
 				rs = statement.executeQuery("SELECT gid FROM gtfs_feed_info;");
 				List<String> ids = new ArrayList<String>();
@@ -750,13 +768,27 @@ public class FileUpload extends HttpServlet {
 				} while (ids.contains(Integer.toString(gid)));
 				String sql = "INSERT INTO gtfs_feed_info "+
 							 "(gid,publishername,publisherurl,lang,startdate,enddate,version,defaultid,agencyids,agencynames,feedname) "+
-							 "VALUES ("+Integer.toString(gid)+",'N/A','N/A','N/A','N/A','N/A','N/A','"+defaultId+"','"+agencyIds+"','"+agencyNames+"','"+feedName+"')";
-				statement.executeUpdate(sql);
+							 "VALUES (?,'N/A','N/A','N/A','N/A','N/A','N/A',?,?,?,?)";
+				PreparedStatement insertFeedInfoStmt = c.prepareStatement(sql);
+				insertFeedInfoStmt.setInt(1, gid);
+				insertFeedInfoStmt.setString(2, defaultId);
+				insertFeedInfoStmt.setString(3, agencyIds);
+				insertFeedInfoStmt.setString(4, agencyNames);
+				insertFeedInfoStmt.setString(5, feedName);
+
+				insertFeedInfoStmt.executeUpdate();
 			}else{
-				statement.executeUpdate("UPDATE gtfs_feed_info SET feedname = '"+feedName+"' WHERE defaultid = '"+defaultId+"';");
+				PreparedStatement updateFeedInfoStmt = c.prepareStatement("UPDATE gtfs_feed_info SET feedname = ? WHERE defaultid = ?");
+				updateFeedInfoStmt.setString(1, feedName);
+				updateFeedInfoStmt.setString(2, defaultId);
+				updateFeedInfoStmt.executeUpdate();
 			}
-			statement.executeUpdate("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize) "
-					+ "VALUES ('"+feedName+"','"+username+"',FALSE,'"+fileSize+"');");
+			PreparedStatement uploadedInsertStmt = c.prepareStatement("INSERT INTO gtfs_uploaded_feeds (feedname,username,ispublic,feedsize) "
+				+ "VALUES (?,?,FALSE,?)");
+			uploadedInsertStmt.setString(1, feedName);
+			uploadedInsertStmt.setString(2, username);
+			uploadedInsertStmt.setLong(3, fileSize);
+			uploadedInsertStmt.executeUpdate();
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -922,16 +954,17 @@ public class FileUpload extends HttpServlet {
 		int index =1;
 		
 		Connection c = null;
-		Statement statement = null;
+		PreparedStatement statement = null;
 		List<String> feedNames = new ArrayList<String>();
 		List<String> names;
 		String name;
 		try {
 			c = dbConfig.getConnection();
-			statement = c.createStatement();
-			ResultSet rs = statement.executeQuery("SELECT agencyids FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
-					+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
-					+ "WHERE gtfs_uploaded_feeds.username='"+username+"';");
+			statement = c.prepareStatement("SELECT agencyids FROM gtfs_feed_info INNER JOIN gtfs_uploaded_feeds "
+				+ "ON gtfs_feed_info.feedname=gtfs_uploaded_feeds.feedname "
+				+ "WHERE gtfs_uploaded_feeds.username=?");
+			statement.setString(1, username);
+			ResultSet rs = statement.executeQuery();
 			while ( rs.next() ) {
 				names = Arrays.asList(rs.getString("agencyids").split(","));
 				feedNames.addAll(names);
@@ -1067,13 +1100,14 @@ public class FileUpload extends HttpServlet {
 					addFeeds.add(feed);
 				}
 			}
+
+			PreparedStatement deleteStmt = c.prepareStatement("DELETE FROM gtfs_modified_feeds WHERE feedname= ?");
 			
 			for(AddRemoveFeed f: removeFeeds){
 				if(b.equals("true") || checkTime()){
 					feedDel(f.username, f.feedname);
-					
-					statement.executeUpdate("DELETE FROM gtfs_modified_feeds "
-							+ "WHERE feedname='"+f.feedname+"';");
+					deleteStmt.setString(1,f.feedname);
+					deleteStmt.executeUpdate();
 					System.out.println("vacuum start");
 					statement.executeUpdate("VACUUM");
 					System.out.println("vacuum finish");
@@ -1088,8 +1122,8 @@ public class FileUpload extends HttpServlet {
 					changeCSV(f.filename, f.username, f.firstname, f.lastname);
 					addFeed(f.filename, f.feedname, Long.parseLong(f.feedsize),f.username);
 					
-					statement.executeUpdate("DELETE FROM gtfs_modified_feeds "
-							+ "WHERE feedname='"+f.feedname+"';");
+					deleteStmt.setString(1,f.feedname);
+					deleteStmt.executeUpdate();
 					
 					System.out.println("vacuum start");
 					statement.executeUpdate("VACUUM");

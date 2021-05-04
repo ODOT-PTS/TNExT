@@ -4198,11 +4198,11 @@ public class Queries {
 		Connection connection = PgisEventManager.makeConnection(dbindex);
 
 		for (int i = 0; i < agencies.size(); i++) {
-			String query = " Select * from agencymapping WHERE agencyID= '"
-					+ agencies.get(i) + "'";
+			String query = " Select * from agencymapping WHERE agencyID= ?";
 			try {
-				Statement stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery(query);
+				PreparedStatement stmt = connection.prepareStatement(query);
+				stmt.setString(1, agencies.get(i));
+				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
 					String[] containedAgencies;
 
@@ -4637,7 +4637,7 @@ public class Queries {
 		String query = "with aids as (SELECT DISTINCT a.defaultid AS aid FROM gtfs_agencies AS a LEFT OUTER JOIN user_selected_agencies AS b ON (b.username = ? AND a.defaultid = b.agency_id) WHERE b.hidden IS NOT true)," // username
 				+ "svcids as (select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = ?" // agencyID1
-				+ " 	where startdate::int<=? and enddate::int>=? and ?= 1 and serviceid_agencyid||serviceid_id " // fulldate, fulldate, day
+				+ " 	where startdate::int<=? and enddate::int>=? and " + day + " = 1 and serviceid_agencyid||serviceid_id " // fulldate, fulldate
 				+ "	not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date=? and exceptiontype=2)" // fulldate
 				+ "	union select serviceid_agencyid, serviceid_id "
 				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = ? where date=? and exceptiontype=1)," // agencyID1, fulldate
@@ -4651,7 +4651,7 @@ public class Queries {
 				+ "	group by stime.trip_agencyid, stime.stop_agencyid, stime.stop_id, stop.location, gtfs_agencies.name, stop.name, stop.lat, stop.lon),"
 				+ " svcids1 as (select serviceid_agencyid, serviceid_id"
 				+ "	from gtfs_calendars gc inner join aids on gc.serviceid_agencyid = aids.aid"
-				+ "	where startdate::int<=? and enddate::int>=? and ?= 1 and gc.serviceid_agencyid = ?" // fulldate, fulldate, day, agencyID1
+				+ "	where startdate::int<=? and enddate::int>=? and " + day + " = 1 and gc.serviceid_agencyid = ?" // fulldate, fulldate, agencyID1
 				+ "	and serviceid_agencyid||serviceid_id not in (select serviceid_agencyid||serviceid_id from gtfs_calendar_dates where date=? and exceptiontype=2)" // fulldate
 				+ " union select serviceid_agencyid, serviceid_id"
 				+ "	from gtfs_calendar_dates gcd inner join aids on gcd.serviceid_agencyid = aids.aid where date=? and exceptiontype=1 and gcd.serviceid_agencyid = ? )," // fulldate, agencyID1
@@ -4674,18 +4674,16 @@ public class Queries {
 		statement.setString(2, agencyID1);
 		statement.setInt(3, Integer.parseInt(fulldate));
 		statement.setInt(4, Integer.parseInt(fulldate));
-		statement.setString(5, day);
-		statement.setString(6, fulldate);
-		statement.setString(7, agencyID1);
-		statement.setString(8, fulldate);
+		statement.setString(5, fulldate);
+		statement.setString(6, agencyID1);
+		statement.setString(7, fulldate);
+		statement.setInt(8, Integer.parseInt(fulldate));
 		statement.setInt(9, Integer.parseInt(fulldate));
-		statement.setInt(10, Integer.parseInt(fulldate));
-		statement.setString(11, day);
-		statement.setString(12, agencyID1);
-		statement.setString(13, fulldate);
-		statement.setString(14, fulldate);
-		statement.setString(15, agencyID1);
-		statement.setDouble(16, radius);
+		statement.setString(10, agencyID1);
+		statement.setString(11, fulldate);
+		statement.setString(12, fulldate);
+		statement.setString(13, agencyID1);
+		statement.setDouble(14, radius);
 
 		ResultSet rs = stmt.executeQuery(query);
 		rs.next();
