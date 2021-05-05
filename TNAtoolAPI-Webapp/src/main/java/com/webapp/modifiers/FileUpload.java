@@ -1230,8 +1230,18 @@ public class FileUpload extends HttpServlet {
 		Connection c = null;
 		Statement statement = null;
 		ResultSet rs = null;
-        File path = new File(basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+username);
-        File uploadedFile = new File(path + "/" + feedDel + ".zip");
+        String path = basePath + "TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/"+ username + "/" + feedDel + ".zip";
+
+        File uploadedFile = new File(path);
+		
+		// Validate path
+		try {
+			if (!uploadedFile.getCanonicalPath().contains("TNAtoolAPI-Webapp/WebContent/playground/upload/uploaded/")) {
+				return;
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
          
 		
 		String[][] defAgencyIds  = {{"census_congdists_trip_map","agencyid_def"},

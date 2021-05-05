@@ -2799,13 +2799,24 @@ public class DbUpdate {
   @Path("/addPnr")
   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
   public Object addPnr(@QueryParam("fileName") String fileName, @QueryParam("db") String db,
-      @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws IOException, SQLException {
+      @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws IllegalArgumentException, IOException, SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/pnr/" + fileName;
+    String localPath = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    String dirPath = "src/main/webapp/resources/admin/uploads/pnr/";
+    String path = localPath + "../../" + dirPath + fileName;
     path = path.substring(1, path.length());
     File source = new File(path);
+
+    // Validate path
+		try {
+			if (!source.getCanonicalPath().contains(dirPath)) {
+				throw new IllegalArgumentException("Invalid filename");
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
     String message = "done";
     Connection c = null;
     Statement statement = null;
@@ -3732,61 +3743,6 @@ public class DbUpdate {
         }
     }
     return results;
-  }
-
-  @GET
-  @Path("/feedlist")
-  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-  public Object listf(@QueryParam("foldername") String directoryName, @QueryParam("db") String db) throws IOException {
-
-    File directory = new File(directoryName);
-    File[] fList = directory.listFiles();
-    FeedNames fn = new FeedNames();
-    //ArrayList<String> fNames = new ArrayList<String>(); 
-    try {
-      for (File file : fList) {
-        if (file.isDirectory()) {
-          fn.feeds.add(file.getName());
-        }
-      }
-    } catch (NullPointerException e) {
-      logger.error("IndexOutOfBoundsException: ", e);
-    }
-
-    String[] dbInfo = db.split(",");
-    Connection c = null;
-    Statement statement = null;
-    ResultSet rs = null;
-    try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
-
-      statement = c.createStatement();
-      rs = statement.executeQuery("SELECT feedname FROM gtfs_feed_info;");
-      while (rs.next()) {
-        fn.feeds.remove(rs.getString("feedname"));
-      }
-
-    } catch (SQLException e) {
-      logger.error(e);
-    } finally {
-      if (rs != null)
-        try {
-          rs.close();
-        } catch (SQLException e) {
-        }
-      if (statement != null)
-        try {
-          statement.close();
-        } catch (SQLException e) {
-        }
-      if (c != null)
-        try {
-          c.close();
-        } catch (SQLException e) {
-        }
-    }
-
-    return fn;
   }
 
   // ian: unused?
