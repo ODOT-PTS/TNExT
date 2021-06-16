@@ -2731,7 +2731,7 @@ public class DbUpdate {
         } while (ids.contains(Integer.toString(gid)));
         String sql = "INSERT INTO gtfs_feed_info "
           + "(gid,publishername,publisherurl,lang,startdate,enddate,version,defaultid,agencyids,agencynames,feedname) "
-          + "VALUES (?,'N/A','N/A','N/A','N/A','N/A','N/A',?,'"
+          + "VALUES (?,'N/A','N/A','N/A','N/A','N/A','N/A',?,"
           + "?,?,?)";
         PreparedStatement insertInfoStmt = c.prepareStatement(sql);
         insertInfoStmt.setInt(1, gid);
