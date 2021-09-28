@@ -289,7 +289,7 @@ function reloadPage() {
 	if (!exit){
 		var output = document.URL;
 		$(".input").each(function(index, object) {
-			console.log(output, object.name, object.value);
+			console.log('%s', output, object.name, object.value);
 			output = setURIParameter(output, object.name, object.value, null)
 		});
 		
