@@ -411,6 +411,8 @@ public class Queries {
 		String[] agencies = agencyIDs.split(",");
 		String feeds = "";
 
+		String safeFlag = flag.replaceAll("[^a-zA-Z0-9\\-]", "");
+
 		// get database parameters
 		DatabaseConfig db = DatabaseConfig.getConfig(dbIndex);
 
@@ -443,7 +445,7 @@ public class Queries {
 			PreparedStatement ps = null;
 			String agencyId = agencies[i];
 			ArrayList<String> query = new ArrayList<String>();
-			if (flag.equals("routes")) {
+			if (safeFlag.equals("routes")) {
 				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
 				String q = "" +
 					"WITH  " +
@@ -516,7 +518,7 @@ public class Queries {
 				logger.info("shapefile export query:\n "+ ps.toString());
 				query.add(ps.toString());
 				ps.close();					
-			} else if (flag.equals("stops")) {
+			} else if (safeFlag.equals("stops")) {
 				// ian note: dow column must be specified as such; cannot be a prepared statement parameter.
 				String q = "" +
 					"WITH  " +
@@ -634,13 +636,13 @@ public class Queries {
 
 			// Folder that contains agency's shapefiles
 			String tempAgencyname = agenciesHashMap.get(agencyId).name.replaceAll("[^a-zA-Z0-9\\-]", "");
-			File agencyFolder = new File(tmpdir, tempAgencyname + "_" + flag);
+			File agencyFolder = new File(tmpdir, tempAgencyname + "_" + safeFlag);
 			agencyFolder.mkdirs();
 
 			// Run the command to generate shapefiles for each agency
 			for ( int j = 0 ; j < query.size() ; j++ ){
 				// pgsql2shp -f <outfile> -h <host> -p <port> -u <username> -P <password> <db> <query>
-				String shapePath = new File(agencyFolder, tempAgencyname + "_" + flag + "_shape_" + j).toString();
+				String shapePath = new File(agencyFolder, tempAgencyname + "_" + safeFlag + "_shape_" + j).toString();
 				String[] cmd = {
 					"pgsql2shp",
 					"-r",
@@ -673,7 +675,7 @@ public class Queries {
 		Date dNow = new Date();
 		SimpleDateFormat ft = new SimpleDateFormat("hhmmss");
 		String uniqueString = ft.format(dNow);
-		String folderName = flag + "_shape_" + uniqueString;
+		String folderName = safeFlag + "_shape_" + uniqueString;
 
 		String zipFilePath = new File(shapefilesPath, folderName + ".zip").toString();
 		logger.debug("writing zip file: " + zipFilePath);
