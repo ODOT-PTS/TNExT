@@ -221,7 +221,7 @@ function runAjaxAgency(ind, fileName){
 				+ popYear + '&areaId=null&type=' + 0 + '&username='
 				+ getSession() + '&x=' + sRadius + '&geotype=' + -1 + '&l=' + los
 				+ '&geoid=null&dbindex=' + $('#dbselect').val(),
-		async : false,
+		// async : false,
 		success : function(d) {
 			csvContent += d.AgencyName.replace(/,/g,'') + ',' 
 				+ d.RouteMiles + ','
