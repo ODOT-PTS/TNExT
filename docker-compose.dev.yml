@@ -3,6 +3,7 @@ version: "3"
 volumes:
   pgdata:
   conf:
+  census:
 
 services:
   nginx:
@@ -22,6 +23,7 @@ services:
     env_file: ENVIRONMENT_VARS.env
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./census:/census
     ports:
       - "5432"
 
@@ -32,6 +34,7 @@ services:
     volumes:
       - ./data:/data
       - ./conf:/app/conf
+      - ./census:/census
     ports:
       - "8080"
     links:

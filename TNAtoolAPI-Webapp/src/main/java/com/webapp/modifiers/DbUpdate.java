@@ -2114,8 +2114,10 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     String message = "";
+    String toDBURL = dbInfo[4];
     String[] dbURL = dbInfo[4].split("/");
     dbURL[dbURL.length - 1] = "census_reference";
+    String fromDBURL = String.join("/", dbURL);
 
     dbInfo[4] = "";
     for (int i = 0; i < dbURL.length - 1; i++) {
@@ -2124,7 +2126,7 @@ public class DbUpdate {
     dbInfo[4] += dbURL[dbURL.length - 1];
     StateInits st = new StateInits();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
+      c = PgisEventManager.makeConnectionByUrl(fromDBURL);
 
       statement = c.createStatement();
       statement.executeUpdate("TRUNCATE TABLE census_states;");
@@ -2175,7 +2177,8 @@ public class DbUpdate {
 
     dbInfo = db.split(",");
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
+
+      c = PgisEventManager.makeConnectionByUrl(toDBURL);
 
       statement = c.createStatement();
       statement.executeUpdate("DROP TABLE IF EXISTS census_states;");
@@ -2237,7 +2240,7 @@ public class DbUpdate {
 
     String[] tableArray = tables.trim().split("\\s+");
     for (String tableName: tableArray) {
-      copyTable(tableName, dbInfo[4], dbInfo[4], dbInfo[5], dbInfo[6]);
+      copyTable(tableName, fromDBURL, toDBURL, dbInfo[5], dbInfo[6]);
     }
 
     try {
@@ -2953,12 +2956,12 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
+    // sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
+    // sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     String[] fileNames = { "b03002", "b16004", "b17021", "b18101", "b19037" };
@@ -3006,55 +3009,43 @@ public class DbUpdate {
 
     for (int i = 0; i < fileNames.length; i++) {
       String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-      path = path + "../../src/main/webapp/resources/admin/uploads/t6/" + fileNames[i] + ".csv";
-      path = path.substring(1, path.length());
+      path = "/census/titlevi/" + fileNames[i] + ".csv";
       File source = new File(path);
 
-      sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_1.sql";
-      sqlPath = sqlPath.substring(1, sqlPath.length());
+      sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_1.sql";
       runSqlFromFile(sqlPath, dbInfo[4]);
 
       copySqlCommand(copyColumn[i], path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_2.sql";
-      sqlPath = sqlPath.substring(1, sqlPath.length());
+      sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_2.sql";
       runSqlFromFile(sqlPath, dbInfo[4]);
     }
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float31.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float31.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float4.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float4.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float5.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float5.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     if (message.equals("")) {
@@ -3094,8 +3085,8 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/emp/rac.csv";
-    path = path.substring(1, path.length());
+    path = "/census/employment/rac.csv";
+    // path = path.substring(1, path.length());
     File source = new File(path);
     String message = "";
     //		logger.debug(message);
@@ -3110,28 +3101,28 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
+    // sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
+    // sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/emp/wac.csv";
-    path = path.substring(1, path.length());
+    path = "/census/employment/wac.csv";
+    // path = path.substring(1, path.length());
     source = new File(path);
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
+    // sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
+    // sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
@@ -3171,8 +3162,7 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/femp/future_employment.csv";
-    path = path.substring(1, path.length());
+    path = "/census/projections/future_employment.csv";
     File source = new File(path);
     String message = "";
     //		logger.debug(message);
@@ -3187,22 +3177,16 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path
-        + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)", path,
         dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path
-        + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path
-        + "../../src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
@@ -3242,7 +3226,7 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/fpop/future_population.csv";
+    path = path + "/census/projections/future_population.csv";
     path = path.substring(1, path.length());
     File source = new File(path);
     String message = "done";
@@ -3258,40 +3242,32 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand(
         "counties_future_pop(countyid,population2015,population2020,population2025,population2030,population2035,population2040,population2045,population2050)",
         path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = "/app/src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;

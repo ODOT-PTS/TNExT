@@ -1,0 +1,5 @@
+*
+!.gitignore
+!*.sh
+!create_census_tables.sql
+!import_census_tables.sql
