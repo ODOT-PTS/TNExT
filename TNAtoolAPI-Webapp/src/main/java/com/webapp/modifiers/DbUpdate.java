@@ -2806,9 +2806,8 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String localPath = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    String dirPath = "src/main/webapp/resources/admin/uploads/pnr/";
-    String path = localPath + "../../" + dirPath + fileName;
-    path = path.substring(1, path.length());
+    String dirPath = "/census/uploads/";
+    String path = dirPath + fileName;
     File source = new File(path);
 
     // Validate path
