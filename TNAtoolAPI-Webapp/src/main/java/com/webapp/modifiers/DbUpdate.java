@@ -3226,8 +3226,7 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "/census/projections/future_population.csv";
-    path = path.substring(1, path.length());
+    path = "/census/projections/future_population.csv";
     File source = new File(path);
     String message = "done";
     //		logger.debug(message);
@@ -3303,8 +3302,7 @@ public class DbUpdate {
     String[] dbInfo = db.split(",");
 
     String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/region/regions.csv";
-    path = path.substring(1, path.length());
+    path = "/census/regions/regions.csv";
     File source = new File(path);
     String message = "done";
     //		logger.debug(message);
@@ -3319,13 +3317,13 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region1.sql";
+    sqlPath = "/app/src/main/resources/admin/resources/region_Queries/region1.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("counties_regions(countyid,regionid,regionname)", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region2.sql";
+    sqlPath = "/app/src/main/resources/admin/resources/region_Queries/region2.sql";
     sqlPath = sqlPath.substring(1, sqlPath.length());
     runSqlFromFile(sqlPath, dbInfo[4]);
 
