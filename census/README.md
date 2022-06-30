@@ -44,7 +44,7 @@ You will need to build a new `census_reference` database that new snapshots can 
 
 ### D. Import Additional Datasets
 
-This section documents a workaround for the broken upload/import file functionality, as well as helper notes for importing specific datasets.
+This section documents a workaround for the broken upload/import file functionality (see https://github.com/ODOT-PTS/TNExT/issues/276), as well as helper notes for importing specific datasets.
 
 #### Dataset-Specific Notes
 - **Title VI** 
@@ -54,10 +54,10 @@ This section documents a workaround for the broken upload/import file functional
 #### Steps
 1. Gather the dataset following the instructions described in TNExT's admin UI for the dataset. The instructions are shown when clicking the "Import ..." button inside the "Notes" drawer.
 2. If not currently building a snapshot (for instance, if you want to create a dummy snapshot solely for storing data for copying to future datasets), create a new snapshot using the TNExT Admin UI and import or copy census data.
-3. [Workaround] Place the file(s) with the correct name and format in `census/uploads/` folder
+3. *[Workaround]* Place the file(s) with the correct name and format in `census/uploads/` folder
 4. "Upload" the file(s) in TNExT:
     - Click the "Import ..." button for the dataset
-    - [Workaround] Select one of the files to upload -- it doesn't matter which file. The file will be uploaded, but it won't be used to import data (the file(s) placed in `census/uploads` will be used. Selecting a file however is necessary for TNExT to allow you to proceed with import.
+    - *[Workaround]* Select one of the files to upload -- it doesn't matter which file. The file will be uploaded, but it won't be used to import data (the file(s) placed in `census/uploads` will be used. Selecting a file however is necessary for TNExT to allow you to proceed with import.
     - Click "Start Upload" and proceed with importing the dataset. Confirm that there is a green checkmark next to the dataset after importing and closing the import panel. 
 
 ### E. Copy Database
