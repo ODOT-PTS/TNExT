@@ -145,4 +145,3 @@ FROM
 WHERE 
    ST_Within(ST_SETSRID(st_makepoint(census_blocks_ref.lon, census_blocks_ref.lat),4326), cd.shape);
    
-update census_blocks_ref set congdistid = stateid||LPAD(congdistid, 2, '0');
