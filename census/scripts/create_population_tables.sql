@@ -1,6 +1,7 @@
 drop table if exists population_state_csv;
 create table population_state_csv (
     population bigint,
+    housing bigint,
     name text,
     state text primary key
 );
@@ -10,6 +11,7 @@ create table population_state_csv (
 drop table if exists population_block_csv;
 create table population_block_csv (
     population bigint,
+    housing bigint,
     name text,
     state text,
     county text,
@@ -23,6 +25,7 @@ create table population_block_csv (
 drop table if exists population_congressional_district_csv;
 create table population_congressional_district_csv (
     population bigint,
+    housing bigint,
     name text,
     state text,
     congressional_district text  primary key
@@ -33,6 +36,7 @@ create table population_congressional_district_csv (
 drop table if exists population_county_csv;
 create table population_county_csv (
     population bigint,
+    housing bigint,
     name text,
     state text,
     county text primary key
@@ -43,6 +47,7 @@ create table population_county_csv (
 drop table if exists population_place_csv;
 create table population_place_csv (
     population bigint,
+    housing bigint,
     name text,
     state text,
     place text  primary key
@@ -53,6 +58,7 @@ create table population_place_csv (
 drop table if exists population_tract_csv;
 create table population_tract_csv (
     population bigint,
+    housing bigint,
     name text,
     state text,
     county text,
@@ -65,6 +71,7 @@ create table population_tract_csv (
 drop table if exists population_urban_area_csv;
 create table population_urban_area_csv (
     population bigint,
+    housing bigint,
     name text,
     state text,
     urban_area text  primary key
