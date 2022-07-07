@@ -1,5 +1,3 @@
-CENSUS_API_KEY=64a80430f8909554a6ce37c21f1f5528c5542e19
-
 echo "FETCHING STATE"
 > population.state.csv
 curl "https://api.census.gov/data/2010/dec/sf1?get=P001001,NAME&for=state:41&key=$CENSUS_API_KEY" | jq -c '.[]' | while read i; do
