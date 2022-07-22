@@ -68,10 +68,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+import net.lingala.zip4j.model.enums.CompressionLevel;
+import net.lingala.zip4j.model.enums.CompressionMethod;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -3760,8 +3761,8 @@ public class DbUpdate {
     File[] files = folder.listFiles();
     ZipFile zipFile = new ZipFile("D:/ziptest/trimet_simplified.zip");
     ZipParameters parameters = new ZipParameters();
-    parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-    parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+    parameters.setCompressionMethod(CompressionMethod.DEFLATE);
+    parameters.setCompressionLevel(CompressionLevel.NORMAL);
     zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
     folder.delete();
     logger.debug("Done modifying feed shapes");
@@ -3815,8 +3816,8 @@ public class DbUpdate {
     File[] files = folder.listFiles();
     ZipFile zipFile = new ZipFile(path + ".zip");
     ZipParameters parameters = new ZipParameters();
-    parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-    parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+    parameters.setCompressionMethod(CompressionMethod.DEFLATE);
+    parameters.setCompressionLevel(CompressionLevel.NORMAL);
     zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
     folder.delete();
     logger.debug("Done modifying feed shapes");

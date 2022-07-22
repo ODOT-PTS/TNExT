@@ -49,11 +49,12 @@ import javax.servlet.http.HttpSession;
 import javax.mail.*;
 import javax.mail.internet.*;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.io.ZipOutputStream;
+import net.lingala.zip4j.io.outputstream.ZipOutputStream;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+import net.lingala.zip4j.model.enums.CompressionLevel;
+import net.lingala.zip4j.model.enums.CompressionMethod;
 
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
@@ -927,11 +928,12 @@ public class FileUpload extends HttpServlet {
         File[] sfiles = folder.listFiles();
         
         ZipParameters parameters = new ZipParameters();
-        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        parameters.setCompressionMethod(CompressionMethod.DEFLATE);
+        parameters.setCompressionLevel(CompressionLevel.NORMAL);
         
         for(File f: sfiles){
-        	out.putNextEntry(f, parameters);
+			parameters.setFileNameInZip(f.getName());
+        	out.putNextEntry(parameters);
         	
         	in = new FileInputStream(f);
             byte[] readBuff = new byte[4096];
@@ -944,7 +946,6 @@ public class FileUpload extends HttpServlet {
             out.closeEntry();
         	in.close();
         }
-        out.finish();
         out.close();
         FileUtils.deleteDirectory(folder);
         /*end zipping*/
@@ -1214,9 +1215,6 @@ public class FileUpload extends HttpServlet {
 	    	try {
 				runPlayground("false");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ZipException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

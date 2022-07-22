@@ -62,10 +62,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+import net.lingala.zip4j.model.enums.CompressionLevel;
+import net.lingala.zip4j.model.enums.CompressionMethod;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -681,12 +682,12 @@ public class Queries {
 		logger.debug("writing zip file: " + zipFilePath);
 
 		ZipParameters parameters = new ZipParameters();
-		parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-		parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+		parameters.setCompressionMethod(CompressionMethod.DEFLATE);
+		parameters.setCompressionLevel(CompressionLevel.NORMAL);
 		parameters.setIncludeRootFolder(false);
 
 		ZipFile zipF = new ZipFile(zipFilePath);
-		zipF.createZipFileFromFolder(tmpdir, parameters, false, 0);
+		zipF.addFolder(tmpdir, parameters);
 
 		logger.debug("removing tmpdir");
 		FileUtils.deleteDirectory(tmpdir);
