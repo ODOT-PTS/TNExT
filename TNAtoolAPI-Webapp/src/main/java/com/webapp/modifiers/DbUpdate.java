@@ -87,6 +87,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import org.postgresql.core.BaseConnection;
+import org.postgresql.copy.CopyManager;
+
 import com.goebl.simplify.Point;
 import com.goebl.simplify.Simplify;
 import com.model.database.DatabaseConfig;
@@ -116,7 +119,7 @@ public class DbUpdate {
   public final static String VERSION = "V4.16.07";
   public static boolean gtfsUpload = false;
   public static String gtfsMessage = "";
-  private final static String uploadsPath = "/census/uploads/"; // temporary workaround for broken import, requires manual file upload to this path
+  private final static String uploadsPath = "app/conf/admin/uploads/";
   private final static String baseSQLPath = "/app/src/main/resources/admin/resources/";
 
   // ian: unused?
@@ -2808,8 +2811,8 @@ public class DbUpdate {
       @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws IllegalArgumentException, IOException, SQLException {
     String[] dbInfo = db.split(",");
 
-    String localPath = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    String path = uploadsPath + fileName;
+    String path = uploadsPath + "pnr/" + fileName;
+
     File source = new File(path);
 
     // Validate path
@@ -3007,8 +3010,7 @@ public class DbUpdate {
     copyColumn[4] = "blkGrp_b19037(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,under_25,from_25_to_44,from_45_to_64,above_65)";
 
     for (int i = 0; i < fileNames.length; i++) {
-      String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-      path = uploadsPath + fileNames[i] + ".csv";
+      String path = uploadsPath + "t6/" + fileNames[i] + ".csv";
       File source = new File(path);
 
       sqlPath = baseSQLPath + "t6_Queries/" + fileNames[i] + "_1.sql";
@@ -3083,8 +3085,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = uploadsPath + "rac.csv";
+    String path = uploadsPath + "emp/rac.csv";
     File source = new File(path);
     String message = "";
     //		logger.debug(message);
@@ -3107,8 +3108,7 @@ public class DbUpdate {
     sqlPath = baseSQLPath + "emp_Queries/lodes_rac2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = uploadsPath + "wac.csv";
+    path = uploadsPath + "emp/wac.csv";
     source = new File(path);
     sqlPath = baseSQLPath + "emp_Queries/lodes_wac1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
@@ -3154,8 +3154,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = uploadsPath + "future_employment.csv";
+    String path = uploadsPath + "femp/future_employment.csv";
     File source = new File(path);
     String message = "";
     //		logger.debug(message);
@@ -3218,8 +3217,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = uploadsPath + "future_population.csv";
+    String path = uploadsPath + "fpop/future_population.csv";
     File source = new File(path);
     String message = "done";
     //		logger.debug(message);
@@ -3294,8 +3292,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = uploadsPath + "regions.csv";
+    String path = uploadsPath + "region/regions.csv";
     File source = new File(path);
     String message = "done";
     //		logger.debug(message);
@@ -3977,10 +3974,13 @@ public class DbUpdate {
     logger.info("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
     try {
       Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl);
-      Statement statement = c.createStatement();
-      statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
+      CopyManager copyManager = new CopyManager((BaseConnection) c);
+      FileReader fileReader = new FileReader(fromFile);
+      copyManager.copyIn("COPY " + copyCommand + " FROM STDIN DELIMITER ',' CSV HEADER", fileReader );
+      // Statement statement = c.createStatement();
+      // statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
       return true;
-    } catch (SQLException e) {
+    } catch (SQLException | IOException e) {
       logger.error(e);
       return false;
     }
