@@ -68,10 +68,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+import net.lingala.zip4j.model.enums.CompressionLevel;
+import net.lingala.zip4j.model.enums.CompressionMethod;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,6 +86,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import org.postgresql.core.BaseConnection;
+import org.postgresql.copy.CopyManager;
 
 import com.goebl.simplify.Point;
 import com.goebl.simplify.Simplify;
@@ -115,6 +119,8 @@ public class DbUpdate {
   public final static String VERSION = "V4.16.07";
   public static boolean gtfsUpload = false;
   public static String gtfsMessage = "";
+  private final static String uploadsPath = "app/conf/admin/uploads/";
+  private final static String baseSQLPath = "/app/src/main/resources/admin/resources/";
 
   // ian: unused?
   @POST
@@ -2114,8 +2120,10 @@ public class DbUpdate {
     Statement statement = null;
     ResultSet rs = null;
     String message = "";
+    String toDBURL = dbInfo[4];
     String[] dbURL = dbInfo[4].split("/");
     dbURL[dbURL.length - 1] = "census_reference";
+    String fromDBURL = String.join("/", dbURL);
 
     dbInfo[4] = "";
     for (int i = 0; i < dbURL.length - 1; i++) {
@@ -2124,7 +2132,7 @@ public class DbUpdate {
     dbInfo[4] += dbURL[dbURL.length - 1];
     StateInits st = new StateInits();
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
+      c = PgisEventManager.makeConnectionByUrl(fromDBURL);
 
       statement = c.createStatement();
       statement.executeUpdate("TRUNCATE TABLE census_states;");
@@ -2175,7 +2183,8 @@ public class DbUpdate {
 
     dbInfo = db.split(",");
     try {
-      c = PgisEventManager.makeConnectionByUrl(dbInfo[4]);
+
+      c = PgisEventManager.makeConnectionByUrl(toDBURL);
 
       statement = c.createStatement();
       statement.executeUpdate("DROP TABLE IF EXISTS census_states;");
@@ -2237,7 +2246,7 @@ public class DbUpdate {
 
     String[] tableArray = tables.trim().split("\\s+");
     for (String tableName: tableArray) {
-      copyTable(tableName, dbInfo[4], dbInfo[4], dbInfo[5], dbInfo[6]);
+      copyTable(tableName, fromDBURL, toDBURL, dbInfo[5], dbInfo[6]);
     }
 
     try {
@@ -2802,15 +2811,13 @@ public class DbUpdate {
       @QueryParam("metadata") String metadata, @QueryParam("stateid") String stateid) throws IllegalArgumentException, IOException, SQLException {
     String[] dbInfo = db.split(",");
 
-    String localPath = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    String dirPath = "src/main/webapp/resources/admin/uploads/pnr/";
-    String path = localPath + "../../" + dirPath + fileName;
-    path = path.substring(1, path.length());
+    String path = uploadsPath + "pnr/" + fileName;
+
     File source = new File(path);
 
     // Validate path
 		try {
-			if (!source.getCanonicalPath().contains(dirPath)) {
+			if (!source.getCanonicalPath().contains(uploadsPath)) {
 				throw new IllegalArgumentException("Invalid filename");
 			}
 		} catch (Exception e) {
@@ -2953,12 +2960,10 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/bg_b_dist.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/bg_b_dist.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/t_b_dist.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/t_b_dist.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     String[] fileNames = { "b03002", "b16004", "b17021", "b18101", "b19037" };
@@ -3005,56 +3010,43 @@ public class DbUpdate {
     copyColumn[4] = "blkGrp_b19037(GISJOIN,STATEA,COUNTYA, TRACTA, BLKGRPA,under_25,from_25_to_44,from_45_to_64,above_65)";
 
     for (int i = 0; i < fileNames.length; i++) {
-      String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-      path = path + "../../src/main/webapp/resources/admin/uploads/t6/" + fileNames[i] + ".csv";
-      path = path.substring(1, path.length());
+      String path = uploadsPath + "t6/" + fileNames[i] + ".csv";
       File source = new File(path);
 
-      sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_1.sql";
-      sqlPath = sqlPath.substring(1, sqlPath.length());
+      sqlPath = baseSQLPath + "t6_Queries/" + fileNames[i] + "_1.sql";
       runSqlFromFile(sqlPath, dbInfo[4]);
 
       copySqlCommand(copyColumn[i], path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-      sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/" + fileNames[i] + "_2.sql";
-      sqlPath = sqlPath.substring(1, sqlPath.length());
+      sqlPath = baseSQLPath + "t6_Queries/" + fileNames[i] + "_2.sql";
       runSqlFromFile(sqlPath, dbInfo[4]);
     }
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float31.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float31.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float32.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float33.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float32.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float32.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float33.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float33.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float4.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float4.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/t6_Queries/title_vi_blocks_float5.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "t6_Queries/title_vi_blocks_float5.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     if (message.equals("")) {
@@ -3093,9 +3085,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/emp/rac.csv";
-    path = path.substring(1, path.length());
+    String path = uploadsPath + "emp/rac.csv";
     File source = new File(path);
     String message = "";
     //		logger.debug(message);
@@ -3110,28 +3100,22 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "emp_Queries/lodes_rac1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_rac2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "emp_Queries/lodes_rac2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/emp/wac.csv";
-    path = path.substring(1, path.length());
+    path = uploadsPath + "emp/wac.csv";
     source = new File(path);
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "emp_Queries/lodes_wac1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/emp_Queries/lodes_wac2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "emp_Queries/lodes_wac2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
@@ -3170,9 +3154,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/femp/future_employment.csv";
-    path = path.substring(1, path.length());
+    String path = uploadsPath + "femp/future_employment.csv";
     File source = new File(path);
     String message = "";
     //		logger.debug(message);
@@ -3187,22 +3169,16 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path
-        + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "femp_Queries/Create_Table_lodes_rac_projection_county1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("temp_01 (countyid, ecurrent,e2010,e2015,e2020,e2025,e2030,e2035,e2040,e2045,e2050)", path,
         dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path
-        + "../../src/main/resources/admin/resources/femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "femp_Queries/Create_Table_lodes_rac_projection_county2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path
-        + "../../src/main/resources/admin/resources/femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "femp_Queries/CREATE_TABLE_lodes_rac_projection_block.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
@@ -3241,9 +3217,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/fpop/future_population.csv";
-    path = path.substring(1, path.length());
+    String path = uploadsPath + "fpop/future_population.csv";
     File source = new File(path);
     String message = "done";
     //		logger.debug(message);
@@ -3258,40 +3232,32 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand(
         "counties_future_pop(countyid,population2015,population2020,population2025,population2030,population2035,population2040,population2045,population2050)",
         path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks3.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks3_1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks3_2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks3_2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks4.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks4_1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/fpop_Queries/futurePopBlocks4_2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "fpop_Queries/futurePopBlocks4_2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
@@ -3326,9 +3292,7 @@ public class DbUpdate {
       @QueryParam("stateid") String stateid) throws SQLException {
     String[] dbInfo = db.split(",");
 
-    String path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    path = path + "../../src/main/webapp/resources/admin/uploads/region/regions.csv";
-    path = path.substring(1, path.length());
+    String path = uploadsPath + "region/regions.csv";
     File source = new File(path);
     String message = "done";
     //		logger.debug(message);
@@ -3343,14 +3307,12 @@ public class DbUpdate {
     String sqlPath;
     String s_path = DbUpdate.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region1.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "region_Queries/region1.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     copySqlCommand("counties_regions(countyid,regionid,regionname)", path, dbInfo[4], dbInfo[5], dbInfo[6]);
 
-    sqlPath = s_path + "../../src/main/resources/admin/resources/region_Queries/region2.sql";
-    sqlPath = sqlPath.substring(1, sqlPath.length());
+    sqlPath = baseSQLPath + "region_Queries/region2.sql";
     runSqlFromFile(sqlPath, dbInfo[4]);
 
     Connection c = null;
@@ -3796,8 +3758,8 @@ public class DbUpdate {
     File[] files = folder.listFiles();
     ZipFile zipFile = new ZipFile("D:/ziptest/trimet_simplified.zip");
     ZipParameters parameters = new ZipParameters();
-    parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-    parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+    parameters.setCompressionMethod(CompressionMethod.DEFLATE);
+    parameters.setCompressionLevel(CompressionLevel.NORMAL);
     zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
     folder.delete();
     logger.debug("Done modifying feed shapes");
@@ -3851,8 +3813,8 @@ public class DbUpdate {
     File[] files = folder.listFiles();
     ZipFile zipFile = new ZipFile(path + ".zip");
     ZipParameters parameters = new ZipParameters();
-    parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-    parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+    parameters.setCompressionMethod(CompressionMethod.DEFLATE);
+    parameters.setCompressionLevel(CompressionLevel.NORMAL);
     zipFile.addFiles(new ArrayList<File>(Arrays.asList(files)), parameters);
     folder.delete();
     logger.debug("Done modifying feed shapes");
@@ -4012,10 +3974,13 @@ public class DbUpdate {
     logger.info("copySqlCommand: " + copyCommand + " (from: " + fromFile + ")");
     try {
       Connection c = PgisEventManager.makeConnectionByUrl(dbConnectionUrl);
-      Statement statement = c.createStatement();
-      statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
+      CopyManager copyManager = new CopyManager((BaseConnection) c);
+      FileReader fileReader = new FileReader(fromFile);
+      copyManager.copyIn("COPY " + copyCommand + " FROM STDIN DELIMITER ',' CSV HEADER", fileReader );
+      // Statement statement = c.createStatement();
+      // statement.executeUpdate("copy " + copyCommand + " FROM '" + fromFile + "' DELIMITER ',' CSV HEADER");
       return true;
-    } catch (SQLException e) {
+    } catch (SQLException | IOException e) {
       logger.error(e);
       return false;
     }

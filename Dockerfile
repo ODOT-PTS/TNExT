@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -y && apt-get install openjdk-8-jdk maven tomcat8 libpq-dev postgresql-client-10 python-psycopg2 postgis -y
+RUN apt-get update -y && apt-get install openjdk-8-jdk maven tomcat8 libpq-dev postgresql-client-10 python-psycopg2 postgis curl jq -y
 RUN update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 ARG DBINFO_CSV="TNAtoolAPI-Webapp/src/main/resources/admin/resources/dbInfo.template.csv"

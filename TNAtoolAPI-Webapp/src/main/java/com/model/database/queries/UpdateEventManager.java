@@ -44,6 +44,7 @@ public class UpdateEventManager {
 	public static void createTables(Connection connection, String[] dbInfo){		
 		addFunction(connection, dbInfo);
 		create_playground_tables(connection);		
+		create_census_tables(connection);
 	}
 	
 	/**
@@ -91,6 +92,333 @@ public class UpdateEventManager {
 	        		+ "  OIDS=FALSE);");
 	        stmt.executeUpdate("ALTER TABLE gtfs_uploaded_feeds"
 	        		+ "  OWNER TO postgres;");	        
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates all census geography/population tables
+	 * @param connection
+	 */
+	public static void create_census_tables(Connection connection){
+		create_census_states_table(connection);
+		create_census_blocks_table(connection);
+		create_census_congdists_table(connection);
+		create_census_counties_table(connection);
+		create_census_places_table(connection);
+		create_census_tracts_table(connection);
+		create_census_urbans_table(connection);
+	}
+
+	/**
+	 * creates census_blocks table
+	 * @param connection
+	 */
+	public static void create_census_blocks_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_blocks ("
+					+ "blockid character varying(15) NOT NULL,"
+					+ "stateid character varying(3),"				
+					+ "countyid character varying(5),"			
+					+ "tractid character varying(11),"			
+					+ "poptype character varying(5),"
+					+ "landarea integer,"
+					+ "waterarea integer,"
+					+ "population integer NOT NULL,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "location geometry(Point,2993) NOT NULL,"
+					+ "placeid character varying(7),"
+					+ "congdistid character varying(4),"
+					+ "regionid character varying(2),"
+					+ "urbanid character varying(5),"
+					+ "shape geometry(MultiPolygon),"				
+					+ "population2010 integer,"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "CONSTRAINT gtfs_census_datas_spatial_pkey PRIMARY KEY (blockid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_blocks"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates census_congdists table
+	 * @param connection
+	 */
+	public static void create_census_congdists_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_congdists ("
+					+ "congdistid character varying(4) NOT NULL,"
+					+ "stateid character varying(3),"
+					+ "cname character varying(255),"
+					+ "housing bigint,"
+					+ "population bigint,"
+					+ "landarea bigint,"
+					+ "waterarea bigint,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "shape geometry(MultiPolygon),"
+					+ "population2010 integer,"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "CONSTRAINT census_congdists_ref_pkey PRIMARY KEY (congdistid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_congdists"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates census_counties table
+	 * @param connection
+	 */
+	public static void create_census_counties_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_counties ("
+					+ "countyid character varying(5) NOT NULL,"
+					+ "cname character varying(50) NOT NULL,"
+					+ "stateid character varying(3),"
+					+ "population bigint,"
+					+ "housing bigint,"
+					+ "landarea bigint,"
+					+ "waterarea bigint,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "regionid character varying(1),"
+					+ "regionname character varying(50),"
+					+ "shape geometry(MultiPolygon),"
+					+ "odotregionid character varying(2),"
+					+ "odotregionname character varying(9),"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "population2010 integer,"
+					+ "CONSTRAINT gtfs_countie_pkey PRIMARY KEY (countyid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_counties"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates census_places table
+	 * @param connection
+	 */
+	public static void create_census_places_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_places ("
+					+ "placeid character varying(7) NOT NULL,"
+					+ "pname character varying(100) NOT NULL,"
+					+ "stateid character varying(3),"
+					+ "population bigint,"
+					+ "housing bigint,"
+					+ "landarea bigint,"
+					+ "waterarea bigint,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "shape geometry(MultiPolygon),"
+					+ "population2010 integer,"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "CONSTRAINT gtfs_place_pkey PRIMARY KEY (placeid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_places"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates census_tracts table
+	 * @param connection
+	 */
+	public static void create_census_tracts_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_tracts ("
+					+ "tractid character varying(11) NOT NULL,"
+					+ "countyid character varying(5),"
+					+ "stateid character varying(3),"	
+					+ "tname character varying(50),"
+					+ "tlongname character varying(50),"
+					+ "housing bigint,"
+					+ "population bigint,"
+					+ "landarea bigint,"
+					+ "waterarea bigint,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "shape geometry(MultiPolygon),"
+					+ "population2010 integer,"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "CONSTRAINT census_tract_pkey PRIMARY KEY (tractid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_tracts"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates census_urbans table
+	 * @param connection
+	 */
+	public static void create_census_urbans_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_urbans ("
+					+ "urbanid character varying(5) NOT NULL,"
+					+ "uname character varying(255),"
+					+ "utype character varying(1),"
+					+ "poptype50k character varying(1),"
+					+ "housing bigint,"
+					+ "population bigint,"
+					+ "landarea bigint,"
+					+ "waterarea bigint,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "shape geometry(MultiPolygon),"
+					+ "population2010 integer,"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "CONSTRAINT census_urban_pkey PRIMARY KEY (urbanid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_urbans"
+	        		+ "  OWNER TO postgres;");
+	        stmt.close();
+	      } catch ( Exception e ) {
+	    	  e.printStackTrace();
+	      }finally{
+	    	  if (stmt != null) try { stmt.close(); } catch (SQLException e) {}
+	      }
+	}
+
+	/**
+	 * creates census_states table
+	 * @param connection
+	 */
+	public static void create_census_states_table(Connection connection){
+		Statement stmt = null;
+	      try {
+	        stmt = connection.createStatement();
+	        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS census_states ("
+					+ "stateid character varying(2) NOT NULL,"
+					+ "sname character varying(255),"
+					+ "housing bigint,"
+					+ "population bigint,"
+					+ "landarea bigint,"
+					+ "waterarea bigint,"
+					+ "lat double precision NOT NULL,"
+					+ "lon double precision NOT NULL,"
+					+ "shape geometry(MultiPolygon),"
+					+ "population2010 integer,"
+					+ "population2015 integer,"
+					+ "population2020 integer,"
+					+ "population2025 integer,"
+					+ "population2030 integer,"
+					+ "population2035 integer,"
+					+ "population2040 integer,"
+					+ "population2045 integer,"
+					+ "population2050 integer,"
+					+ "CONSTRAINT census_state_pkey PRIMARY KEY (stateid)"
+					+ ")"
+	        		+ "  WITH ("
+	        		+ "  OIDS=FALSE"
+	        		+ ");");
+	        stmt.executeUpdate("ALTER TABLE census_states"
+	        		+ "  OWNER TO postgres;");
 	        stmt.close();
 	      } catch ( Exception e ) {
 	    	  e.printStackTrace();
